@@ -1,0 +1,61 @@
+<fieldset>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-2 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Nbre pièces principales <span
+                            class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    {{ form_widget(form.nombrePiece) }}
+                    {{ form_errors(form.nombrePiece) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-2 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Logement <span
+                            class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    {{ form_widget(form.logement) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-2 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Mobilier <span
+                            class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    {{ form_widget(form.mobilier) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-2 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Électricité (a) <span
+                            class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    {{ form_widget(form.electricite) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Eau (b) <span
+                            class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    {{ form_widget(form.eaux) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+
+

@@ -1,0 +1,105 @@
+<fieldset>
+    <legend>Information personnel salarié</legend>
+    <div class="mb-2 row">
+        <label class="col-md-1 col-form-label">Matricule <span class="text-danger">*</span></label>
+        <div class="col-md-3">
+            {{ form_widget(form.matricule) }}
+        </div>
+        <label class="col-md-1 col-form-label">Nom <span class="text-danger">*</span></label>
+        <div class="col-md-3">
+            {{ form_widget(form.firstName) }}
+        </div>
+        <label class="col-md-1 col-form-label">Prénom(s) <span class="text-danger">*</span></label>
+        <div class="col-md-3">
+            {{ form_widget(form.lastName) }}
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label class="col-md-1 col-form-label">Genre <span class="text-danger">*</span></label>
+        <div class="col-md-3">
+            {{ form_widget(form.genre) }}
+        </div>
+        <label class="col-md-1 col-form-label">Date naiss.<span class="text-danger">*</span></label>
+        <div class="col-md-3">
+            {{ form_widget(form.birthday) }}
+        </div>
+        <label class="col-md-1 col-form-label">Lieu naiss.<span class="text-danger">*</span></label>
+        <div class="col-md-3">
+            {{ form_widget(form.lieuNaissance) }}
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label class="col-md-1 col-form-label">N° CNPS</label>
+        <div class="col-md-3">
+            {{ form_widget(form.refCNPS) }}
+        </div>
+        <label class="col-md-1 col-form-label">Nature pièce <span class="text-danger">*</span></label>
+        <div class="col-md-3">
+            {{ form_widget(form.piece) }}
+        </div>
+        <label class="col-md-1 col-form-label">N° pièce <span class="text-danger">*</span></label>
+        <div class="col-md-3">
+            {{ form_widget(form.refPiece) }}
+        </div>
+    </div>
+</fieldset>
+<br><br>
+<ul class="nav nav-pills navtab-bg nav-justified p-1">
+    <li class="nav-item">
+        <a href="#coordonner" data-bs-toggle="tab" aria-expanded="false" class="nav-link active">
+            <span class="d-block d-sm-none"><i class="uil-home-alt"></i></span>
+            <span class="d-none d-sm-block">Coordonner</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#situation_familiale" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+            <span class="d-block d-sm-none"><i class="uil-envelope"></i></span>
+            <span class="d-none d-sm-block">Situation familiale</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#categories_socio_professionnel" data-bs-toggle="tab" aria-expanded="true" class="nav-link">
+            <span class="d-block d-sm-none"><i class="uil-user"></i></span>
+            <span class="d-none d-sm-block">Catégorie socio professionnelle</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#contrat" data-bs-toggle="tab" aria-expanded="true" class="nav-link">
+            <span class="d-block d-sm-none"><i class="uil-user"></i></span>
+            <span class="d-none d-sm-block">Contrat</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#primes" data-bs-toggle="tab" aria-expanded="true" class="nav-link">
+            <span class="d-block d-sm-none"><i class="uil-user"></i></span>
+            <span class="d-none d-sm-block">Primes</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#salaire" data-bs-toggle="tab" aria-expanded="true" class="nav-link">
+            <span class="d-block d-sm-none"><i class="uil-user"></i></span>
+            <span class="d-none d-sm-block">Salaire</span>
+        </a>
+    </li>
+</ul>
+<div class="tab-content text-muted">
+    <div class="tab-pane active" id="coordonner">
+        {% include 'dossier_personal/personal/_coordonnee_form.html.twig' %}
+    </div>
+    <div class="tab-pane show" id="situation_familiale">
+        {% include 'dossier_personal/personal/_situation.familiale_form.html.twig' %}
+    </div>
+    <div class="tab-pane" id="categories_socio_professionnel">
+        {% include 'dossier_personal/personal/_catégorie.social_form.html.twig' %}
+    </div>
+    <div class="tab-pane" id="contrat">
+        {% include 'dossier_personal/personal/_contract_form.html.twig' %}
+    </div>
+    <div class="tab-pane" id="primes">
+        {% include 'dossier_personal/personal/_prime.html.twig' %}
+    </div>
+    <div class="tab-pane" id="salaire">
+        {% include 'dossier_personal/personal/_salary_form.html.twig' %}
+    </div>
+</div>
+

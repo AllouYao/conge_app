@@ -1,0 +1,182 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Detail salarié{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        Salarié {{ personal.matricule }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <fieldset>
+                        <legend>Informations personnelles du salarié</legend>
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-light">
+                            <tr>
+                                <th class="text-center">Matricule</th>
+                                <th class="text-center">Nom</th>
+                                <th class="text-center">Prénom(s)</th>
+                                <th class="text-center">Genre</th>
+                                <th class="text-center">Date de Naissance</th>
+                                <th class="text-center">Lieu de Naissance</th>
+                                <th class="text-center">N° CNPS</th>
+                                <th class="text-center">Nature Pièce</th>
+                                <th class="text-center">N° Pièce</th>
+                                <th class="text-center">Etat civil</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td class="text-center">{{ personal.matricule }}</td>
+                                <td class="text-start">{{ personal.firstName }}</td>
+                                <td class="text-start">{{ personal.lastName }}</td>
+                                <td class="text-start">{{ personal.genre|capitalize }}</td>
+                                <td class="text-center">{{ personal.birthday|date('d-m-Y') }}</td>
+                                <td class="text-start">{{ personal.lieuNaissance|capitalize }}</td>
+                                <td class="text-center">{{ personal.refCNPS }}</td>
+                                <td class="text-start">{{ personal.piece|capitalize }}</td>
+                                <td class="text-center">{{ personal.refPiece }}</td>
+                                <td class="text-start">{{ personal.etatCivil|capitalize }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                    <br>
+                    <fieldset>
+                        <legend>Coordonnées du salarié</legend>
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-light">
+                            <tr>
+                                <th class="text-center">Adresse</th>
+                                <th class="text-center">Numéro de téléphone</th>
+                                <th class="text-center">Email</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td class="text-start">{{ personal.address }}</td>
+                                <td class="text-center">(+225) {{ personal.telephone }}</td>
+                                <td class="text-start">{{ personal.email }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                    <br>
+                    {% if personal.etatCivil == 'MARIEE' %}
+                        <fieldset>
+                            <legend>Situation familiale</legend>
+                            <table class="table table-bordered table-sm">
+                                <thead class="table-light">
+                                <tr>
+                                    <th class="text-center">Nom & prénoms du conjoint</th>
+                                    <th class="text-center">N° Certificat mariage</th>
+                                    <th class="text-center">Extrait d’acte mariage</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td class="text-start">{{ personal.conjoint }}</td>
+                                    <td class="text-center">{{ personal.numCertificat }}</td>
+                                    <td class="text-start">{{ personal.numExtraitActe }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+                        <br>
+                    {% endif %}
+                    <fieldset>
+                        <legend>Catégorie socio professionnelle</legend>
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-light">
+                            <tr>
+                                <th class="text-center">Catégorie</th>
+                                <th class="text-center">Diplôme</th>
+                                <th class="text-center">Niveau de formation</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                {% for dip in personal.diplomes %}
+                                    <td class="text-start">{{ personal.categorie.intitule }}</td>
+                                    <td class="text-center">{{ dip.intitule|capitalize }}</td>
+                                    <td class="text-start">{{ personal.niveauFormation|capitalize }}</td>
+                                {% endfor %}
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                    <br>
+                    <fieldset>
+                        <legend>Contrat</legend>
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-light">
+                            <tr>
+                                <th class="text-center">Type de contrat</th>
+                                <th class="text-center">Date d’embauche</th>
+                                <th class="text-center">Date d’effet</th>
+                                <th class="text-center">Ancienneté</th>
+                                <th class="text-center">Type de temps contractuel</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td class="text-start">{{ personal.contract.typeContrat }}</td>
+                                <td class="text-center">{{ personal.contract.dateEmbauche|date('d-m-Y') }}</td>
+                                <td class="text-center">{{ personal.contract.dateEffet|date('d-m-Y') }}</td>
+                                <td class="text-center">{{ personal.ancienity }}</td>
+                                <td class="text-start">{{ personal.contract.tempsContractuel|capitalize }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                    <br>
+                    <fieldset>
+                        <legend>Salaire</legend>
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-light">
+                            <tr>
+                                <th class="text-center">Salaire catégoriel</th>
+                                <th class="text-center">Sursalaire</th>
+                                <th class="text-center">Prime de fonction</th>
+                                <th class="text-center">Prime de logement </th>
+                                <th class="text-center">Prime de transport</th>
+                                <th class="text-center">Autre Prime </th>
+                                <th class="text-center">Avantage en nature </th>
+                                <th class="text-center">Salaire brut </th>
+                                <th class="text-center">Salaire brut Imposable </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+
+                                <td class="text-end">{{ personal.categorie.amount|number_format(0, ',', ' ') }}</td>
+                                <td class="text-end">{{ personal.salary.sursalaire|number_format(0, ',', ' ') }}</td>
+                                <td class="text-end">{{ personal.salary.primeFonction|number_format(0, ',', ' ') }}</td>
+                                <td class="text-end">{{ personal.salary.primeLogement|number_format(0, ',', ' ') }}</td>
+                                <td class="text-end">{{ personal.salary.primeTransport|number_format(0, ',', ' ') }}</td>
+                                {% for pr in personal.salary.primes %}
+                                    <td class="text-start">{{ pr.intitule }}</td>
+                                {% endfor %}
+                                <td class="text-center">{{ personal.salary.avantageNature }}</td>
+                                <td class="text-end">{{ personal.salary.brutAmount|number_format(0, ',', ' ') }}</td>
+                                <td class="text-end">{{ personal.salary.brutImposable|number_format(0, ',', ' ') }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('personal_edit', {'uuid': personal.uuid}) }}"
+                       class="btn btn-warning float-end " style="color: white">Modifier</a>
+                    <a href="{{ path('personal_index') }}" class="btn btn-info float-end me-2">Retour</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

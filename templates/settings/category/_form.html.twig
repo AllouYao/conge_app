@@ -1,0 +1,38 @@
+<fieldset>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Catégorie Salariale <span class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    {{ form_widget(form.categorySalarie) }}
+                    {{ form_errors(form.categorySalarie) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Echelon <span class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    {{ form_widget(form.intitule) }}
+                    {{ form_errors(form.intitule) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Salaire catégoriel <span class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    {{ form_widget(form.amount) }}
+                    {{ form_errors(form.amount) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+
+

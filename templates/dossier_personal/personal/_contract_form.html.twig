@@ -1,0 +1,34 @@
+<div class="mb-2 row">
+    <label class="col-md-1 col-form-label">Type contrat <span
+                class="text-danger">*</span></label>
+    <div class="col-md-3">
+        {{ form_widget(form.contract.typeContrat) }}
+    </div>
+    <label class="col-md-1 col-form-label">Date d’emb. <span
+                class="text-danger">*</span></label>
+    <div class="col-md-3">
+        {{ form_widget(form.contract.dateEmbauche) }}
+    </div>
+    <label class="col-md-1 col-form-label">Date d’effet <span
+                class="text-danger">*</span></label>
+    <div class="col-md-3">
+        {{ form_widget(form.contract.dateEffet) }}
+    </div>
+</div>
+<div class="mb-2 row">
+    <label class="col-md-1 col-form-label">Date fin <span
+                class="text-danger">*</span></label>
+    <div class="col-md-3">
+        {{ form_widget(form.contract.dateFin) }}
+    </div>
+    <label class="col-md-1 col-form-label">Temps Contr. <span
+                class="text-danger">*</span></label>
+    <div class="col-md-3">
+        {{ form_widget(form.contract.tempsContractuel) }}
+    </div>
+    <label class="col-md-1 col-form-label">Ancienneté <span
+                class="text-danger">*</span></label>
+    <div class="col-md-3">
+        {{ form_widget(form.ancienity) }}
+    </div>
+</div>

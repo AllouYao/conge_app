@@ -1,0 +1,131 @@
+<?php
+
+namespace App\Form\DossierPersonal;
+
+use App\Entity\DossierPersonal\Personal;
+use App\Entity\Settings\Category;
+use App\Form\CustomType\DateCustomType;
+use App\Utils\Status;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotBlank;
+
+class PersonalType extends AbstractType
+{
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
+        $builder
+            ->add('matricule')
+            ->add('firstName')
+            ->add('lastName')
+            ->add('genre', ChoiceType::class, [
+                'attr' => [
+                    'data-plugin' => 'customselect',
+                ],
+                'choices' => [
+                    'Masculin' => Status::MASCULIN,
+                    'Féminin' => Status::FEMININ
+                ],
+                'placeholder' => 'Sélectionner un genre'
+            ])
+            ->add('birthday', DateCustomType::class)
+            ->add('lieuNaissance')
+            ->add('refCNPS')
+            ->add('piece', ChoiceType::class, [
+                'attr' => [
+                    'data-plugin' => 'customselect',
+                ],
+                'choices' => [
+                    'Passeport' => Status::PASSPORT,
+                    'CNI' => Status::CNI,
+                    'Carte consulaire' => Status::CARTE_CONSULAIRE,
+                    'Attestation' => Status::ATTESTATION
+                ],
+                'placeholder' => 'Sélectionner la nature de votre pièce'
+            ])
+            ->add('refPiece')
+            ->add('address', TextType::class, [
+                'required' => false
+            ])
+            ->add('telephone', TextType::class, [
+                'required' => false
+            ])
+            ->add('email', TextType::class, [
+                'required' => false
+            ])
+            ->add('categorie', EntityType::class, [
+                'class' => Category::class,
+                'placeholder' => 'Sélectionner une catégorie salariale',
+                'attr' => [
+                    'data-plugin' => 'customselect',
+                ],
+                'choice_attr' => function (Category $category) {
+                    return [
+                        'data-amount' => $category->getAmount()
+                    ];
+                },
+                'required' => true
+            ])
+            ->add('conjoint', TextType::class, [
+                'required' => false
+            ])
+            ->add('numCertificat', TextType::class, [
+                'required' => false
+            ])
+            ->add('numExtraitActe', TextType::class, [
+                'required' => false
+            ])
+            ->add('etatCivil', ChoiceType::class, [
+                'choices' => [
+                    'Célibataire' => Status::CELIBATAIRE,
+                    'Divorcé (e)' => Status::DIVORCE,
+                    'Marié (e)' => Status::MARIEE,
+                    'Veuf (ve)' => Status::VEUF,
+                ],
+                'expanded' => true,
+                'multiple' => false,
+                'label_attr' => [
+                    'class' => 'radio-inline'
+                ],
+                //'required' => false
+            ])
+            ->add('niveauFormation', ChoiceType::class, [
+                'attr' => [
+                    'data-plugin' => 'customselect',
+                ],
+                'choices' => [
+                    'Bac ' => Status::BAC,
+                    'BTS (Bac + 2)' => Status::BTS,
+                    'Maitrise (Bac + 4) ' => Status::MAITRISE,
+                    'Master (Bac + 5)' => Status::Master
+                ],
+                'placeholder' => 'Sélectionner votre niveau de formation',
+                'required' => false
+            ])
+            ->add('contract', ContractType::class, [
+                'required' => false
+            ])
+            ->add('ancienity', TextType::class, [
+                'attr' => [
+                    'readonly' => true
+                ],
+            ])
+            ->add('salary', SalaryType::class, [
+                'label' => false,
+            ])
+        ;
+
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([
+            'data_class' => Personal::class,
+        ]);
+    }
+}

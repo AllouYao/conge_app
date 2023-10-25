@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des primes{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        Liste des primes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-responsive table-sm" id="basic-datatable">
+                        <thead class="table-light">
+                        <tr>
+                            <th class="text-center">Intitulé</th>
+                            <th class="text-center">Codification</th>
+                            <th class="text-center">Coefficient</th>
+                            <th class="text-center">Date Création</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for p in primes %}
+                            <tr>
+                                <td class="text-start">{{ p.intitule }}</td>
+                                <td class="text-start">{{ p.code }}</td>
+                                <td class="text-end">{{ p.taux|number_format(0, ',', ' ') }}</td>
+                                <td class="text-center">{{ p.createdAt|date('d/m/Y') }}</td>
+                                <td class="text-center">
+                                    <a href="{{ path('settings_prime_show', {'uuid': p.uuid}) }}">
+                                        <i data-feather="eye" class="me-2 feather"></i> </a>
+                                    <a href="{{ path('settings_prime_edit', {'uuid': p.uuid}) }}">
+                                        <i data-feather="edit" class="feather" style="color: yellow"></i></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('settings_prime_new') }}" class="btn btn-primary float-end">Nouveau</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

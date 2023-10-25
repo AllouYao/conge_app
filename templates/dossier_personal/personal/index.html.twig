@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste du personnel salarié{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        Liste du personnel salarié
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-responsive table-sm" id="basic-datatable">
+                        <thead class="table-light">
+                        <tr>
+                            <th class="text-center">Catégorie</th>
+                            <th class="text-center">Matricule</th>
+                            <th class="text-center">Nom et prénom(s)</th>
+                            <th class="text-center">Sex</th>
+                            <th class="text-center">Date d'anniverssaire</th>
+                            <th class="text-center">Lieu de naissance</th>
+                            <th class="text-center">Postale</th>
+                            <th class="text-center">Téléphone</th>
+                            <th class="text-center">E-mail</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for perso in personals %}
+                            <tr>
+                                <td class="text-start">{{ perso.categorie }}</td>
+                                <td class="text-start">{{ perso.matricule }}</td>
+                                <td class="text-start">{{ perso.lastName }} {{ perso.firstName }}</td>
+                                <td class="text-start">{{ perso.genre }}</td>
+                                <td class="text-start">{{ perso.birthday|date('d-m-Y') }}</td>
+                                <td class="text-start">{{ perso.lieuNaissance }}</td>
+                                <td class="text-start">{{ perso.address }}</td>
+                                <td class="text-start">{{ perso.telephone }}</td>
+                                <td class="text-start">{{ perso.email }}</td>
+                                <td class="text-center">
+                                    <a href="{{ path('personal_show', {'uuid': perso.uuid}) }}">
+                                        <i data-feather="eye" class="me-2 feather"></i> </a>
+                                    <a href="{{ path('personal_edit', {'uuid': perso.uuid}) }}">
+                                        <i data-feather="edit" class="feather" style="color: yellow"></i></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('personal_new') }}" class="btn btn-primary float-end">Nouveau</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

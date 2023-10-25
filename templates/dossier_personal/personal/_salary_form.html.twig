@@ -1,0 +1,30 @@
+
+
+<div class="mb-2 row">
+    <label class="col-md-1 col-form-label">Salaire caté.<span
+                class="text-danger">*</span></label>
+    <div class="col-md-3">
+        {{ form_widget(form.salary.baseAmount) }}
+    </div>
+    <label class="col-md-1 col-form-label">Sursalaire </label>
+    <div class="col-md-3">
+        {{ form_widget(form.salary.sursalaire) }}
+    </div>
+    <label class="col-md-1 col-form-label">Prime Trans.<span
+                class="text-danger">*</span></label>
+    <div class="col-md-3">
+        {{ form_widget(form.salary.primeTransport) }}
+    </div>
+</div>
+<div class="mb-2 row">
+    <label class="col-md-1 col-form-label">Salaire brut <span
+                class="text-danger">*</span></label>
+    <div class="col-md-3">
+        {{ form_widget(form.salary.brutAmount) }}
+    </div>
+    <label class="col-md-1 col-form-label">Salaire impo.<span
+                class="text-danger">*</span></label>
+    <div class="col-md-3">
+        {{ form_widget(form.salary.brutImposable) }}
+    </div>
+</div>

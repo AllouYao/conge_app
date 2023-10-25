@@ -1,0 +1,30 @@
+<div class="mb-2 row">
+    <label class="col-md-1 col-form-label">État civil <span
+                class="text-danger">*</span></label>
+    <div class="col-md-8">
+        {{ form_widget(form.etatCivil) }}
+    </div>
+</div>
+<br>
+<div id="family_container">
+    <fieldset>
+        <legend>Élément rélative au mariage</legend>
+        <div class="mb-2 row">
+            <label class="col-md-1 col-form-label">Nom Conjoint<span
+                        class="text-danger">*</span></label>
+            <div class="col-md-3">
+                {{ form_widget(form.conjoint) }}
+            </div>
+            <label class="col-md-1 col-form-label">N° Certificat <span
+                        class="text-danger">*</span></label>
+            <div class="col-md-3">
+                {{ form_widget(form.numCertificat) }}
+            </div>
+            <label class="col-md-1 col-form-label">N° Acte <span
+                        class="text-danger">*</span></label>
+            <div class="col-md-3">
+                {{ form_widget(form.numExtraitActe) }}
+            </div>
+        </div>
+    </fieldset>
+</div>

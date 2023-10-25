@@ -1,0 +1,92 @@
+//
+// Select 2
+//
+
+$border-color_1: #5369f8;
+
+.select2-container {
+    width: 100%!important;
+    .select2-selection--single {
+        border: $input-border-width solid $input-border-color;
+        height: $input-height;
+        padding: $input-padding-y $input-padding-x;
+        font-family: $input-font-family;
+        font-weight: $input-font-weight;
+        line-height: $input-line-height;
+        color: $input-color;
+        background-color: $input-bg;
+    }
+}
+
+.select2-container--bootstrap {
+    .select2-selection {
+        font-size: 0.813rem !important;
+        box-shadow: none !important;
+        border-radius: 0.2rem;
+        border: 1px solid $gray-100;
+    }
+    .select2-selection--single {
+        line-height: $input-line-height;
+    }
+    .select2-dropdown {
+        border: $input-border-width solid $input-border-color;
+        box-shadow: $box-shadow;
+        background-color: $dropdown-bg;
+    }
+    .select2-search--dropdown {
+        .select2-search__field {
+            border-radius: $input-border-radius;
+        }
+    }
+}
+.select2-dropdown {
+    .select2-dropdown--below {
+        box-shadow: 0 6px 12px rgb(0 0 0 / 18%);
+        border-color: $border-color_1;
+        overflow-x: hidden;
+        margin-top: -1px;
+    }
+}
+.select2-container--bootstrap.select2-container--focus {
+    .select2-selection {
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        -o-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        -webkit-transition: border-color ease-in-out 0.15s, -webkit-box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, -webkit-box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s, -webkit-box-shadow ease-in-out 0.15s;
+        border-color: $border-color_1;
+    }
+}
+.select2-container--bootstrap.select2-container--open {
+    .select2-selection {
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        -o-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        -webkit-transition: border-color ease-in-out 0.15s, -webkit-box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, -webkit-box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+        transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s, -webkit-box-shadow ease-in-out 0.15s;
+        border-color: $border-color_1;
+    }
+}
+.select2 {
+    .select2-container--bootstrap {
+        width: 0 !important;
+    }
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: $input-color;
+    line-height: 22px;
+    .select2-selection__arrow {
+        top: 6px;
+    }
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow  {
+    top: 6px;
+}
