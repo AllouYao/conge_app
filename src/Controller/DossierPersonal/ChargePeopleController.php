@@ -38,6 +38,7 @@ class ChargePeopleController extends AbstractController
             }
             $manager->persist($personal);
             $manager->flush();
+            flash()->addSuccess('Personne à la charge du personel ajouté avec succès.');
             return $this->redirectToRoute('charge_people_index', [], Response::HTTP_SEE_OTHER);
         }
         return $this->render('dossier_personal/charge_people/new.html.twig', [
@@ -64,7 +65,7 @@ class ChargePeopleController extends AbstractController
                 $manager->persist($chargePerson);
             }
             $manager->flush();
-
+            flash()->addSuccess('Personne à la charge du personel modifié avec succès.');
             return $this->redirectToRoute('charge_people_index', [], Response::HTTP_SEE_OTHER);
         }
 

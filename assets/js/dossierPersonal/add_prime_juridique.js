@@ -12,6 +12,8 @@ let transport = 0;
 let fonction = 0;
 let logement = 0;
 
+let $anciennete = 0;
+
 
 $('#add-collection-widget-personal-salary-prime').click(function () {
     const list = $($(this).attr('data-list-selector'));
@@ -135,7 +137,7 @@ const calculateSalaireNet = () => {
         console.log('prime transport imposable: ', $transportImposable)
         console.log('prime logement imposable: ', $logementImposable)
         $('#personal_salary_brutImposable').val(montantNet - Transport + $logementImposable + $transportImposable)
-    }else {
+    } else {
         $('#personal_salary_brutImposable').val(montantNet)
     }
 }
@@ -149,7 +151,7 @@ let getAnciennete = () => {
         let $annee = $today.getFullYear()
         let $anneA = date.getFullYear()
 
-        let $anciennete = $annee - $anneA;
+        $anciennete = $annee - $anneA;
         $('#personal_ancienity').val($anciennete);
     })
 }
@@ -200,15 +202,20 @@ $(`#personal_salary_avantage`).each(function () {
     calculateSalaireNet()
 });
 
-$(`#personal_contract_dateEmbauche, #personal_ancienity`).each(function () {
-    let $dateEmbauche = $('#personal_contract_dateEmbauche').val();
-    let $today = new Date();
-    let date = new Date($dateEmbauche)
-    let $annee = $today.getFullYear()
-    let $anneA = date.getFullYear()
 
-    let $anciennete = $annee - $anneA;
-    $('#personal_ancienity').val($anciennete);
+$(document).ready(function () {
+    $('#personal_ancienity').val(' ');
+    let $anciennete = 0;
+    $(`#personal_contract_dateEmbauche, #personal_ancienity`).each(function () {
+        let $dateEmbauche = $('#personal_contract_dateEmbauche').val();
+        let $today = new Date();
+        let date = new Date($dateEmbauche)
+        let $annee = $today.getFullYear()
+        let $anneA = date.getFullYear()
+
+        $anciennete = $annee - $anneA;
+        $('#personal_ancienity').val($anciennete);
+    });
 })
 
 

@@ -121,8 +121,18 @@ class PersonalType extends AbstractType
             ->add('salary', SalaryType::class, [
                 'label' => false,
             ])
+            ->add('modePaiement', ChoiceType::class, [
+                'attr' => [
+                    'data-plugin' => 'customselect',
+                ],
+                'choices' => [
+                    'Chèque' => Status::CHEQUE,
+                    'Virement' => Status::VIREMENT,
+                    'Caisse' => Status::CAISSE,
+                ],
+                'placeholder' => 'Sélectionner le mode de paiement'
+            ])
         ;
-
     }
 
     public function configureOptions(OptionsResolver $resolver): void

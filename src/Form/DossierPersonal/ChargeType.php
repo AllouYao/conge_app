@@ -26,24 +26,24 @@ class ChargeType extends AbstractType
                     return [
                         'data-id' => $personal->getId(),
                         'data-name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
-                        'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y') ,
-                        'data-category' => $personal->getCategorie()->getCategorySalarie()->getName()
+                        'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y'),
+                        'data-category' => '( '.$personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' . $personal->getCategorie()
                     ];
                 }
             ])
-            ->add('name',TextType::class, [
+            ->add('name', TextType::class, [
                 'mapped' => false,
                 'attr' => [
                     'readonly' => 'readonly'
                 ]
             ])
-            ->add('hireDate',TextType::class, [
+            ->add('hireDate', TextType::class, [
                 'mapped' => false,
                 'attr' => [
                     'readonly' => 'readonly'
                 ]
             ])
-            ->add('category',TextType::class, [
+            ->add('category', TextType::class, [
                 'mapped' => false,
                 'attr' => [
                     'readonly' => 'readonly'

@@ -10,7 +10,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Validator\Constraints\Unique;
 
 #[ORM\Entity(repositoryClass: PersonalRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -82,9 +81,6 @@ class Personal
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $niveauFormation = null;
 
-    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Diplome::class)]
-    private Collection $diplomes;
-
     #[ORM\OneToOne(mappedBy: 'personal', cascade: ['persist', 'remove'])]
     private ?Contract $contract = null;
 
@@ -105,7 +101,6 @@ class Personal
 
     public function __construct()
     {
-        $this->diplomes = new ArrayCollection();
         $this->chargePeople = new ArrayCollection();
         $this->accountBanks = new ArrayCollection();
     }
@@ -339,36 +334,6 @@ class Personal
     public function setNiveauFormation(?string $niveauFormation): static
     {
         $this->niveauFormation = $niveauFormation;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Diplome>
-     */
-    public function getDiplomes(): Collection
-    {
-        return $this->diplomes;
-    }
-
-    public function addDiplome(Diplome $diplome): static
-    {
-        if (!$this->diplomes->contains($diplome)) {
-            $this->diplomes->add($diplome);
-            $diplome->setPersonal($this);
-        }
-
-        return $this;
-    }
-
-    public function removeDiplome(Diplome $diplome): static
-    {
-        if ($this->diplomes->removeElement($diplome)) {
-            // set the owning side to null (unless already changed)
-            if ($diplome->getPersonal() === $this) {
-                $diplome->setPersonal(null);
-            }
-        }
 
         return $this;
     }

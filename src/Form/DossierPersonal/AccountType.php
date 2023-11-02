@@ -33,7 +33,7 @@ class AccountType extends AbstractType
                     return [
                         'data-name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
                         'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y'),
-                        'data-category' => $personal->getCategorie()->getIntitule()
+                        'data-category' => '( '.$personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' .$personal->getCategorie()->getIntitule()
                     ];
                 }
             ])

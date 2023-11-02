@@ -39,7 +39,7 @@ class AccountBankController extends AbstractController
                 $manager->persist($accountBank);
             }
             $manager->flush();
-            $this->addFlash('success','Compte banque crée avec succès');
+            flash()->addSuccess('Compte banque crée avec succès.');
             return  $this->redirectToRoute('personal_account_bank_index');
         }
         return $this->render('dossier_personal/account_bank/new.html.twig', [
@@ -63,7 +63,7 @@ class AccountBankController extends AbstractController
                 $manager->persist($accountBank);
             }
             $manager->flush();
-
+            flash()->addSuccess('Compte banque modifié avec succès.');
             return $this->redirectToRoute('personal_account_bank_index', [], Response::HTTP_SEE_OTHER);
         }
 
