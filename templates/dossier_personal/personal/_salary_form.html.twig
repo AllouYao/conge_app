@@ -1,7 +1,6 @@
 
-
 <div class="mb-2 row">
-    <label class="col-md-1 col-form-label">Salaire caté.<span
+    <label class="col-md-1 col-form-label">Sa. Catégr.<span
                 class="text-danger">*</span></label>
     <div class="col-md-3">
         {{ form_widget(form.salary.baseAmount) }}
@@ -10,19 +9,33 @@
     <div class="col-md-3">
         {{ form_widget(form.salary.sursalaire) }}
     </div>
-    <label class="col-md-1 col-form-label">Prime Trans.<span
+    <label class="col-md-1 col-form-label">Transport<span
                 class="text-danger">*</span></label>
     <div class="col-md-3">
         {{ form_widget(form.salary.primeTransport) }}
     </div>
 </div>
 <div class="mb-2 row">
-    <label class="col-md-1 col-form-label">Salaire brut <span
+    <label class="col-md-1 col-form-label">Fonction</label>
+    <div class="col-md-3">
+        {{ form_widget(form.salary.primeFonction) }}
+    </div>
+    <label class="col-md-1 col-form-label">Logement</label>
+    <div class="col-md-3">
+        {{ form_widget(form.salary.primeLogement) }}
+    </div>
+    <label class="col-md-1 col-form-label">Avt. nature</label>
+    <div class="col-md-3">
+        {{ form_widget(form.salary.avantage) }}
+    </div>
+</div>
+<div class="mb-2 row">
+    <label class="col-md-1 col-form-label">Sa. brut <span
                 class="text-danger">*</span></label>
     <div class="col-md-3">
         {{ form_widget(form.salary.brutAmount) }}
     </div>
-    <label class="col-md-1 col-form-label">Salaire impo.<span
+    <label class="col-md-1 col-form-label">Sa. imposab.<span
                 class="text-danger">*</span></label>
     <div class="col-md-3">
         {{ form_widget(form.salary.brutImposable) }}

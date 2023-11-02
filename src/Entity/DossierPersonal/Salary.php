@@ -2,8 +2,7 @@
 
 namespace App\Entity\DossierPersonal;
 
-use App\Entity\Settings\AventageNature;
-use App\Entity\Settings\Primes;
+use App\Entity\Settings\Avantage;
 use App\Repository\DossierPersonal\SalaryRepository;
 use App\Utils\Horodatage;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -35,12 +34,6 @@ class Salary
     private ?string $primeTransport = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
-    private ?string $indemniteFonction = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
-    private ?string $indemniteLogement = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $primeLogement = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
@@ -59,6 +52,12 @@ class Salary
 
     #[ORM\OneToMany(mappedBy: 'salary', targetEntity: DetailSalary::class, orphanRemoval: true)]
     private Collection $detailSalaries;
+
+    #[ORM\ManyToOne(inversedBy: 'salaries')]
+    private ?Avantage $avantage = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $totalPrimeJuridique = null;
 
     public function __construct()
     {
@@ -228,6 +227,30 @@ class Salary
                 $detailSalary->setSalary(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getAvantage(): ?Avantage
+    {
+        return $this->avantage;
+    }
+
+    public function setAvantage(?Avantage $avantage): static
+    {
+        $this->avantage = $avantage;
+
+        return $this;
+    }
+
+    public function getTotalPrimeJuridique(): ?string
+    {
+        return $this->totalPrimeJuridique;
+    }
+
+    public function setTotalPrimeJuridique(?string $totalPrimeJuridique): static
+    {
+        $this->totalPrimeJuridique = $totalPrimeJuridique;
 
         return $this;
     }

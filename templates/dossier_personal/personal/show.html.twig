@@ -95,17 +95,13 @@
                             <thead class="table-light">
                             <tr>
                                 <th class="text-center">Catégorie</th>
-                                <th class="text-center">Diplôme</th>
                                 <th class="text-center">Niveau de formation</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr>
-                                {% for dip in personal.diplomes %}
-                                    <td class="text-start">{{ personal.categorie.intitule }}</td>
-                                    <td class="text-center">{{ dip.intitule|capitalize }}</td>
-                                    <td class="text-start">{{ personal.niveauFormation|capitalize }}</td>
-                                {% endfor %}
+                                <td class="text-start"> ({{ personal.categorie.categorySalarie }}) - {{ personal.categorie.intitule }}</td>
+                                <td class="text-start">{{ personal.niveauFormation|capitalize }}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -135,6 +131,35 @@
                         </table>
                     </fieldset>
                     <br>
+                    {% if personal.salary.detailSalaries %}
+                        <fieldset>
+                            <legend>Prime</legend>
+                            <table class="table table-bordered table-sm">
+                                <thead class="table-light">
+                                <tr>
+                                    <th class="text-center">Intitule</th>
+                                    <th class="text-center">Montant</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for detail in personal.salary.detailSalaries %}
+                                    <tr>
+                                        <td class="text-start">{{detail.prime.intitule }}</td>
+                                        <td class="text-end">{{ detail.amountPrime|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <th colspan="1" class="text-center">TOTAL</th>
+                                    <th class="text-end">{{ personal.salary.totalPrimeJuridique|number_format(0, ',', ' ') }}</th>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </fieldset>
+                        <br>
+                    {% endif %}
+
                     <fieldset>
                         <legend>Salaire</legend>
                         <table class="table table-bordered table-sm">
@@ -142,27 +167,22 @@
                             <tr>
                                 <th class="text-center">Salaire catégoriel</th>
                                 <th class="text-center">Sursalaire</th>
-                                <th class="text-center">Prime de fonction</th>
-                                <th class="text-center">Prime de logement </th>
                                 <th class="text-center">Prime de transport</th>
-                                <th class="text-center">Autre Prime </th>
-                                <th class="text-center">Avantage en nature </th>
-                                <th class="text-center">Salaire brut </th>
-                                <th class="text-center">Salaire brut Imposable </th>
+                                <th class="text-center">Prime de fonction</th>
+                                <th class="text-center">Prime de logement</th>
+                                <th class="text-center">Avantage en nature</th>
+                                <th class="text-center">Salaire brut</th>
+                                <th class="text-center">Salaire brut Imposable</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr>
-
                                 <td class="text-end">{{ personal.categorie.amount|number_format(0, ',', ' ') }}</td>
                                 <td class="text-end">{{ personal.salary.sursalaire|number_format(0, ',', ' ') }}</td>
+                                <td class="text-end">{{ personal.salary.primeTransport|number_format(0, ',', ' ') }}</td>
                                 <td class="text-end">{{ personal.salary.primeFonction|number_format(0, ',', ' ') }}</td>
                                 <td class="text-end">{{ personal.salary.primeLogement|number_format(0, ',', ' ') }}</td>
-                                <td class="text-end">{{ personal.salary.primeTransport|number_format(0, ',', ' ') }}</td>
-                                {% for pr in personal.salary.primes %}
-                                    <td class="text-start">{{ pr.intitule }}</td>
-                                {% endfor %}
-                                <td class="text-center">{{ personal.salary.avantageNature }}</td>
+                                <td class="text-center">{{ personal.salary.avantage }} </td>
                                 <td class="text-end">{{ personal.salary.brutAmount|number_format(0, ',', ' ') }}</td>
                                 <td class="text-end">{{ personal.salary.brutImposable|number_format(0, ',', ' ') }}</td>
                             </tr>

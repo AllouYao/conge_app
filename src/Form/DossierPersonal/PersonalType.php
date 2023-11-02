@@ -6,6 +6,7 @@ use App\Entity\DossierPersonal\Personal;
 use App\Entity\Settings\Category;
 use App\Form\CustomType\DateCustomType;
 use App\Utils\Status;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -69,7 +70,8 @@ class PersonalType extends AbstractType
                         'data-amount' => $category->getAmount()
                     ];
                 },
-                'required' => true
+                'required' => true,
+                'group_by' => 'categorySalarie'
             ])
             ->add('conjoint', TextType::class, [
                 'required' => false
@@ -112,7 +114,8 @@ class PersonalType extends AbstractType
             ])
             ->add('ancienity', TextType::class, [
                 'attr' => [
-                    'readonly' => true
+                    'readonly' => true,
+                    'class' => 'text-end'
                 ],
             ])
             ->add('salary', SalaryType::class, [

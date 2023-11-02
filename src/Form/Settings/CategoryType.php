@@ -41,7 +41,7 @@ class CategoryType extends AbstractType
                     ])
                 ],
                 'attr' => [
-                    'class' => 'separator'
+                    'class' => 'separator text-end'
                 ]
             ]);
     }

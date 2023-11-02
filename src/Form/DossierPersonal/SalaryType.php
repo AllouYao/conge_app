@@ -3,7 +3,9 @@
 namespace App\Form\DossierPersonal;
 
 use App\Entity\DossierPersonal\Salary;
+use App\Entity\Settings\Avantage;
 use App\Repository\Settings\SmigRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -22,35 +24,60 @@ class SalaryType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('avantage', EntityType::class, [
+                'class' => Avantage::class,
+                'placeholder' => "Sélectionner le nombre de pièce principale",
+                'attr' => [
+                    'data-plugin' => 'customselect'
+                ],
+                'required' => false,
+                'choice_attr' => function (Avantage $avantage) {
+                    return [
+                        'data-total-avantage' => $avantage->getTotalAvantage()
+                    ];
+                }
+            ])
             ->add('baseAmount', TextType::class, [
                 'attr' => [
                     'readonly' => true,
-                    'class' => 'separator'
+                    'class' => 'separator text-end'
                 ],
                 'required' => false
             ])
             ->add('sursalaire', TextType::class, [
                 'required' => false,
                 'attr' => [
-                    'class' => 'total-prime separator'
+                    'class' => 'total-prime separator text-end'
                 ]
             ])
             ->add('primeTransport', TextType::class, [
                 'required' => true,
                 'attr' => [
-                    'class' => 'total-prime separator'
+                    'class' => 'total-prime separator text-end'
+                ]
+            ])
+            ->add('primeLogement', TextType::class, [
+                'required' => true,
+                'attr' => [
+                    'class' => 'total-prime separator text-end'
+                ]
+            ])
+            ->add('primeFonction', TextType::class, [
+                'required' => true,
+                'attr' => [
+                    'class' => 'total-prime separator text-end'
                 ]
             ])
             ->add('brutAmount', TextType::class, [
                 'attr' => [
                     'readonly' => true,
-                    'class' => 'total-prime separator'
+                    'class' => 'total-prime separator text-end'
                 ],
             ])
             ->add('brutImposable', TextType::class, [
                 'attr' => [
                     'readonly' => true,
-                    'class' => 'total-prime separator'
+                    'class' => 'total-prime separator text-end'
                 ],
             ])
             ->add('detailSalaries', CollectionType::class, [
@@ -78,6 +105,20 @@ class SalaryType extends AbstractType
                     $data = $event->getData();
                     $smig = $this->smigRepository->active();
                     $data->setSmig($smig?->getAmount() ?? 0);
+                }
+            );
+
+        $builder
+            ->addEventListener(FormEvents::POST_SUBMIT,
+                function (FormEvent $event) {
+                    /** @var Salary $data */
+                    $data = $event->getData();
+                    $totalPrime = 0;
+                    foreach ($data->getDetailSalaries() as $detailSalary) {
+                        $totalPrime += $detailSalary?->getAmountPrime();
+                    }
+                    $data
+                        ->setTotalPrimeJuridique($totalPrime);
                 }
             );
     }

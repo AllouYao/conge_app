@@ -2,27 +2,27 @@
 
 namespace App\Repository\Settings;
 
-use App\Entity\Settings\Aventage;
+use App\Entity\Settings\Avantage;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Aventage>
+ * @extends ServiceEntityRepository<Avantage>
  *
- * @method Aventage|null find($id, $lockMode = null, $lockVersion = null)
- * @method Aventage|null findOneBy(array $criteria, array $orderBy = null)
- * @method Aventage[]    findAll()
- * @method Aventage[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Avantage|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Avantage|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Avantage[]    findAll()
+ * @method Avantage[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class AventageRepository extends ServiceEntityRepository
+class AvantageRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Aventage::class);
+        parent::__construct($registry, Avantage::class);
     }
 
 //    /**
-//     * @return Aventage[] Returns an array of Aventage objects
+//     * @return Avantage[] Returns an array of Avantage objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -36,7 +36,7 @@ class AventageRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Aventage
+//    public function findOneBySomeField($value): ?Avantage
 //    {
 //        return $this->createQueryBuilder('a')
 //            ->andWhere('a.exampleField = :val')

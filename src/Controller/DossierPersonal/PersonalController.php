@@ -36,13 +36,13 @@ class PersonalController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($personal);
-            foreach ($personal->getDiplomes() as $diplome) {
-                $diplome->setPersonal($personal);
-                $entityManager->persist($diplome);
+            foreach ($personal->getSalary()->getDetailSalaries() as $detailSalary) {
+                $detailSalary->setSalary($personal->getSalary());
+                $entityManager->persist($detailSalary);
             }
             $entityManager->flush();
             flash()->addSuccess('Salarié enregistré avec succès.');
-            return $this->redirectToRoute('personal_show', ['uuid', $personal->getUuid()], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('personal_show', ['uuid' => $personal->getUuid()]);
         }
 
         return $this->render('dossier_personal/personal/new.html.twig', [
@@ -66,9 +66,9 @@ class PersonalController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            foreach ($personal->getDiplomes() as $diplome) {
-                $diplome->setPersonal($personal);
-                $entityManager->persist($diplome);
+            foreach ($personal->getSalary()->getDetailSalaries() as $detailSalary) {
+                $detailSalary->setSalary($personal->getSalary());
+                $entityManager->persist($detailSalary);
             }
             $entityManager->flush();
             flash()->addSuccess('Salarié modifier avec succès.');
