@@ -14,7 +14,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\HasLifecycleCallbacks]
 class Personal
 {
-
     use Horodatage;
 
     #[ORM\Id]
@@ -92,9 +91,20 @@ class Personal
     #[ORM\OneToOne(mappedBy: 'personal', cascade: ['persist', 'remove'])]
     private ?Salary $salary = null;
 
+    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: ChargePeople::class, orphanRemoval: true)]
+    private Collection $chargePeople;
+
+    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: AccountBank::class, orphanRemoval: true)]
+    private Collection $accountBanks;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $modePaiement = null;
+
     public function __construct()
     {
         $this->diplomes = new ArrayCollection();
+        $this->chargePeople = new ArrayCollection();
+        $this->accountBanks = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -417,6 +427,78 @@ class Personal
         }
 
         $this->salary = $salary;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ChargePeople>
+     */
+    public function getChargePeople(): Collection
+    {
+        return $this->chargePeople;
+    }
+
+    public function addChargePerson(ChargePeople $chargePerson): static
+    {
+        if (!$this->chargePeople->contains($chargePerson)) {
+            $this->chargePeople->add($chargePerson);
+            $chargePerson->setPersonal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChargePerson(ChargePeople $chargePerson): static
+    {
+        if ($this->chargePeople->removeElement($chargePerson)) {
+            // set the owning side to null (unless already changed)
+            if ($chargePerson->getPersonal() === $this) {
+                $chargePerson->setPersonal(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AccountBank>
+     */
+    public function getAccountBanks(): Collection
+    {
+        return $this->accountBanks;
+    }
+
+    public function addAccountBank(AccountBank $accountBank): static
+    {
+        if (!$this->accountBanks->contains($accountBank)) {
+            $this->accountBanks->add($accountBank);
+            $accountBank->setPersonal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAccountBank(AccountBank $accountBank): static
+    {
+        if ($this->accountBanks->removeElement($accountBank)) {
+            // set the owning side to null (unless already changed)
+            if ($accountBank->getPersonal() === $this) {
+                $accountBank->setPersonal(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getModePaiement(): ?string
+    {
+        return $this->modePaiement;
+    }
+
+    public function setModePaiement(?string $modePaiement): static
+    {
+        $this->modePaiement = $modePaiement;
 
         return $this;
     }

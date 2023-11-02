@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste du personnel salarié{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        Liste des comptes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-responsive table-sm" id="basic-datatable">
+                        <thead class="table-light">
+                        <tr>
+                            <th class="text-center">Matricule employé</th>
+                            <th class="text-center">Nom & prénom(s)</th>
+                            <th class="text-center">Catégorie</th>
+                            <th class="text-center">Date d'embauche</th>
+                            <th class="text-center">N° compte</th>
+                            <th class="text-center">Banque</th>
+                            <th class="text-center">Rib</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for accountBank in accountBanks %}
+                            <tr>
+                                <td class="text-left">{{ accountBank.personal.matricule }}</td>
+                                <td class="text-left">{{ accountBank.personal.firstName }} {{ accountBank.personal.lastName }}</td>
+                                <td class="text-left">{{ accountBank.personal.categorie.intitule }}</td>
+                                <td class="text-center">{{ accountBank.personal.contract.dateEmbauche ?  accountBank.personal.contract.dateEmbauche|date('d/m/Y') : ''}}</td>
+                                <td class="text-left">{{ accountBank.numCompte }}</td>
+                                <td class="text-left">{{ accountBank.bankId }}</td>
+                                <td class="text-left">{{ accountBank.rib }}</td>
+                                <td class="text-center">
+                                    <a href="{{ path('personal_account_bank_edit', {'uuid': accountBank.personal.uuid}) }}" >
+                                        <i data-feather="edit" class="feather" style="color: yellow"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('personal_account_bank_new') }}" class="btn btn-primary float-end">Nouveau</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

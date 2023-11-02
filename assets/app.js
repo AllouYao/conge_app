@@ -65,6 +65,7 @@ import './js/delete.form.collection';
 import './js/dossierPersonal/personnel';
 import './js/dossierPersonal/salary';
 import './js/dossierPersonal/personal';
+import './js/dossierPersonal/fetchpersonal'
 
 import './js/app';
 

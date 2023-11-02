@@ -63,6 +63,32 @@
                                        class="dropdown-item">Liste salariés</a>
                                 </div>
                             </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Personne à charge
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('charge_people_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('charge_people_index') }}"
+                                       class="dropdown-item">Liste </a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Compte banque
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('personal_account_bank_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('personal_account_bank_index') }}"
+                                       class="dropdown-item">Liste </a>
+                                </div>
+                            </div>
                         </div>
                     </li>
                 </ul> <!-- end navbar-->

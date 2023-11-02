@@ -1,0 +1,48 @@
+<fieldset>
+    <legend>Information personnel salarié</legend>
+    <div class="mb-2 row">
+        <label class="col-md-1 col-form-label">Matricule <span class="text-danger">*</span></label>
+        <div class="col-md-3">
+            {{ form_widget(form.personal) }}
+        </div>
+        <label class="col-md-1 col-form-label">Nom <span class="text-danger">*</span></label>
+        <div class="col-md-3">
+            {{ form_widget(form.name) }}
+        </div>
+        <label class="col-md-1 col-form-label">Date emb <span class="text-danger">*</span></label>
+        <div class="col-md-3">
+            {{ form_widget(form.hireDate) }}
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label class="col-md-1 col-form-label">Catégorie <span class="text-danger">*</span></label>
+        <div class="col-md-3">
+            {{ form_widget(form.category) }}
+        </div>
+    </div>
+</fieldset>
+<br>
+<fieldset>
+    <legend>Information enfant à charge</legend>
+    <div class="row">
+        <div class="col-md-12 table-responsive">
+            <table class="table table-bordered table-sm table-responsive-sm">
+                <thead>
+                <tr>
+                    <th class="text-center">Banque</th>
+                    <th class="text-center">Code</th>
+                    <th class="text-center">N° Compte</th>
+                    <th class="text-center">Rib</th>
+                    <th class="text-center">Action</th>
+                </tr>
+                </thead>
+                {% form_theme form 'dossier_personal/account_bank/_collection_account.html.twig' %}
+                <tbody id="detail_personal_account_banque_table">
+                {{ form_widget(form.accountBanks) }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</fieldset>
+
+
