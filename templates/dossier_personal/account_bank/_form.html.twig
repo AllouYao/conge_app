@@ -1,22 +1,22 @@
 <fieldset>
     <legend>Information personnel salarié</legend>
     <div class="mb-2 row">
-        <label class="col-md-1 col-form-label">Matricule <span class="text-danger">*</span></label>
-        <div class="col-md-3">
+        <label class="col-md-2 col-form-label">Matricule <span class="text-danger">*</span></label>
+        <div class="col-md-4">
             {{ form_widget(form.personal) }}
         </div>
-        <label class="col-md-1 col-form-label">Nom <span class="text-danger">*</span></label>
-        <div class="col-md-3">
+        <label class="col-md-2 col-form-label">Nom & Prénom(s) <span class="text-danger">*</span></label>
+        <div class="col-md-4">
             {{ form_widget(form.name) }}
-        </div>
-        <label class="col-md-1 col-form-label">Date emb <span class="text-danger">*</span></label>
-        <div class="col-md-3">
-            {{ form_widget(form.hireDate) }}
         </div>
     </div>
     <div class="mb-2 row">
-        <label class="col-md-1 col-form-label">Catégorie <span class="text-danger">*</span></label>
-        <div class="col-md-3">
+        <label class="col-md-2 col-form-label">Date d'embauche <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.hireDate) }}
+        </div>
+        <label class="col-md-2 col-form-label">Catégorie <span class="text-danger">*</span></label>
+        <div class="col-md-4">
             {{ form_widget(form.category) }}
         </div>
     </div>

@@ -1,18 +1,18 @@
 import {runInputmask} from "../inputmask";
 
 //Mais variable  globals
-let montantTotal = 0;
-let $amount = 0;
+let $amountPrimes = 0;
+let $salaireBase = 0;
 let $amountAventage = 0;
-let $montantNonJuridique = 0;
+let $amountBrut = 0;
+let $amountBrutImposable = 0;
 let lastIndexDemandeAchat = 0;
 
 let sursalaire = 0;
 let transport = 0;
 let fonction = 0;
 let logement = 0;
-
-let $anciennete = 0;
+let amountBrut = 0;
 
 
 $('#add-collection-widget-personal-salary-prime').click(function () {
@@ -80,18 +80,18 @@ const calculateTotalPrimeJuridique = () => {
         sum.push(+$(this).val());
     });
     if (sum.length > 0) {
-        montantTotal = sum.reduce((previousValue, currentValue) => previousValue + currentValue);
+        $amountPrimes = sum.reduce((previousValue, currentValue) => previousValue + currentValue);
     } else {
-        montantTotal = 0;
+        $amountPrimes = 0;
     }
-    $('#total_montant_prime_salary').html(new Intl.NumberFormat('fr-FR').format(montantTotal || 0));
+    $('#total_montant_prime_salary').html(new Intl.NumberFormat('fr-FR').format($amountPrimes || 0));
 }
 
 
 const salaireBase = () => {
     $('body').on('change', '#personal_categorie', function () {
         const $selected = $("#personal_categorie :selected");
-        $amount = +$selected.attr('data-amount') || 0;
+        $salaireBase = +$selected.attr('data-amount') || 0;
         calculateSalaireNet()
     });
 }
@@ -112,46 +112,53 @@ const calculatePrimeNonJuridique = () => {
         transport = +$('#personal_salary_primeTransport').val();
         fonction = +$('#personal_salary_primeFonction').val();
         logement = +$('#personal_salary_primeLogement').val();
-        $montantNonJuridique = sursalaire + transport + fonction + logement
-        console.log('montant prime non juridique: ', $montantNonJuridique)
         calculateSalaireNet()
     })
 }
 
 
 const calculateSalaireNet = () => {
-    const Transport = 30000;
-    let $transportImposable = 0;
-    let $logementImposable = 0;
-    console.log('Salaire de base: ', $amount)
-    console.log('Total prime juridique: ', montantTotal)
+    const DEFAULT_TRANSPORT = 30000;
+    amountBrut = $salaireBase + $amountPrimes + sursalaire + fonction;
+    let $logements = +$('#personal_salary_primeLogement').val();
+    console.log('seconds logements: ', $logements)
+    console.log('avantage en nature: ', $amountAventage)
 
-    let montantNet = $amount + montantTotal + $montantNonJuridique;
-    console.log('montant net :', montantNet)
+    let $avantagesImposable = $logements > $amountAventage ? $logements - $amountAventage : 0;
+    console.log('aventage imposable: ', $avantagesImposable)
+    let $amountImposableWithAvantage = $avantagesImposable !== 0 && $amountAventage !== 0 ? amountBrut + logement + $avantagesImposable : amountBrut + logement;
+    console.log('brut imposable avec avantage imposable: ', $amountImposableWithAvantage)
 
-    $('#personal_salary_baseAmount').val($amount);
-    $('#personal_salary_brutAmount').val(montantNet)
-    if (transport > Transport && logement > $amountAventage) {
-        $transportImposable = transport - Transport;
-        $logementImposable = logement - $amountAventage
-        console.log('prime transport imposable: ', $transportImposable)
-        console.log('prime logement imposable: ', $logementImposable)
-        $('#personal_salary_brutImposable').val(montantNet - Transport + $logementImposable + $transportImposable)
-    } else {
-        $('#personal_salary_brutImposable').val(montantNet)
-    }
-}
+    let $transport = +$('#personal_salary_primeTransport').val();
+    console.log('seconds transport: ', $transport)
 
+    let $transportImposable = $transport > DEFAULT_TRANSPORT ? $transport - DEFAULT_TRANSPORT : 0;
+    console.log('transport imposable: ', $transportImposable)
+    let $amountImposableWithTransport = $transportImposable !== 0 && $transport > DEFAULT_TRANSPORT ? $transportImposable : DEFAULT_TRANSPORT;
+    console.log('brut imposable avec transport imposable: ', $amountImposableWithTransport)
+
+    $amountBrut = amountBrut + logement + $transport;
+    console.log('Montant brut: ', $amountBrut)
+    $amountBrutImposable = $amountImposableWithAvantage + $amountImposableWithTransport;
+    console.log('Montant brut imposable: ', $amountBrutImposable)
+
+    $('#personal_salary_baseAmount').val($salaireBase);
+    $('#personal_salary_brutAmount').val($amountBrut)
+    $('#personal_salary_brutImposable').val($amountBrutImposable);
+
+};
 
 let getAnciennete = () => {
     $('body').on('change', '#personal_contract_dateEmbauche, #personal_ancienity', function () {
         let $dateEmbauche = $('#personal_contract_dateEmbauche').val();
+        $('#personal_ancienity').val(0)
         let $today = new Date();
         let date = new Date($dateEmbauche)
         let $annee = $today.getFullYear()
         let $anneA = date.getFullYear()
 
-        $anciennete = $annee - $anneA;
+        let $anciennete = $annee - $anneA;
+        //$anciennete.val($annee - $anneA)
         $('#personal_ancienity').val($anciennete);
     })
 }
@@ -186,13 +193,12 @@ $('.total-prime').each(function () {
     transport = +$('#personal_salary_primeTransport').val();
     fonction = +$('#personal_salary_primeFonction').val();
     logement = +$('#personal_salary_primeLogement').val();
-    $montantNonJuridique = sursalaire + transport + fonction + logement
     calculateSalaireNet()
 });
 
 $(`#personal_categorie`).each(function () {
     const $selected = $("#personal_categorie :selected");
-    $amount = +$selected.attr('data-amount') || 0;
+    $salaireBase = +$selected.attr('data-amount') || 0;
     calculateSalaireNet()
 });
 
@@ -202,21 +208,6 @@ $(`#personal_salary_avantage`).each(function () {
     calculateSalaireNet()
 });
 
-
-$(document).ready(function () {
-    $('#personal_ancienity').val(' ');
-    let $anciennete = 0;
-    $(`#personal_contract_dateEmbauche, #personal_ancienity`).each(function () {
-        let $dateEmbauche = $('#personal_contract_dateEmbauche').val();
-        let $today = new Date();
-        let date = new Date($dateEmbauche)
-        let $annee = $today.getFullYear()
-        let $anneA = date.getFullYear()
-
-        $anciennete = $annee - $anneA;
-        $('#personal_ancienity').val($anciennete);
-    });
-})
 
 
 getAnciennete()

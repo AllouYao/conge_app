@@ -1,5 +1,5 @@
 <fieldset>
-    <legend>Information personnel salarié</legend>
+    <legend>Information du salarié</legend>
     <div class="mb-2 row">
         <label class="col-md-1 col-form-label">Matricule <span class="text-danger">*</span></label>
         <div class="col-md-3">
@@ -19,12 +19,12 @@
         <div class="col-md-3">
             {{ form_widget(form.genre) }}
         </div>
-        <label class="col-md-1 col-form-label">Date naiss.<span class="text-danger">*</span></label>
-        <div class="col-md-3">
+        <label class="col-md-2 col-form-label">Date naissance <span class="text-danger">*</span></label>
+        <div class="col-md-2">
             {{ form_widget(form.birthday) }}
         </div>
-        <label class="col-md-1 col-form-label">Lieu naiss.<span class="text-danger">*</span></label>
-        <div class="col-md-3">
+        <label class="col-md-2 col-form-label">Lieu naissance <span class="text-danger">*</span></label>
+        <div class="col-md-2">
             {{ form_widget(form.lieuNaissance) }}
         </div>
     </div>
@@ -33,8 +33,8 @@
         <div class="col-md-3">
             {{ form_widget(form.refCNPS) }}
         </div>
-        <label class="col-md-1 col-form-label">Nature pièce <span class="text-danger">*</span></label>
-        <div class="col-md-3">
+        <label class="col-md-2 col-form-label">Nature pièce <span class="text-danger">*</span></label>
+        <div class="col-md-2">
             {{ form_widget(form.piece) }}
         </div>
         <label class="col-md-1 col-form-label">N° pièce <span class="text-danger">*</span></label>
@@ -48,7 +48,7 @@
     <li class="nav-item">
         <a href="#coordonner" data-bs-toggle="tab" aria-expanded="false" class="nav-link active">
             <span class="d-block d-sm-none"><i class="uil-home-alt"></i></span>
-            <span class="d-none d-sm-block">Coordonner</span>
+            <span class="d-none d-sm-block">Contact</span>
         </a>
     </li>
     <li class="nav-item">
@@ -60,7 +60,7 @@
     <li class="nav-item">
         <a href="#categories_socio_professionnel" data-bs-toggle="tab" aria-expanded="true" class="nav-link">
             <span class="d-block d-sm-none"><i class="uil-user"></i></span>
-            <span class="d-none d-sm-block">Catégorie socio professionnelle</span>
+            <span class="d-none d-sm-block">Catégorie</span>
         </a>
     </li>
     <li class="nav-item">

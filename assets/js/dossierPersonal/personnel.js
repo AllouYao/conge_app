@@ -1,5 +1,5 @@
 let marriedShow = () => {
-    const $marie = $("#personal_etatCivil_3");
+    const $marie = $("#personal_etatCivil_2");
 
     if (!$marie.is(":checked")) {
         $("#family_container").hide();

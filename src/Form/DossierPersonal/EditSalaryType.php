@@ -6,7 +6,6 @@ use App\Entity\DossierPersonal\Salary;
 use App\Entity\Settings\Avantage;
 use App\Repository\Settings\SmigRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -15,7 +14,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class SalaryType extends AbstractType
+class EditSalaryType
 {
     public function __construct(private readonly SmigRepository $smigRepository)
     {
@@ -121,15 +120,6 @@ class SalaryType extends AbstractType
                         ->setTotalPrimeJuridique($totalPrime);
                 }
             );
-
-        $builder
-            ->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event) {
-                /** @var Salary $data */
-                $data = $event->getData();
-                $transport = $data->getId() ? $data->getPrimeTransport() : 30000;
-                $form = $event->getForm();
-                $form->get('primeTransport')->setData($transport);
-            });
     }
 
     public function configureOptions(OptionsResolver $resolver): void
