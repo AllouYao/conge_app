@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des catégories de charge{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        Liste des catégories de charge
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-responsive table-sm" id="basic-datatable">
+                        <thead class="table-light">
+                        <tr>
+                            <th class="text-center">Intitulé</th>
+                            <th class="text-center">Codification</th>
+                            <th class="text-center">Créer le</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for category in category_charges %}
+                            <tr>
+                                <td class="text-left">{{ category.intitule }}</td>
+                                <td class="text-left">{{ category.codification }}</td>
+                                <td class="text-center">{{ category.createdAt ? category.createdAt|date('d/m/Y') : '' }}</td>
+                                <td class="text-center">
+                                    <a href="{{ path('import_category_charge_edit', {'uuid': category.uuid}) }}">
+                                        <i data-feather="edit" class="feather" style="color: yellow"></i></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('import_category_charge_new') }}" class="btn btn-primary float-end">Nouveau</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

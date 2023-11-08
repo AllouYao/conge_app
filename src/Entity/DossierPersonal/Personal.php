@@ -2,6 +2,7 @@
 
 namespace App\Entity\DossierPersonal;
 
+use App\Entity\Impots\ChargePersonals;
 use App\Entity\Settings\Category;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Utils\Horodatage;
@@ -99,10 +100,14 @@ class Personal
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $modePaiement = null;
 
+    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: ChargePersonals::class)]
+    private Collection $chargePersonals;
+
     public function __construct()
     {
         $this->chargePeople = new ArrayCollection();
         $this->accountBanks = new ArrayCollection();
+        $this->chargePersonals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -467,6 +472,36 @@ class Personal
     public function setModePaiement(?string $modePaiement): static
     {
         $this->modePaiement = $modePaiement;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ChargePersonals>
+     */
+    public function getChargePersonals(): Collection
+    {
+        return $this->chargePersonals;
+    }
+
+    public function addChargePersonal(ChargePersonals $chargePersonal): static
+    {
+        if (!$this->chargePersonals->contains($chargePersonal)) {
+            $this->chargePersonals->add($chargePersonal);
+            $chargePersonal->setPersonal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChargePersonal(ChargePersonals $chargePersonal): static
+    {
+        if ($this->chargePersonals->removeElement($chargePersonal)) {
+            // set the owning side to null (unless already changed)
+            if ($chargePersonal->getPersonal() === $this) {
+                $chargePersonal->setPersonal(null);
+            }
+        }
 
         return $this;
     }
