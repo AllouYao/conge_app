@@ -2,6 +2,7 @@
 
 namespace App\Controller\DossierPersonal;
 
+use App\Contract\SalaryInterface;
 use App\Entity\DossierPersonal\Personal;
 use App\Form\DossierPersonal\ChargeType;
 use App\Repository\DossierPersonal\PersonalRepository;
@@ -25,7 +26,9 @@ class ChargePeopleController extends AbstractController
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(
         Request                $request,
-        EntityManagerInterface $manager): Response
+        EntityManagerInterface $manager,
+        SalaryInterface        $salary
+    ): Response
     {
         $form = $this->createForm(ChargeType::class);
         $form->handleRequest($request);
@@ -36,6 +39,7 @@ class ChargePeopleController extends AbstractController
                 $chargePerson->setPersonal($personal);
                 $manager->persist($chargePerson);
             }
+            $salary->chargePersonal($personal);
             $manager->persist($personal);
             $manager->flush();
             flash()->addSuccess('Personne à la charge du personel ajouté avec succès.');
@@ -51,6 +55,7 @@ class ChargePeopleController extends AbstractController
         Request                $request,
         Personal               $personal,
         EntityManagerInterface $manager,
+        SalaryInterface        $salary
     ): Response
     {
         $form = $this->createForm(ChargeType::class, [
@@ -64,6 +69,7 @@ class ChargePeopleController extends AbstractController
                 $chargePerson->setPersonal($personal);
                 $manager->persist($chargePerson);
             }
+            $salary->chargePersonal($personal);
             $manager->flush();
             flash()->addSuccess('Personne à la charge du personel modifié avec succès.');
             return $this->redirectToRoute('charge_people_index', [], Response::HTTP_SEE_OTHER);

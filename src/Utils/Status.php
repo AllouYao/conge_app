@@ -29,9 +29,9 @@ final class Status
      * Etat Civil
      */
     public const CONCUBIN = 'CONCUBIN';
-    public const CELIBATAIRE = 'CELIBARAIRE';
+    public const CELIBATAIRE = 'CELIBATAIRE';
     public const DIVORCE = 'DIVORCE';
-    public const MARIEE = 'MARIEE';
+    public const MARIEE = 'MARIE';
     public const SEPARE = 'SEPARE';
     public const VEUF = 'VEUF';
 

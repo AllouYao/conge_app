@@ -2,11 +2,13 @@
 
 namespace App\Controller\DossierPersonal;
 
+use App\Contract\SalaryInterface;
 use App\Entity\DossierPersonal\Contract;
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\DossierPersonal\Salary;
 use App\Form\DossierPersonal\PersonalType;
 use App\Repository\DossierPersonal\PersonalRepository;
+use App\Service\SalaryImpotsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,7 +27,7 @@ class PersonalController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager,SalaryInterface $salary): Response
     {
         $personal = new Personal();
         $salaire = (new Salary());
@@ -40,6 +42,7 @@ class PersonalController extends AbstractController
                 $detailSalary->setSalary($personal->getSalary());
                 $entityManager->persist($detailSalary);
             }
+            $salary->chargePersonal($personal);
             $entityManager->flush();
             flash()->addSuccess('Salarié enregistré avec succès.');
             return $this->redirectToRoute('personal_show', ['uuid' => $personal->getUuid()]);
@@ -60,7 +63,7 @@ class PersonalController extends AbstractController
     }
 
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Personal $personal, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Personal $personal, EntityManagerInterface $entityManager,SalaryImpotsService $salary): Response
     {
         $form = $this->createForm(PersonalType::class, $personal);
         $form->handleRequest($request);
@@ -70,6 +73,12 @@ class PersonalController extends AbstractController
                 $detailSalary->setSalary($personal->getSalary());
                 $entityManager->persist($detailSalary);
             }
+            //$salary->chargePersonal($personal);
+            /*$part = $salary->getParts($personal);
+            $creditImpot = $salary->calculateCreditImpot($personal);
+            $impotBrut = $salary->calculerImpotBrut($personal);
+            dd($part,$impotBrut,$creditImpot,$impotBrut - $creditImpot);*/
+            $salary->chargePersonal($personal);
             $entityManager->flush();
             flash()->addSuccess('Salarié modifier avec succès.');
             return $this->redirectToRoute('personal_show', ['uuid' => $personal->getUuid()]);
