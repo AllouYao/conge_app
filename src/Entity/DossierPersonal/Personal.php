@@ -2,6 +2,7 @@
 
 namespace App\Entity\DossierPersonal;
 
+use App\Entity\Impots\ChargeEmployeur;
 use App\Entity\Impots\ChargePersonals;
 use App\Entity\Settings\Category;
 use App\Repository\DossierPersonal\PersonalRepository;
@@ -103,11 +104,15 @@ class Personal
     #[ORM\OneToMany(mappedBy: 'personal', targetEntity: ChargePersonals::class)]
     private Collection $chargePersonals;
 
+    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: ChargeEmployeur::class)]
+    private Collection $chargeEmployeurs;
+
     public function __construct()
     {
         $this->chargePeople = new ArrayCollection();
         $this->accountBanks = new ArrayCollection();
         $this->chargePersonals = new ArrayCollection();
+        $this->chargeEmployeurs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -500,6 +505,36 @@ class Personal
             // set the owning side to null (unless already changed)
             if ($chargePersonal->getPersonal() === $this) {
                 $chargePersonal->setPersonal(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ChargeEmployeur>
+     */
+    public function getChargeEmployeurs(): Collection
+    {
+        return $this->chargeEmployeurs;
+    }
+
+    public function addChargeEmployeur(ChargeEmployeur $chargeEmployeur): static
+    {
+        if (!$this->chargeEmployeurs->contains($chargeEmployeur)) {
+            $this->chargeEmployeurs->add($chargeEmployeur);
+            $chargeEmployeur->setPersonal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChargeEmployeur(ChargeEmployeur $chargeEmployeur): static
+    {
+        if ($this->chargeEmployeurs->removeElement($chargeEmployeur)) {
+            // set the owning side to null (unless already changed)
+            if ($chargeEmployeur->getPersonal() === $this) {
+                $chargeEmployeur->setPersonal(null);
             }
         }
 

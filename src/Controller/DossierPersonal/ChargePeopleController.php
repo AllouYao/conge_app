@@ -2,10 +2,10 @@
 
 namespace App\Controller\DossierPersonal;
 
-use App\Contract\SalaryInterface;
 use App\Entity\DossierPersonal\Personal;
 use App\Form\DossierPersonal\ChargeType;
 use App\Repository\DossierPersonal\PersonalRepository;
+use App\Service\SalaryImpotsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,7 +27,7 @@ class ChargePeopleController extends AbstractController
     public function new(
         Request                $request,
         EntityManagerInterface $manager,
-        SalaryInterface        $salary
+        SalaryImpotsService    $salary
     ): Response
     {
         $form = $this->createForm(ChargeType::class);
@@ -39,8 +39,11 @@ class ChargePeopleController extends AbstractController
                 $chargePerson->setPersonal($personal);
                 $manager->persist($chargePerson);
             }
-            $salary->chargePersonal($personal);
             $manager->persist($personal);
+
+            /** Service pour le calcule des impôts sur salaire du salarié */
+            $salary->chargePersonal($personal);
+
             $manager->flush();
             flash()->addSuccess('Personne à la charge du personel ajouté avec succès.');
             return $this->redirectToRoute('charge_people_index', [], Response::HTTP_SEE_OTHER);
@@ -55,7 +58,7 @@ class ChargePeopleController extends AbstractController
         Request                $request,
         Personal               $personal,
         EntityManagerInterface $manager,
-        SalaryInterface        $salary
+        SalaryImpotsService    $salary
     ): Response
     {
         $form = $this->createForm(ChargeType::class, [
@@ -69,7 +72,10 @@ class ChargePeopleController extends AbstractController
                 $chargePerson->setPersonal($personal);
                 $manager->persist($chargePerson);
             }
+
+            /** Service pour le calcule des impôts sur salaire du salarié */
             $salary->chargePersonal($personal);
+
             $manager->flush();
             flash()->addSuccess('Personne à la charge du personel modifié avec succès.');
             return $this->redirectToRoute('charge_people_index', [], Response::HTTP_SEE_OTHER);

@@ -5,7 +5,10 @@ namespace App\Service;
 
 use App\Contract\SalaryInterface;
 use App\Entity\DossierPersonal\Personal;
+use App\Entity\Impots\ChargeEmployeur;
 use App\Entity\Impots\ChargePersonals;
+use App\Repository\Impots\CategoryChargeRepository;
+use App\Repository\Impots\ChargeEmployeurRepository;
 use App\Repository\Impots\ChargePersonalsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -14,37 +17,84 @@ class SalaryImpotsService implements SalaryInterface
 
     private EntityManagerInterface $manager;
     private ChargePersonalsRepository $chargePersonalRt;
+    private CategoryChargeRepository $CategoryChargeRt;
+    private ChargeEmployeurRepository $chargeEmployeurRt;
 
-    public function __construct(EntityManagerInterface $manager,ChargePersonalsRepository $chargePersonalsRepository)
+    public function __construct(
+        EntityManagerInterface    $manager,
+        ChargePersonalsRepository $chargePersonalsRepository,
+        CategoryChargeRepository  $categoryChargeRepository,
+        ChargeEmployeurRepository $chargeEmployeurRepository
+    )
     {
         $this->manager = $manager;
         $this->chargePersonalRt = $chargePersonalsRepository;
+        $this->CategoryChargeRt = $categoryChargeRepository;
+        $this->chargeEmployeurRt = $chargeEmployeurRepository;
     }
 
     public function chargePersonal(Personal $personal): void
     {
+        $part = $this->getParts($personal);
         $impotBrut = $this->calculerImpotBrut($personal);
         $creditImpot = $this->calculateCreditImpot($personal);
         $impotNet = $impotBrut - $creditImpot;
         $amountCNPS = $this->calculateCNPS($personal);
         $amountCMU = $this->calculateCMU();
         $charge = $this->chargePersonalRt->findOneBy(['personal' => $personal]);
-        if(!$charge){
+        if (!$charge) {
             $charge = (new ChargePersonals())
                 ->setPersonal($personal)
-                ->setAmountIts($impotNet)
-                ->setAmountCMU($amountCMU)
-                ->setAmountCNPS($amountCNPS)
-                ->setAmountTotalChargePersonal($impotNet + $amountCMU + $amountCNPS)
-            ;
-        }
-            $charge
-                ->setPersonal($personal)
+                ->setNumPart($part)
                 ->setAmountIts($impotNet)
                 ->setAmountCMU($amountCMU)
                 ->setAmountCNPS($amountCNPS)
                 ->setAmountTotalChargePersonal($impotNet + $amountCMU + $amountCNPS);
+        }
+        $charge
+            ->setPersonal($personal)
+            ->setNumPart($part)
+            ->setAmountIts($impotNet)
+            ->setAmountCMU($amountCMU)
+            ->setAmountCNPS($amountCNPS)
+            ->setAmountTotalChargePersonal($impotNet + $amountCMU + $amountCNPS);
         $this->manager->persist($charge);
+    }
+
+    public function chargeEmployeur(Personal $personal): void
+    {
+        $montantIs = $this->calculateIS($personal);
+        $montantFDFP = $this->calculateFDFP($personal);
+        $montantCR = $this->calculateRCNPS_CR($personal);
+        $montantPF = $this->calculateRCNPS_PF($personal);
+        $montantAT = $this->calculateRCNPS_AT($personal);
+        $montantRetenuCNPS = $montantCR + $montantPF + $montantAT;
+        $montantCMU = $this->calculateCMU();
+        $totalChargeEmployeur = $montantIs + $montantFDFP + $montantRetenuCNPS + $montantCMU;
+        $chargeEmpl = $this->chargeEmployeurRt->findOneBy(['personal' => $personal]);
+        if (!$chargeEmpl) {
+            $chargeEmpl = (new ChargeEmployeur())
+                ->setPersonal($personal)
+                ->setAmountIS($montantIs)
+                ->setAmountFDFP($montantFDFP)
+                ->setAmountCR($montantCR)
+                ->setAmountPF($montantPF)
+                ->setAmountAT($montantAT)
+                ->setAmountCMU($montantCMU)
+                ->setTotalRetenuCNPS($montantRetenuCNPS)
+                ->setTotalChargeEmployeur($totalChargeEmployeur);
+        }
+        $chargeEmpl
+            ->setPersonal($personal)
+            ->setAmountIS($montantIs)
+            ->setAmountFDFP($montantFDFP)
+            ->setAmountCR($montantCR)
+            ->setAmountPF($montantPF)
+            ->setAmountAT($montantAT)
+            ->setTotalRetenuCNPS($montantRetenuCNPS)
+            ->setTotalChargeEmployeur($totalChargeEmployeur);
+
+        $this->manager->persist($chargeEmpl);
     }
 
     public function getParts(Personal $personal): float|int
@@ -164,12 +214,58 @@ class SalaryImpotsService implements SalaryInterface
 
     public function calculateCNPS(Personal $personal): float
     {
-        return $personal->getSalary()->getBrutImposable() * 0.063;
+        $salaire = $personal->getSalary()->getBrutImposable();
+        $categoryRate = $this->CategoryChargeRt->findOneBy(['codification' => 'CNPS']);
+        return $salaire * $categoryRate->getValue() / 100;
+
     }
 
-    public function calculateCMU(): float
+    public function calculateCMU(): float|int
     {
-        return 500;
+        $categoryRate = $this->CategoryChargeRt->findOneBy(['codification' => 'CMU']);
+        return $categoryRate->getValue();
     }
 
+
+    private function calculateIS(Personal $personal): float|int
+    {
+        $salaireBrut = $personal->getSalary()->getBrutAmount();
+        $categoryRate = $this->CategoryChargeRt->findOneBy(['codification' => 'IS']);
+        return $salaireBrut * $categoryRate->getValue() / 100;
+    }
+
+    private function calculateFDFP(Personal $personal): float|int
+    {
+        $salaireBrut = $personal->getSalary()->getBrutAmount();
+        $categoryRateFDFP_TA = $this->CategoryChargeRt->findOneBy(['codification' => 'FDFP_TA']);
+        $categoryRateFDFP_FPC = $this->CategoryChargeRt->findOneBy(['codification' => 'FDFP_FPC']);
+        $categoryRateFDFP_FPC_VER = $this->CategoryChargeRt->findOneBy(['codification' => 'FDFP_FPC_VER']);
+
+        $montantFDFP_TA = $salaireBrut * $categoryRateFDFP_TA->getValue() / 100;
+        $montantFDFP_FPC = $salaireBrut * $categoryRateFDFP_FPC->getValue() / 100;
+        $montantFDFP_FPC_VER = $salaireBrut * $categoryRateFDFP_FPC_VER->getValue() / 100;
+
+        return $montantFDFP_TA + $montantFDFP_FPC + $montantFDFP_FPC_VER;
+    }
+
+    private function calculateRCNPS_CR(Personal $personal): float|int
+    {
+        $salaireBrut = $personal->getSalary()->getBrutAmount();
+        $categoryRateRCNPS_CR = $this->CategoryChargeRt->findOneBy(['codification' => 'RCNPS_CR']);
+        return $salaireBrut * $categoryRateRCNPS_CR->getValue() / 100;
+    }
+
+    private function calculateRCNPS_PF(Personal $personal): float|int
+    {
+        $salaireBrut = $personal->getSalary()->getBrutAmount();
+        $categoryRateRCNPS_PF = $this->CategoryChargeRt->findOneBy(['codification' => 'RCNPS_PF']);
+        return $salaireBrut * $categoryRateRCNPS_PF->getValue() / 100;
+    }
+
+    private function calculateRCNPS_AT(Personal $personal): float|int
+    {
+        $salaireBrut = $personal->getSalary()->getBrutAmount();
+        $categoryRateRCNPS_AT = $this->CategoryChargeRt->findOneBy(['codification' => 'RCNPS_AT']);
+        return $salaireBrut * $categoryRateRCNPS_AT->getValue() / 100;
+    }
 }

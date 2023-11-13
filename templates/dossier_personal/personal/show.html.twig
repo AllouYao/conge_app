@@ -14,10 +14,10 @@
                 </div>
                 <div class="card-body">
                     <fieldset>
-                        <legend>Informations personnelles du salarié</legend>
+                        <legend>INFORMATION DU SALARIE</legend>
                         <table class="table table-bordered table-sm">
                             <thead class="table-light">
-                            <tr>
+                            <tr style="font-size: 11px">
                                 <th class="text-center">Matricule</th>
                                 <th class="text-center">Nom</th>
                                 <th class="text-center">Prénom(s)</th>
@@ -32,7 +32,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
+                            <tr style="font-size: 10px">
                                 <td class="text-center">{{ personal.matricule }}</td>
                                 <td class="text-start">{{ personal.firstName }}</td>
                                 <td class="text-start">{{ personal.lastName }}</td>
@@ -50,17 +50,17 @@
                     </fieldset>
                     <br>
                     <fieldset>
-                        <legend>Coordonnées du salarié</legend>
+                        <legend>COORDONNEE DU SALARIE</legend>
                         <table class="table table-bordered table-sm">
                             <thead class="table-light">
-                            <tr>
+                            <tr style="font-size: 11px">
                                 <th class="text-center">Adresse</th>
                                 <th class="text-center">Numéro de téléphone</th>
                                 <th class="text-center">Email</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
+                            <tr style="font-size: 10px">
                                 <td class="text-start">{{ personal.address }}</td>
                                 <td class="text-center">(+225) {{ personal.telephone }}</td>
                                 <td class="text-start">{{ personal.email }}</td>
@@ -71,17 +71,17 @@
                     <br>
                     {% if personal.etatCivil == 'MARIEE' %}
                         <fieldset>
-                            <legend>Situation familiale</legend>
+                            <legend>SITUATION FAMILIALE</legend>
                             <table class="table table-bordered table-sm">
                                 <thead class="table-light">
-                                <tr>
+                                <tr style="font-size: 11px">
                                     <th class="text-center">Nom & prénoms du conjoint</th>
                                     <th class="text-center">N° Certificat mariage</th>
                                     <th class="text-center">Extrait d’acte mariage</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
+                                <tr style="font-size: 10px">
                                     <td class="text-start">{{ personal.conjoint }}</td>
                                     <td class="text-center">{{ personal.numCertificat }}</td>
                                     <td class="text-start">{{ personal.numExtraitActe }}</td>
@@ -91,18 +91,20 @@
                         </fieldset>
                         <br>
                     {% endif %}
+
                     <fieldset>
-                        <legend>Catégorie socio professionnelle</legend>
+                        <legend>CATEGORIE SOCIO PROFESSIONNELLE</legend>
                         <table class="table table-bordered table-sm">
                             <thead class="table-light">
-                            <tr>
+                            <tr style="font-size: 11px">
                                 <th class="text-center">Catégorie</th>
                                 <th class="text-center">Niveau de formation</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td class="text-start"> ({{ personal.categorie.categorySalarie }}) - {{ personal.categorie.intitule }}</td>
+                            <tr style="font-size: 10px">
+                                <td class="text-start"> ({{ personal.categorie.categorySalarie }})
+                                    - {{ personal.categorie.intitule }}</td>
                                 <td class="text-start">{{ personal.niveauFormation|capitalize }}</td>
                             </tr>
                             </tbody>
@@ -110,10 +112,10 @@
                     </fieldset>
                     <br>
                     <fieldset>
-                        <legend>Contrat</legend>
+                        <legend>CONTRAT</legend>
                         <table class="table table-bordered table-sm">
                             <thead class="table-light">
-                            <tr>
+                            <tr style="font-size: 11px">
                                 <th class="text-center">Type de contrat</th>
                                 <th class="text-center">Date d’embauche</th>
                                 <th class="text-center">Date d’effet</th>
@@ -122,7 +124,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
+                            <tr style="font-size: 10px">
                                 <td class="text-start">{{ personal.contract.typeContrat }}</td>
                                 <td class="text-center">{{ personal.contract.dateEmbauche|date('d-m-Y') }}</td>
                                 <td class="text-center">{{ personal.contract.dateEffet|date('d-m-Y') }}</td>
@@ -135,24 +137,24 @@
                     <br>
                     {% if personal.salary.detailSalaries %}
                         <fieldset>
-                            <legend>Prime</legend>
+                            <legend>PRIME</legend>
                             <table class="table table-bordered table-sm">
                                 <thead class="table-light">
-                                <tr>
+                                <tr style="font-size: 11px">
                                     <th class="text-center">Intitule</th>
                                     <th class="text-center">Montant</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {% for detail in personal.salary.detailSalaries %}
-                                    <tr>
-                                        <td class="text-start">{{detail.prime.intitule }}</td>
+                                    <tr style="font-size: 10px">
+                                        <td class="text-start">{{ detail.prime.intitule }}</td>
                                         <td class="text-end">{{ detail.amountPrime|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>
                                 <tfoot>
-                                <tr>
+                                <tr style="font-size: 11px">
                                     <th colspan="1" class="text-center">TOTAL</th>
                                     <th class="text-end">{{ personal.salary.totalPrimeJuridique|number_format(0, ',', ' ') }}</th>
                                 </tr>
@@ -163,10 +165,10 @@
                     {% endif %}
 
                     <fieldset>
-                        <legend>Salaire</legend>
+                        <legend>SALAIRE</legend>
                         <table class="table table-bordered table-sm">
                             <thead class="table-light">
-                            <tr>
+                            <tr style="font-size: 11px">
                                 <th class="text-center">Salaire catégoriel</th>
                                 <th class="text-center">Sursalaire</th>
                                 <th class="text-center">Prime de transport</th>
@@ -178,7 +180,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
+                            <tr style="font-size: 10px">
                                 <td class="text-end">{{ personal.categorie.amount|number_format(0, ',', ' ') }}</td>
                                 <td class="text-end">{{ personal.salary.sursalaire|number_format(0, ',', ' ') }}</td>
                                 <td class="text-end">{{ personal.salary.primeTransport|number_format(0, ',', ' ') }}</td>
@@ -187,6 +189,56 @@
                                 <td class="text-center">{{ personal.salary.avantage }} </td>
                                 <td class="text-end">{{ personal.salary.brutAmount|number_format(0, ',', ' ') }}</td>
                                 <td class="text-end">{{ personal.salary.brutImposable|number_format(0, ',', ' ') }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                    <br>
+                    <fieldset>
+                        <legend>IMPOSITION DE SALAIRE</legend>
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-light">
+                            <tr style="font-size: 11px">
+                                <th class="text-center">Nombre de part</th>
+                                <th class="text-center">Montant ITS</th>
+                                <th class="text-center">Montant CMU</th>
+                                <th class="text-center">Montant CNPS</th>
+                                <th class="text-center">Montant Impôt Net</th>
+
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr style="font-size: 10px">
+                                <td class="text-center">{{ charge_personal.numPart|number_format }}</td>
+                                <td class="text-end">{{ charge_personal.amountIts|number_format(0, ',', ' ') }}</td>
+                                <td class="text-end">{{ charge_personal.amountCMU|number_format(0, ',', ' ') }}</td>
+                                <td class="text-end">{{ charge_personal.amountCNPS|number_format(0, ',', ' ') }}</td>
+                                <td class="text-end">{{ charge_personal.amountTotalChargePersonal|number_format(0, ',', ' ') }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </fieldset>
+                    <br>
+                    <fieldset>
+                        <legend>CHARGE DE EMPLOYEUR</legend>
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-light">
+                            <tr style="font-size: 11px">
+                                <th class="text-center">Montant IS</th>
+                                <th class="text-center">Montant FDFP</th>
+                                <th class="text-center">Montant CMU</th>
+                                <th class="text-center">Retenue CNPS</th>
+                                <th class="text-center">Total Charge</th>
+
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr style="font-size: 10px">
+                                <td class="text-end">{{ charge_employeur.amountIS|number_format(0, ',', ' ') }}</td>
+                                <td class="text-end">{{ charge_employeur.amountFDFP|number_format(0, ',', ' ') }}</td>
+                                <td class="text-end">{{ charge_employeur.amountCMU|number_format(0, ',', ' ') }}</td>
+                                <td class="text-end">{{ charge_employeur.totalRetenuCNPS|number_format(0, ',', ' ') }}</td>
+                                <td class="text-end">{{ charge_employeur.totalChargeEmployeur|number_format(0, ',', ' ') }}</td>
                             </tr>
                             </tbody>
                         </table>

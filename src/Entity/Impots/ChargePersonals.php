@@ -37,6 +37,9 @@ class ChargePersonals
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $AmountTotalChargePersonal = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    private ?string $numPart = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -98,6 +101,18 @@ class ChargePersonals
     public function setAmountTotalChargePersonal(?string $AmountTotalChargePersonal): static
     {
         $this->AmountTotalChargePersonal = $AmountTotalChargePersonal;
+
+        return $this;
+    }
+
+    public function getNumPart(): ?string
+    {
+        return $this->numPart;
+    }
+
+    public function setNumPart(string $numPart): static
+    {
+        $this->numPart = $numPart;
 
         return $this;
     }
