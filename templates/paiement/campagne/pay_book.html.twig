@@ -1,0 +1,384 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des catégories de charge{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridPayBook {
+            height: 500px;
+            border-width: 50px;
+
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        Liste des catégories de charge
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="dataGridPayBook"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        $(document).ready(function () {
+            let debut;
+            let fin;
+            $("#dataGridPayBook").dxDataGrid({
+                // Configuration goes here
+                dataSource: `{{ url('campagne_pay_book') }}`,
+                showBorders: true,
+                scrolling: {
+                    columnRenderingMode: 'virtual'
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['pdf', 'xlsx'],
+                },
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('Livre de paie');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                            columnWidths: [55, 55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
+                            customizeCell: function (options) {
+                                const {gridCell, excelCell} = options;
+                                if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
+                                    excelCell.text = formatNumber(gridCell.value)
+                                    excelCell.font = {size: 9};
+                                    excelCell.alignment = {horizontal: 'left'};
+                                }
+                            }
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then(function (buffer) {
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Livre de paie ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    } else if (e.format === 'pdf') {
+                        const doc = new JsPdf.jsPDF({
+                            orientation: 'landscape',
+                            unit: "pt",
+                        });
+                        DevExpress.pdfExporter.exportDataGrid({
+                            jsPDFDocument: doc,
+                            component: e.component,
+                            repeatHeaders: true,
+                            columnWidths: [55, 55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
+                            customizeCell: function (options) {
+                                const {gridCell, pdfCell} = options;
+                                if (gridCell.rowType === 'data' && typeof gridCell.value === 'number') {
+                                    pdfCell.text = formatNumber(gridCell.value)
+                                    pdfCell.font = {size: 9};
+                                    pdfCell.alignment = {horizontal: 'left'};
+                                }
+
+                            },
+                            topLeft: {x: 1, y: 15},
+                        }).then(() => {
+
+                            const header = 'Livre de paie';
+                            const pageWidth = doc.internal.pageSize.getWidth();
+                            doc.setFontSize(15);
+                            const headerWidth = doc.getTextDimensions(header).w;
+                            doc.text(header, (pageWidth - headerWidth) / 2, 20);
+
+                            doc.save(`Livre de paie du ${debut ?? " "} au ${fin ?? " "}.pdf`)
+                        });
+                        e.cancel = true;
+                    }
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                columns: [
+                    {
+                        dataField: 'full_name_salaried',
+                        dataType: 'string',
+                        caption: 'Nom et Prénom',
+                        alignment: 'left',
+                        fixed: true,
+                        width: 120
+                    },
+                    {
+                        dataField: 'category_salaried',
+                        dataType: 'string',
+                        caption: 'Catégorie Salarié',
+                        alignment: 'center',
+                        width: 120
+                    },
+                    {
+                        dataField: 'number_part_salaried',
+                        dataType: 'string',
+                        caption: 'Nombre De Part',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        dataField: 'salaire_base_salaried',
+                        dataType: 'number',
+                        caption: 'Salaire Catégoriel',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                        },
+                    },
+                    {
+                        dataField: 'sursalaire_salaried',
+                        dataType: 'number',
+                        caption: 'Sursalaire',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                        },
+                    },
+                    {
+                        dataField: 'salaire_brut_salaried',
+                        dataType: 'number',
+                        caption: 'Salaire Brut',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                        },
+                    },
+                    {
+                        dataField: 'salaire_imposable_salaried',
+                        dataType: 'number',
+                        caption: 'Salaire Brut Imposable',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                        },
+                    },
+                    {
+                        dataField: 'its_salaried',
+                        dataType: 'number',
+                        caption: 'ITS',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                        },
+                    },
+                    {
+                        dataField: 'cmu_salaried',
+                        dataType: 'number',
+                        caption: 'CMU',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                        },
+                    },
+                    {
+                        dataField: 'cnps_salaried',
+                        dataType: 'number',
+                        caption: 'CNPS',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                        },
+                    },
+                    {
+                        dataField: 'assurance_salaried',
+                        dataType: 'number',
+                        caption: 'Assurance Santé',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                        },
+                    },
+                    {
+                        dataField: 'total_fixcal_salaried',
+                        dataType: 'number',
+                        caption: 'Total Retenu',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                        },
+                    },
+                    {
+                        dataField: 'transport_salaried',
+                        dataType: 'number',
+                        caption: 'Indemnité Transport',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                        },
+                    },
+                    {
+                        dataField: 'net_payer_salaried',
+                        dataType: 'number',
+                        caption: 'Net à Payer',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                        },
+                    },
+                    {
+                        caption: 'Charge',
+                        alignment: 'center',
+                        columns: [
+                            {
+                                dataField: 'employer_is',
+                                dataType: 'number',
+                                caption: 'IS',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                                },
+                            },
+                            {
+                                dataField: 'employer_fdfp',
+                                dataType: 'number',
+                                caption: 'FDFP',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                                },
+                            },
+
+                        ]
+                    },
+                    {
+                        caption: 'Charge SO patronal',
+                        alignment: 'center',
+                        columns: [
+                            {
+                                dataField: 'employer_cr',
+                                dataType: 'number',
+                                caption: 'Caisse de Retraite',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                                },
+                            },
+                            {
+                                dataField: 'employer_cmu',
+                                dataType: 'number',
+                                caption: 'CMU',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                                },
+                            },
+                            {
+                                dataField: 'employer_pr',
+                                dataType: 'number',
+                                caption: 'Prest. Familiale',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                                },
+                            },
+                            {
+                                dataField: 'employer_at',
+                                dataType: 'number',
+                                caption: 'Accident travail',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                                },
+                            },
+                            {
+                                dataField: 'employer_cnps',
+                                dataType: 'number',
+                                caption: 'Total CNPS',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                                },
+                            },
+                            {
+                                dataField: 'total_fixcal_employer',
+                                dataType: 'number',
+                                caption: 'Total Charg. Patron.',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                                },
+                            },
+                        ]
+                    },
+                    {
+                        dataField: 'assurance_employer',
+                        dataType: 'number',
+                        caption: 'Assurance Santé',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                        },
+                    },
+                    {
+                        dataField: 'masse_salariale',
+                        dataType: 'number',
+                        caption: 'Masse Salariale',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                        },
+                    },
+
+                ]
+
+            })
+        });
+    </script>
+
+{% endblock %}

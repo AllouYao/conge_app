@@ -4,6 +4,8 @@ namespace App\Entity\DossierPersonal;
 
 use App\Entity\Impots\ChargeEmployeur;
 use App\Entity\Impots\ChargePersonals;
+use App\Entity\Paiement\Campagne;
+use App\Entity\Paiement\Payroll;
 use App\Entity\Settings\Category;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Utils\Horodatage;
@@ -107,12 +109,20 @@ class Personal
     #[ORM\OneToMany(mappedBy: 'personal', targetEntity: ChargeEmployeur::class)]
     private Collection $chargeEmployeurs;
 
+    #[ORM\ManyToMany(targetEntity: Campagne::class, mappedBy: 'personal')]
+    private Collection $campagnes;
+
+    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Payroll::class)]
+    private Collection $payrolls;
+
     public function __construct()
     {
         $this->chargePeople = new ArrayCollection();
         $this->accountBanks = new ArrayCollection();
         $this->chargePersonals = new ArrayCollection();
         $this->chargeEmployeurs = new ArrayCollection();
+        $this->campagnes = new ArrayCollection();
+        $this->payrolls = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -535,6 +545,69 @@ class Personal
             // set the owning side to null (unless already changed)
             if ($chargeEmployeur->getPersonal() === $this) {
                 $chargeEmployeur->setPersonal(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        // TODO: Implement __toString() method.
+        return '( ' . $this->matricule . ' ) - ' . $this->firstName . ' ' . $this->lastName;
+    }
+
+    /**
+     * @return Collection<int, Campagne>
+     */
+    public function getCampagnes(): Collection
+    {
+        return $this->campagnes;
+    }
+
+    public function addCampagne(Campagne $campagne): static
+    {
+        if (!$this->campagnes->contains($campagne)) {
+            $this->campagnes->add($campagne);
+            $campagne->addPersonal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCampagne(Campagne $campagne): static
+    {
+        if ($this->campagnes->removeElement($campagne)) {
+            $campagne->removePersonal($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Payroll>
+     */
+    public function getPayrolls(): Collection
+    {
+        return $this->payrolls;
+    }
+
+    public function addPayroll(Payroll $payroll): static
+    {
+        if (!$this->payrolls->contains($payroll)) {
+            $this->payrolls->add($payroll);
+            $payroll->setPersonal($this);
+        }
+
+        return $this;
+    }
+
+    public function removePayroll(Payroll $payroll): static
+    {
+        if ($this->payrolls->removeElement($payroll)) {
+            // set the owning side to null (unless already changed)
+            if ($payroll->getPersonal() === $this) {
+                $payroll->setPersonal(null);
             }
         }
 

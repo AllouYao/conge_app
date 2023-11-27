@@ -4,7 +4,9 @@ namespace App\Repository\DossierPersonal;
 
 use App\Entity\DossierPersonal\Personal;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use PhpParser\Node\Expr\Array_;
 
 /**
  * @extends ServiceEntityRepository<Personal>
@@ -45,4 +47,15 @@ class PersonalRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    /**
+     * @return Personal[] Returns an array of Personal objects
+     */
+    public function findAllPersonal(): array
+    {
+        $qb = $this->createQueryBuilder('p')->getQuery()->getResult();
+        return array_map(function ($result) {
+            return $result;
+        }, $qb);
+    }
 }

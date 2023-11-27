@@ -203,13 +203,12 @@
                                 <th class="text-center">Montant ITS</th>
                                 <th class="text-center">Montant CMU</th>
                                 <th class="text-center">Montant CNPS</th>
-                                <th class="text-center">Montant Impôt Net</th>
-
+                                <th class="text-center">Total Charge</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr style="font-size: 10px">
-                                <td class="text-center">{{ charge_personal.numPart|number_format }}</td>
+                                <td class="text-center">{{ charge_personal.numPart|number_format(1, ',', ' ') }}</td>
                                 <td class="text-end">{{ charge_personal.amountIts|number_format(0, ',', ' ') }}</td>
                                 <td class="text-end">{{ charge_personal.amountCMU|number_format(0, ',', ' ') }}</td>
                                 <td class="text-end">{{ charge_personal.amountCNPS|number_format(0, ',', ' ') }}</td>
@@ -224,19 +223,28 @@
                         <table class="table table-bordered table-sm">
                             <thead class="table-light">
                             <tr style="font-size: 11px">
-                                <th class="text-center">Montant IS</th>
-                                <th class="text-center">Montant FDFP</th>
-                                <th class="text-center">Montant CMU</th>
-                                <th class="text-center">Retenue CNPS</th>
-                                <th class="text-center">Total Charge</th>
-
+                                <th class="text-center" rowspan="2">Montant IS</th>
+                                <th class="text-center" rowspan="2">Montant FDFP</th>
+                                <th class="text-center" rowspan="2">Montant CMU</th>
+                                <th class="text-center" colspan="4">Retenue CNPS</th>
+                                <th class="text-center" rowspan="2">Total Charge</th>
+                            </tr>
+                            <tr style="font-size: 11px">
+                                <th>Caisse de retraite</th>
+                                <th>Prestations familiales</th>
+                                <th>Accidents de travail</th>
+                                <th>Total</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr style="font-size: 10px">
+
                                 <td class="text-end">{{ charge_employeur.amountIS|number_format(0, ',', ' ') }}</td>
                                 <td class="text-end">{{ charge_employeur.amountFDFP|number_format(0, ',', ' ') }}</td>
                                 <td class="text-end">{{ charge_employeur.amountCMU|number_format(0, ',', ' ') }}</td>
+                                <td class="text-end">{{ charge_employeur.amountCR|number_format(0, ',', ' ') }}</td>
+                                <td class="text-end">{{ charge_employeur.amountPF|number_format(0, ',', ' ') }}</td>
+                                <td class="text-end">{{ charge_employeur.amountAT|number_format(0, ',', ' ') }}</td>
                                 <td class="text-end">{{ charge_employeur.totalRetenuCNPS|number_format(0, ',', ' ') }}</td>
                                 <td class="text-end">{{ charge_employeur.totalChargeEmployeur|number_format(0, ',', ' ') }}</td>
                             </tr>

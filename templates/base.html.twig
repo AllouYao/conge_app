@@ -11,14 +11,15 @@
     {{ encore_entry_link_tags('app') }}
     {% block stylesheets %}{% endblock %}
 </head>
-<body class="loading" data-layout-mode="horizontal" data-layout='{"mode": "light", "width": "fluid", "menuPosition": "fixed", "sidebar": { "color": "light", "size": "default", "showuser": false}, "topbar": {"color": "light"}, "showRightSidebarOnPageLoad": true}'>
+<body class="loading dx-viewport" data-layout-mode="horizontal"
+      data-layout='{"mode": "light", "width": "fluid", "menuPosition": "fixed", "sidebar": { "color": "light", "size": "default", "showuser": false}, "topbar": {"color": "light"}, "showRightSidebarOnPageLoad": true}'>
 
 <!-- Begin page -->
 <div id="wrapper">
-
-    {% include 'partials/_header.html.twig' %}
-
-    {% include 'partials/_top_bar.html.twig' %}
+    {% if is_granted('ROLE_USER') %}
+        {% include 'partials/_header.html.twig' %}
+        {% include 'partials/_top_bar.html.twig' %}
+    {% endif %}
 
     <!-- ============================================================== -->
     <!-- Start Page Content here -->
@@ -60,5 +61,6 @@
 <!-- END wrapper -->
 <!-- Vendor js -->
 {{ encore_entry_script_tags('app') }}
+{% block javascripts %}{% endblock %}
 </body>
 </html>

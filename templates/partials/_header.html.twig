@@ -49,15 +49,15 @@
                         </h5>
                     </div>
                     <div class="noti-scroll" data-simplebar>
-                            <a href="" class="dropdown-item notify-item border-bottom">
-                                <div class="notify-icon">
-                                    <div class="notify-icon bg-danger"><i class="uil uil-comment-message"></i></div>
-                                </div>
-                                <p class="notify-details">Karen Robinson</p>
-                                <p class="text-muted mb-0 user-msg">
-                                    <small>Wow ! this admin looks good and awesome design</small>
-                                </p>
-                            </a>
+                        <a href="" class="dropdown-item notify-item border-bottom">
+                            <div class="notify-icon">
+                                <div class="notify-icon bg-danger"><i class="uil uil-comment-message"></i></div>
+                            </div>
+                            <p class="notify-details">Karen Robinson</p>
+                            <p class="text-muted mb-0 user-msg">
+                                <small>Wow ! this admin looks good and awesome design</small>
+                            </p>
+                        </a>
                     </div>
 
                     <!-- All-->
@@ -68,12 +68,11 @@
 
                 </div>
             </li>
-
             <li class="dropdown notification-list topbar-dropdown">
                 <a class="nav-link dropdown-toggle nav-user me-0" data-bs-toggle="dropdown" href="#" role="button"
                    aria-haspopup="false" aria-expanded="false">
                     <span class="pro-user-name ms-1">
-                        Nick Patel <i class="uil uil-angle-down"></i>
+                        {{ app.user.username }} <i class="uil uil-angle-down"></i>
                     </span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end profile-dropdown ">
@@ -87,8 +86,8 @@
                     </a>
                     <div class="dropdown-divider"></div>
 
-                    <a href="#" class="dropdown-item notify-item">
-                        <i data-feather="log-out" class="icon-dual icon-xs me-1"></i><span>Logout</span>
+                    <a href="{{ path('app_logout') }}" class="dropdown-item notify-item">
+                        <i data-feather="log-out" class="icon-dual icon-xs me-1"></i><span>Déconnexion</span>
                     </a>
 
                 </div>
@@ -99,21 +98,21 @@
         <div class="logo-box">
             <a href="{{ path('app_home') }}" class="logo logo-dark">
                 <span class="logo-sm">
-{#                    <img src="assets/images/logo-sm.png" alt="" height="24">#}
+{#                    <img src="assets/images/logo-sm.png" alt="" height="24"> #}
                     <!-- <span class="logo-lg-text-light">Shreyu</span> -->
                 </span>
                 <span class="logo-lg">
-{#                    <img src="assets/images/logo-dark.png" alt="" height="24">#}
+{#                    <img src="assets/images/logo-dark.png" alt="" height="24"> #}
                     <!-- <span class="logo-lg-text-light">S</span> -->
                 </span>
             </a>
 
             <a href="{{ path('app_home') }}" class="logo logo-light">
                 <span class="logo-sm">
-{#                    <img src="assets/images/logo-sm.png" alt="" height="24">#}
+{#                    <img src="assets/images/logo-sm.png" alt="" height="24"> #}
                 </span>
                 <span class="logo-lg">
-{#                    <img src="assets/images/logo-light.png" alt="" height="24">#}
+{#                    <img src="assets/images/logo-light.png" alt="" height="24"> #}
                 </span>
             </a>
         </div>

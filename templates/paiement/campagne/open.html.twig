@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ouverture de la campagne{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            {{ form_start(form) }}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        Ouverture de la campagne
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {{ include('paiement/campagne/_open.form.html.twig') }}
+                </div>
+                <div class="card-footer">
+                    <button type="submit"
+                            class="btn btn-primary float-end">{{ button_label|default('Enregistrer') }}</button>
+                    <a href="{{ path('campagne_open_campagne') }}"
+                       class="btn btn-info float-end me-2">Retour</a>
+                </div>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}
+
+

@@ -10,6 +10,7 @@ use App\Entity\Impots\ChargePersonals;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Repository\Impots\ChargeEmployeurRepository;
 use App\Repository\Impots\ChargePersonalsRepository;
+use App\Utils\Status;
 use Doctrine\ORM\EntityManagerInterface;
 
 class SalaryImpotsService implements SalaryInterface
@@ -40,7 +41,7 @@ class SalaryImpotsService implements SalaryInterface
         $creditImpot = $this->calculateCreditImpot($personal);
         $impotNet = $impotBrut - $creditImpot;
         $amountCNPS = $this->calculateCNPS($personal);
-        $amountCMU = $this->calculateCMU();
+        $amountCMU = $this->calculateCMU($personal);
         $charge = $this->chargePersonalRt->findOneBy(['personal' => $personal]);
         if (!$charge) {
             $charge = (new ChargePersonals())
@@ -69,7 +70,7 @@ class SalaryImpotsService implements SalaryInterface
         $montantPF = $this->calculateRCNPS_PF($personal);
         $montantAT = $this->calculateRCNPS_AT($personal);
         $montantRetenuCNPS = $montantCR + $montantPF + $montantAT;
-        $montantCMU = $this->calculateCMU();
+        $montantCMU = $this->calculateCMU($personal);
         $totalChargeEmployeur = $montantIs + $montantFDFP + $montantRetenuCNPS + $montantCMU;
         $chargeEmpl = $this->chargeEmployeurRt->findOneBy(['personal' => $personal]);
         if (!$chargeEmpl) {
@@ -91,6 +92,7 @@ class SalaryImpotsService implements SalaryInterface
             ->setAmountCR($montantCR)
             ->setAmountPF($montantPF)
             ->setAmountAT($montantAT)
+            ->setAmountCMU($montantCMU)
             ->setTotalRetenuCNPS($montantRetenuCNPS)
             ->setTotalChargeEmployeur($totalChargeEmployeur);
 
@@ -179,7 +181,7 @@ class SalaryImpotsService implements SalaryInterface
     function calculateCreditImpot(Personal $personal): float|int
     {
         $nbrePart = $this->getParts($personal);
-        $creditImpot = 0;
+        $creditImpot = null;
         switch ($nbrePart) {
             case 1;
                 $creditImpot = 0;
@@ -220,10 +222,14 @@ class SalaryImpotsService implements SalaryInterface
 
     }
 
-    public function calculateCMU(): float|int
+    public function calculateCMU(Personal $personal): float|int
     {
         $categoryRate = $this->CategoryChargeRt->findOneBy(['codification' => 'CMU']);
-        return $categoryRate->getValue();
+        // Je recupere le nombre d'enfant à charge
+        $chargePeople = $personal->getChargePeople()->count();
+        $marie = $personal->getEtatCivil() === Status::MARIEE ? 1 : 0;
+        $CMU = $categoryRate->getValue();
+        return ($chargePeople * $CMU) + ($CMU * $marie) + $CMU;
     }
 
 
