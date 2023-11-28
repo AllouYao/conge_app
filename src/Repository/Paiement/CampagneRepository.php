@@ -5,6 +5,7 @@ namespace App\Repository\Paiement;
 use App\Entity\Paiement\Campagne;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -48,7 +49,9 @@ class CampagneRepository extends ServiceEntityRepository
 //    }
 
 
-
+    /**
+     * @throws NonUniqueResultException
+     */
     public function active(): ?Campagne
     {
         return $this->createQueryBuilder('c')
@@ -87,13 +90,16 @@ class CampagneRepository extends ServiceEntityRepository
         return count($qb->getQuery()->getResult());
     }
 
-    public function findCampaign(): Campagne
+    /**
+     * @throws NonUniqueResultException
+     */
+    public function findLastCampaign()
     {
         return $this->createQueryBuilder('c')
-            ->orderBy('c.id', 'DESC')
+            ->orderBy("c.id", "DESC")
             ->setMaxResults(1)
             ->getQuery()
-            ->getSingleResult();
+            ->getOneOrNullResult();
     }
 
 

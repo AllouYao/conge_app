@@ -10,6 +10,8 @@ use App\Service\PayrollService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use JetBrains\PhpStorm\NoReturn;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,7 +41,7 @@ class CampagneController extends AbstractController
         $payBooks = $this->payrollRepository->findPayrollByCampaign(true);
 
         return $this->render('paiement/campagne/pay_book.html.twig', [
-          'payBooks' => $payBooks
+            'payBooks' => $payBooks
         ]);
     }
 
@@ -155,33 +157,27 @@ class CampagneController extends AbstractController
 
     }
 
-    #[Route('/paiement/campagne/{uuid}/close', name: 'close_campagne', methods: ['GET', 'POST'])]
-    public function closeCampagne(Campagne $campagne, EntityManagerInterface $manager, CampagneRepository $campagneRepository): Response
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
+    #[NoReturn] #[Route('/paiement/campagne/close', name: 'close', methods: ['GET', 'POST'])]
+    public function closeCampagne(EntityManagerInterface $manager, CampagneRepository $campagneRepository): Response
     {
 
-        $campagne = $campagneRepository->find($campagne->getUuid());
-        if (!$campagne) {
-            throw $this->createNotFoundException('Campagne non trouvée pour l\'id ' . $campagne->getUuid());
+        $campagneActive = $campagneRepository->active();
+
+        if (!$campagneActive) {
+            $this->addFlash('error', 'Aucune campagne ouverte au préalable');
+            return $this->redirectToRoute('app_home');
         }
 
-        $lastActiveCampagne = $campagneRepository->active();
-
-        if ($lastActiveCampagne && $lastActiveCampagne !== $campagne) {
-            $lastActiveCampagne->setLastCampagne(null);
-        }
-
-        $campagne->setClosedAt(new DateTime());
-        $campagne->setActive(false);
-
-        // Mettre à jour la relation lastCampagne avec la nouvelle campagne active
-        $lastActiveCampagne = $campagneRepository->findOneBy(['active' => true]);
-        if ($lastActiveCampagne && $lastActiveCampagne !== $campagne) {
-            $campagne->setLastCampagne($lastActiveCampagne);
-        }
+        $campagneActive->setClosedAt(new DateTime());
+        $campagneActive->setActive(false);
 
         $manager->flush();
-
-        return $this->redirectToRoute('app_home', ['id' => $campagne->getId()]);
+        $this->addFlash('success', 'Campagne fermée avec succès');
+        return $this->redirectToRoute('app_home');
     }
 
 }

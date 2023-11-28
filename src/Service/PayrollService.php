@@ -67,14 +67,14 @@ class PayrollService
          * charge de l'employeur et retenue fixcal
          */
         $chargeEmployeur = $this->chargeEmployeurRepository->findOneBy(['personal' => $personal]);
-        $employeurIS = $chargeEmployeur->getAmountIS();
-        $employeurFDFP = $chargeEmployeur->getAmountFDFP();
-        $employeurCMU = $chargeEmployeur->getAmountCMU();
-        $employeurCR = $chargeEmployeur->getAmountCR();
-        $employeurPF = $chargeEmployeur->getAmountPF();
-        $employeurAT = $chargeEmployeur->getAmountAT();
-        $employeurCNPS = $chargeEmployeur->getTotalRetenuCNPS();
-        $fixcalAmountEmployeur = $chargeEmployeur->getTotalChargeEmployeur();
+        $employeurIS = $chargeEmployeur?->getAmountIS();
+        $employeurFDFP = $chargeEmployeur?->getAmountFDFP();
+        $employeurCMU = $chargeEmployeur?->getAmountCMU();
+        $employeurCR = $chargeEmployeur?->getAmountCR();
+        $employeurPF = $chargeEmployeur?->getAmountPF();
+        $employeurAT = $chargeEmployeur?->getAmountAT();
+        $employeurCNPS = $chargeEmployeur?->getTotalRetenuCNPS();
+        $fixcalAmountEmployeur = $chargeEmployeur?->getTotalChargeEmployeur();
         $employeurAssuranceSante = 0;
 
         /**

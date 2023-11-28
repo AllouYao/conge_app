@@ -237,7 +237,7 @@ class SalaryImpotsService implements SalaryInterface
     {
         $salaireBrut = $personal->getSalary()->getBrutAmount();
         $categoryRate = $this->CategoryChargeRt->findOneBy(['codification' => 'IS']);
-        return $salaireBrut * $categoryRate->getValue() / 100;
+        return $salaireBrut * $categoryRate?->getValue() / 100;
     }
 
     private function calculateFDFP(Personal $personal): float|int
