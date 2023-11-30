@@ -51,7 +51,7 @@
                 export: {
                     enabled: true,
                     allowExportSelectedData: true,
-                    formats: ['pdf', 'xlsx'],
+                    formats: ['xlsx'],
                 },
                 onExporting(e) {
                     if (e.format === 'xlsx') {
@@ -74,37 +74,6 @@
                             workbook.xlsx.writeBuffer().then(function (buffer) {
                                 saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Livre de paie ${debut ?? " "} au ${fin ?? " "}.xlsx`);
                             });
-                        });
-                        e.cancel = true;
-                    } else if (e.format === 'pdf') {
-                        const doc = new JsPdf.jsPDF({
-                            orientation: 'landscape',
-                            unit: "pt",
-                        });
-                        DevExpress.pdfExporter.exportDataGrid({
-                            jsPDFDocument: doc,
-                            component: e.component,
-                            repeatHeaders: true,
-                            columnWidths: [55, 55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
-                            customizeCell: function (options) {
-                                const {gridCell, pdfCell} = options;
-                                if (gridCell.rowType === 'data' && typeof gridCell.value === 'number') {
-                                    pdfCell.text = formatNumber(gridCell.value)
-                                    pdfCell.font = {size: 9};
-                                    pdfCell.alignment = {horizontal: 'left'};
-                                }
-
-                            },
-                            topLeft: {x: 1, y: 15},
-                        }).then(() => {
-
-                            const header = 'Livre de paie';
-                            const pageWidth = doc.internal.pageSize.getWidth();
-                            doc.setFontSize(15);
-                            const headerWidth = doc.getTextDimensions(header).w;
-                            doc.text(header, (pageWidth - headerWidth) / 2, 20);
-
-                            doc.save(`Livre de paie du ${debut ?? " "} au ${fin ?? " "}.pdf`)
                         });
                         e.cancel = true;
                     }

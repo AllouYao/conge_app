@@ -9,7 +9,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        Catégorie
+                        Catégorie salariale
                     </h5>
                 </div>
                 <div class="card-body">
@@ -17,7 +17,7 @@
                         <table class="table table-bordered table-sm">
                             <thead class="table-light">
                             <tr>
-                                <th class="text-center">Catégorie salariale</th>
+                                <th class="text-center">Catégorie</th>
                                 <th class="text-center">Echelon</th>
                                 <th class="text-center">Salaire catégoriel</th>
                             </tr>
@@ -35,7 +35,8 @@
                 <div class="card-footer">
                     <a href="{{ path('settings_category_edit', {'uuid': category.uuid}) }}"
                        class="btn btn-warning float-end " style="color: white">Modifier</a>
-                    <a href="{{ path('settings_category_index') }}" class="btn btn-info float-end me-2">Retour</a>
+                    <a href="{{ path('settings_category_index') }}" class="btn btn-info float-end me-2"
+                       style="color: white">Retour</a>
                 </div>
             </div>
         </div>

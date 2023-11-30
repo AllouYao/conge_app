@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des primes{% endblock %}
+{% block title %}Liste des primes à nature non juridique de salaire{% endblock %}
 
 {% block body %}
     <div class="row">
@@ -9,7 +9,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        Liste des primes
+                        Liste des primes à nature non juridique de salaire
                     </h5>
                 </div>
                 <div class="card-body">
@@ -42,7 +42,7 @@
                     </table>
                 </div>
                 <div class="card-footer">
-                    <a href="{{ path('settings_prime_new') }}" class="btn btn-primary float-end">Nouveau</a>
+                    <a href="{{ path('settings_prime_new') }}" class="btn btn-primary float-end" style="color: white">Nouveau</a>
                 </div>
             </div>
         </div>

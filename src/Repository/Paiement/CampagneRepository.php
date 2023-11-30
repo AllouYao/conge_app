@@ -5,7 +5,6 @@ namespace App\Repository\Paiement;
 use App\Entity\Paiement\Campagne;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -70,7 +69,6 @@ class CampagneRepository extends ServiceEntityRepository
             ->leftJoin('p.chargePersonals', 'ch')
             ->where("c.active = false")
             ->orderBy("c.id", "DESC")
-            ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
     }
@@ -79,12 +77,9 @@ class CampagneRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('c');
         $qb
-            ->select([
-
-            ])
-            ->where("c = :c")
             ->join("c.personal", "p")
-            ->andWhere('p is not null')
+            ->where("c = :c")
+            ->andWhere('p IS NOT NULL')
             ->setParameter('c', $campagne)
         ;
         return count($qb->getQuery()->getResult());

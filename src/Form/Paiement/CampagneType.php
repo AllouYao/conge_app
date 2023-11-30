@@ -9,6 +9,7 @@ use App\Repository\DossierPersonal\PersonalRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -27,7 +28,14 @@ class CampagneType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('startedAt', DateCustomType::class);
+            ->add('startedAt', DateTimeType::class, [
+                'attr' => [
+                    'class' => 'form-control form-control-sm'
+                ],
+                'html5' => true,
+                'widget' => 'single_text',
+                'required' => false
+            ]);
 
         $formModifier = static function (FormInterface $form) {
 

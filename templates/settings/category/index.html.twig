@@ -9,14 +9,14 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        Liste des catégories salariale
+                        Liste des catégories salariales
                     </h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-bordered table-responsive table-sm" id="basic-datatable">
                         <thead class="table-light">
                         <tr>
-                            <th class="text-center">Catégorie salariale</th>
+                            <th class="text-center">Catégorie</th>
                             <th class="text-center">Echelon</th>
                             <th class="text-center">Salaire catégoriel</th>
                             <th class="text-center">Actions</th>
@@ -40,7 +40,8 @@
                     </table>
                 </div>
                 <div class="card-footer">
-                    <a href="{{ path('settings_category_new') }}" class="btn btn-primary float-end">Nouveau</a>
+                    <a href="{{ path('settings_category_new') }}"
+                       class="btn btn-primary float-end" style="color: white">Nouveau</a>
                 </div>
             </div>
         </div>

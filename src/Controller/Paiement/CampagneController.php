@@ -24,15 +24,17 @@ class CampagneController extends AbstractController
 
     private PayrollService $payrollService;
     private PayrollRepository $payrollRepository;
+    private CampagneRepository $campagneRepository;
 
     /**
      * @param PayrollService $payrollService
      * @param PayrollRepository $payrollRepository
      */
-    public function __construct(PayrollService $payrollService, PayrollRepository $payrollRepository)
+    public function __construct(PayrollService $payrollService, PayrollRepository $payrollRepository, CampagneRepository $campagneRepository)
     {
         $this->payrollService = $payrollService;
         $this->payrollRepository = $payrollRepository;
+        $this->campagneRepository = $campagneRepository;
     }
 
     #[Route('/index', name: 'livre', methods: ['GET'])]
@@ -95,41 +97,17 @@ class CampagneController extends AbstractController
      * @throws NonUniqueResultException
      */
     #[Route('/paiement/campagne/open', name: 'open_campagne', methods: ['GET', 'POST'])]
-    public function open(CampagneRepository $campagneRepository, Request $request, EntityManagerInterface $manager): Response
+    public function open(Request $request, EntityManagerInterface $manager): Response
     {
-        $nbPersonal = 0;
-        $totalChargePersonal = 0;
-        $totalChargeEmployeur = 0;
-        $salaireTotal = 0;
 
-        $active = $campagneRepository->active();
+        $active = $this->campagneRepository->active();
         if ($active) {
-            flash()->addInfo('Une campagne est déjà en cours !');
+            $this->addFlash('error', 'Une campagne est déjà en cours !');
             return $this->redirectToRoute('campagne_livre');
-            //throw $this->createNotFoundException('Une campagne est déjà active.');
         }
 
         $campagne = new Campagne();
-        $lastCampagne = $campagneRepository->lastCampagne();
-        if ($lastCampagne) {
-            $nbPersonal = $campagneRepository->getNbrePersonal($lastCampagne);
-            $campagne->setLastCampagne($lastCampagne);
-
-            // Récupération de la somme des charge globals pour l'employeur et l'employé et aussi de la somme global des salaire brut
-            $personnalFromLastCampagne = $lastCampagne->getPersonal();
-            foreach ($personnalFromLastCampagne as $item) {
-                $chargePersonals = $item->getChargePersonals();
-                $chargeEmployeurs = $item->getChargeEmployeurs();
-                $salaireTotal = $item->getSalary()->getBrutAmount();
-                foreach ($chargePersonals as $chargePersonal) {
-                    $totalChargePersonal = $chargePersonal->getAmountTotalChargePersonal();
-                }
-                foreach ($chargeEmployeurs as $chargeEmployeur) {
-                    $totalChargeEmployeur = $chargeEmployeur->getTotalChargeEmployeur();
-                }
-            }
-
-        }
+        $lastCampagne = $this->getDetailOfLastCampagne($campagne);
 
         $form = $this->createForm(CampagneType::class, $campagne);
         $form->handleRequest($request);
@@ -148,11 +126,8 @@ class CampagneController extends AbstractController
 
         return $this->render('paiement/campagne/open.html.twig', [
             'form' => $form->createView(),
-            'nombre_personal' => $nbPersonal,
             'campagne' => $campagne,
-            'global_charge_personal' => $totalChargePersonal,
-            'global_charge_employeur' => $totalChargeEmployeur,
-            'global_salaire_brut' => $salaireTotal,
+            'lastCampagne' => $lastCampagne
         ]);
 
     }
@@ -178,6 +153,40 @@ class CampagneController extends AbstractController
         $manager->flush();
         $this->addFlash('success', 'Campagne fermée avec succès');
         return $this->redirectToRoute('app_home');
+    }
+
+    public function getDetailOfLastCampagne(Campagne $campagne): array
+    {
+        $nbPersonal = 0;
+        $salaireTotal = 0;
+        $totalChargePersonal = 0;
+        $totalChargeEmployeur = 0;
+        $lastCampagne = $this->campagneRepository->lastCampagne();
+        if ($lastCampagne) {
+            $campagne->setLastCampagne($lastCampagne);
+            $nbPersonal = $lastCampagne->getPersonal()->count();
+
+            // Récupération de la somme des charge globals pour l'employeur et l'employé et aussi de la somme global des salaire brut
+            $personnalFromLastCampagne = $lastCampagne->getPersonal();
+            foreach ($personnalFromLastCampagne as $item) {
+                $chargePersonals = $item->getChargePersonals();
+                $chargeEmployeurs = $item->getChargeEmployeurs();
+                $salaireTotal += $item->getSalary()->getBrutAmount();
+                foreach ($chargePersonals as $chargePersonal) {
+                    $totalChargePersonal += $chargePersonal->getAmountTotalChargePersonal();
+                }
+                foreach ($chargeEmployeurs as $chargeEmployeur) {
+                    $totalChargeEmployeur += $chargeEmployeur->getTotalChargeEmployeur();
+                }
+            }
+
+        }
+        return [
+            "nombre_personal" => $nbPersonal,
+            "global_salaire_brut" => $salaireTotal,
+            "global_charge_personal" => $totalChargePersonal,
+            "global_charge_employeur" => $totalChargeEmployeur
+        ];
     }
 
 }

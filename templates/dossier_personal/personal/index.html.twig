@@ -1,7 +1,15 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Liste du personnel salarié{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridPersonal {
+            height: 400px;
+            border-width: 50px;
 
+        }
+    </style>
+{% endblock %}
 {% block body %}
     <div class="row">
         <div class="col-12">
@@ -13,48 +21,497 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <table class="table table-bordered table-responsive table-sm" id="basic-datatable">
-                        <thead class="table-light">
-                        <tr>
-                            <th class="text-center">Catégorie</th>
-                            <th class="text-center">Matricule</th>
-                            <th class="text-center">Nom et prénom(s)</th>
-                            <th class="text-center">Sex</th>
-                            <th class="text-center">Date d'anniverssaire</th>
-                            <th class="text-center">Lieu de naissance</th>
-                            <th class="text-center">Postale</th>
-                            <th class="text-center">Téléphone</th>
-                            <th class="text-center">E-mail</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for perso in personals %}
-                            <tr>
-                                <td class="text-start">{{ perso.categorie }}</td>
-                                <td class="text-start">{{ perso.matricule }}</td>
-                                <td class="text-start">{{ perso.lastName }} {{ perso.firstName }}</td>
-                                <td class="text-start">{{ perso.genre }}</td>
-                                <td class="text-start">{{ perso.birthday|date('d-m-Y') }}</td>
-                                <td class="text-start">{{ perso.lieuNaissance }}</td>
-                                <td class="text-start">{{ perso.address }}</td>
-                                <td class="text-start">{{ perso.telephone }}</td>
-                                <td class="text-start">{{ perso.email }}</td>
-                                <td class="text-center">
-                                    <a href="{{ path('personal_show', {'uuid': perso.uuid}) }}">
-                                        <i data-feather="eye" class="me-2 feather"></i> </a>
-                                    <a href="{{ path('personal_edit', {'uuid': perso.uuid}) }}">
-                                        <i data-feather="edit" class="feather" style="color: yellow"></i></a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                    <div id="dataGridPersonal"></div>
                 </div>
                 <div class="card-footer">
-                    <a href="{{ path('personal_new') }}" class="btn btn-primary float-end">Nouveau</a>
+                    <a href="{{ path('personal_new') }}" class="btn btn-primary float-end"
+                       style="color: white">Nouveau</a>
                 </div>
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        $(document).ready(function () {
+            let debut;
+            let fin;
+            $("#dataGridPersonal").dxDataGrid({
+                dataSource: `{{ url('personal_salaried_book') }}`,
+                showBorders: true,
+                scrolling: {
+                    columnRenderingMode: 'virtual',
+                    height: 400,
+                    mode: "virtual"
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('Livre des salariés');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                            columnWidths: [55, 55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
+                            customizeCell: function (options) {
+                                const {gridCell, excelCell} = options;
+                                if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
+                                    excelCell.text = formatNumber(gridCell.value)
+                                    excelCell.font = {size: 9};
+                                    excelCell.alignment = {horizontal: 'left'};
+                                }
+                            }
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then(function (buffer) {
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Livre des salariés ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                columns: [
+                    {
+                        caption: 'INFORMATION DU SALARIE',
+                        alignment: 'center',
+                        columns: [
+                            {
+                                caption: 'Matricule',
+                                dataType: 'string',
+                                dataField: 'matricule',
+                                fixed: true,
+                                alignment: 'center',
+                                width: 120
+                            },
+                            {
+                                caption: 'Nom & Prenoms',
+                                dataType: 'string',
+                                dataField: 'full_name',
+                                fixed: true,
+                                alignment: 'left',
+                                width: 120
+                            },
+                            {
+                                caption: 'Genre',
+                                dataType: 'string',
+                                dataField: 'genre',
+                                alignment: 'left',
+                                width: 120
+                            },
+                            {
+                                caption: 'Date naissance',
+                                dataType: 'string',
+                                dataField: 'date_naissance',
+                                alignment: 'center',
+                                width: 120
+                            },
+                            {
+                                caption: 'Lieu naissance',
+                                dataType: 'string',
+                                dataField: 'lieu_naissance',
+                                alignment: 'left',
+                                width: 120
+                            },
+                            {
+                                caption: 'Référence CNPS',
+                                dataType: 'string',
+                                dataField: 'numero_cnps',
+                                alignment: 'center',
+                                width: 120
+                            },
+                            {
+                                caption: 'Nature Pièce',
+                                dataType: 'string',
+                                dataField: 'nature_piece',
+                                alignment: 'left',
+                                width: 120
+                            },
+                            {
+                                caption: 'N° Pièce',
+                                dataType: 'string',
+                                dataField: 'numero_piece',
+                                alignment: 'center',
+                                width: 120
+                            },
+                            {
+                                caption: 'Etat Civil',
+                                dataType: 'string',
+                                dataField: 'etat_civil',
+                                alignment: 'left',
+                                width: 120
+                            },
+                            {
+                                caption: 'Mode Paiement',
+                                dataType: 'string',
+                                dataField: 'mode_paiement',
+                                alignment: 'left',
+                                width: 120
+                            },
+                            {
+                                caption: 'Ancienneté',
+                                dataType: 'string',
+                                dataField: 'anciennete',
+                                alignment: 'center',
+                                width: 120
+                            },
+                        ]
+                    },
+                    {
+                        caption: 'COORDONNEES DU SALARIE',
+                        alignment: 'center',
+                        columns: [
+                            {
+                                caption: 'Adresse',
+                                dataType: 'string',
+                                dataField: 'adresse',
+                                alignment: 'left',
+                                width: 120
+                            },
+                            {
+                                caption: 'Téléphone',
+                                dataType: 'string',
+                                dataField: 'telephone',
+                                alignment: 'center',
+                                width: 120
+                            },
+                            {
+                                caption: 'Email',
+                                dataType: 'string',
+                                dataField: 'email',
+                                alignment: 'left',
+                                width: 120
+                            },
+                        ]
+                    },
+                    {
+                        caption: 'CATEGORIE SOCIO PROFESSIONNELLE',
+                        alignment: 'center',
+                        columns: [
+                            {
+                                caption: 'Catégorie Salarié',
+                                dataType: 'string',
+                                dataField: 'category',
+                                alignment: 'left',
+                                width: 120
+                            },
+                            {
+                                caption: 'Niveau D\'etude',
+                                dataType: 'string',
+                                dataField: 'niveau_formation',
+                                alignment: 'left',
+                                width: 120
+                            }
+                        ]
+                    },
+                    {
+                        caption: 'CONTRAT DU SALARIE',
+                        alignment: 'center',
+                        columns: [
+                            {
+                                caption: 'Type Contrat',
+                                dataType: 'string',
+                                dataField: 'type_contract',
+                                alignment: 'left',
+                                width: 120
+                            },
+                            {
+                                caption: 'Date d\'embauche',
+                                dataType: 'date',
+                                dataField: 'date_embauche',
+                                alignment: 'center',
+                                width: 120
+                            },
+                            {
+                                caption: 'Date d\'effet',
+                                dataType: 'date',
+                                dataField: 'date_effet',
+                                alignment: 'center',
+                                width: 120
+                            },
+                            {
+                                caption: 'Date fin',
+                                dataType: 'date',
+                                dataField: 'date_fin',
+                                alignment: 'center',
+                                width: 120
+                            },
+                            {
+                                caption: 'Temps Contractuel',
+                                dataType: 'string',
+                                dataField: 'temps_contractuel',
+                                alignment: 'left',
+                                width: 120
+                            },
+                        ]
+                    },
+                    {
+                        caption: 'SALAIRE',
+                        alignment: 'center',
+                        columns: [
+                            {
+                                caption: 'Salaire catégoriel',
+                                dataType: 'number',
+                                dataField: 'salaire_base',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Sursalaire',
+                                dataType: 'number',
+                                dataField: 'sursalaire',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Prime Transport',
+                                dataType: 'number',
+                                dataField: 'prime_transport',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Prime Fonction',
+                                dataType: 'number',
+                                dataField: 'prime_fonction',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Prime Logement',
+                                dataType: 'number',
+                                dataField: 'prime_logement',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Aventage Nature',
+                                dataType: 'string',
+                                dataField: 'aventage_nature',
+                                alignment: 'center',
+                                width: 120,
+                            },
+                            {
+                                caption: 'Montant Prime Nature Non Juridique',
+                                dataType: 'number',
+                                dataField: 'prime_non_juridique',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Salaire brut',
+                                dataType: 'number',
+                                dataField: 'salaire_brut',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Salaire Brut Imposable',
+                                dataType: 'number',
+                                dataField: 'salaire_imposable',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+
+                        ]
+                    },
+                    {
+                        caption: 'CHARGE SALARIE',
+                        alignment: 'center',
+                        columns: [
+                            {
+                                caption: 'Nombre Part',
+                                dataType: 'number',
+                                dataField: 'nombre_part',
+                                alignment: 'center',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                }
+                            },
+                            {
+                                caption: 'Montant ITS',
+                                dataType: 'number',
+                                dataField: 'montant_its',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                }
+                            },
+                            {
+                                caption: 'Montant CMU',
+                                dataType: 'number',
+                                dataField: 'montant_cmu',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                }
+                            },
+                            {
+                                caption: 'Montant CNPS',
+                                dataType: 'number',
+                                dataField: 'montant_cnps',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                }
+                            },
+                            {
+                                caption: 'Total Charge Salarié',
+                                dataType: 'number',
+                                dataField: 'total_charge_personal',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                }
+                            },
+                        ]
+                    },
+                    {
+                        caption: 'CHARGE EMPLOYEUR',
+                        alignment: 'center',
+                        columns: [
+                            {
+                                caption: 'Montant IS',
+                                dataType: 'number',
+                                dataField: 'montant_is',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Montant FDFP',
+                                dataType: 'number',
+                                dataField: 'montant_fdfp',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Caisse Retraite',
+                                dataType: 'number',
+                                dataField: 'montant_cr',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Prestation Familiale',
+                                dataType: 'number',
+                                dataField: 'montant_pf',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Accident Travail',
+                                dataType: 'number',
+                                dataField: 'montant_at',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Montant CMU',
+                                dataType: 'number',
+                                dataField: 'montant_emp_cmu',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Retenue CNPS',
+                                dataType: 'number',
+                                dataField: 'total_retenu_cnps',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Total Charge Employeur',
+                                dataType: 'number',
+                                dataField: 'total_charge_employeur',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            }
+                        ]
+                    }
+                ]
+            })
+        })
+    </script>
+
 {% endblock %}

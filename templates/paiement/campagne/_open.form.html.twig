@@ -30,13 +30,13 @@
             <tbody>
             <tr>
                 <td class="text-center">{{ campagne.lastCampagne.createdAt | date("d/m/Y") }}</td>
-                <td class="text-center">{{ campagne.lastCampagne.createdAt | date("H:m") }}</td>
+                <td class="text-center">{{ campagne.lastCampagne.createdAt | date("H:i") }}</td>
                 <td class="text-center">{{ campagne.lastCampagne.updatedAt | date("d/m/Y") }}</td>
-                <td class="text-center">{{ campagne.lastCampagne.updatedAt | date("H:m") }}</td>
-                <td class="text-center">{{ nombre_personal | number_format(0, ",", " ") }}</td>
-                <td class="text-end">{{ global_charge_personal | number_format(0, ",", " ") }}</td>
-                <td class="text-end">{{ global_charge_employeur | number_format(0, ",", " ") }}</td>
-                <td class="text-end">{{ global_salaire_brut | number_format(0, ",", " ") }}</td>
+                <td class="text-center">{{ campagne.lastCampagne.updatedAt | date("H:i") }}</td>
+                <td class="text-center">{{ lastCampagne.nombre_personal | number_format(0, ",", " ") }}</td>
+                <td class="text-end">{{ lastCampagne.global_charge_personal | number_format(0, ",", " ") }}</td>
+                <td class="text-end">{{ lastCampagne.global_charge_employeur | number_format(0, ",", " ") }}</td>
+                <td class="text-end">{{ lastCampagne.global_salaire_brut | number_format(0, ",", " ") }}</td>
             </tr>
             </tbody>
         </table>
