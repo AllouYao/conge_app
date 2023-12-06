@@ -68,6 +68,8 @@ class PersonalRepository extends ServiceEntityRepository
             ->select([
                 'category.intitule as categorie_intitule',
                 'categorie_salary.name as categorie_name',
+                'p.id',
+                'p.uuid',
                 'p.matricule as matricule',
                 'p.firstName as personal_name',
                 'p.lastName as personal_prenoms',
@@ -115,6 +117,10 @@ class PersonalRepository extends ServiceEntityRepository
                 'charge_employeurs.amountCMU as charge_employeur_cmu',
                 'charge_employeurs.totalRetenuCNPS as total_retenu_cnps',
                 'charge_employeurs.totalChargeEmployeur as total_charge_employeur',
+                'account_banks.bankId as name_banque',
+                'account_banks.code as code_banque',
+                'account_banks.numCompte as numero_compte',
+                'account_banks.rib as rib',
             ])
             ->leftJoin('p.categorie', 'category')
             ->leftJoin('p.contract', 'contract')

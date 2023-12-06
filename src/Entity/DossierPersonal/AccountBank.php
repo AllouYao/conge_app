@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 class AccountBank
 {
     use Horodatage;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -95,5 +96,10 @@ class AccountBank
         $this->personal = $personal;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->code . ' ' . $this->numCompte . ' ' . $this->rib;
     }
 }
