@@ -1,4 +1,4 @@
-{% extends 'imprimer.html.twig' %}
+{% extends 'imprimerLivrePaie.html.twig' %}
 
 {% block title 'Fiche information salarié' %}
 
@@ -9,10 +9,7 @@
             <div class="widget">
                 <div class="widget-content">
                     <div class="row">
-                        <div class="col-md-12"></div>
-                        <br><br>
-
-                        <div class="col-md-12 mb-4" style="border: 2px double silver; padding: 20px; border-radius: 5px"
+                        <div class="col-md-12 mb-3" style="border: 2px double silver; padding: 10px; border-radius: 5px"
                              id="header">
                             <h4 class="text-center"><strong>FICHE D'INFORMATION SALARIE </strong></h4>
                         </div>
@@ -21,7 +18,7 @@
                         <div class="card mb-4">
                             <div class="card-body">
                                 <div class="col-md-12 row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-6 left">
                                         <p>
                                             <span class="h5 text-center">N° Ordre : </span> <span class="h5"
                                                                                                   style="margin-left: 10px">{{ index }}</span><br><br>
@@ -33,24 +30,24 @@
                                                     class="h5"
                                                     style="margin-left: 10px">{{ personals.birthday|date('d/m/y') }}</span><br><br>
                                             <span class="h5 text-center">Fonction : </span> <span class="h5"
-                                                                                                  style="margin-left: 10px">{{ 'Aucune information' }}</span><br><br>
+                                                                                                  style="margin-left: 10px">{{ '' }}</span><br><br>
                                             <span class="h5 text-center">Département ou service : </span> <span
                                                     class="h5"
-                                                    style="margin-left: 10px">{{ 'Aucune information' }}</span><br><br>
+                                                    style="margin-left: 10px">{{ '' }}</span><br><br>
                                             <span class="h5 text-center">Diplôme : </span> <span class="h5"
                                                                                                  style="margin-left: 10px">{{ personals.niveauFormation|upper }}</span><br><br>
                                             <span class="h5 text-center">Compte banque : </span> <span class="h5"
                                                                                                        style="margin-left: 10px">{{ accountBanque|upper }}</span><br><br>
                                             <span class="h5 text-center">Nom banque : </span> <span class="h5"
-                                                                                                    style="margin-left: 10px">{{ 'Aucune information' }}</span><br><br>
+                                                                                                    style="margin-left: 10px">{{ '' }}</span><br><br>
                                             <span class="h5 text-center">Grade catégoriel : </span> <span class="h5"
                                                                                                           style="margin-left: 10px">{{ personals.categorie.intitule }}</span><br><br>
                                             <span class="h5 text-center">Taux horaire : </span> <span class="h5"
-                                                                                                      style="margin-left: 10px">{{ 'Aucune information' }}</span><br><br>
+                                                                                                      style="margin-left: 10px">{{ '' }}</span><br><br>
                                         </p>
                                     </div>
-                                    <div class="col-md-6">
-                                        <p>
+                                    <div class="col-md-6 right ">
+                                        <p style="margin-left: 25%">
                                             <span class="h5 text-center">Matricule : </span> <span class="h5" style="margin-left: 10px">{{ personals.matricule }}</span><br><br>
                                             <span class="h5 text-center">Ancienneté (en année) : </span> <span class="h5" style="margin-left: 10px">{{ anciennete }}</span><br><br>
                                             <span class="h5 text-center">Age (en année) : </span> <span class="h5" style="margin-left: 10px">{{ age }}</span><br><br>
@@ -65,7 +62,56 @@
                                         </p>
                                     </div>
                                 </div>
+                                <table class="table table-bordered table-responsive table-sm">
+                                    <tr>
+                                        <td>Salaire de base</td>
+                                        <td class="text-end">{{ personals.salary.baseAmount|number_format(0, ',', ' ')  }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Prime de panier</td>
+                                        <td class="text-end">{{ primePanier.amountPrime ?? '' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Prime de salissure</td>
+                                        <td class="text-end">{{ primeSalissure.amountPrime ?? ''  }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Prime de tenue de travail</td>
+                                        <td class="text-end">{{ primeTT.amountPrime ?? '' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Prime outillage</td>
+                                        <td class="text-end">{{ primeOutil.amountPrime ?? ''   }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Prime de transport</td>
+                                        <td class="text-end">{{ personals.salary.primeTransport|number_format(0, ',', ' ')  }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Prime de fonction</td>
+                                        <td  class="text-end">{{ personals.salary.primeFonction|number_format(0, ',', ' ')   }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Prime de logement</td>
+                                        <td class="text-end">{{ personals.salary.primeLogement|number_format(0, ',', ' ')  }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Avantage en nature</td>
+                                        <td class="text-end">{{ personals.salary.avantage.totalAvantage|number_format(0, ',', ' ')  }}</td>
+                                    </tr>
+                                    <tr>
+                                        {% set amountTT = personals.salary.baseAmount + primePanier.amountPrime ?? 0 +
+                                            primeSalissure.amountPrime ?? 0 + primeTT.amountPrime ?? 0 + primeOutil.amountPrime ?? 0 + personals.salary.primeTransport +
+                                            personals.salary.primeFonction + personals.salary.primeLogement +
+                                            personals.salary.avantage.totalAvantage
+                                        %}
+                                        <th>TOTAL</th>
+                                        <td class="text-end">{{ amountTT|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                </table>
+
                             </div>
+                        </div>
                         </div>
                     </div>
                 </div>

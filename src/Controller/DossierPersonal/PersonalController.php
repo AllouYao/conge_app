@@ -7,10 +7,13 @@ use App\Entity\DossierPersonal\Contract;
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\DossierPersonal\Salary;
 use App\Form\DossierPersonal\PersonalType;
+use App\Repository\DossierPersonal\DetailSalaryRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\Impots\ChargeEmployeurRepository;
 use App\Repository\Impots\ChargePersonalsRepository;
+use App\Repository\Settings\PrimesRepository;
 use App\Service\SalaryImpotsService;
+use App\Utils\Status;
 use Doctrine\DBAL\Types\DateTimeType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -30,7 +33,11 @@ class PersonalController extends AbstractController
     }
 
     #[Route('/{uuid}/print', name: 'print_salary_info', methods: ['GET'])]
-    public function print(Personal $personal): Response
+    public function print(
+        Personal $personal,
+        DetailSalaryRepository $detailSalaryRepository,
+        PrimesRepository       $primesRepository
+    ): Response
     {
         $accountNumber  = null;
         $accountBanque = $personal->getAccountBanks();
@@ -49,6 +56,15 @@ class PersonalController extends AbstractController
 
         $numberEnfant = $personal->getChargePeople()->count();
 
+        $primePanier = $primesRepository->findOneBy(['code' => Status::PRIME_PANIER]);
+        $primeSalissure = $primesRepository->findOneBy(['code' => Status::PRIME_SALISSURE]);
+        $primeTT = $primesRepository->findOneBy(['code' => Status::PRIME_TENUE_TRAVAIL]);
+        $primeOutil = $primesRepository->findOneBy(['code' => Status::PRIME_OUTILLAGE]);
+
+        $amountPanier = $detailSalaryRepository->findPrimeBySalary($personal,$primePanier);
+        $amountSalissure = $detailSalaryRepository->findPrimeBySalary($personal,$primeSalissure);
+        $amountTT = $detailSalaryRepository->findPrimeBySalary($personal,$primeTT);
+        $amountOutil = $detailSalaryRepository->findPrimeBySalary($personal,$primeOutil);
 
         return $this->render('dossier_personal/personal/print.html.twig', [
             'personals' => $personal,
@@ -57,7 +73,11 @@ class PersonalController extends AbstractController
             'anciennete' => $anciennete,
             'age' => $age,
             'dureeContrat' => $dureeContrat,
-            'nombreEnfant' => $numberEnfant
+            'nombreEnfant' => $numberEnfant,
+            'primePanier' => $amountPanier,
+            'primeSalissure' => $amountSalissure,
+            'primeTT' => $amountTT,
+            'primeOutil' => $amountOutil
         ]);
     }
 

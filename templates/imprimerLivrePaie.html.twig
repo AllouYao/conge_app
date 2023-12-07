@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <title>Impression {% block title %}de document {% endblock %}</title>
+    <!--=== CSS ===-->
+    {{ encore_entry_link_tags('app') }}
+    <link rel="stylesheet" href="//pro.fontawesome.com/releases/v5.10.0/css/all.css"
+          integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+    {% block stylesheets %}
+        <style>
+            table {
+                border: solid #808080 !important;
+                border-width: 1px 0 0 1px !important;
+            }
+
+            tr, td {
+                font-size: 0.8000rem;
+                font-weight: bold;
+            }
+
+            tr, td {
+                border: solid #808080 !important;
+                border-width: 0 1px 1px 0 !important;
+            }
+            p {
+                font-size: 0.5000rem;
+            }
+
+        </style>
+    {% endblock %}
+</head>
+<body>
+<div class="container">
+    <!--=== Page Content ===-->
+    {% block content %}
+
+    {% endblock %}
+</div>
+<style>
+    @media print {
+        .right {
+            float: right;
+        }
+
+        .btn-print {
+            display: none;
+        }
+
+        .btn-back {
+            display: none;
+        }
+        p {
+            font-size: 0.0100rem;
+        }
+        td {
+            font-size: 0.8300rem;
+            font-weight: bold;
+        }
+    }
+</style>
+</body>
+</html>
+
+

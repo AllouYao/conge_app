@@ -3,6 +3,8 @@
 namespace App\Repository\DossierPersonal;
 
 use App\Entity\DossierPersonal\DetailSalary;
+use App\Entity\DossierPersonal\Personal;
+use App\Entity\Settings\Primes;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -19,6 +21,21 @@ class DetailSalaryRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, DetailSalary::class);
+    }
+
+    public function findPrimeBySalary(Personal $personal,Primes $primes)
+    {
+        $qb = $this->createQueryBuilder('d');
+        $qb
+            ->select('d.amountPrime')
+            ->join('d.salary','salary')
+            ->where('salary.personal =:personal')
+            ->andWhere('d.prime =:prime')
+            ->setParameters([
+                'personal' => $personal,
+                'prime' => $primes
+            ]);
+        return $qb->getQuery()->getOneOrNullResult();
     }
 
 //    /**

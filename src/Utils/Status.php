@@ -64,4 +64,15 @@ final class Status
      */
     public const TEMPS_PLEIN = 'TEMPS PlEIN';
     public const TEMPS_PARTIEL = 'TEMPS_PARTIEL';
+
+    /**
+     * Prime non juridique
+     */
+    public const PRIME_PANIER = 'PRIME_PANIER';
+
+    public const PRIME_SALISSURE = 'PRIME_SALISSURE';
+
+    public const PRIME_TENUE_TRAVAIL = 'PRIME_TENUE_TRAVAIL';
+
+    public const PRIME_OUTILLAGE = 'PRIME_OUTILLAGE';
 }
