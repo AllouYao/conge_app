@@ -62,6 +62,17 @@ class PersonalRepository extends ServiceEntityRepository
     /**
      * @return Personal[] Returns an array of Personal objects
      */
+    public function findAllWomanPersonal(): array
+    {
+        $qb = $this->createQueryBuilder('p')->where('p.genre = FEMININ')->getQuery()->getResult();
+        return array_map(function ($result) {
+            return $result;
+        }, $qb);
+    }
+
+    /**
+     * @return Personal[] Returns an array of Personal objects
+     */
     public function findPersonalSalaried(): array
     {
         return $this->createQueryBuilder('p')

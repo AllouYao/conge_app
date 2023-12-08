@@ -75,4 +75,10 @@ final class Status
     public const PRIME_TENUE_TRAVAIL = 'PRIME_TENUE_TRAVAIL';
 
     public const PRIME_OUTILLAGE = 'PRIME_OUTILLAGE';
+
+    /**
+     * Type Congés
+     */
+    public const CONGE_GLOBAL = 'CONGES_GLOBAL';
+    public const CONGE_MATERNITY = 'CONGE_MATERNITY';
 }

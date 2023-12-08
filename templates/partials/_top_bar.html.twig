@@ -114,6 +114,29 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Congés & Absence
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <div class="dropdown">
+                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                           aria-expanded="false">
+                                            Planifier congés
+                                            <div class="arrow-down"></div>
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                            <a href="{{ path('conge_new') }}"
+                                               class="dropdown-item">Créer</a>
+                                            <a href="{{ path('conge_index') }}"
+                                               class="dropdown-item">Liste congés planifiés</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
@@ -137,7 +160,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </li>
                 </ul> <!-- end navbar-->
             </div> <!-- end .collapsed-->

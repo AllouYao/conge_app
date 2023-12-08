@@ -115,6 +115,9 @@ class Personal
     #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Payroll::class)]
     private Collection $payrolls;
 
+    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Conge::class)]
+    private Collection $conges;
+
     public function __construct()
     {
         $this->chargePeople = new ArrayCollection();
@@ -123,6 +126,7 @@ class Personal
         $this->chargeEmployeurs = new ArrayCollection();
         $this->campagnes = new ArrayCollection();
         $this->payrolls = new ArrayCollection();
+        $this->conges = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -608,6 +612,36 @@ class Personal
             // set the owning side to null (unless already changed)
             if ($payroll->getPersonal() === $this) {
                 $payroll->setPersonal(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Conge>
+     */
+    public function getConges(): Collection
+    {
+        return $this->conges;
+    }
+
+    public function addConge(Conge $conge): static
+    {
+        if (!$this->conges->contains($conge)) {
+            $this->conges->add($conge);
+            $conge->setPersonal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConge(Conge $conge): static
+    {
+        if ($this->conges->removeElement($conge)) {
+            // set the owning side to null (unless already changed)
+            if ($conge->getPersonal() === $this) {
+                $conge->setPersonal(null);
             }
         }
 

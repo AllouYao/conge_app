@@ -29,16 +29,31 @@ let depart = () => {
     $('#depart_hireDate').val(hireDate);
     $('#depart_category').val(category);
 }
-$('body').on('change', '#charge_personal, #account_personal, #depart_personal', function () {
+
+let conge = () => {
+    const selectedOption = $("#conge_personal :selected");
+    const name = selectedOption.attr('data-name');
+    const hireDate = selectedOption.attr('data-hireDate');
+    const category = selectedOption.attr('data-category');
+
+    $('#conge_name').val(name);
+    $('#conge_hireDate').val(hireDate);
+    $('#conge_category').val(category);
+}
+
+$('body').on('change', '#charge_personal, #account_personal, #depart_personal, #conge_personal', function () {
     if ($(this).attr('id') === 'charge_personal') {
         chargePeople();
     } else if ($(this).attr('id') === 'account_personal') {
         accountPersonal();
     } else if ($(this).attr('id') === 'depart_personal') {
         depart();
+    } else if ($(this).attr('id') === 'conge_personal') {
+        conge();
     }
 });
 
 chargePeople();
 accountPersonal();
 depart();
+conge();
