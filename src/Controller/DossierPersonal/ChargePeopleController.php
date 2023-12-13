@@ -55,8 +55,8 @@ class ChargePeopleController extends AbstractController
 
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(
-        Request                $request,
-        Personal               $personal,
+        Request $request,
+        Personal $personal,
         EntityManagerInterface $manager,
         SalaryImpotsService    $salary
     ): Response

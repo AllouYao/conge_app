@@ -23,24 +23,24 @@
 </fieldset>
 <br>
 <fieldset>
-    <legend>Information enfant à charge</legend>
+    <legend>Information heure suplementaire</legend>
     <div class="row">
         <div class="col-md-12 table-responsive">
             <table class="table table-bordered table-sm table-responsive-sm">
                 <thead class="table-secondary">
                 <tr>
-                    <th class="text-center">Nom</th>
-                    <th class="text-center">Prénom (s)</th>
-                    <th class="text-center">Date naissance</th>
-                    <th class="text-center">Genre</th>
-                    <th class="text-center">N° Extrait</th>
-                    <th class="text-center">Contact</th>
+                    <th class="text-center">Jour/Nuit</th>
+                    <th class="text-center">Normal/Dimanche/Férié</th>
+                    <th class="text-center">Date début</th>
+                    <th class="text-center">Heure début</th>
+                    <th class="text-center">Date fin</th>
+                    <th class="text-center">Heure fin</th>
                     <th class="text-center">Action</th>
                 </tr>
                 </thead>
-                {% form_theme form 'dossier_personal/charge_people/_collection_charge_people.html.twig' %}
-                <tbody id="detail_personal_charge_people_table">
-                    {{ form_widget(form.chargePeople) }}
+                {% form_theme form 'dossier_personal/heure_sup/_collection_heure_sup.html.twig' %}
+                <tbody id="detail_heure_sup_table">
+                    {{ form_widget(form.heureSup) }}
                 </tbody>
             </table>
         </div>

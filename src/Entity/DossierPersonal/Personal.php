@@ -2,6 +2,7 @@
 
 namespace App\Entity\DossierPersonal;
 
+use App\Entity\DossierPersonal\HeureSup;
 use App\Entity\Impots\ChargeEmployeur;
 use App\Entity\Impots\ChargePersonals;
 use App\Entity\Paiement\Campagne;
@@ -118,6 +119,9 @@ class Personal
     #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Conge::class)]
     private Collection $conges;
 
+    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: HeureSup::class)]
+    private Collection $heureSups;
+
     public function __construct()
     {
         $this->chargePeople = new ArrayCollection();
@@ -127,6 +131,7 @@ class Personal
         $this->campagnes = new ArrayCollection();
         $this->payrolls = new ArrayCollection();
         $this->conges = new ArrayCollection();
+        $this->heureSups = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -642,6 +647,36 @@ class Personal
             // set the owning side to null (unless already changed)
             if ($conge->getPersonal() === $this) {
                 $conge->setPersonal(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HeureSup>
+     */
+    public function getHeureSups(): Collection
+    {
+        return $this->heureSups;
+    }
+
+    public function addHeureSup(HeureSup $heureSup): static
+    {
+        if (!$this->heureSups->contains($heureSup)) {
+            $this->heureSups->add($heureSup);
+            $heureSup->setPersonal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHeureSup(HeureSup $heureSup): static
+    {
+        if ($this->heureSups->removeElement($heureSup)) {
+            // set the owning side to null (unless already changed)
+            if ($heureSup->getPersonal() === $this) {
+                $heureSup->setPersonal(null);
             }
         }
 

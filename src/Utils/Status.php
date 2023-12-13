@@ -81,4 +81,31 @@ final class Status
      */
     public const CONGE_GLOBAL = 'CONGES_GLOBAL';
     public const CONGE_MATERNITY = 'CONGE_MATERNITY';
+
+    /**
+     * Salaire horraire
+     */
+
+    public const SALAIRE_HORRAIRE_CATEGORIEL = 75000/173.33;
+
+    /**
+     * Taux horraire
+     */
+    
+    public const TAUX_JOUR_OUVRABLE = (15/100);
+    public const TAUX_JOUR_OUVRABLE_EXTRA = (50/100);
+    public const TAUX_NUIT_OUVRABLE_OR_NON_OUVRABLE = (75/100); 
+    public const TAUX_NUIT_NON_OUVRABLE = (100 / 100);
+
+
+    /**
+     * Jour
+     */
+    public const JOUR = "JOUR";
+    public const NUIT = "NUIT";
+    public const NORMAL = "NORMAL";
+    public const DIMANCHE_FERIE = "DIMANCHE/FÉRIÉ";
+
+
+    
 }

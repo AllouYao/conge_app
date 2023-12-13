@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste du personnel salarié{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        Liste des heures suplementaire
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-responsive table-sm" id="basic-datatable">
+                        <thead class="table-light">
+                        <tr>
+                            <th class="text-center">Matricule</th>
+                            <th class="text-center">Nom</th>
+                            <th class="text-center">Prénom(s)</th>
+                            <th class="text-center">Date de naissance</th>
+                            <th class="text-center">Catégorie</th>
+                            <th class="text-center">Date d'embauche</th>
+                            <th class="text-center">Date début</th>
+                            <th class="text-center">Heure début</th>
+                            <th class="text-center">Date fin</th>
+                            <th class="text-center">Heure fin</th>
+                            <th class="text-center">Total horraire</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for heureSup in heureSups %}
+                            <tr>
+                                <td class="text-right">{{ heureSup.personal.matricule }}</td>
+                                <td class="text-left">{{ heureSup.personal.firstName }}</td>
+                                <td class="text-left">{{ heureSup.personal.lastName }}</td>
+                                <td class="text-center">{{ heureSup.personal.birthday ? heureSup.personal.birthday|date('d/m/Y') : '' }}</td>
+                                <td class="text-left">{{ heureSup.personal.categorie.intitule }}</td>
+                                <td class="text-center">{{ heureSup.personal.contract.dateEmbauche ? heureSup.personal.contract.dateEmbauche|date('d/m/Y') : '' }}</td>
+                                <td class="text-center">{{ heureSup.startedDate ? heureSup.startedDate|date('d/m/Y') : '' }}</td>
+                                <td class="text-center">{{ heureSup.startedHour ? heureSup.startedHour|date('H:i') : '' }}</td>
+                                <td class="text-center">{{ heureSup.endedDate ? heureSup.endedDate|date('d/m/Y') : '' }}</td>
+                                <td class="text-center">{{ heureSup.endedHour ? heureSup.endedHour|date('H:i') : '' }}</td>
+                                <td class="text-center">{{ heureSup.getTotalHorraire()}}</td>
+                                <td class="text-center">
+                                    <a href="{{ path('personal_heure_sup_edit', {'uuid': heureSup.personal.uuid}) }}">
+                                        <i data-feather="edit" class="feather" style="color: yellow"></i></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('personal_heure_sup_new') }}" class="btn btn-primary float-end" style="color: white">Nouveau</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
