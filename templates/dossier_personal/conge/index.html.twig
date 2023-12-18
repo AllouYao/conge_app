@@ -179,17 +179,17 @@
                         width: 120
                     },
                     {
-                        dataField: 'action',
-                        caption: 'Action',
+                        dataField: 'modifier',
+                        caption: 'Modifier',
                         alignment: 'center',
                         cellTemplate: function (container, options) {
                             $("<a>")
-                                .html('<i data-feather="edit"></i>')
-                                .attr("href", options.data.action)
+                                .html('<i data-feather="edit" style="color: yellow"></i>')
+                                .attr("href", options.data.modifier)
                                 .attr("target", '_blank')
                                 .appendTo(container);
                             feather.replace();
-                        }
+                        },
                     },
                 ],
             })

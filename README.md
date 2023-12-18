@@ -1,26 +1,17 @@
--- Ajout de phpFlasher
-
-- Mise en place de l'enregistrement d'une catégorie.
-- Mise en place de l'enregistrement d'une prime.
-- Mise en place du dossier de personnel.
-
-
-let getPrimeCoefficient = () => {
-$('body').on('change', '.prime-salary', function () {
-const parentId = $(this).parent().parent().attr('data-id');
-const $prime = +$(`#${parentId}_prime option:selected`).attr('data-taux');
-const coefficient = $(`#${parentId}_taux`);
-const primes = $(`#${parentId}_prime`).val()
-console.log(primes)
-if (primes.length > 0) {
-coefficient.val($prime);
-const $smig = +$('#personal_salary_smig').val();
-$horaire = $smig / 173.33;
-$(`#${parentId}_smigHoraire`).val($horaire);
-} else {
-$(`#${parentId}_smigHoraire`).val(' ');
-coefficient.val(' ');
-}
-calculateSmigHoraire(parentId)
-})
-}
+$conges = $this->congeRepository->getLastConge($p);
+$primeAnciennete = (int)$this->etatService->getPrimeAnciennete($p);
+$autrePrime = (int)$p->getSalary()->getTotalPrimeJuridique();
+$amountHeureSupp = (int)$this->heureSupService->getAmountHeursSupp($p);
+$gratification = $this->etatService->getGratification($p);
+$etatSalaire = $this->payrollRepository->findEtatSalaire($startMonth, $endMonth, $personalId);
+$allocationConger = (int)$conges?->getAllocationConge();
+$salaireBrut = $p->getSalary()->getBrutAmount() + $primeAnciennete + $amountHeureSupp + $gratification + $allocationConger;
+$netImposable = $p->getSalary()->getBrutImposable() + $primeAnciennete + $amountHeureSupp + $gratification + $allocationConger;
+$retenueCNPS = ceil(($netImposable * 7.7) / 100);
+$itsPatronal = ceil(($netImposable * 1.2) / 100);
+$tfc = ceil(($netImposable * 0.6) / 100);
+$tauxApprentissage = ceil(($netImposable * 0.4) / 100);
+$accidentTravail = ceil(($netImposable * 2) / 100);
+$prestationTravail = ceil(($netImposable * 5.75) / 100);
+$totalRetenue = $retenueCNPS + $itsPatronal + $tauxApprentissage + $tfc + $accidentTravail + $prestationTravail;
+$netSalary = $salaireBrut - $totalRetenue;

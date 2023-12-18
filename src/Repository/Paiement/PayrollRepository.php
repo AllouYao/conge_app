@@ -2,9 +2,13 @@
 
 namespace App\Repository\Paiement;
 
+use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Payroll;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
+use function Doctrine\ORM\QueryBuilder;
 
 /**
  * @extends ServiceEntityRepository<Payroll>
@@ -20,31 +24,6 @@ class PayrollRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Payroll::class);
     }
-
-//    /**
-//     * @return Payroll[] Returns an array of Payroll objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('p.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?Payroll
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
 
     public function findPayrollByCampaign(bool $campagne): array
     {
@@ -76,7 +55,7 @@ class PayrollRepository extends ServiceEntityRepository
                 'pr.employeurSante as employeur_assurance',
                 'pr.fixcalAmountEmployeur as fixcal_amount_employeur',
                 'pr.masseSalary as masse_salary',
-                'c.createdAt as debut'
+                'c.startedAt as debut'
             ])
             ->join('pr.personal', 'p')
             ->join('p.categorie', 'cy')
@@ -86,4 +65,83 @@ class PayrollRepository extends ServiceEntityRepository
             ->getQuery()->getResult();
     }
 
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
+    public function getTotalSalarie(Personal $personal, mixed $start, mixed $end): float|int|null
+    {
+        return $this->createQueryBuilder('pr')
+            ->select('SUM(pr.brutAmount - pr.salaryTransport) as amount_moyen')
+            ->where('pr.personal = :pr_personal')
+            ->andWhere('pr.createdAt >= :start_date')
+            ->andWhere('pr.createdAt <= :end_date')
+            ->setParameter('pr_personal', $personal)
+            ->setParameter('start_date', $start)
+            ->setParameter('end_date', $end)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function findEtatSalaire(mixed $mouth1, mixed $mouth2, ?int $personalId): array
+    {
+        $qb = $this->createQueryBuilder('payroll');
+        $qb
+            ->select([
+                'personal.id as personal_id',
+                'personal.firstName',
+                'personal.lastName',
+                'personal.matricule',
+                'personal.refCNPS',
+                'YEAR(personal.birthday) as personal_birthday',
+                'contract.dateEmbauche as embauche',
+                'salary.totalPrimeJuridique as prime_juridique',
+                'salary.primeLogement as aventage_nature_imposable',
+                'contract.dateEmbauche',
+                'payroll.baseAmount',
+                'payroll.brutAmount',
+                'payroll.salaryCnps',
+                'payroll.imposableAmount',
+                'payroll.salaryIts',
+                'payroll.salaryCmu',
+                'payroll.salarySante',
+                'payroll.numberPart',
+                'payroll.createdAt'
+            ])
+            ->join('payroll.campagne', 'campagnes')
+            ->join('payroll.personal', 'personal')
+            ->leftJoin('personal.salary', 'salary')
+            ->leftJoin('personal.contract', 'contract')
+            ->where('campagnes.active = false')
+            ->andWhere('payroll.createdAt BETWEEN ?1 and ?2');
+        $qb->setParameters(['1' => $mouth1, '2' => $mouth2]);
+        if ($personalId) {
+            $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
+        }
+        return $qb->getQuery()->getResult();
+    }
+
+
+    public function findCnps(): array
+    {
+        $qb = $this->createQueryBuilder('payroll');
+        $qb
+            ->select([
+                'personal.id as personal_id',
+                'personal.firstName',
+                'personal.lastName',
+                'personal.matricule',
+                'personal.refCNPS',
+                'YEAR(personal.birthday) as personal_birthday',
+                'contract.dateEmbauche as embauche',
+                'payroll.imposableAmount',
+            ])
+            ->join('payroll.campagne', 'campagnes')
+            ->join('payroll.personal', 'personal')
+            ->leftJoin('personal.contract', 'contract')
+            ->where('campagnes.active = false');
+        return $qb->getQuery()->getResult();
+    }
 }
+

@@ -2,16 +2,18 @@
 
 namespace App\Controller\DossierPersonal;
 
-use App\Entity\DossierPersonal\HeureSup;
 use App\Entity\DossierPersonal\Personal;
-use App\Form\DossierPersonal\HeureSupType;
 use App\Form\DossierPersonal\PersonalHeureSupType;
 use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Service\HeureSupService;
+use App\Utils\Status;
+use Carbon\Carbon;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -26,17 +28,101 @@ class HeureSupController extends AbstractController
     private $heureSupRepository;
 
 
-    public function __construct(EntityManagerInterface $entityManager, HeureSupService $heureSupService, PersonalRepository $personalRepository, HeureSupRepository $heureSupRepository )
+    public function __construct(EntityManagerInterface $entityManager, HeureSupService $heureSupService, PersonalRepository $personalRepository, HeureSupRepository $heureSupRepository)
     {
         $this->entityManager = $entityManager;
         $this->heureSupService = $heureSupService;
         $this->personalRepository = $personalRepository;
         $this->heureSupRepository = $heureSupRepository;
-
-
-
     }
-    #[Route('/', name: 'index')]
+
+    #[Route('/api/heure_supp', name: 'api_heure_supp', methods: ['GET'])]
+    public function apiHeureSupp(): JsonResponse
+    {
+        $heure_15 = 0;
+        $heure_50 = 0;
+        $heure_75_jour = 0;
+        $heure_75_nuit = 0;
+        $heure_100 = 0;
+        $totalHeure = 0;
+        $index = 0;
+        $jourNormalOrFerie = null;
+        $jourOrNuit = null;
+        $amountHoraire = null;
+
+        $today = Carbon::now();
+        $years = $today->year;
+        $month = $today->month;
+        $personals = $this->personalRepository->findAllPersonal();
+
+        $apiHeureSupp = [];
+        foreach ($personals as $personal) {
+            $heureSupp = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
+            if ($heureSupp) {
+                foreach ($heureSupp as $item) {
+                    $fullnamePersonal = $personal->getFirstName() . ' ' . $personal->getLastName();
+                    $personalSalaireBase = $personal->getCategorie()->getAmount();
+                    $statut = $personal->getContract()->getTempsContractuel() === Status::TEMPS_PLEIN ? 'PERMANENT' : 'VACATAIRES';
+                    $tauxHoraire = ceil($personalSalaireBase / Status::TAUX_HEURE);
+                    $heure = (int)$item->getTotalHorraire();
+                    $jourNormalOrFerie = $item->getTypeDay();
+                    $jourOrNuit = $item->getTypeJourOrNuit();
+                    $totalHeure += (int)$item->getTotalHorraire();
+                    if ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure <= 6) {
+                        $heure_15 += $heure;
+                    } elseif ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure > 6) {
+                        $heure_50 += $heure;
+                    } elseif ($jourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
+                        $heure_75_jour += $heure;
+                    } elseif (($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::NUIT)) {
+                        $heure_75_nuit += $heure;
+                    } elseif ($jourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::NUIT) {
+                        $heure_100 += $heure;
+                    }
+                    $amountHoraire = $this->heureSupService->getAmountHeursSupp($personal);
+
+                }
+
+                $apiHeureSupp[] = [
+                    'index' => ++$index,
+                    'full_name' => $fullnamePersonal,
+                    'heure_normal' => 40,
+                    'total_heure' => $totalHeure,
+                    'typeDay' => $jourNormalOrFerie,
+                    'typeJour' => $jourOrNuit,
+                    'heure_15_%' => $heure_15,
+                    'heure_50_%' => $heure_50,
+                    'heure_75_%_jour' => $heure_75_jour,
+                    'heure_75_%_nuit' => $heure_75_nuit,
+                    'heure_100_%_nuit' => $heure_100,
+                    'taux_horaire' => $tauxHoraire,
+                    'montant_heure_supp' => $amountHoraire,
+                    'status' => $statut,
+                ];
+
+                $heure_15 = 0;
+                $heure_50 = 0;
+                $heure_75_jour = 0;
+                $heure_75_nuit = 0;
+                $heure_100 = 0;
+                $totalHeure = 0;
+                $jourNormalOrFerie = null;
+                $jourOrNuit = null;
+                $amountHoraire = null;
+            }
+        }
+        return new JsonResponse($apiHeureSupp);
+    }
+
+    #[Route('/supp_book', name: 'supp_book', methods: ['GET'])]
+    public function heureSuppBook(): Response
+    {
+        return $this->render('dossier_personal/heure_sup/sup_book.html.twig', [
+            'heureSups' => $this->heureSupRepository->findAll(),
+        ]);
+    }
+
+    #[Route('/', name: 'index', methods: ['GET'])]
     public function index(): Response
     {
         return $this->render('dossier_personal/heure_sup/index.html.twig', [
@@ -44,30 +130,32 @@ class HeureSupController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request,): Response {
+    public function new(Request $request,): Response
+    {
 
-        $heureSup = new HeureSup();
-        
         $form = $this->createForm(PersonalHeureSupType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $PersonalHeureSup = $form->get('heureSup')->getData();
             $personal = $form->get('personal')->getData();
-            
+
             foreach ($PersonalHeureSup as $heureSup) {
-                
+
                 // Heure debut
                 $StartedfullDate = $heureSup->getStartedDate();
                 $StartedfullTime = $heureSup->getStartedHour();
-                
+
                 $startedDate = $StartedfullDate->format('Y-m-d');
                 $startedHour = $StartedfullTime->format('H:i:s');
-                
-                $fullNewDateTime = $startedDate.''. $startedHour;
-                
+
+                $fullNewDateTime = $startedDate . '' . $startedHour;
+
                 $newFullDate = new DateTime($fullNewDateTime);
-                
+
                 $heureSup->setStartedHour($newFullDate);
 
                 // Heure fin
@@ -82,38 +170,35 @@ class HeureSupController extends AbstractController
                 $newFullDate = new DateTime($fullNewDateTime);
 
                 $heureSup->setEndedHour($newFullDate);
-                
-                
+
+
                 $heureSup->setPersonal($personal);
                 $this->entityManager->persist($heureSup);
             }
-            
             $this->entityManager->persist($personal);
-            
+
             $this->entityManager->flush();
             flash()->addSuccess('Heure suplementaire ajouté avec succès.');
             return $this->redirectToRoute('personal_heure_sup_index', [], Response::HTTP_SEE_OTHER);
         }
 
-/* test
-        $personal = $this->personalRepository->find(3);
+        /* test
+                $personal = $this->personalRepository->find(3);
 
-        $heureSups =  $this->heureSupService->getAmountByMonth($personal, 12, 2023);
+                $heureSups =  $this->heureSupService->getAmountByMonth($personal, 12, 2023);
 
-        dd($heureSups);
-*/
-        
+                dd($heureSups);
+        */
+
         return $this->render('dossier_personal/heure_sup/new.html.twig', [
             'form' => $form
         ]);
     }
 
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(Personal $personal, Request $request): Response {
-        $form = $this->createForm(PersonalHeureSupType::class, [
-            'personal' => $personal,
-            'heureSup' => $personal->getHeureSups(),
-        ]);
+    public function edit(Personal $personal, Request $request): Response
+    {
+        $form = $this->createForm(PersonalHeureSupType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -133,6 +218,5 @@ class HeureSupController extends AbstractController
             'editing' => true
         ]);
     }
-    
 
 }

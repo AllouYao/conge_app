@@ -23,43 +23,26 @@ class HeureSupRepository extends ServiceEntityRepository
         parent::__construct($registry, HeureSup::class);
     }
 
-    //    /**
-    //     * @return HeureSup[] Returns an array of HeureSup objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('h')
-    //            ->andWhere('h.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('h.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?HeureSup
-    //    {
-    //        return $this->createQueryBuilder('h')
-    //            ->andWhere('h.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
-
-    public function getHeureSupByDate(Personal $personal, int $month, int $year): ?array
+    /**
+     * @param Personal $personal
+     * @param int $month
+     * @param int $year
+     * @return HeureSup[]
+     */
+    public function getHeureSupByDate(Personal $personal, int $month, int $year): array
     {
         return $this->createQueryBuilder('h')
-        ->andWhere('h.personal = :personal')
-        ->andWhere('YEAR(h.startedDate) = :year')
-        ->andWhere('MONTH(h.startedDate) = :month')
-        ->setParameter('personal', $personal)
-        ->setParameter('year', $year)
-        ->setParameter('month', $month)
-        ->orderBy('h.startedDate', 'ASC')
-        ->getQuery()
-        ->getResult();
+            ->andWhere('h.personal = :personal')
+            ->andWhere('YEAR(h.startedDate) = :year')
+            ->andWhere('MONTH(h.startedDate) = :month')
+            ->setParameter('personal', $personal)
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
+            ->orderBy('h.startedDate', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
+
+
 
 }

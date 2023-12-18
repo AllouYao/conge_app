@@ -75,6 +75,7 @@ final class Status
     public const PRIME_TENUE_TRAVAIL = 'PRIME_TENUE_TRAVAIL';
 
     public const PRIME_OUTILLAGE = 'PRIME_OUTILLAGE';
+    public const GRATIFICATION = 'GRATIFICATION';
 
     /**
      * Type Congés
@@ -86,16 +87,16 @@ final class Status
      * Salaire horraire
      */
 
-    public const SALAIRE_HORRAIRE_CATEGORIEL = 75000/173.33;
+    public const TAUX_HEURE = 173.33;
 
     /**
      * Taux horraire
      */
-    
-    public const TAUX_JOUR_OUVRABLE = (15/100);
-    public const TAUX_JOUR_OUVRABLE_EXTRA = (50/100);
-    public const TAUX_NUIT_OUVRABLE_OR_NON_OUVRABLE = (75/100); 
-    public const TAUX_NUIT_NON_OUVRABLE = (100 / 100);
+
+    public const TAUX_JOUR_OUVRABLE = 115 / 100;
+    public const TAUX_JOUR_OUVRABLE_EXTRA = 150 / 100;
+    public const TAUX_NUIT_OUVRABLE_OR_NON_OUVRABLE = 175 / 100;
+    public const TAUX_NUIT_NON_OUVRABLE = 200 / 100;
 
 
     /**
@@ -107,5 +108,4 @@ final class Status
     public const DIMANCHE_FERIE = "DIMANCHE/FÉRIÉ";
 
 
-    
 }

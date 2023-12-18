@@ -1,0 +1,42 @@
+<fieldset>
+    <legend>Information personnel salarié</legend>
+    <div class="mb-2 row">
+        <label class="col-md-2 col-form-label">Matricule <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.personal) }}
+        </div>
+        <label class="col-md-2 col-form-label">Nom & Prénom(s) <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.name) }}
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label class="col-md-2 col-form-label">Date d'embauche <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.hireDate) }}
+        </div>
+        <label class="col-md-2 col-form-label">Catégorie <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.category) }}
+        </div>
+    </div>
+</fieldset>
+<fieldset>
+    <legend>Information congé</legend>
+    <div class="mb-2 row">
+        <label class="col-md-2 col-form-label">Date départ <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.dateDepart) }}
+        </div>
+        <label class="col-md-2 col-form-label">Date retour <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.dateRetour) }}
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label class="col-md-2 col-form-label" for="example-textarea">Commentaire</label>
+        <div class="col-md-10">
+            {{ form_widget(form.commentaires) }}
+        </div>
+    </div>
+</fieldset>

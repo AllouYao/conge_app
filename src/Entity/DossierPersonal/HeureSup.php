@@ -4,12 +4,16 @@ namespace App\Entity\DossierPersonal;
 
 use App\Entity\DossierPersonal\Personal;
 use App\Repository\DossierPersonal\HeureSupRepository;
+use App\Utils\Horodatage;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: HeureSupRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class HeureSup
 {
+    use Horodatage;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -124,6 +128,7 @@ class HeureSup
 
         return $this;
     }
+
     public function getTotalHorraire()
     {
 

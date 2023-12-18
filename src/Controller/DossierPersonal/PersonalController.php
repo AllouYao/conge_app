@@ -34,12 +34,12 @@ class PersonalController extends AbstractController
 
     #[Route('/{uuid}/print', name: 'print_salary_info', methods: ['GET'])]
     public function print(
-        Personal $personal,
+        Personal               $personal,
         DetailSalaryRepository $detailSalaryRepository,
         PrimesRepository       $primesRepository
     ): Response
     {
-        $accountNumber  = null;
+        $accountNumber = null;
         $accountBanque = $personal->getAccountBanks();
         foreach ($accountBanque as $value) {
             $accountNumber = $value->getCode() . ' ' . $value->getNumCompte() . ' ' . $value->getRib();
@@ -61,10 +61,10 @@ class PersonalController extends AbstractController
         $primeTT = $primesRepository->findOneBy(['code' => Status::PRIME_TENUE_TRAVAIL]);
         $primeOutil = $primesRepository->findOneBy(['code' => Status::PRIME_OUTILLAGE]);
 
-        $amountPanier = $detailSalaryRepository->findPrimeBySalary($personal,$primePanier);
-        $amountSalissure = $detailSalaryRepository->findPrimeBySalary($personal,$primeSalissure);
-        $amountTT = $detailSalaryRepository->findPrimeBySalary($personal,$primeTT);
-        $amountOutil = $detailSalaryRepository->findPrimeBySalary($personal,$primeOutil);
+        $amountPanier = $detailSalaryRepository->findPrimeBySalary($personal, $primePanier);
+        $amountSalissure = $detailSalaryRepository->findPrimeBySalary($personal, $primeSalissure);
+        $amountTT = $detailSalaryRepository->findPrimeBySalary($personal, $primeTT);
+        $amountOutil = $detailSalaryRepository->findPrimeBySalary($personal, $primeOutil);
 
         return $this->render('dossier_personal/personal/print.html.twig', [
             'personals' => $personal,
@@ -114,7 +114,8 @@ class PersonalController extends AbstractController
                 'category_grade' => $item['categorie_intitule'],
                 'nature_piece' => $item['personal_piece'] . '° ' . $item['personal_numero_piece'],
                 'numero_cnps' => $item['personal_numero_cnps'],
-                'action' => $this->generateUrl('personal_print_salary_info', ['uuid' => $item['uuid']])
+                'action' => $this->generateUrl('personal_print_salary_info', ['uuid' => $item['uuid']]),
+                'modifier' => $this->generateUrl('personal_edit', ['uuid' => $item['uuid']])
             ];
         }
         return new JsonResponse($personalSalaried);
