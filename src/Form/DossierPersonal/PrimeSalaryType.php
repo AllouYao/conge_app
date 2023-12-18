@@ -4,6 +4,8 @@ namespace App\Form\DossierPersonal;
 
 use App\Entity\DossierPersonal\DetailSalary;
 use App\Entity\Settings\Primes;
+use App\Utils\Status;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -27,7 +29,17 @@ class PrimeSalaryType extends AbstractType
                         'data-taux' => $primes->getTaux()
                     ];
                 },
-                'required' => true
+                'required' => true,
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('prime')
+                        ->where('prime.code in (:code)')
+                        ->setParameter('code', [
+                            Status::PRIME_OUTILLAGE,
+                            Status::PRIME_PANIER,
+                            Status::PRIME_SALISSURE,
+                            Status::PRIME_TENUE_TRAVAIL
+                        ]);
+                }
             ])
             ->add('smigHoraire', TextType::class, [
                 'attr' => [

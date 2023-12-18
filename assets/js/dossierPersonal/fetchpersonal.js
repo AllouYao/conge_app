@@ -41,7 +41,18 @@ let conge = () => {
     $('#conge_category').val(category);
 }
 
-$('body').on('change', '#charge_personal, #account_personal, #depart_personal, #conge_personal', function () {
+let heureSupp = () => {
+    const selectedOption = $("#personal_heure_sup_personal :selected");
+    const name = selectedOption.attr('data-name');
+    const hireDate = selectedOption.attr('data-hireDate');
+    const category = selectedOption.attr('data-category');
+
+    $('#personal_heure_sup_name').val(name);
+    $('#personal_heure_sup_hireDate').val(hireDate);
+    $('#personal_heure_sup_category').val(category);
+}
+
+$('body').on('change', '#charge_personal, #account_personal, #depart_personal, #conge_personal, #personal_heure_sup_personal', function () {
     if ($(this).attr('id') === 'charge_personal') {
         chargePeople();
     } else if ($(this).attr('id') === 'account_personal') {
@@ -50,6 +61,8 @@ $('body').on('change', '#charge_personal, #account_personal, #depart_personal, #
         depart();
     } else if ($(this).attr('id') === 'conge_personal') {
         conge();
+    } else if ($(this).attr('id') === 'personal_heure_sup_personal') {
+        heureSupp();
     }
 });
 

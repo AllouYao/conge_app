@@ -148,10 +148,12 @@
                                        class="dropdown-item">Créer</a>
                                     <a href="{{ path('personal_heure_sup_index') }}"
                                        class="dropdown-item">Liste heure suplementaire</a>
+                                    <a href="{{ path('personal_heure_sup_supp_book') }}"
+                                       class="dropdown-item">Livre heure suplementaire</a>
                                 </div>
                             </div>
-                           
-                            
+
+
                         </div>
                     </li>
                     <li class="nav-item dropdown">
@@ -174,6 +176,23 @@
                                        class="dropdown-item">Ferméture campagne</a>
                                 </div>
                             </div>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i data-feather="dollar-sign"></i>ETAT GLOBALE
+                            <div class="arrow-down"></div>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="topnav-components">
+                            <a href="{{ path('reporting_etat_salaire') }}"
+                               class="dropdown-item">Etat des salaire</a>
+                            <a href="{{ path('reporting_declaration_dgi') }}"
+                               class="dropdown-item">Etat declaration dgi</a>
+                            <a href="{{ path('reporting_declaration_cnps') }}"
+                               class="dropdown-item">Etat declaration cnps</a>
+                            <a href="{{ path('reporting_declaration_fdfp') }}"
+                               class="dropdown-item">Etat declaration fdfp</a>
                         </div>
                     </li>
                 </ul> <!-- end navbar-->

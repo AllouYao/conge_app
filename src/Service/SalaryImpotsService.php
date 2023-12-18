@@ -12,35 +12,28 @@ use App\Repository\Impots\CategoryChargeRepository;
 use App\Repository\Impots\ChargeEmployeurRepository;
 use App\Repository\Impots\ChargePersonalsRepository;
 use App\Utils\Status;
-use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 
 class SalaryImpotsService implements SalaryInterface
 {
-    const JOUR_CONGE_OUVRABLE = 2.2;
-    const JOUR_CONGE_CALANDAIRE = 1.25;
 
     private EntityManagerInterface $manager;
     private ChargePersonalsRepository $chargePersonalRt;
     private CategoryChargeRepository $CategoryChargeRt;
     private ChargeEmployeurRepository $chargeEmployeurRt;
-    private CongeRepository $congeRepository;
 
     public function __construct(
         EntityManagerInterface    $manager,
         ChargePersonalsRepository $chargePersonalsRepository,
         CategoryChargeRepository  $categoryChargeRepository,
         ChargeEmployeurRepository $chargeEmployeurRepository,
-        CongeRepository           $congeRepository
+        CongeRepository           $congeRepository,
     )
     {
         $this->manager = $manager;
         $this->chargePersonalRt = $chargePersonalsRepository;
         $this->CategoryChargeRt = $categoryChargeRepository;
         $this->chargeEmployeurRt = $chargeEmployeurRepository;
-        $this->congeRepository = $congeRepository;
     }
 
     public function chargePersonal(Personal $personal): void
@@ -282,106 +275,5 @@ class SalaryImpotsService implements SalaryInterface
         $salaireBrut = $personal->getSalary()->getBrutAmount();
         $categoryRateRCNPS_AT = $this->CategoryChargeRt->findOneBy(['codification' => 'RCNPS_AT']);
         return $salaireBrut * $categoryRateRCNPS_AT->getValue() / 100;
-    }
-
-    // Recupération du moi Travailler
-    public function getCongeMonth(Personal $personal): array
-    {
-        $today = Carbon::now();
-        $embauche = $personal->getContract()->getDateEmbauche();
-        $anciennete = ceil(($embauche->diff($today)->y));
-        $lastConger = $this->congeRepository->getLastConge($personal);
-        $genre = $personal->getGenre();
-        $chargPeapleOfPersonal = $personal->getChargePeople();
-        if (!$lastConger) {
-            $jourTravailler = ceil(($embauche->diff($today)->days));
-            $moisTravailler = $jourTravailler / 30;
-            $result = $moisTravailler >= 12;
-        } else {
-            $dateRetourLastConge = $this->congeRepository->getDateRetour($personal);
-
-            $jourTravailler = ceil(($dateRetourLastConge['retour']->diff($today)->days));
-            $moisTravailler = $jourTravailler / 30;
-            $result = $moisTravailler >= 11;
-        }
-        $suppConger = $this->suppConger($genre, $chargPeapleOfPersonal, $today);
-        $nbJourCalandaireConge = ($jourTravailler * self::JOUR_CONGE_OUVRABLE) * self::JOUR_CONGE_CALANDAIRE;
-        if ($genre === Status::FEMININ) {
-            $nbJourCongesPaye = $nbJourCalandaireConge + $this->echelonConge($anciennete) + $suppConger;
-        } else {
-            $nbJourCongesPaye = $nbJourCalandaireConge + $this->echelonConge($anciennete);
-        }
-        return [
-            'conge_day' => $nbJourCongesPaye,
-            'mouth_works' => $moisTravailler,
-            'take_conge' => $result,
-            'conger_supp' => $suppConger
-        ];
-    }
-
-    private function echelonConge(mixed $anciennete): int
-    {
-        return match ($anciennete) {
-            $anciennete >= 5 && $anciennete < 10 => 1,
-            $anciennete >= 10 && $anciennete < 15 => 2,
-            $anciennete >= 15 && $anciennete < 20 => 3,
-            $anciennete >= 20 && $anciennete < 25 => 5,
-            $anciennete > 25 => 7,
-            default => 0,
-        };
-    }
-
-    public function suppConger(mixed $genre, mixed $chargPeapleOfPersonal, mixed $today): int|float
-    {
-        $nbJrCongeSupp = 0;
-        if ($genre === Status::FEMININ) {
-            foreach ($chargPeapleOfPersonal->getValues() as $item) {
-                $yearOfChargPeaple = $item->getBirthday()->diff($today)->y;
-                if ($yearOfChargPeaple < 21) {
-                    $nbJrCongeSupp += 2;
-                } elseif ($chargPeapleOfPersonal->count() >= 4 && $yearOfChargPeaple > 21) {
-                    $nbJrCongeSupp += 2;
-                }
-            }
-        }
-        return $nbJrCongeSupp;
-    }
-
-    // Determination du salaire moyen
-    public function getAllocation(Personal $personal): array
-    {
-        $today = Carbon::now();
-        $annee = $today->format('Y');
-        $nbJoursOuvrables = 0;
-        $datePremierJour = Carbon::createFromDate($annee, 1, 1);
-        $dateDernierJour = Carbon::createFromDate($annee, 12, 31);
-        for ($date = $datePremierJour; $date->lte($dateDernierJour); $date->addDay()) {
-            // Vérifier si le jour n'est pas un week-end (samedi ou dimanche)
-            if ($date->isWeekday()) {
-                $nbJoursOuvrables++;
-            }
-        }
-        $nbJourCalandaire = $nbJoursOuvrables * 1.25;
-        $dateDebut = $personal->getContract()->getDateEmbauche();
-        $dateDepart = $this->congeRepository->getLastConge($personal);
-        $dateFin = $dateDepart->getDateDepart();
-        $genre = $personal->getGenre();
-        $chargPeapleOfPersonal = $personal->getChargePeople();
-        $suppConger = $this->suppConger($genre, $chargPeapleOfPersonal, $today);
-        if ($genre === Status::FEMININ) {
-            $moisTravailler = ceil((($dateDebut->diff($today)->days) + $suppConger) / 30);
-        } else {
-            $moisTravailler = ceil(($dateDebut->diff($today)->days) / 30);
-        }
-        $salaireMoyen = ceil(($this->congeRepository->getSalaryMoyByPeriod($personal, $dateDebut, $dateFin)) / $moisTravailler);
-        $salaireJournalier = ceil($salaireMoyen / 30);
-
-        $allocationConge = ceil($salaireJournalier * $nbJourCalandaire);
-
-        return [
-            'salaire_moyen' => $salaireMoyen,
-            'salaire_journalier' => $salaireJournalier,
-            'allocation_conge_annuel' => $allocationConge
-        ];
     }
 }

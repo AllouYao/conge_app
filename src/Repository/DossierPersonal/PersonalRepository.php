@@ -3,7 +3,10 @@
 namespace App\Repository\DossierPersonal;
 
 use App\Entity\DossierPersonal\Personal;
+use App\Utils\Status;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use PhpParser\Node\Expr\Array_;
@@ -23,30 +26,6 @@ class PersonalRepository extends ServiceEntityRepository
         parent::__construct($registry, Personal::class);
     }
 
-//    /**
-//     * @return Personal[] Returns an array of Personal objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('p.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?Personal
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
 
     /**
      * @return Personal[] Returns an array of Personal objects
@@ -64,7 +43,7 @@ class PersonalRepository extends ServiceEntityRepository
      */
     public function findAllWomanPersonal(): array
     {
-        $qb = $this->createQueryBuilder('p')->where('p.genre = FEMININ')->getQuery()->getResult();
+        $qb = $this->createQueryBuilder('p')->where('p.genre = :genre')->setParameter('genre', Status::FEMININ)->getQuery()->getResult();
         return array_map(function ($result) {
             return $result;
         }, $qb);
@@ -141,6 +120,21 @@ class PersonalRepository extends ServiceEntityRepository
             ->leftJoin('salary.avantage', 'avantage')
             ->join('p.chargePersonals', 'charge_personals')
             ->join('p.chargeEmployeurs', 'charge_employeurs')
+            ->getQuery()
+            ->getResult();
+    }
+
+
+    /**
+     * @return Personal[] Returns an array of Personal objects
+     */
+    public function findPersonalWithContract(): array
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.campagnes', 'campagnes')
+            ->leftJoin('p.contract', 'contract')
+            ->where('contract.id IS NOT NULL')
+            ->andWhere('campagnes.id  IS NOT NULL')
             ->getQuery()
             ->getResult();
     }

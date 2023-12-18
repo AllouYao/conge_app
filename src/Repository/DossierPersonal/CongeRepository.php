@@ -77,31 +77,6 @@ class CongeRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-
-    public function getFirstConge(Personal $personal): mixed
-    {
-        return $this->createQueryBuilder('co')
-            ->join('co.personal', 'p')
-            ->where('co.id = 1')
-            ->andWhere('co.personal = :personal')
-            ->setParameter('personal', $personal)
-            ->getQuery()->getSingleResult();
-    }
-
-    public function getDateRetour(Personal $personal): mixed
-    {
-        return $this->createQueryBuilder('co')
-            ->select([
-                'co.dateRetour as retour',
-                'co.dateDepart as depart'
-            ])
-            ->where('co.personal = :personal')
-            ->setParameter('personal', $personal)
-            ->setMaxResults(1)
-            ->orderBy('co.id', 'DESC')
-            ->getQuery()->getSingleResult();
-    }
-
     public function getLastConge(Personal $personal): ?Conge
     {
         return $this->createQueryBuilder('co')
@@ -110,23 +85,6 @@ class CongeRepository extends ServiceEntityRepository
             ->setParameter('personal', $personal)
             ->orderBy('co.id', 'DESC')
             ->getQuery()->getOneOrNullResult();
-    }
-
-    public function getSalaryMoyByPeriod(Personal $personal, $dateDebut, $dateFin): int|float|null
-    {
-        $qb = $this->createQueryBuilder('co');
-
-        $qb->select('SUM(s.brutAmount - s.primeTransport ) as sommeSalaire')
-            ->join('co.personal', 'p')
-            ->leftJoin('p.contract', 'c')
-            ->leftJoin('p.salary', 's')
-            ->where('co.personal = :personal')
-            ->andWhere($qb->expr()->between('c.dateEmbauche', ':dateDebut', ':dateFin'))
-            ->setParameter('personal', $personal)
-            ->setParameter('dateDebut', $dateDebut)
-            ->setParameter('dateFin', $dateFin);
-
-        return $qb->getQuery()->getSingleScalarResult();
     }
 
     /**
@@ -142,5 +100,16 @@ class CongeRepository extends ServiceEntityRepository
             ->orderBy('co.id', 'DESC')
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    public function getLastCongeByID(int $personal): ?Conge
+    {
+        return $this->createQueryBuilder('co')
+            ->join('co.personal', 'personal')
+            ->where('personal.id = :personal')
+            ->setMaxResults(1)
+            ->setParameter('personal', $personal)
+            ->orderBy('co.id', 'DESC')
+            ->getQuery()->getOneOrNullResult();
     }
 }

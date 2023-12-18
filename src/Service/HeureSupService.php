@@ -4,92 +4,98 @@ namespace App\Service;
 
 use App\Entity\DossierPersonal\HeureSup;
 use App\Entity\DossierPersonal\Personal;
-use App\Entity\Paiement\Campagne;
 use App\Repository\DossierPersonal\HeureSupRepository;
+use App\Repository\DossierPersonal\PersonalRepository;
 use App\Utils\Status;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
+use Carbon\Carbon;
 
 class HeureSupService
 {
-    private EntityManagerInterface $manager;
     private HeureSupRepository $heureSupRepository;
+    private PersonalRepository $personalRepository;
 
-
-
-    public function __construct(EntityManagerInterface $entityManager, HeureSupRepository $heureSupRepository)
+    public function __construct(HeureSupRepository $heureSupRepository, PersonalRepository $personalRepository)
     {
-        $this->manager = $entityManager;
         $this->heureSupRepository = $heureSupRepository;
+        $this->personalRepository = $personalRepository;
     }
 
-    /**
-     * @param Personal $personal
-     * @param Campagne $campagne
-     * @throws NonUniqueResultException
-     */
-    public function getAmountByMonth(Personal $personal, int $month, int $year): float
+    public function getAmountHeursSupp(Personal $personal): int|float
     {
+        $today = Carbon::now();
+        $years = $today->year;
+        $month = $today->month;
+        $salaireBase = $personal->getCategorie()->getAmount();
+        $tauxHoraire = ceil($salaireBase / Status::TAUX_HEURE);
+        $heureSups = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
+        $salaireHorraire = 0;
 
-        $montantTotal = 0;
-
-        $heureSups = $this->heureSupRepository->getHeureSupByDate($personal, $month, $year);
-
-        foreach ($heureSups as $heureSup) {
-
-            $montant = $this->calculHeureSup($heureSup);
-            $montantTotal += $montant;
+        foreach ($heureSups as $sup) {
+            $JourNormalOrFerie = $sup->getTypeDay(); // normal/Férié/dimanche
+            $startedHour = $sup->getStartedHour(); // heure debut
+            $endedHour = $sup->getEndedHour(); // heure fin
+            $jourOrNuit = $sup->getTypeJourOrNuit(); // Jour/nuit
+            $diffHours = $startedHour->diff($endedHour);
+            $totalHorraire = $diffHours->format('%h');
+            if ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire <= 6) {
+                // 15% jour normal ~ 115%
+                $salaireHorraire = $salaireHorraire + ($tauxHoraire * Status::TAUX_JOUR_OUVRABLE) * $totalHorraire;
+            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire > 6) {
+                // 50% jour normal ~ 150%
+                $salaireHorraire = $salaireHorraire + ($tauxHoraire * Status::TAUX_JOUR_OUVRABLE_EXTRA) * $totalHorraire;
+            } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
+                // 75% jour ferié or dimanche nuit ~ 175%
+                $salaireHorraire = $salaireHorraire + ($tauxHoraire * Status::TAUX_NUIT_OUVRABLE_OR_NON_OUVRABLE) * $totalHorraire;
+            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::NUIT) {
+                // 75% jour ferié or dimanche nuit ~ 175%
+                $salaireHorraire = $salaireHorraire + ($tauxHoraire * Status::TAUX_NUIT_OUVRABLE_OR_NON_OUVRABLE) * $totalHorraire;
+            } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::NUIT) {
+                // 75% jour ferié or dimanche nuit ~ 200%
+                $salaireHorraire = $salaireHorraire + ($tauxHoraire * Status::TAUX_NUIT_NON_OUVRABLE) * $totalHorraire;
+            }
         }
-
-        return $montantTotal;
+        return $salaireHorraire;
     }
-    private function calculHeureSup(HeureSup $heureSup)
+
+    public function getAmountHeursSuppByID(int $perso): int|float
     {
-
-        $JourNormalOrFerie = $heureSup->getTypeDay(); // normal/Férié/dimanche
-        
-        $startedHour = $heureSup->getStartedHour();
-        $endedHour = $heureSup->getEndedHour();
-        $jourOrNuit = $heureSup->getTypeJourOrNuit(); // Jour/nuit
-
-        $diff = $startedHour->diff($endedHour);
-        $totalHorraire = $diff->format('%h');
-
-        if ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire <= 6) {
-
-            // 15% jour normal 
-            $salaireHorraire = Status::SALAIRE_HORRAIRE_CATEGORIEL * Status::TAUX_JOUR_OUVRABLE * $totalHorraire;
-            return $salaireHorraire;
+        $today = Carbon::now();
+        $years = $today->year;
+        $month = $today->month;
+        $personals = $this->personalRepository->findBy(['id' => $perso]);
+        foreach ($personals as $personal) {
+            $salaireBase = $personal->getCategorie()->getAmount();
         }
 
-        if($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire > 6){
+        $heureSups = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
+        $tauxHoraire = ceil($salaireBase / Status::TAUX_HEURE);
+        $salaireHorraire = 0;
 
-            // 50% jour normal 
-            
-            $salaireHorraire = Status::SALAIRE_HORRAIRE_CATEGORIEL*Status::TAUX_JOUR_OUVRABLE_EXTRA* $totalHorraire;
-            return $salaireHorraire;
-            
+        foreach ($heureSups as $sup) {
+            $JourNormalOrFerie = $sup->getTypeDay(); // normal/Férié/dimanche
+            $startedHour = $sup->getStartedHour(); // heure debut
+            $endedHour = $sup->getEndedHour(); // heure fin
+            $jourOrNuit = $sup->getTypeJourOrNuit(); // Jour/nuit
+            $diffHours = $startedHour->diff($endedHour);
+            $totalHorraire = $diffHours->format('%h');
+            if ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire <= 6) {
+                // 15% jour normal ~ 115%
+                $salaireHorraire = $salaireHorraire + ($tauxHoraire * Status::TAUX_JOUR_OUVRABLE) * $totalHorraire;
+            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire > 6) {
+                // 50% jour normal ~ 150%
+                $salaireHorraire = $salaireHorraire + ($tauxHoraire * Status::TAUX_JOUR_OUVRABLE_EXTRA) * $totalHorraire;
+            } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
+                // 75% jour ferié or dimanche nuit ~ 175%
+                $salaireHorraire = $salaireHorraire + ($tauxHoraire * Status::TAUX_NUIT_OUVRABLE_OR_NON_OUVRABLE) * $totalHorraire;
+            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::NUIT) {
+                // 75% jour ferié or dimanche nuit ~ 175%
+                $salaireHorraire = $salaireHorraire + ($tauxHoraire * Status::TAUX_NUIT_OUVRABLE_OR_NON_OUVRABLE) * $totalHorraire;
+            } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::NUIT) {
+                // 75% jour ferié or dimanche nuit ~ 200%
+                $salaireHorraire = $salaireHorraire + ($tauxHoraire * Status::TAUX_NUIT_NON_OUVRABLE) * $totalHorraire;
+            }
         }
-
-        if (($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::NUIT)|| ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR)) {
-
-            $salaireHorraire = Status::SALAIRE_HORRAIRE_CATEGORIEL * Status::TAUX_JOUR_OUVRABLE_EXTRA * $totalHorraire;
-            return $salaireHorraire;
-            
-        }
-
-        if ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
-
-            $salaireHorraire = Status::SALAIRE_HORRAIRE_CATEGORIEL * Status::TAUX_NUIT_OUVRABLE_OR_NON_OUVRABLE * $totalHorraire;
-            return $salaireHorraire;
-            
-        }
-
-        if ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::NUIT) {
-
-            $salaireHorraire = Status::SALAIRE_HORRAIRE_CATEGORIEL * Status::TAUX_NUIT_NON_OUVRABLE * $totalHorraire;
-            return $salaireHorraire;
-            
-        }
+        return $salaireHorraire;
     }
+
 }

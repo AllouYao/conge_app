@@ -1,0 +1,497 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Livre de paie{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridEtatSalaire {
+            height: 500px;
+            border-width: 50px;
+
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <form action="{{ url('api_reporting_etat_salaire') }}" method="get" class="form-horizontal"
+                  name="form_reporting_etat_salaire" id="form_reporting_etat_salaire">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title-custom" style="color: white">
+                            <i data-feather="list"></i>
+                            RECHERCHE
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {{ include('reporting/etat_salaire/form.html.twig') }}
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-primary float-end">Rechercher</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        ETAT DES SALAIRES
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="dataGridEtatSalaire">Cliquer sur recherche pour afficher le tableau</div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+
+        const $form = $(`form[name="form_reporting_etat_salaire"]`);
+        $form.submit(function (e) {
+            e.preventDefault();
+            const form = $(e.currentTarget);
+            const $data = form.serialize();
+            const tab = $data.split('&');
+            const tab2_deb = tab[0].split('=');
+            const tab2_fin = tab[1].split('=');
+            const debut = tab2_deb[1];
+            const fin = tab2_fin[1];
+
+            $('#head').html(`du ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')} `);
+
+
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+            }
+
+            $('#dataGridEtatSalaire').dxDataGrid({
+                dataSource: `{{ url('api_reporting_etat_salaire') }}?${$data}`,
+                showBorders: true,
+                scrolling: {
+                    mode: 'virtual',
+                    columnRenderingMode: 'virtual'
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('Employees');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then((buffer) => {
+                                saveAs(new Blob([buffer], {type: 'application /octet-stream'}), `Balance âgé des tiers ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                columns: [
+                    {
+                        dataField: "index",
+                        dataType: "number",
+                        caption: "N°Ordre",
+                        alignment: "center",
+                        fixed: true,
+                        width: 120
+                    },
+                    {
+                        dataField: "dateCreation",
+                        dataType: "date",
+                        caption: "Date",
+                        alignment: "center",
+                        fixed: true,
+                        width: 120
+                    },
+                    {
+                        dataField: 'fullName',
+                        dataType: 'string',
+                        caption: 'Nom et Prénoms',
+                        alignment: 'left',
+                        fixed: true,
+                        width: 120
+                    },
+                    {
+                        dataField: 'matricule',
+                        dataType: 'string',
+                        caption: 'Matricule',
+                        alignment: 'center',
+                        fixed: true,
+                        width: 120
+                    },
+                    {
+                        dataField: "salaireBase",
+                        dataType: 'number',
+                        caption: 'Salaire de base',
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "primeAnciennete",
+                        dataType: 'number',
+                        caption: "Prime d'ancienneté",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "autrePrimes",
+                        dataType: 'number',
+                        caption: "Autres primes et indemnités",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "amountHeureSupp",
+                        dataType: 'number',
+                        caption: "Heures supplementaires",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "gratification",
+                        dataType: 'number',
+                        caption: "Gratification",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "congePaye",
+                        dataType: 'number',
+                        caption: "Congés payés",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "salaireBrut",
+                        dataType: 'number',
+                        caption: "Salaire brut",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "personalCnps",
+                        dataType: "number",
+                        caption: "CNPS (6,3%)",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "salaireImposable",
+                        dataType: 'number',
+                        caption: "Net imposable",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "itsNetCreditImpot",
+                        dataType: 'number',
+                        caption: "ITS(0% à 32%) net du crédit d'impôt",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "prêtDuMois",
+                        dataType: 'number',
+                        caption: "Avance, Acompte, Prêts du mois ",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "retenueDivers",
+                        dataType: 'number',
+                        caption: "Retenues diverses",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "autreDroits",
+                        dataType: 'number',
+                        caption: "Autres droits",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "salaireNet",
+                        dataType: 'number',
+                        caption: "Salaire net",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "observation",
+                        dataType: 'string',
+                        caption: "Observation",
+                        alignment: 'left',
+                        summaryType: 'sum',
+                        width: 120
+                    },
+                    {
+                        dataField: "cnpsPatronal",
+                        dataType: "number",
+                        caption: "CNPS (7,7%)",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "itsPatronal",
+                        dataType: 'number',
+                        caption: "ITS patronal (1,2%)",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "tauxApprentissage",
+                        dataType: 'number',
+                        caption: "TA(0,4%)",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "TFC",
+                        dataType: 'number',
+                        caption: "TFC(0,6%)",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "accidentTravail",
+                        dataType: 'number',
+                        caption: "Accident de travail (2%)",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "prestationFamille",
+                        dataType: 'number',
+                        caption: "Prestation familiale (5,75%)",
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                ],
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'salaireBase', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'primeAnciennete', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'autrePrimes', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'amountHeureSupp', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'gratification', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'congePaye', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'salaireBrut', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'personalCnps', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'salaireImposable', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'itsNetCreditImpot', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'retenueDivers', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'salaireNet', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'cnpsPatronal', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'itsPatronal', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'tauxApprentissage', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'TFC', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'accidentTravail', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'prestationFamille', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                    ],
+                }
+            });
+        });
+    </script>
+{% endblock %}

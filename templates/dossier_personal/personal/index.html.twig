@@ -66,7 +66,7 @@
                             component: e.component,
                             worksheet,
                             autoFilterEnabled: true,
-                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
+                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
                             customizeCell: function (options) {
                                 const {gridCell, excelCell} = options;
                                 if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
@@ -240,18 +240,38 @@
                         width: 120
                     },
                     {
-                        dataField: 'action',
                         caption: 'Action',
                         alignment: 'center',
-                        cellTemplate: function (container, options) {
-                            $("<a>")
-                                .html('<i data-feather="printer"></i>')
-                                .attr("href", options.data.action)
-                                .attr("target", '_blank')
-                                .appendTo(container);
-                            feather.replace();
-                        }
-                    },
+                        columns:[
+                            {
+                                dataField: 'action',
+                                caption: 'Imprimer',
+                                alignment: 'center',
+                                cellTemplate: function (container, options) {
+                                    $("<a>")
+                                        .html('<i data-feather="printer"></i>')
+                                        .attr("href", options.data.action)
+                                        .attr("target", '_blank')
+                                        .appendTo(container);
+                                    feather.replace();
+                                }
+                            },
+                            {
+                                dataField: 'modifier',
+                                caption: 'Modifier',
+                                alignment: 'center',
+                                cellTemplate: function (container, options) {
+                                    $("<a>")
+                                        .html('<i data-feather="edit" style="color: yellow"></i>')
+                                        .attr("href", options.data.modifier)
+                                        .attr("target", '_blank')
+                                        .appendTo(container);
+                                    feather.replace();
+                                }
+                            },
+                        ],
+                        width: 120
+                    }
                 ],
             })
         })

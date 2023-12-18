@@ -1,0 +1,199 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}LISTE DES CONGES DE MATERNITE PLANIFIES{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridConge {
+            height: 400px;
+            border-width: 50px;
+
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        LISTE DES CONGES DE MATERNITE PLANIFIES
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="dataGridConge"></div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('maternity_conge_new') }}" class="btn btn-primary float-end"
+                       style="color: white">Nouveau</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        $(document).ready(function () {
+            let debut;
+            let fin;
+            $("#dataGridConge").dxDataGrid({
+                dataSource: `{{ url('maternity_conge_api_maternity_book') }}`,
+                showBorders: true,
+                scrolling: {
+                    columnRenderingMode: 'virtual',
+                    height: 400,
+                    mode: "virtual"
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('Livre des congés planifiés');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
+                            customizeCell: function (options) {
+                                const {gridCell, excelCell} = options;
+                                if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
+                                    excelCell.text = formatNumber(gridCell.value)
+                                    excelCell.font = {size: 9};
+                                    excelCell.alignment = {horizontal: 'left'};
+                                }
+                            }
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then(function (buffer) {
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Livre des congés planifiés ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                columns: [
+                    {
+                        caption: 'N°Ordre',
+                        alignment: 'center',
+                        dataType: 'number',
+                        dataField: 'index',
+                        width: 80,
+                        fixed: true
+                    },
+                    {
+                        caption: 'Nom et prénoms',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'full_name',
+                        width: 120,
+                        fixed: true
+                    },
+                    {
+                        caption: 'Date de départ en congé',
+                        dataType: 'date',
+                        dataField: 'date_depart',
+                        alignment: 'center',
+                        width: 120
+                    },
+                    {
+                        caption: 'Date de retour du \n dernier congé',
+                        dataType: 'date',
+                        dataField: 'dernier_conge',
+                        alignment: 'center',
+                        width: 120
+                    },
+                    {
+                        caption: 'Durée (en jours) des congés annuels',
+                        dataType: 'number',
+                        dataField: 'conges_annuel_jour',
+                        alignment: 'center',
+                        width: 120,
+                    },
+                    {
+                        caption: 'Date de retour des congé annuels',
+                        dataType: 'date',
+                        dataField: 'date_retour',
+                        alignment: 'center',
+                        width: 120
+                    },
+                    {
+                        caption: 'Salaire moyen mensuel',
+                        dataType: 'number',
+                        dataField: 'salaire_moyen',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Allocation pour les congés annuels',
+                        dataType: 'number',
+                        dataField: 'allocation_annuel',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Commentaire',
+                        dataType: 'string',
+                        dataField: 'commentaire',
+                        alignment: 'center',
+                        width: 120
+                    },
+                    {
+                        caption: 'Est en congé ?',
+                        dataType: 'string',
+                        dataField: 'en_conge_?',
+                        alignment: 'center',
+                        width: 120
+                    },
+                    {
+                        dataField: 'action',
+                        caption: 'Action',
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<a>")
+                                .html('<i data-feather="edit"></i>')
+                                .attr("href", options.data.action)
+                                .attr("target", '_blank')
+                                .appendTo(container);
+                            feather.replace();
+                        }
+                    },
+                ],
+            })
+        })
+    </script>
+
+{% endblock %}

@@ -6,10 +6,13 @@ use App\Entity\DossierPersonal\Conge;
 use App\Form\DossierPersonal\CongeType;
 use App\Repository\DossierPersonal\CongeRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
-use App\Service\SalaryImpotsService;
+use App\Repository\Paiement\CampagneRepository;
+use App\Service\CongeService;
 use App\Utils\Status;
+use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,13 +25,15 @@ class CongeController extends AbstractController
 
     private PersonalRepository $personalRepository;
     private CongeRepository $congeRepository;
-    private SalaryImpotsService $impotsService;
+    private CongeService $congeService;
+    private CampagneRepository $campagneRepository;
 
-    public function __construct(PersonalRepository $personalRepository, CongeRepository $congeRepository, SalaryImpotsService $impotsService)
+    public function __construct(PersonalRepository $personalRepository, CongeRepository $congeRepository, CongeService $congeService, CampagneRepository $campagneRepository)
     {
         $this->personalRepository = $personalRepository;
         $this->congeRepository = $congeRepository;
-        $this->impotsService = $impotsService;
+        $this->congeService = $congeService;
+        $this->campagneRepository = $campagneRepository;
     }
 
 
@@ -37,25 +42,38 @@ class CongeController extends AbstractController
     {
         $personals = $this->personalRepository->findAllPersonal();
         $conges = $this->congeRepository->findConge(Status::CONGE_GLOBAL);
-        $perso = null;
+        $today = Carbon::now();
+        $genre = null;
+        $chargPeapleOfPersonal = null;
+        $anciennete = null;
         $congeSalaried = [];
         foreach ($personals as $personal) {
-            $perso = $personal;
+            $genre = $personal->getGenre();
+            $chargPeapleOfPersonal = $personal->getChargePeople();
+            $anciennete = ceil($personal->getContract()->getDateEmbauche()->diff($today)->y);
         }
+        $suppConger = $this->congeService->suppConger($genre, $chargPeapleOfPersonal, $today);
         foreach ($conges as $conge => $item) {
-            $nbJourCongeAnnuel = $this->impotsService->getCongeMonth($perso);
+            $dateDebut = $item['depart'];
+            $dateRetour = $item['retour'];
+            if ($genre === Status::FEMININ) {
+                $dureeJourCongeAnnuel = ceil((($dateDebut->diff($dateRetour)->days) + $suppConger));
+            } else {
+                $dureeJourCongeAnnuel = ceil(($dateDebut->diff($dateRetour)->days));
+            }
+            $nbJourCongesPaye = $dureeJourCongeAnnuel + $this->congeService->echelonConge($anciennete);
             $congeSalaried[] = [
                 'index' => ++$conge,
                 'full_name' => $item['nom'] . ' ' . $item['prenoms'],
-                'date_depart' => date_format($item['depart'], 'd/m/y'),
-                'date_retour' => date_format($item['retour'], 'd/m/y'),
-                'conges_annuel_jour' => $nbJourCongeAnnuel['conge_day'],
-                'dernier_conge' => date_format($item['dernier_retour'], 'd/m/y'),
+                'date_depart' => date_format($dateDebut, 'd/m/Y'),
+                'date_retour' => date_format($dateRetour, 'd/m/Y'),
+                'conges_annuel_jour' => $nbJourCongesPaye,
+                'dernier_conge' => date_format($item['dernier_retour'], 'd/m/Y'),
                 'salaire_moyen' => $item['salaire_moyen'],
                 'allocation_annuel' => $item['allocation_conge'],
                 'commentaire' => $item['commentaire'],
                 'en_conge_?' => $item['en_conge'] === true ? 'OUI' : 'NOM',
-                'action' => $this->generateUrl('conge_edit', ['uuid' => $item['uuid']])
+                'modifier' => $this->generateUrl('conge_edit', ['uuid' => $item['uuid']])
             ];
         }
         return new JsonResponse($congeSalaried);
@@ -71,34 +89,38 @@ class CongeController extends AbstractController
 
     /**
      * @throws NonUniqueResultException
+     * @throws NoResultException
      */
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, CongeService $congeService): Response
     {
         $conge = new Conge();
         $form = $this->createForm(CongeType::class, $conge);
         $form->handleRequest($request);
 
-
         if ($form->isSubmitted() && $form->isValid()) {
             $dateDernierRetour = $form->get('dateRetour')->getData();
             $personal = $form->get('personal')->getData();
             $active = $this->congeRepository->active($personal);
-            if ($active) {
-                $this->addFlash('error', 'Monsieur ' . $personal->getFirstName() . ' n\'est pas encore de retour du congé précédent.');
+            $checkPersonalCampagne = $this->campagneRepository->checkPersonalInCampagne($personal);
+            if (!$checkPersonalCampagne) {
+                $this->addFlash('error', 'Monsieur ou Madame ' . $personal->getFirstName() . ' n\'est pas éligible pour obtenir un congé.');
                 return $this->redirectToRoute('conge_index');
             }
-            $elementConge = $this->impotsService->getAllocation($personal);
-            $salaireMoyen = $elementConge['salaire_moyen'];
-            $allocationAnnuel = $elementConge['allocation_conge_annuel'];
+            if ($active) {
+                $this->addFlash('error', 'Monsieur ou Madame ' . $personal->getFirstName() . ' n\'est pas encore de retour du congé précédent.');
+                return $this->redirectToRoute('conge_index');
+            }
+
+            $congeService->calculate($conge);
             $conge
                 ->setDateDernierRetour($dateDernierRetour)
-                ->setSalaireMoyen($salaireMoyen)
-                ->setAllocationConge($allocationAnnuel)
                 ->setTypeConge(Status::CONGE_GLOBAL)
                 ->setIsConge(true);
+
             $entityManager->persist($conge);
             $entityManager->flush();
+
             flash()->addSuccess('Congé planifié avec succès.');
             return $this->redirectToRoute('conge_index');
         }
@@ -109,7 +131,7 @@ class CongeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'show', methods: ['GET'])]
+    #[Route('/{uuid}', name: 'show', methods: ['GET'])]
     public function show(Conge $conge): Response
     {
         return $this->render('dossier_personal/conge/show.html.twig', [
@@ -134,6 +156,5 @@ class CongeController extends AbstractController
             'form' => $form,
         ]);
     }
-
 
 }

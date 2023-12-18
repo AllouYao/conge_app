@@ -1,0 +1,325 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Livre de paie{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridDeclarationDgi {
+            height: 500px;
+            border-width: 50px;
+
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <form action="{{ url('api_reporting_declaration_dgi') }}" method="get" class="form-horizontal"
+                  name="form_reporting_declaration_dgi" id="form_reporting_declaration_dgi">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title-custom" style="color: white">
+                            <i data-feather="list"></i>
+                            RECHERCHE
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {{ include('reporting/declaration_dgi/form.html.twig') }}
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-primary float-end">Rechercher</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        ETAT DES DECLARATION DGI
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="dataGridDeclarationDgi">Cliquer sur recherche pour afficher le tableau</div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+
+        const $form = $(`form[name="form_reporting_declaration_dgi"]`);
+        $form.submit(function (e) {
+            e.preventDefault();
+            const form = $(e.currentTarget);
+            const $data = form.serialize();
+            const tab = $data.split('&');
+            const tab2_deb = tab[0].split('=');
+            const tab2_fin = tab[1].split('=');
+            const debut = tab2_deb[1];
+            const fin = tab2_fin[1];
+
+            $('#head').html(`du ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')} `);
+
+
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+            }
+
+            $('#dataGridDeclarationDgi').dxDataGrid({
+                dataSource: `{{ url('api_reporting_declaration_dgi') }}?${$data}`,
+                showBorders: true,
+                scrolling: {
+                    mode: 'virtual',
+                    columnRenderingMode: 'virtual'
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('Employees');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then((buffer) => {
+                                saveAs(new Blob([buffer], {type: 'application /octet-stream'}), `Etat declaration dgi ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                columns: [
+                    {
+                        dataField: "index",
+                        dataType: "number",
+                        caption: "N°Ordre",
+                        alignment: "center",
+                        fixed: true,
+                        width: 120
+                    },
+                    {
+                        dataField: "dateCreation",
+                        dataType: "date",
+                        caption: "Date",
+                        alignment: "center",
+                        fixed: true,
+                        width: 120
+                    },
+                    {
+                        dataField: 'matricule',
+                        dataType: 'string',
+                        caption: 'Matricule',
+                        alignment: 'center',
+                        fixed: true,
+                        width: 120
+                    },
+                    {
+                        dataField: 'fullName',
+                        dataType: 'string',
+                        caption: 'Nom et Prénoms',
+                        alignment: 'left',
+                        fixed: true,
+                        width: 120
+                    },
+                    {
+                        dataField: "remunerationBrut",
+                        dataType: 'number',
+                        caption: 'Remuneration brutes',
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "indemniteTransportNomImposable",
+                        dataType: 'number',
+                        caption: 'Imdemnité de transport non imposable',
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "autrePrimesEtIndemniteNomImposable",
+                        dataType: 'number',
+                        caption: 'Autre prime et indemnite non imposable',
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "indemniteDepartNonImposable",
+                        dataType: 'number',
+                        caption: 'Indemnite de départ non imposable',
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "AventageNature",
+                        dataType: 'number',
+                        caption: 'Aventage en nature',
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "revenusNetImposable",
+                        dataType: 'number',
+                        caption: 'Revenus nets imposable',
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "itsSalarialBrut",
+                        dataType: 'number',
+                        caption: 'ITS salarial brut',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "nombreDeParts",
+                        dataType: 'number',
+                        caption: 'Nombre de parts',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "creditImpot",
+                        dataType: 'number',
+                        caption: 'Crédit d\'impôt',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "itsSalarialNet",
+                        dataType: 'number',
+                        caption: 'ITS salarial net',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+                    {
+                        dataField: "itsPatronal",
+                        dataType: 'number',
+                        caption: 'ITS patronal',
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 120
+                    },
+
+                ],
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'matricule',
+                            summaryType: 'count',
+                        },
+                        {
+                            column: 'remunerationBrut', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'indemniteTransportNomImposable', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'autrePrimesEtIndemniteNomImposable', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'indemniteDepartNonImposable', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'AventageNature', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'revenusNetImposable', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'itsPatronal', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                    ],
+                }
+            });
+        });
+    </script>
+{% endblock %}

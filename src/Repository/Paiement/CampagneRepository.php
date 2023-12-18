@@ -2,9 +2,11 @@
 
 namespace App\Repository\Paiement;
 
+use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Campagne;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -21,32 +23,6 @@ class CampagneRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Campagne::class);
     }
-
-//    /**
-//     * @return Campagne[] Returns an array of Campagne objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('c.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?Campagne
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
-
 
     /**
      * @throws NonUniqueResultException
@@ -80,8 +56,7 @@ class CampagneRepository extends ServiceEntityRepository
             ->join("c.personal", "p")
             ->where("c = :c")
             ->andWhere('p IS NOT NULL')
-            ->setParameter('c', $campagne)
-        ;
+            ->setParameter('c', $campagne);
         return count($qb->getQuery()->getResult());
     }
 
@@ -97,7 +72,14 @@ class CampagneRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-
+    public function checkPersonalInCampagne(Personal $personal): array
+    {
+        return $this->createQueryBuilder('c')
+            ->join("c.personal", 'p')
+            ->where("p = :personal")
+            ->setParameter('personal', $personal)
+            ->getQuery()->getScalarResult();
+    }
 
 
 }
