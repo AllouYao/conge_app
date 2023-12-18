@@ -7,7 +7,6 @@ use App\Entity\Paiement\Campagne;
 use App\Entity\Paiement\Payroll;
 use App\Repository\Impots\ChargeEmployeurRepository;
 use App\Repository\Impots\ChargePersonalsRepository;
-use App\Repository\Settings\PrimesRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 
@@ -89,11 +88,26 @@ class PayrollService
             ->setPersonal($personal)
             ->setCampagne($campagne)
             ->setNumberPart($nombrePart)
-            ->setBaseAmount($baseSalaire)->setSursalaire($sursalaire)->setBrutAmount($brutAmount)->setImposableAmount($imposableAmount)
-            ->setSalaryIts($salaryIts)->setSalaryCmu($salaryCmu)->setSalaryCnps($salaryCnps)
-            ->setFixcalAmount($fiscalAmount)->setSalarySante($salarySante)->setSalaryTransport($salaryTransport)->setNetPayer($netPayer)
-            ->setEmployeurIs($employeurIS)->setEmployeurCmu($employeurCMU)->setEmployeurSante($employeurAssuranceSante)->setFixcalAmountEmployeur($fixcalAmountEmployeur)
-            ->setEmployeurFdfp($employeurFDFP)->setEmployeurPf($employeurPF)->setEmployeurCr($employeurCR)->setEmployeurAt($employeurAT)->setEmployeurCnps($employeurCNPS)
+            ->setBaseAmount($baseSalaire)
+            ->setSursalaire($sursalaire)
+            ->setBrutAmount($brutAmount)
+            ->setImposableAmount($imposableAmount)
+            ->setSalaryIts($salaryIts)
+            ->setSalaryCmu($salaryCmu)
+            ->setSalaryCnps($salaryCnps)
+            ->setFixcalAmount($fiscalAmount)
+            ->setSalarySante($salarySante)
+            ->setSalaryTransport($salaryTransport)
+            ->setNetPayer($netPayer)
+            ->setEmployeurIs($employeurIS)
+            ->setEmployeurCmu($employeurCMU)
+            ->setEmployeurSante($employeurAssuranceSante)
+            ->setFixcalAmountEmployeur($fixcalAmountEmployeur)
+            ->setEmployeurFdfp($employeurFDFP)
+            ->setEmployeurPf($employeurPF)
+            ->setEmployeurCr($employeurCR)
+            ->setEmployeurAt($employeurAT)
+            ->setEmployeurCnps($employeurCNPS)
             ->setMasseSalary($masseSalaries);
         $this->manager->persist($payroll);
     }
