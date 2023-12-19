@@ -4,6 +4,7 @@ namespace App\Entity\DossierPersonal;
 
 use App\Repository\DossierPersonal\ContractRepository;
 use App\Utils\Horodatage;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -19,13 +20,13 @@ class Contract
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $dateEmbauche = null;
+    private ?DateTimeInterface $dateEmbauche = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $dateEffet = null;
+    private ?DateTimeInterface $dateEffet = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $dateFin = null;
+    private ?DateTimeInterface $dateFin = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $tempsContractuel = null;
@@ -42,36 +43,36 @@ class Contract
         return $this->id;
     }
 
-    public function getDateEmbauche(): ?\DateTimeInterface
+    public function getDateEmbauche(): ?DateTimeInterface
     {
         return $this->dateEmbauche;
     }
 
-    public function setDateEmbauche(?\DateTimeInterface $dateEmbauche): static
+    public function setDateEmbauche(?DateTimeInterface $dateEmbauche): static
     {
         $this->dateEmbauche = $dateEmbauche;
 
         return $this;
     }
 
-    public function getDateEffet(): ?\DateTimeInterface
+    public function getDateEffet(): ?DateTimeInterface
     {
         return $this->dateEffet;
     }
 
-    public function setDateEffet(?\DateTimeInterface $dateEffet): static
+    public function setDateEffet(?DateTimeInterface $dateEffet): static
     {
         $this->dateEffet = $dateEffet;
 
         return $this;
     }
 
-    public function getDateFin(): ?\DateTimeInterface
+    public function getDateFin(): ?DateTimeInterface
     {
         return $this->dateFin;
     }
 
-    public function setDateFin(?\DateTimeInterface $dateFin): static
+    public function setDateFin(?DateTimeInterface $dateFin): static
     {
         $this->dateFin = $dateFin;
 

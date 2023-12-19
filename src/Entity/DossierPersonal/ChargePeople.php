@@ -4,6 +4,7 @@ namespace App\Entity\DossierPersonal;
 
 use App\Repository\DossierPersonal\ChargePeopleRepository;
 use App\Utils\Horodatage;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -12,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 class ChargePeople
 {
     use Horodatage;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -24,7 +26,7 @@ class ChargePeople
     private ?string $lastName = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $birthday = null;
+    private ?DateTimeInterface $birthday = null;
 
     #[ORM\Column(length: 255)]
     private ?string $gender = null;
@@ -68,12 +70,12 @@ class ChargePeople
         return $this;
     }
 
-    public function getBirthday(): ?\DateTimeInterface
+    public function getBirthday(): ?DateTimeInterface
     {
         return $this->birthday;
     }
 
-    public function setBirthday(\DateTimeInterface $birthday): static
+    public function setBirthday(DateTimeInterface $birthday): static
     {
         $this->birthday = $birthday;
 

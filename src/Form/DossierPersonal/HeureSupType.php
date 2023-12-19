@@ -7,8 +7,8 @@ use App\Entity\DossierPersonal\HeureSup;
 use App\Form\CustomType\DateCustomType;
 use App\Utils\Status;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -19,14 +19,14 @@ class HeureSupType extends AbstractType
         $builder
             ->add('startedDate', DateCustomType::class)
             ->add('endedDate', DateCustomType::class)
-            ->add('startedHour', TimeType::class ,[
+            ->add('startedHour', TimeType::class, [
                 'widget' => 'single_text',
             ])
             ->add('endedHour', TimeType::class, [
                 'widget' => 'single_text',
             ])
             ->add(
-            'typeDay',
+                'typeDay',
                 ChoiceType::class,
                 [
                     'choices' => [
@@ -58,7 +58,7 @@ class HeureSupType extends AbstractType
                     ],
                     'data' => 'DEBUT'
                 ]
-                );
+            );
     }
 
     public function configureOptions(OptionsResolver $resolver): void

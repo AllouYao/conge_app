@@ -15,6 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Primes
 {
     use Horodatage;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

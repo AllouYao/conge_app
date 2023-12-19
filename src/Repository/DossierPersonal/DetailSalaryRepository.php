@@ -23,12 +23,12 @@ class DetailSalaryRepository extends ServiceEntityRepository
         parent::__construct($registry, DetailSalary::class);
     }
 
-    public function findPrimeBySalary(Personal $personal,Primes $primes)
+    public function findPrimeBySalary(Personal $personal, Primes $primes)
     {
         $qb = $this->createQueryBuilder('d');
         $qb
             ->select('d.amountPrime')
-            ->join('d.salary','salary')
+            ->join('d.salary', 'salary')
             ->where('salary.personal =:personal')
             ->andWhere('d.prime =:prime')
             ->setParameters([

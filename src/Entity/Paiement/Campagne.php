@@ -5,6 +5,7 @@ namespace App\Entity\Paiement;
 use App\Entity\DossierPersonal\Personal;
 use App\Repository\Paiement\CampagneRepository;
 use App\Utils\Horodatage;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -23,10 +24,10 @@ class Campagne
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $startedAt = null;
+    private ?DateTimeInterface $startedAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $closedAt = null;
+    private ?DateTimeInterface $closedAt = null;
 
     #[ORM\Column]
     private ?bool $active = null;
@@ -55,24 +56,24 @@ class Campagne
         return $this->id;
     }
 
-    public function getStartedAt(): ?\DateTimeInterface
+    public function getStartedAt(): ?DateTimeInterface
     {
         return $this->startedAt;
     }
 
-    public function setStartedAt(\DateTimeInterface $startedAt): static
+    public function setStartedAt(DateTimeInterface $startedAt): static
     {
         $this->startedAt = $startedAt;
 
         return $this;
     }
 
-    public function getClosedAt(): ?\DateTimeInterface
+    public function getClosedAt(): ?DateTimeInterface
     {
         return $this->closedAt;
     }
 
-    public function setClosedAt(?\DateTimeInterface $closedAt): static
+    public function setClosedAt(?DateTimeInterface $closedAt): static
     {
         $this->closedAt = $closedAt;
 
@@ -99,23 +100,6 @@ class Campagne
     public function setLastCampagne(self $lastCampagne): static
     {
         $this->lastCampagne = $lastCampagne;
-
-        return $this;
-    }
-
-    public function getCampagne(): ?self
-    {
-        return $this->campagne;
-    }
-
-    public function setCampagne(self $campagne): static
-    {
-        // set the owning side of the relation if necessary
-        if ($campagne->getLastCampagne() !== $this) {
-            $campagne->setLastCampagne($this);
-        }
-
-        $this->campagne = $campagne;
 
         return $this;
     }
@@ -170,6 +154,23 @@ class Campagne
                 $payroll->setCampagne(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCampagne(): ?self
+    {
+        return $this->campagne;
+    }
+
+    public function setCampagne(self $campagne): static
+    {
+        // set the owning side of the relation if necessary
+        if ($campagne->getLastCampagne() !== $this) {
+            $campagne->setLastCampagne($this);
+        }
+
+        $this->campagne = $campagne;
 
         return $this;
     }

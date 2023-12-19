@@ -12,9 +12,8 @@ use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\Impots\ChargeEmployeurRepository;
 use App\Repository\Impots\ChargePersonalsRepository;
 use App\Repository\Settings\PrimesRepository;
-use App\Service\SalaryImpotsService;
 use App\Utils\Status;
-use Doctrine\DBAL\Types\DateTimeType;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -49,7 +48,7 @@ class PersonalController extends AbstractController
 
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
         $dateFin = $personal->getContract()->getDateFin();
-        $today = new \DateTime();
+        $today = new DateTime();
         $anciennete = $dateEmbauche->diff($today)->y;
         $age = $personal->getBirthday()->diff($today)->y;
         $dureeContrat = $dateEmbauche->diff($dateFin)->m;
@@ -88,7 +87,7 @@ class PersonalController extends AbstractController
         $personalSalaried = [];
         foreach ($personal as $value => $item) {
             $dateEmbauche = $item['contrat_date_embauche'];
-            $today = new \DateTime();
+            $today = new DateTime();
             $anciennete = $dateEmbauche->diff($today);
             $ancienneteEnMois = $anciennete->y * 12 + $anciennete->m;
             $personalSalaried[] = [

@@ -142,6 +142,12 @@ class Avantage
         return $this;
     }
 
+    public function __toString(): string
+    {
+        // TODO: Implement __toString() method.
+        return $this->numPiece . '-' . number_format($this->getTotalAvantage(), 0, ',', ' ');
+    }
+
     public function getTotalAvantage(): ?string
     {
         return $this->totalAvantage;
@@ -152,11 +158,5 @@ class Avantage
         $this->totalAvantage = $totalAvantage;
 
         return $this;
-    }
-
-    public function __toString(): string
-    {
-        // TODO: Implement __toString() method.
-        return $this->numPiece.'-'.number_format($this->getTotalAvantage(), 0, ',', ' ');
     }
 }

@@ -6,15 +6,12 @@ use App\Entity\DossierPersonal\Personal;
 use App\Entity\Settings\Category;
 use App\Form\CustomType\DateCustomType;
 use App\Utils\Status;
-use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 class PersonalType extends AbstractType
 {
@@ -131,8 +128,7 @@ class PersonalType extends AbstractType
                     'Caisse' => Status::CAISSE,
                 ],
                 'placeholder' => 'Sélectionner le mode de paiement'
-            ])
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

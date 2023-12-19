@@ -64,43 +64,6 @@ class SalaryImpotsService implements SalaryInterface
         $this->manager->persist($charge);
     }
 
-    public function chargeEmployeur(Personal $personal): void
-    {
-        $montantIs = $this->calculateIS($personal);
-        $montantFDFP = $this->calculateFDFP($personal);
-        $montantCR = $this->calculateRCNPS_CR($personal);
-        $montantPF = $this->calculateRCNPS_PF($personal);
-        $montantAT = $this->calculateRCNPS_AT($personal);
-        $montantRetenuCNPS = $montantCR + $montantPF + $montantAT;
-        $montantCMU = $this->calculateCMU($personal);
-        $totalChargeEmployeur = $montantIs + $montantFDFP + $montantRetenuCNPS + $montantCMU;
-        $chargeEmpl = $this->chargeEmployeurRt->findOneBy(['personal' => $personal]);
-        if (!$chargeEmpl) {
-            $chargeEmpl = (new ChargeEmployeur())
-                ->setPersonal($personal)
-                ->setAmountIS($montantIs)
-                ->setAmountFDFP($montantFDFP)
-                ->setAmountCR($montantCR)
-                ->setAmountPF($montantPF)
-                ->setAmountAT($montantAT)
-                ->setAmountCMU($montantCMU)
-                ->setTotalRetenuCNPS($montantRetenuCNPS)
-                ->setTotalChargeEmployeur($totalChargeEmployeur);
-        }
-        $chargeEmpl
-            ->setPersonal($personal)
-            ->setAmountIS($montantIs)
-            ->setAmountFDFP($montantFDFP)
-            ->setAmountCR($montantCR)
-            ->setAmountPF($montantPF)
-            ->setAmountAT($montantAT)
-            ->setAmountCMU($montantCMU)
-            ->setTotalRetenuCNPS($montantRetenuCNPS)
-            ->setTotalChargeEmployeur($totalChargeEmployeur);
-
-        $this->manager->persist($chargeEmpl);
-    }
-
     public function getParts(Personal $personal): float|int
     {
         $nbrePart = [
@@ -234,6 +197,42 @@ class SalaryImpotsService implements SalaryInterface
         return ($chargePeople * $CMU) + ($CMU * $marie) + $CMU;
     }
 
+    public function chargeEmployeur(Personal $personal): void
+    {
+        $montantIs = $this->calculateIS($personal);
+        $montantFDFP = $this->calculateFDFP($personal);
+        $montantCR = $this->calculateRCNPS_CR($personal);
+        $montantPF = $this->calculateRCNPS_PF($personal);
+        $montantAT = $this->calculateRCNPS_AT($personal);
+        $montantRetenuCNPS = $montantCR + $montantPF + $montantAT;
+        $montantCMU = $this->calculateCMU($personal);
+        $totalChargeEmployeur = $montantIs + $montantFDFP + $montantRetenuCNPS + $montantCMU;
+        $chargeEmpl = $this->chargeEmployeurRt->findOneBy(['personal' => $personal]);
+        if (!$chargeEmpl) {
+            $chargeEmpl = (new ChargeEmployeur())
+                ->setPersonal($personal)
+                ->setAmountIS($montantIs)
+                ->setAmountFDFP($montantFDFP)
+                ->setAmountCR($montantCR)
+                ->setAmountPF($montantPF)
+                ->setAmountAT($montantAT)
+                ->setAmountCMU($montantCMU)
+                ->setTotalRetenuCNPS($montantRetenuCNPS)
+                ->setTotalChargeEmployeur($totalChargeEmployeur);
+        }
+        $chargeEmpl
+            ->setPersonal($personal)
+            ->setAmountIS($montantIs)
+            ->setAmountFDFP($montantFDFP)
+            ->setAmountCR($montantCR)
+            ->setAmountPF($montantPF)
+            ->setAmountAT($montantAT)
+            ->setAmountCMU($montantCMU)
+            ->setTotalRetenuCNPS($montantRetenuCNPS)
+            ->setTotalChargeEmployeur($totalChargeEmployeur);
+
+        $this->manager->persist($chargeEmpl);
+    }
 
     private function calculateIS(Personal $personal): float|int
     {

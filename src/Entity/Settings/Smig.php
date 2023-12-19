@@ -4,6 +4,7 @@ namespace App\Entity\Settings;
 
 use App\Repository\Settings\SmigRepository;
 use App\Utils\Horodatage;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -20,10 +21,10 @@ class Smig
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $dateDebut = null;
+    private ?DateTimeInterface $dateDebut = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $dateFin = null;
+    private ?DateTimeInterface $dateFin = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2)]
     private ?string $amount = null;
@@ -36,24 +37,24 @@ class Smig
         return $this->id;
     }
 
-    public function getDateDebut(): ?\DateTimeInterface
+    public function getDateDebut(): ?DateTimeInterface
     {
         return $this->dateDebut;
     }
 
-    public function setDateDebut(\DateTimeInterface $dateDebut): static
+    public function setDateDebut(DateTimeInterface $dateDebut): static
     {
         $this->dateDebut = $dateDebut;
 
         return $this;
     }
 
-    public function getDateFin(): ?\DateTimeInterface
+    public function getDateFin(): ?DateTimeInterface
     {
         return $this->dateFin;
     }
 
-    public function setDateFin(?\DateTimeInterface $dateFin): static
+    public function setDateFin(?DateTimeInterface $dateFin): static
     {
         $this->dateFin = $dateFin;
 

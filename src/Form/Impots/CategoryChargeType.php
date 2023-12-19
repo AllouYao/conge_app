@@ -13,8 +13,7 @@ class CategoryChargeType extends AbstractType
     {
         $builder
             ->add('codification')
-            ->add('intitule')
-        ;
+            ->add('intitule');
     }
 
     public function configureOptions(OptionsResolver $resolver): void

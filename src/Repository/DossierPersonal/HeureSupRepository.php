@@ -44,5 +44,4 @@ class HeureSupRepository extends ServiceEntityRepository
     }
 
 
-
 }

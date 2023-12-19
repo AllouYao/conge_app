@@ -4,8 +4,6 @@ namespace App\Entity\Impots;
 
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Utils\Horodatage;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 

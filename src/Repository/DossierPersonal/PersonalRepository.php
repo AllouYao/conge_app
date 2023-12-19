@@ -5,11 +5,7 @@ namespace App\Repository\DossierPersonal;
 use App\Entity\DossierPersonal\Personal;
 use App\Utils\Status;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
-use PhpParser\Node\Expr\Array_;
 
 /**
  * @extends ServiceEntityRepository<Personal>

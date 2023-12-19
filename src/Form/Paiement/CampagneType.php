@@ -4,7 +4,6 @@ namespace App\Form\Paiement;
 
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Campagne;
-use App\Form\CustomType\DateCustomType;
 use App\Repository\DossierPersonal\PersonalRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;

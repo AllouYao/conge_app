@@ -16,6 +16,7 @@ use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 class Category
 {
     use Horodatage;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

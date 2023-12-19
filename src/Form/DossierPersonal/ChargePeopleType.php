@@ -29,7 +29,7 @@ class ChargePeopleType extends AbstractType
                 ]
             ])
             ->add('numPiece')
-            ->add('contact',TextType::class, [
+            ->add('contact', TextType::class, [
                 'required' => false
             ]);
     }
@@ -37,7 +37,7 @@ class ChargePeopleType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            
+
             'data_class' => ChargePeople::class,
         ]);
     }

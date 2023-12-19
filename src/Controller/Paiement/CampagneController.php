@@ -10,8 +10,6 @@ use App\Service\PayrollService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
-use JetBrains\PhpStorm\NoReturn;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,8 +27,13 @@ class CampagneController extends AbstractController
     /**
      * @param PayrollService $payrollService
      * @param PayrollRepository $payrollRepository
+     * @param CampagneRepository $campagneRepository
      */
-    public function __construct(PayrollService $payrollService, PayrollRepository $payrollRepository, CampagneRepository $campagneRepository)
+    public function __construct(
+        PayrollService     $payrollService,
+        PayrollRepository  $payrollRepository,
+        CampagneRepository $campagneRepository
+    )
     {
         $this->payrollService = $payrollService;
         $this->payrollRepository = $payrollRepository;
@@ -132,29 +135,6 @@ class CampagneController extends AbstractController
 
     }
 
-    /**
-     * @throws NonUniqueResultException
-     * @throws NoResultException
-     */
-    #[NoReturn] #[Route('/paiement/campagne/close', name: 'close', methods: ['GET', 'POST'])]
-    public function closeCampagne(EntityManagerInterface $manager, CampagneRepository $campagneRepository): Response
-    {
-
-        $campagneActive = $campagneRepository->active();
-
-        if (!$campagneActive) {
-            $this->addFlash('error', 'Aucune campagne ouverte au préalable');
-            return $this->redirectToRoute('app_home');
-        }
-
-        $campagneActive->setClosedAt(new DateTime());
-        $campagneActive->setActive(false);
-
-        $manager->flush();
-        $this->addFlash('success', 'Campagne fermée avec succès');
-        return $this->redirectToRoute('app_home');
-    }
-
     public function getDetailOfLastCampagne(Campagne $campagne): array
     {
         $nbPersonal = 0;
@@ -187,6 +167,28 @@ class CampagneController extends AbstractController
             "global_charge_personal" => $totalChargePersonal,
             "global_charge_employeur" => $totalChargeEmployeur
         ];
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    #[Route('/paiement/campagne/close', name: 'close', methods: ['GET', 'POST'])]
+    public function closeCampagne(EntityManagerInterface $manager, CampagneRepository $campagneRepository): Response
+    {
+
+        $campagneActive = $campagneRepository->active();
+
+        if (!$campagneActive) {
+            $this->addFlash('error', 'Aucune campagne ouverte au préalable');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $campagneActive->setClosedAt(new DateTime());
+        $campagneActive->setActive(false);
+
+        $manager->flush();
+        $this->addFlash('success', 'Campagne fermée avec succès');
+        return $this->redirectToRoute('app_home');
     }
 
 }

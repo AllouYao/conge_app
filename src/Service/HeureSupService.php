@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use App\Entity\DossierPersonal\HeureSup;
 use App\Entity\DossierPersonal\Personal;
 use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Repository\DossierPersonal\PersonalRepository;

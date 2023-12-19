@@ -2,7 +2,6 @@
 
 namespace App\Entity\DossierPersonal;
 
-use App\Entity\DossierPersonal\HeureSup;
 use App\Entity\Impots\ChargeEmployeur;
 use App\Entity\Impots\ChargePersonals;
 use App\Entity\Paiement\Campagne;
@@ -10,6 +9,7 @@ use App\Entity\Paiement\Payroll;
 use App\Entity\Settings\Category;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Utils\Horodatage;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -41,7 +41,7 @@ class Personal
     private ?string $genre = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $birthday = null;
+    private ?DateTimeInterface $birthday = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $lieuNaissance = null;
@@ -187,12 +187,12 @@ class Personal
         return $this;
     }
 
-    public function getBirthday(): ?\DateTimeInterface
+    public function getBirthday(): ?DateTimeInterface
     {
         return $this->birthday;
     }
 
-    public function setBirthday(?\DateTimeInterface $birthday): static
+    public function setBirthday(?DateTimeInterface $birthday): static
     {
         $this->birthday = $birthday;
 

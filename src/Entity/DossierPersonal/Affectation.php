@@ -4,6 +4,7 @@ namespace App\Entity\DossierPersonal;
 
 use App\Repository\DossierPersonal\AffectationRepository;
 use App\Utils\Horodatage;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -20,7 +21,7 @@ class Affectation
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $dateEffet = null;
+    private ?DateTimeInterface $dateEffet = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $groupeTravail = null;
@@ -42,12 +43,12 @@ class Affectation
         return $this->id;
     }
 
-    public function getDateEffet(): ?\DateTimeInterface
+    public function getDateEffet(): ?DateTimeInterface
     {
         return $this->dateEffet;
     }
 
-    public function setDateEffet(?\DateTimeInterface $dateEffet): static
+    public function setDateEffet(?DateTimeInterface $dateEffet): static
     {
         $this->dateEffet = $dateEffet;
 

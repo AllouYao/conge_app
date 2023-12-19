@@ -15,8 +15,7 @@ class AccountBankType extends AbstractType
             ->add('bankId')
             ->add('code')
             ->add('numCompte')
-            ->add('rib')
-        ;
+            ->add('rib');
     }
 
     public function configureOptions(OptionsResolver $resolver): void

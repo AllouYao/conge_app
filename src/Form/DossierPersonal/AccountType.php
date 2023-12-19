@@ -23,7 +23,7 @@ class AccountType extends AbstractType
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('p')
                         ->where('p.modePaiement in (:modePaiement)')
-                        ->setParameter('modePaiement',[Status::VIREMENT,Status::CHEQUE]);
+                        ->setParameter('modePaiement', [Status::VIREMENT, Status::CHEQUE]);
                 },
                 'placeholder' => 'Sélectionner un matricule',
                 'attr' => [
@@ -33,37 +33,36 @@ class AccountType extends AbstractType
                     return [
                         'data-name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
                         'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y'),
-                        'data-category' => '( '.$personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' .$personal->getCategorie()->getIntitule()
+                        'data-category' => '( ' . $personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' . $personal->getCategorie()->getIntitule()
                     ];
                 }
             ])
-            ->add('name',TextType::class, [
+            ->add('name', TextType::class, [
                 'mapped' => false,
                 'attr' => [
                     'readonly' => 'readonly'
                 ]
             ])
-            ->add('hireDate',TextType::class, [
+            ->add('hireDate', TextType::class, [
                 'mapped' => false,
                 'attr' => [
                     'readonly' => 'readonly'
                 ]
             ])
-            ->add('category',TextType::class, [
+            ->add('category', TextType::class, [
                 'mapped' => false,
                 'attr' => [
                     'readonly' => 'readonly'
                 ]
             ])
-            ->add('accountBanks',CollectionType::class, [
+            ->add('accountBanks', CollectionType::class, [
                 'entry_type' => AccountBankType::class,
                 "entry_options" => [
                     "label" => false
                 ],
                 'allow_add' => true,
                 'allow_delete' => true,
-            ])
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -71,7 +71,7 @@ class PrimesController extends AbstractController
     #[Route('/{uuid}/delete', name: 'delete', methods: ['POST'])]
     public function delete(Request $request, Primes $prime, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$prime->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $prime->getId(), $request->request->get('_token'))) {
             $entityManager->remove($prime);
             $entityManager->flush();
         }

@@ -2,9 +2,9 @@
 
 namespace App\Entity\DossierPersonal;
 
-use App\Entity\DossierPersonal\Personal;
 use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Utils\Horodatage;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -20,10 +20,10 @@ class HeureSup
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $startedHour = null;
+    private ?DateTimeInterface $startedHour = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $endedHour = null;
+    private ?DateTimeInterface $endedHour = null;
 
     #[ORM\ManyToOne(inversedBy: 'heureSups')]
     private ?Personal $personal = null;
@@ -35,34 +35,34 @@ class HeureSup
     private ?string $typeJourOrNuit = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $startedDate = null;
+    private ?DateTimeInterface $startedDate = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $endedDate = null;
+    private ?DateTimeInterface $endedDate = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getStartedHour(): ?\DateTimeInterface
+    public function getStartedHour(): ?DateTimeInterface
     {
         return $this->startedHour;
     }
 
-    public function setStartedHour(\DateTimeInterface $startedHour): static
+    public function setStartedHour(DateTimeInterface $startedHour): static
     {
         $this->startedHour = $startedHour;
 
         return $this;
     }
 
-    public function getEndedHour(): ?\DateTimeInterface
+    public function getEndedHour(): ?DateTimeInterface
     {
         return $this->endedHour;
     }
 
-    public function setEndedHour(\DateTimeInterface $endedHour): static
+    public function setEndedHour(DateTimeInterface $endedHour): static
     {
         $this->endedHour = $endedHour;
 
@@ -105,24 +105,24 @@ class HeureSup
         return $this;
     }
 
-    public function getStartedDate(): ?\DateTimeInterface
+    public function getStartedDate(): ?DateTimeInterface
     {
         return $this->startedDate;
     }
 
-    public function setStartedDate(\DateTimeInterface $startedDate): static
+    public function setStartedDate(DateTimeInterface $startedDate): static
     {
         $this->startedDate = $startedDate;
 
         return $this;
     }
 
-    public function getEndedDate(): ?\DateTimeInterface
+    public function getEndedDate(): ?DateTimeInterface
     {
         return $this->endedDate;
     }
 
-    public function setEndedDate(\DateTimeInterface $endedDate): static
+    public function setEndedDate(DateTimeInterface $endedDate): static
     {
         $this->endedDate = $endedDate;
 

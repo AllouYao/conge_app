@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+
 #[Route('/dossier/personal/account_bank', name: 'personal_account_bank_')]
 class AccountBankController extends AbstractController
 {
@@ -21,26 +22,24 @@ class AccountBankController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'new', methods: ['GET','POST'])]
+    #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(
-        Request $request,
+        Request                $request,
         EntityManagerInterface $manager
     ): Response
     {
         $form = $this->createForm(AccountType::class);
         $form->handleRequest($request);
-        if($form->isSubmitted() && $form->isValid())
-        {
+        if ($form->isSubmitted() && $form->isValid()) {
             $accountBanks = $form->get('accountBanks')->getData();
             $personal = $form->get('personal')->getData();
-            foreach ($accountBanks as $accountBank)
-            {
+            foreach ($accountBanks as $accountBank) {
                 $accountBank->setPersonal($personal);
                 $manager->persist($accountBank);
             }
             $manager->flush();
             flash()->addSuccess('Compte banque crée avec succès.');
-            return  $this->redirectToRoute('personal_account_bank_index');
+            return $this->redirectToRoute('personal_account_bank_index');
         }
         return $this->render('dossier_personal/account_bank/new.html.twig', [
             'form' => $form,
@@ -50,15 +49,14 @@ class AccountBankController extends AbstractController
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Personal $personal, EntityManagerInterface $manager): Response
     {
-        $form = $this->createForm(AccountType::class,[
+        $form = $this->createForm(AccountType::class, [
             'personal' => $personal,
             'accountBanks' => $personal->getAccountBanks()
         ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            foreach ($personal->getAccountBanks() as $accountBank)
-            {
+            foreach ($personal->getAccountBanks() as $accountBank) {
                 $accountBank->setPersonal($personal);
                 $manager->persist($accountBank);
             }

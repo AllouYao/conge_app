@@ -21,13 +21,12 @@ class SmigRepository extends ServiceEntityRepository
         parent::__construct($registry, Smig::class);
     }
 
-    public function active():?Smig
+    public function active(): ?Smig
     {
         return $this->createQueryBuilder('s')
             ->where('s.isActive = true')
             ->setMaxResults(1)
             ->getQuery()
-            ->getOneOrNullResult()
-        ;
+            ->getOneOrNullResult();
     }
 }

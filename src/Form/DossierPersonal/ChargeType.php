@@ -27,7 +27,7 @@ class ChargeType extends AbstractType
                         'data-id' => $personal->getId(),
                         'data-name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
                         'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y'),
-                        'data-category' => '( '.$personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' . $personal->getCategorie()
+                        'data-category' => '( ' . $personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' . $personal->getCategorie()
                     ];
                 }
             ])

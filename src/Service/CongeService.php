@@ -64,18 +64,6 @@ class CongeService
         $conge->setAllocationConge($allocationConge);
     }
 
-    public function echelonConge(mixed $anciennete): int
-    {
-        return match ($anciennete) {
-            $anciennete >= 5 && $anciennete < 10 => 1,
-            $anciennete >= 10 && $anciennete < 15 => 2,
-            $anciennete >= 15 && $anciennete < 20 => 3,
-            $anciennete >= 20 && $anciennete < 25 => 5,
-            $anciennete > 25 => 7,
-            default => 0,
-        };
-    }
-
     public function suppConger(mixed $genre, mixed $chargPeapleOfPersonal, mixed $today): int|float
     {
         $nbJrCongeSupp = 0;
@@ -92,6 +80,17 @@ class CongeService
         return $nbJrCongeSupp;
     }
 
+    public function echelonConge(mixed $anciennete): int
+    {
+        return match ($anciennete) {
+            $anciennete >= 5 && $anciennete < 10 => 1,
+            $anciennete >= 10 && $anciennete < 15 => 2,
+            $anciennete >= 15 && $anciennete < 20 => 3,
+            $anciennete >= 20 && $anciennete < 25 => 5,
+            $anciennete > 25 => 7,
+            default => 0,
+        };
+    }
 
     public function getWeekdaysInYear($year): int
     {

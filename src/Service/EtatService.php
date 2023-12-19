@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use App\Entity\DossierPersonal\Personal;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\Settings\PrimesRepository;
 use App\Utils\Status;

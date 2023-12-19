@@ -4,6 +4,7 @@ namespace App\Entity\DossierPersonal;
 
 use App\Repository\DossierPersonal\CongeRepository;
 use App\Utils\Horodatage;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -20,13 +21,13 @@ class Conge
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $dateDepart = null;
+    private ?DateTimeInterface $dateDepart = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $dateRetour = null;
+    private ?DateTimeInterface $dateRetour = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $dateDernierRetour = null;
+    private ?DateTimeInterface $dateDernierRetour = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $salaireMoyen = null;
@@ -52,36 +53,36 @@ class Conge
         return $this->id;
     }
 
-    public function getDateDepart(): ?\DateTimeInterface
+    public function getDateDepart(): ?DateTimeInterface
     {
         return $this->dateDepart;
     }
 
-    public function setDateDepart(\DateTimeInterface $dateDepart): static
+    public function setDateDepart(DateTimeInterface $dateDepart): static
     {
         $this->dateDepart = $dateDepart;
 
         return $this;
     }
 
-    public function getDateRetour(): ?\DateTimeInterface
+    public function getDateRetour(): ?DateTimeInterface
     {
         return $this->dateRetour;
     }
 
-    public function setDateRetour(\DateTimeInterface $dateRetour): static
+    public function setDateRetour(DateTimeInterface $dateRetour): static
     {
         $this->dateRetour = $dateRetour;
 
         return $this;
     }
 
-    public function getDateDernierRetour(): ?\DateTimeInterface
+    public function getDateDernierRetour(): ?DateTimeInterface
     {
         return $this->dateDernierRetour;
     }
 
-    public function setDateDernierRetour(?\DateTimeInterface $dateDernierRetour): static
+    public function setDateDernierRetour(?DateTimeInterface $dateDernierRetour): static
     {
         $this->dateDernierRetour = $dateDernierRetour;
 

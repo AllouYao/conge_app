@@ -2,6 +2,8 @@
 
 namespace App\Utils;
 
+use DateTimeImmutable;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid;
@@ -12,10 +14,10 @@ trait Horodatage
     private ?string $uuid;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $createdAt;
+    private ?DateTimeInterface $createdAt;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $updatedAt;
+    private ?DateTimeInterface $updatedAt;
 
     public function getUuid(): ?string
     {
@@ -30,7 +32,7 @@ trait Horodatage
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
@@ -38,12 +40,12 @@ trait Horodatage
     #[ORM\PrePersist]
     public function setCreatedAt(): static
     {
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
 
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }
@@ -52,7 +54,7 @@ trait Horodatage
     #[ORM\PreUpdate]
     public function setUpdatedAt(): static
     {
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
 
         return $this;
     }
