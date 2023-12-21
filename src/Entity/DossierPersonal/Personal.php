@@ -122,6 +122,9 @@ class Personal
     #[ORM\OneToMany(mappedBy: 'personal', targetEntity: HeureSup::class)]
     private Collection $heureSups;
 
+    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Absence::class)]
+    private Collection $absences;
+
     public function __construct()
     {
         $this->chargePeople = new ArrayCollection();
@@ -132,6 +135,7 @@ class Personal
         $this->payrolls = new ArrayCollection();
         $this->conges = new ArrayCollection();
         $this->heureSups = new ArrayCollection();
+        $this->absences = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -677,6 +681,36 @@ class Personal
             // set the owning side to null (unless already changed)
             if ($heureSup->getPersonal() === $this) {
                 $heureSup->setPersonal(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Absence>
+     */
+    public function getAbsences(): Collection
+    {
+        return $this->absences;
+    }
+
+    public function addAbsence(Absence $absence): static
+    {
+        if (!$this->absences->contains($absence)) {
+            $this->absences->add($absence);
+            $absence->setPersonal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAbsence(Absence $absence): static
+    {
+        if ($this->absences->removeElement($absence)) {
+            // set the owning side to null (unless already changed)
+            if ($absence->getPersonal() === $this) {
+                $absence->setPersonal(null);
             }
         }
 

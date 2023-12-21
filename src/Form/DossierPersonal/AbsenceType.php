@@ -1,37 +1,31 @@
 <?php
 
-
 namespace App\Form\DossierPersonal;
 
-use App\Entity\DossierPersonal\HeureSup;
-use App\Form\CustomType\DateCustomType;
-use App\Utils\Status;
+use App\Entity\DossierPersonal\Absence;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\TimeType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use App\Form\CustomType\DateCustomType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use App\Utils\Status;
 
-class HeureSupType extends AbstractType
+
+class AbsenceType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('startedDate', DateCustomType::class)
             ->add('endedDate', DateCustomType::class)
-            ->add('startedHour', TimeType::class ,[
-                'widget' => 'single_text',
-            ])
-            ->add('endedHour', TimeType::class, [
-                'widget' => 'single_text',
-            ])
             ->add(
-            'typeDay',
+                'justified',
                 ChoiceType::class,
                 [
                     'choices' => [
-                        'NORMAL' => Status::NORMAL,
-                        'DIMANCHE/FÉRIÉ' => Status::DIMANCHE_FERIE,
+                        'NON' => false,
+                        'OUI' => true,
                     ],
                     'label' => 'Type',
                     'multiple' => false,
@@ -42,27 +36,34 @@ class HeureSupType extends AbstractType
                 ]
             )
             ->add(
-                'typeJourOrNuit',
+                'type',
                 ChoiceType::class,
                 [
-                    'choices' => [
-                        'JOUR' => Status::JOUR,
-                        'NUIT' => Status::NUIT,
-                    ],
-                    'label' => 'Type',
+                    'choices' => $this->getTypeAbsences(),
+                    'label' => 'Minute',
                     'multiple' => false,
                     'expanded' => false,
                     'attr' => [
                         'class' => 'form-select select2',
                     ],
                 ]
-                );
+            )
+            ->add('description',TextType::class);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => HeureSup::class,
+            'data_class' => Absence::class,
         ]);
+    }
+    private function getTypeAbsences(){
+        $typeAbsences = [];
+        foreach(Status::TYPE_ABSENCE as $typeAbsence){
+            
+            $typeAbsences[$typeAbsence] =  $typeAbsence;
+            
+        }
+        return $typeAbsences;
     }
 }

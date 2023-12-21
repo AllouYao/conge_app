@@ -1,0 +1,47 @@
+<fieldset>
+    <legend>Information personnel salarié</legend>
+    <div class="mb-2 row">
+        <label class="col-md-2 col-form-label">Matricule <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.personal) }}
+        </div>
+        <label class="col-md-2 col-form-label">Nom & Prénom(s) <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.name) }}
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label class="col-md-2 col-form-label">Date d'embauche <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.hireDate) }}
+        </div>
+        <label class="col-md-2 col-form-label">Catégorie <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.category) }}
+        </div>
+    </div>
+</fieldset>
+<br>
+<fieldset>
+    <legend>Information absence</legend>
+    <div class="row">
+        <div class="col-md-12 table-responsive">
+            <table class="table table-bordered table-sm table-responsive-sm">
+                <thead class="table-secondary">
+                <tr>
+                    <th class="text-center">Type d'absence</th>
+                    <th class="text-center">Date début</th>
+                    <th class="text-center">Date fin</th>
+                    <th class="text-center">Justificatif apporté</th>
+                    <th class="text-center">Description</th>
+                    <th class="text-center">Action</th>
+                </tr>
+                </thead>
+                {% form_theme form 'dossier_personal/absence/_collection_absence.html.twig' %}
+                <tbody id="detail_absence_table">
+                    {{ form_widget(form.absence) }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</fieldset>
