@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\DossierPersonal\Conge;
 use App\Repository\DossierPersonal\CongeRepository;
 use App\Repository\Paiement\PayrollRepository;
+use App\Repository\Settings\PrimesRepository;
 use App\Utils\Status;
 use Carbon\Carbon;
 use Doctrine\ORM\NonUniqueResultException;
@@ -18,34 +19,37 @@ class CongeService
 
     private CongeRepository $congeRepository;
     private PayrollRepository $payrollRepository;
+    private PrimesRepository $primesRepository;
 
-    public function __construct(CongeRepository $congeRepository, PayrollRepository $payrollRepository)
+    public function __construct(CongeRepository $congeRepository, PayrollRepository $payrollRepository, PrimesRepository $primesRepository)
     {
         $this->congeRepository = $congeRepository;
         $this->payrollRepository = $payrollRepository;
+        $this->primesRepository = $primesRepository;
     }
 
     /**
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    #[NoReturn] public function calculate(Conge &$conge): void
+    #[NoReturn] public function calculate(Conge $conge): void
     {
         $personal = $conge->getPersonal();
         $today = Carbon::now();
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
-        $anciennete = ceil(($dateEmbauche->diff($today)->y));
+        $anciennete = ceil(($today->diff($dateEmbauche)->y));
         $lastConge = $this->congeRepository->getLastConge($personal);
         $returnDate = $lastConge?->getDateDernierRetour();
+
 
         $genre = $personal->getGenre();
         $chargPeapleOfPersonal = $personal->getChargePeople();
         $suppConger = $this->suppConger($genre, $chargPeapleOfPersonal, $today);
 
         if ($genre === Status::FEMININ) {
-            $moisTravailler = ceil((($dateEmbauche->diff($today)->days) + $this->echelonConge($anciennete) + $suppConger) / 30);
+            $moisTravailler = ceil((($today->diff($dateEmbauche)->days) + $this->echelonConge($anciennete) + $suppConger) / 30);
         } else {
-            $moisTravailler = ceil((($dateEmbauche->diff($today)->days) + $this->echelonConge($anciennete)) / 30);
+            $moisTravailler = (($today->diff($dateEmbauche)->days) + $this->echelonConge($anciennete)) / 30;
         }
 
         $moisAcquis = self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE * $moisTravailler;
@@ -57,11 +61,16 @@ class CongeService
         }
 
         $salaireCategoriel = $personal->getCategorie()->getAmount();
-        $gratification = ($salaireCategoriel * 75) / 100;
+        $tauxGratification = $this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux();
+        $gratification = ($salaireCategoriel * (int)$tauxGratification) / 100;
         $salaireMoyen = ceil(($salaireBrutPeriodique + $gratification) / $moisTravailler);
         $conge->setSalaireMoyen($salaireMoyen);
-        $allocationConge = ceil(($salaireMoyen * $moisAcquis) / 30);
-        $conge->setAllocationConge($allocationConge);
+        $allocationConge = ($salaireMoyen * $moisAcquis) / 30;
+        $conge->setAllocationConge($allocationConge)
+            ->getPersonal()->getSalary()
+            ->setCongePayer($allocationConge)
+            ->setGratification($gratification);
+
     }
 
     public function suppConger(mixed $genre, mixed $chargPeapleOfPersonal, mixed $today): int|float

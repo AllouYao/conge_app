@@ -63,12 +63,14 @@ class HeureSupService
         $month = $today->month;
         $personals = $this->personalRepository->findBy(['id' => $perso]);
         foreach ($personals as $personal) {
-            $salaireBase = $personal->getCategorie()->getAmount();
+            $salaireBase = (int)$personal->getCategorie()->getAmount();
+            $tauxHoraire = (double)$personal->getSalary()->getTauxHoraire();
+
         }
 
         $heureSups = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
-        $tauxHoraire = ceil($salaireBase / Status::TAUX_HEURE);
-        $salaireHorraire = 0;
+        $salaireHoraire = ceil($salaireBase / $tauxHoraire);
+        $amountHeureSup = 0;
 
         foreach ($heureSups as $sup) {
             $JourNormalOrFerie = $sup->getTypeDay(); // normal/Férié/dimanche
@@ -79,22 +81,22 @@ class HeureSupService
             $totalHorraire = $diffHours->format('%h');
             if ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire <= 6) {
                 // 15% jour normal ~ 115%
-                $salaireHorraire = $salaireHorraire + ($tauxHoraire * Status::TAUX_JOUR_OUVRABLE) * $totalHorraire;
+                $amountHeureSup = $amountHeureSup + ($salaireHoraire * Status::TAUX_JOUR_OUVRABLE) * $totalHorraire;
             } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire > 6) {
                 // 50% jour normal ~ 150%
-                $salaireHorraire = $salaireHorraire + ($tauxHoraire * Status::TAUX_JOUR_OUVRABLE_EXTRA) * $totalHorraire;
+                $amountHeureSup = $amountHeureSup + ($salaireHoraire * Status::TAUX_JOUR_OUVRABLE_EXTRA) * $totalHorraire;
             } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
                 // 75% jour ferié or dimanche nuit ~ 175%
-                $salaireHorraire = $salaireHorraire + ($tauxHoraire * Status::TAUX_NUIT_OUVRABLE_OR_NON_OUVRABLE) * $totalHorraire;
+                $amountHeureSup = $amountHeureSup + ($salaireHoraire * Status::TAUX_NUIT_OUVRABLE_OR_NON_OUVRABLE) * $totalHorraire;
             } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::NUIT) {
                 // 75% jour ferié or dimanche nuit ~ 175%
-                $salaireHorraire = $salaireHorraire + ($tauxHoraire * Status::TAUX_NUIT_OUVRABLE_OR_NON_OUVRABLE) * $totalHorraire;
+                $amountHeureSup = $amountHeureSup + ($salaireHoraire * Status::TAUX_NUIT_OUVRABLE_OR_NON_OUVRABLE) * $totalHorraire;
             } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::NUIT) {
                 // 75% jour ferié or dimanche nuit ~ 200%
-                $salaireHorraire = $salaireHorraire + ($tauxHoraire * Status::TAUX_NUIT_NON_OUVRABLE) * $totalHorraire;
+                $amountHeureSup = $amountHeureSup + ($salaireHoraire * Status::TAUX_NUIT_NON_OUVRABLE) * $totalHorraire;
             }
         }
-        return $salaireHorraire;
+        return $amountHeureSup;
     }
 
 }

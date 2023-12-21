@@ -28,7 +28,12 @@ class HeureSupController extends AbstractController
     private $heureSupRepository;
 
 
-    public function __construct(EntityManagerInterface $entityManager, HeureSupService $heureSupService, PersonalRepository $personalRepository, HeureSupRepository $heureSupRepository)
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        HeureSupService        $heureSupService,
+        PersonalRepository     $personalRepository,
+        HeureSupRepository     $heureSupRepository
+    )
     {
         $this->entityManager = $entityManager;
         $this->heureSupService = $heureSupService;
@@ -117,8 +122,13 @@ class HeureSupController extends AbstractController
     #[Route('/supp_book', name: 'supp_book', methods: ['GET'])]
     public function heureSuppBook(): Response
     {
+        $today = Carbon::now();
+        $years = $today->year;
+        $month = $today->month;
         return $this->render('dossier_personal/heure_sup/sup_book.html.twig', [
             'heureSups' => $this->heureSupRepository->findAll(),
+            'mois' => $month,
+            'annee' => $years
         ]);
     }
 
@@ -130,65 +140,73 @@ class HeureSupController extends AbstractController
         ]);
     }
 
+
     /**
      * @throws Exception
      */
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request,): Response
     {
-
         $form = $this->createForm(PersonalHeureSupType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $PersonalHeureSup = $form->get('heureSup')->getData();
             $personal = $form->get('personal')->getData();
+            $tauxHoraire = (double)$personal->getSalary()->getTauxHoraire();
+            $salaireBase = (int)$personal->getCategorie()->getAmount();
+            $salaireHoraire = ceil($salaireBase / $tauxHoraire);
 
             foreach ($PersonalHeureSup as $heureSup) {
-
                 // Heure debut
                 $StartedfullDate = $heureSup->getStartedDate();
                 $StartedfullTime = $heureSup->getStartedHour();
-
                 $startedDate = $StartedfullDate->format('Y-m-d');
                 $startedHour = $StartedfullTime->format('H:i:s');
-
                 $fullNewDateTime = $startedDate . '' . $startedHour;
-
                 $newFullDate = new DateTime($fullNewDateTime);
-
                 $heureSup->setStartedHour($newFullDate);
 
                 // Heure fin
                 $endedfullDate = $heureSup->getEndedDate();
                 $endedfullTime = $heureSup->getEndedHour();
-
                 $endedDate = $endedfullDate->format('Y-m-d');
                 $endedHour = $endedfullTime->format('H:i:s');
-
                 $fullNewDateTime = $endedDate . '' . $endedHour;
-
                 $newFullDate = new DateTime($fullNewDateTime);
-
                 $heureSup->setEndedHour($newFullDate);
 
+                $JourNormalOrFerie = $heureSup->getTypeDay(); // normal/Férié/dimanche
+                $startedHour = $heureSup->getStartedHour(); // heure debut
+                $endedHour = $heureSup->getEndedHour(); // heure fin
+                $jourOrNuit = $heureSup->getTypeJourOrNuit(); // Jour/nuit
+                $diffHours = $startedHour->diff($endedHour);
+                $totalHorraire = (int)$diffHours->format('%h');
+                $amountHeureSup = 0;
+                if ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire <= 6) {
+                    // 15% jour normal ~ 115%
+                    $amountHeureSup = $amountHeureSup + ($salaireHoraire * Status::TAUX_JOUR_OUVRABLE) * $totalHorraire;
+                } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire > 6) {
+                    // 50% jour normal ~ 150%
+                    $amountHeureSup = $amountHeureSup + ($salaireHoraire * Status::TAUX_JOUR_OUVRABLE_EXTRA) * $totalHorraire;
+                } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
+                    // 75% jour ferié or dimanche nuit ~ 175%
+                    $amountHeureSup = $amountHeureSup + ($salaireHoraire * Status::TAUX_NUIT_OUVRABLE_OR_NON_OUVRABLE) * $totalHorraire;
+                } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::NUIT) {
+                    // 75% jour ferié or dimanche nuit ~ 175%
+                    $amountHeureSup = $amountHeureSup + ($salaireHoraire * Status::TAUX_NUIT_OUVRABLE_OR_NON_OUVRABLE) * $totalHorraire;
+                } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::NUIT) {
+                    // 75% jour ferié or dimanche nuit ~ 200%
+                    $amountHeureSup = $amountHeureSup + ($salaireHoraire * Status::TAUX_NUIT_NON_OUVRABLE) * $totalHorraire;
+                }
 
+                $personal->getSalary()->setHeursupplementaire($amountHeureSup);
                 $heureSup->setPersonal($personal);
                 $this->entityManager->persist($heureSup);
             }
-            $this->entityManager->persist($personal);
-
             $this->entityManager->flush();
             flash()->addSuccess('Heure suplementaire ajouté avec succès.');
             return $this->redirectToRoute('personal_heure_sup_index', [], Response::HTTP_SEE_OTHER);
         }
-
-        /* test
-                $personal = $this->personalRepository->find(3);
-
-                $heureSups =  $this->heureSupService->getAmountByMonth($personal, 12, 2023);
-
-                dd($heureSups);
-        */
 
         return $this->render('dossier_personal/heure_sup/new.html.twig', [
             'form' => $form
@@ -198,9 +216,11 @@ class HeureSupController extends AbstractController
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Personal $personal, Request $request): Response
     {
-        $form = $this->createForm(PersonalHeureSupType::class);
+        $form = $this->createForm(PersonalHeureSupType::class, [
+            'personal' => $personal,
+            'heureSup' => $personal->getHeureSups()
+        ]);
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             foreach ($personal->getHeureSups() as $heureSup) {
                 $heureSup->setPersonal($personal);
@@ -213,7 +233,7 @@ class HeureSupController extends AbstractController
         }
 
         return $this->render('dossier_personal/heure_sup/edit.html.twig', [
-            'charges' => $personal,
+            'personals' => $personal,
             'form' => $form,
             'editing' => true
         ]);

@@ -70,3 +70,4 @@ chargePeople();
 accountPersonal();
 depart();
 conge();
+heureSupp();

@@ -59,13 +59,7 @@ class CongeType extends AbstractType
 
                 ]
             ])
-            ->add('commentaires', TextareaType::class, [
-                'attr' => [
-                    'style' => 'height:100px',
-                    'class' => 'form-control'
-                ],
-                'required' => false
-            ]);
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

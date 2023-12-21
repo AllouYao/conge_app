@@ -57,18 +57,16 @@ class PersonalHeureSupType extends AbstractType
             ])
             ->add('heureSup', CollectionType::class, [
                 "entry_type" => HeureSupType::class,
-                "allow_add" => true,
-                "allow_delete" => true,
                 "entry_options" => [
                     "label" => false
-                ]
+                ],
+                'allow_add' => true,
+                'allow_delete' => true,
             ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([
-            'data_class' => null,
-        ]);
+        $resolver->setDefaults([]);
     }
 }

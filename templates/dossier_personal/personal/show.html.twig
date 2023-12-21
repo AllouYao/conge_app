@@ -99,6 +99,8 @@
                             <tr style="font-size: 11px">
                                 <th class="text-center">Catégorie</th>
                                 <th class="text-center">Niveau de formation</th>
+                                <th class="text-center">Fonction</th>
+                                <th class="text-center">Département ou Service</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -106,6 +108,8 @@
                                 <td class="text-start"> ({{ personal.categorie.categorySalarie }})
                                     - {{ personal.categorie.intitule }}</td>
                                 <td class="text-start">{{ personal.niveauFormation|capitalize }}</td>
+                                <td class="text-start">{{ personal.fonction|capitalize }}</td>
+                                <td class="text-start">{{ personal.service|capitalize }}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -119,7 +123,6 @@
                                 <th class="text-center">Type de contrat</th>
                                 <th class="text-center">Date d’embauche</th>
                                 <th class="text-center">Date d’effet</th>
-                                <th class="text-center">Ancienneté</th>
                                 <th class="text-center">Type de temps contractuel</th>
                             </tr>
                             </thead>
@@ -128,7 +131,6 @@
                                 <td class="text-start">{{ personal.contract.typeContrat }}</td>
                                 <td class="text-center">{{ personal.contract.dateEmbauche|date('d-m-Y') }}</td>
                                 <td class="text-center">{{ personal.contract.dateEffet|date('d-m-Y') }}</td>
-                                <td class="text-center">{{ personal.ancienity }}</td>
                                 <td class="text-start">{{ personal.contract.tempsContractuel|capitalize }}</td>
                             </tr>
                             </tbody>

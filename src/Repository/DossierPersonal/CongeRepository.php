@@ -61,7 +61,6 @@ class CongeRepository extends ServiceEntityRepository
                 'co.dateDepart as depart',
                 'co.salaireMoyen as salaire_moyen',
                 'co.allocationConge as allocation_conge',
-                'co.commentaires as commentaire',
                 'co.isConge as en_conge',
                 'co.dateDernierRetour as dernier_retour',
                 'co.uuid'

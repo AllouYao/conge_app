@@ -35,9 +35,6 @@ class Conge
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $allocationConge = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $commentaires = null;
-
     #[ORM\Column]
     private ?bool $isConge = null;
 
@@ -109,18 +106,6 @@ class Conge
     public function setAllocationConge(?string $allocationConge): static
     {
         $this->allocationConge = $allocationConge;
-
-        return $this;
-    }
-
-    public function getCommentaires(): ?string
-    {
-        return $this->commentaires;
-    }
-
-    public function setCommentaires(?string $commentaires): static
-    {
-        $this->commentaires = $commentaires;
 
         return $this;
     }

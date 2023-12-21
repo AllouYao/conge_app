@@ -64,9 +64,6 @@ class Personal
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $email = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $ancienity = null;
-
     #[ORM\ManyToOne(inversedBy: 'personals')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Category $categorie = null;
@@ -121,6 +118,12 @@ class Personal
 
     #[ORM\OneToMany(mappedBy: 'personal', targetEntity: HeureSup::class)]
     private Collection $heureSups;
+
+    #[ORM\Column(length: 255)]
+    private ?string $fonction = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $service = null;
 
     public function __construct()
     {
@@ -283,17 +286,6 @@ class Personal
         return $this;
     }
 
-    public function getAncienity(): ?string
-    {
-        return $this->ancienity;
-    }
-
-    public function setAncienity(?string $ancienity): static
-    {
-        $this->ancienity = $ancienity;
-
-        return $this;
-    }
 
     public function getCategorie(): ?Category
     {
@@ -679,6 +671,30 @@ class Personal
                 $heureSup->setPersonal(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFonction(): ?string
+    {
+        return $this->fonction;
+    }
+
+    public function setFonction(string $fonction): static
+    {
+        $this->fonction = $fonction;
+
+        return $this;
+    }
+
+    public function getService(): ?string
+    {
+        return $this->service;
+    }
+
+    public function setService(string $service): static
+    {
+        $this->service = $service;
 
         return $this;
     }

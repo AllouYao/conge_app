@@ -2,11 +2,19 @@
 
 namespace App\Controller\Paiement;
 
+use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Campagne;
 use App\Form\Paiement\CampagneType;
+use App\Repository\DossierPersonal\CongeRepository;
+use App\Repository\DossierPersonal\PersonalRepository;
+use App\Repository\Impots\CategoryChargeRepository;
 use App\Repository\Paiement\CampagneRepository;
 use App\Repository\Paiement\PayrollRepository;
+use App\Service\EtatService;
+use App\Service\HeureSupService;
 use App\Service\PayrollService;
+use App\Utils\Status;
+use Carbon\Carbon;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -23,6 +31,10 @@ class CampagneController extends AbstractController
     private PayrollService $payrollService;
     private PayrollRepository $payrollRepository;
     private CampagneRepository $campagneRepository;
+    private EtatService $etatService;
+    private HeureSupService $heureSupService;
+    private CongeRepository $congeRepository;
+    private CategoryChargeRepository $categoryChargeRepository;
 
     /**
      * @param PayrollService $payrollService
@@ -30,14 +42,22 @@ class CampagneController extends AbstractController
      * @param CampagneRepository $campagneRepository
      */
     public function __construct(
-        PayrollService     $payrollService,
-        PayrollRepository  $payrollRepository,
-        CampagneRepository $campagneRepository
+        PayrollService           $payrollService,
+        PayrollRepository        $payrollRepository,
+        CampagneRepository       $campagneRepository,
+        EtatService              $etatService,
+        HeureSupService          $heureSupService,
+        CongeRepository          $congeRepository,
+        CategoryChargeRepository $categoryChargeRepository
     )
     {
         $this->payrollService = $payrollService;
         $this->payrollRepository = $payrollRepository;
         $this->campagneRepository = $campagneRepository;
+        $this->etatService = $etatService;
+        $this->heureSupService = $heureSupService;
+        $this->congeRepository = $congeRepository;
+        $this->categoryChargeRepository = $categoryChargeRepository;
     }
 
     #[Route('/index', name: 'livre', methods: ['GET'])]
@@ -189,6 +209,89 @@ class CampagneController extends AbstractController
         $manager->flush();
         $this->addFlash('success', 'Campagne fermée avec succès');
         return $this->redirectToRoute('app_home');
+
     }
 
+    #[Route('/bulletin/{id}', name: 'make_bulletin', methods: ['GET'])]
+    public function makeBulletin(PersonalRepository $personalRepository, Personal $personal): Response
+    {
+        $data = [
+            'fonction' => 'GERANTE',
+            'departement' => 'DIRECTION',
+            'taux_its' => '0% à 32%',
+            'acompte_avance_pret' => 0,
+        ];
+        $dataPayroll = [];
+        $personal = $personalRepository->find($personal->getId());
+        $payrolls = $this->payrollRepository->findBulletinByCampaign(true, $personal);
+        $today = Carbon::now();
+        foreach ($payrolls as $index => $payroll) {
+            $nombreEnfant = $personal->getChargePeople()->count();
+            $anciennete = ceil(($payroll['date_embauche']->diff($today)->y));
+            $salaireHoraire = $payroll['base_salary'] / Status::TAUX_HEURE;
+            $primeAnciennete = $this->etatService->getPrimeAnciennete($payroll['personal_id']);
+            $amountHeureSupp = $this->heureSupService->getAmountHeursSuppByID($payroll['personal_id']);
+            $gratification = $this->etatService->getGratification($payroll['personal_id']);
+            $conges = $this->congeRepository->getLastCongeByID($payroll['personal_id']);
+            $allocationConger = $conges?->getAllocationConge();
+            $salaireBrut = $payroll['brut_salary'] + $primeAnciennete + $amountHeureSupp + $gratification + $allocationConger;
+            $salaireImposable = $payroll['imposable_salary'] + $primeAnciennete + $amountHeureSupp + $gratification + $allocationConger;
+            $categoryRateCNPS = $this->categoryChargeRepository->findOneBy(['codification' => 'CNPS'])->getValue();
+            $amountCnpsPersonal = ($salaireImposable * $categoryRateCNPS) / 100;
+
+            $dataPayroll = [
+                'period_debut' => $payroll['debut'],
+                'period_fin' => $payroll['fin'],
+                'matricule' => $payroll['personal_matricule'],
+                'index' => $index,
+                'grade' => $payroll['categories_name'],
+                'embauche' => $payroll['date_embauche'],
+                'anciennete' => $anciennete,
+                'numeroCnps' => $payroll['numero_cnps'],
+                'categorie_salarie' => $payroll['categories_code'],
+                'etat_civil' => $payroll['personal_etat_civil'],
+                'nombre_enfant' => $nombreEnfant,
+                'date_retour_dernier_conge' => '' ,
+                'fullName_salaried' => $payroll['first_name'] . ' ' . $payroll['last_name'],
+                'nombre_jour_conge' => 3,
+                'date_depart_conge' => '',
+                'date_retour_conge' => '',
+                'taux_horaire' => Status::TAUX_HEURE,
+                'salaire_horaire' => (int)$salaireHoraire,
+                'salaire_base' => (int)$payroll['base_salary'],
+                'prime_anciennete' => (int)$primeAnciennete,
+                'autre_prime_indemnite' => (int)$payroll['prime_juridique'],
+                'heure_supplementaire' => (int)$amountHeureSupp,
+                'gratification' => (int)$gratification,
+                'conge_payes' => (int)$allocationConger,
+                'salaire_brut' => (int)$salaireBrut,
+                'salaire_brut_imposable' => (int)$salaireImposable,
+                'taux_cnps' => $categoryRateCNPS,
+                'cnps_salaried' => (int)$amountCnpsPersonal,
+                'its_salaried' => (int)$payroll['personal_its'],
+                'retenue_diverse' => (int)$payroll['salary_cmu'] + (int)$payroll['salary_assurance'],
+                'total_retenue' => (int)$payroll['total_revenu_divers'],
+                'charge_salariale' => (int)$payroll['montant_fixcal_salary'],
+                'charge_patronal' => (int)$payroll['fixcal_amount_employeur'],
+                'avantage_nature' => (int)$payroll['prime_logement'],
+                'net_payer' => (int)$payroll['net_payer']
+            ];
+        }
+        //dd($dataPayroll);
+        return $this->render('paiement/campagne/bulletin.html.twig', [
+            'data' => $data,
+            'payrolls' => $dataPayroll
+        ]);
+    }
+
+    #[Route('/bulletin/{id}', name: 'bulletin', methods: ['GET'])]
+    public function bulletin(PersonalRepository $personalRepository, Personal $personal): void
+    {
+        $personal = $personalRepository->find($personal->getId());
+        $payrolls = $this->payrollRepository->findBulletinByCampaign(false, $personal);
+        if (!$payrolls) {
+            throw $this->createNotFoundException('Employé non trouvé');
+        }
+        dd($personal, $payrolls);
+    }
 }

@@ -28,7 +28,12 @@ class CongeController extends AbstractController
     private CongeService $congeService;
     private CampagneRepository $campagneRepository;
 
-    public function __construct(PersonalRepository $personalRepository, CongeRepository $congeRepository, CongeService $congeService, CampagneRepository $campagneRepository)
+    public function __construct(
+        PersonalRepository $personalRepository,
+        CongeRepository    $congeRepository,
+        CongeService       $congeService,
+        CampagneRepository $campagneRepository
+    )
     {
         $this->personalRepository = $personalRepository;
         $this->congeRepository = $congeRepository;
@@ -50,7 +55,8 @@ class CongeController extends AbstractController
         foreach ($personals as $personal) {
             $genre = $personal->getGenre();
             $chargPeapleOfPersonal = $personal->getChargePeople();
-            $anciennete = ceil($personal->getContract()->getDateEmbauche()->diff($today)->y);
+            $dateEmbauche = $personal->getContract()->getDateEmbauche();
+            $anciennete = ceil($today->diff($dateEmbauche)->y);
         }
         $suppConger = $this->congeService->suppConger($genre, $chargPeapleOfPersonal, $today);
         foreach ($conges as $conge => $item) {
@@ -71,7 +77,6 @@ class CongeController extends AbstractController
                 'dernier_conge' => date_format($item['dernier_retour'], 'd/m/Y'),
                 'salaire_moyen' => $item['salaire_moyen'],
                 'allocation_annuel' => $item['allocation_conge'],
-                'commentaire' => $item['commentaire'],
                 'en_conge_?' => $item['en_conge'] === true ? 'OUI' : 'NOM',
                 'modifier' => $this->generateUrl('conge_edit', ['uuid' => $item['uuid']])
             ];
@@ -82,8 +87,13 @@ class CongeController extends AbstractController
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(CongeRepository $congeRepository): Response
     {
+        $today = Carbon::now();
+        $years = $today->year;
+        $month = $today->month;
         return $this->render('dossier_personal/conge/index.html.twig', [
             'conges' => $congeRepository->findAll(),
+            'mois' => $month,
+            'annee' => $years
         ]);
     }
 
@@ -97,9 +107,10 @@ class CongeController extends AbstractController
         $conge = new Conge();
         $form = $this->createForm(CongeType::class, $conge);
         $form->handleRequest($request);
-
+        $today = Carbon::today();
         if ($form->isSubmitted() && $form->isValid()) {
             $dateDernierRetour = $form->get('dateRetour')->getData();
+            $date = new Carbon($dateDernierRetour);
             $personal = $form->get('personal')->getData();
             $active = $this->congeRepository->active($personal);
             $checkPersonalCampagne = $this->campagneRepository->checkPersonalInCampagne($personal);
@@ -107,7 +118,7 @@ class CongeController extends AbstractController
                 $this->addFlash('error', 'Monsieur ou Madame ' . $personal->getFirstName() . ' n\'est pas éligible pour obtenir un congé.');
                 return $this->redirectToRoute('conge_index');
             }
-            if ($active) {
+            if ($active && $today->diff($date)->days <= 30) {
                 $this->addFlash('error', 'Monsieur ou Madame ' . $personal->getFirstName() . ' n\'est pas encore de retour du congé précédent.');
                 return $this->redirectToRoute('conge_index');
             }
@@ -117,7 +128,6 @@ class CongeController extends AbstractController
                 ->setDateDernierRetour($dateDernierRetour)
                 ->setTypeConge(Status::CONGE_GLOBAL)
                 ->setIsConge(true);
-
             $entityManager->persist($conge);
             $entityManager->flush();
 
@@ -128,14 +138,6 @@ class CongeController extends AbstractController
         return $this->render('dossier_personal/conge/new.html.twig', [
             'conge' => $conge,
             'form' => $form,
-        ]);
-    }
-
-    #[Route('/{uuid}', name: 'show', methods: ['GET'])]
-    public function show(Conge $conge): Response
-    {
-        return $this->render('dossier_personal/conge/show.html.twig', [
-            'conge' => $conge,
         ]);
     }
 

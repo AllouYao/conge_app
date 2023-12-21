@@ -33,13 +33,13 @@ class HeureSupType extends AbstractType
                         'NORMAL' => Status::NORMAL,
                         'DIMANCHE/FÉRIÉ' => Status::DIMANCHE_FERIE,
                     ],
+                    'placeholder' => ' ',
                     'label' => 'Type',
                     'multiple' => false,
                     'expanded' => false,
                     'attr' => [
-                        'class' => 'form-select select2',
+                        'class' => 'form-select form-select-sm select2',
                     ],
-                    'data' => 'DEBUT'
                 ]
             )
             ->add(
@@ -50,13 +50,13 @@ class HeureSupType extends AbstractType
                         'JOUR' => Status::JOUR,
                         'NUIT' => Status::NUIT,
                     ],
+                    'placeholder' => ' ',
                     'label' => 'Type',
                     'multiple' => false,
                     'expanded' => false,
                     'attr' => [
-                        'class' => 'form-select select2',
+                        'class' => 'form-select form-select-sm select2',
                     ],
-                    'data' => 'DEBUT'
                 ]
             );
     }

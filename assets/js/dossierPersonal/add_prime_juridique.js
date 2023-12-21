@@ -148,20 +148,6 @@ const calculateSalaireNet = () => {
 
 };
 
-let getAnciennete = () => {
-    $('body').on('change', '#personal_contract_dateEmbauche, #personal_ancienity', function () {
-        let $dateEmbauche = $('#personal_contract_dateEmbauche').val();
-        $('#personal_ancienity').val(0)
-        let $today = new Date();
-        let date = new Date($dateEmbauche)
-        let $annee = $today.getFullYear()
-        let $anneA = date.getFullYear()
-
-        let $anciennete = $annee - $anneA;
-        //$anciennete.val($annee - $anneA)
-        $('#personal_ancienity').val($anciennete);
-    })
-}
 
 
 $('.prime-salary').each(function () {
@@ -210,7 +196,6 @@ $(`#personal_salary_avantage`).each(function () {
 
 
 
-getAnciennete()
 salaireBase()
 avantageNature()
 calculatePrimeJuridique()

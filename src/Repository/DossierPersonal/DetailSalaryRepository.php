@@ -6,6 +6,7 @@ use App\Entity\DossierPersonal\DetailSalary;
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Settings\Primes;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -23,6 +24,9 @@ class DetailSalaryRepository extends ServiceEntityRepository
         parent::__construct($registry, DetailSalary::class);
     }
 
+    /**
+     * @throws NonUniqueResultException
+     */
     public function findPrimeBySalary(Personal $personal, Primes $primes)
     {
         $qb = $this->createQueryBuilder('d');
@@ -38,28 +42,18 @@ class DetailSalaryRepository extends ServiceEntityRepository
         return $qb->getQuery()->getOneOrNullResult();
     }
 
-//    /**
-//     * @return DetailSalary[] Returns an array of DetailSalary objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('d')
-//            ->andWhere('d.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('d.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?DetailSalary
-//    {
-//        return $this->createQueryBuilder('d')
-//            ->andWhere('d.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function findPrime(Personal $personal, Primes $primes): ?DetailSalary
+    {
+        $qb = $this->createQueryBuilder('d');
+        $qb
+            //->select('d.amountPrime')
+            ->join('d.salary', 'salary')
+            ->where('salary.personal =:personal')
+            ->andWhere('d.prime =:prime')
+            ->setParameters([
+                'personal' => $personal,
+                'prime' => $primes
+            ]);
+        return $qb->getQuery()->getOneOrNullResult();
+    }
 }

@@ -3,10 +3,16 @@
 namespace App\Controller\Reporting;
 
 use App\Repository\DossierPersonal\CongeRepository;
+use App\Repository\DossierPersonal\DetailSalaryRepository;
+use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Repository\Paiement\PayrollRepository;
+use App\Repository\Settings\PrimesRepository;
 use App\Service\EtatService;
 use App\Service\HeureSupService;
+use App\Utils\Status;
+use Carbon\Carbon;
+use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,6 +26,9 @@ class ApiReportingController extends AbstractController
     private HeureSupService $heureSupService;
     private CongeRepository $congeRepository;
     private CategoryChargeRepository $categoryChargeRepository;
+    private PrimesRepository $primesRepository;
+    private DetailSalaryRepository $detailSalaryRepository;
+    private PersonalRepository $personalRepository;
 
     public function __construct(
         PayrollRepository        $payrollRepository,
@@ -27,6 +36,9 @@ class ApiReportingController extends AbstractController
         HeureSupService          $heureSupService,
         CongeRepository          $congeRepository,
         CategoryChargeRepository $categoryChargeRepository,
+        PrimesRepository         $primesRepository,
+        DetailSalaryRepository   $detailSalaryRepository,
+        PersonalRepository       $personalRepository
     )
     {
         $this->payrollRepository = $payrollRepository;
@@ -34,10 +46,49 @@ class ApiReportingController extends AbstractController
         $this->heureSupService = $heureSupService;
         $this->congeRepository = $congeRepository;
         $this->categoryChargeRepository = $categoryChargeRepository;
+        $this->primesRepository = $primesRepository;
+        $this->detailSalaryRepository = $detailSalaryRepository;
+        $this->personalRepository = $personalRepository;
     }
 
-    #[Route('/etat_salaire', name: 'etat_salaire', methods: ['GET'])]
-    public function salaire(Request $request): JsonResponse
+    /**
+     * @throws NonUniqueResultException
+     */
+    #[Route('/prime_indemnite', name: 'prime_indemnite', methods: ['GET'])]
+    public function primeIndemnite(): JsonResponse
+    {
+        $personals = $this->personalRepository->findPersonalWithContract();
+        $personalPrime = [];
+        foreach ($personals as $value => $personal) {
+            $primePanier = $this->primesRepository->findOneBy(['code' => Status::PRIME_PANIER]);
+            $primeSalissure = $this->primesRepository->findOneBy(['code' => Status::PRIME_SALISSURE]);
+            $primeTT = $this->primesRepository->findOneBy(['code' => Status::PRIME_TENUE_TRAVAIL]);
+            $primeOutil = $this->primesRepository->findOneBy(['code' => Status::PRIME_OUTILLAGE]);
+            $amountPanier = $this->detailSalaryRepository->findPrime($personal, $primePanier);
+            $amountSalissure = $this->detailSalaryRepository->findPrime($personal, $primeSalissure);
+            $amountTT = $this->detailSalaryRepository->findPrime($personal, $primeTT);
+            $amountOutil = $this->detailSalaryRepository->findPrime($personal, $primeOutil);
+            $primeTransport = $personal->getSalary()->getPrimeTransport() === 30000 ? $personal->getSalary()->getPrimeTransport() : 30000;
+            $primeAnciennete = $this->etatService->getPrimeAnciennete($personal->getId());
+            $personalPrime[] = [
+                "index" => ++$value,
+                "fullName" => $personal->getFirstName() . ' ' . $personal->getLastName(),
+                "prime_transport" => $primeTransport,
+                "prime_panier" => (int)$amountPanier?->getAmountPrime(),
+                "prime_salissure" => (int)$amountSalissure?->getAmountPrime(),
+                "prime_outillage" => (int)$amountOutil?->getAmountPrime(),
+                "prime_tenue_travail" => (int)$amountTT?->getAmountPrime(),
+                "prime_fonction" => (int)$personal->getSalary()?->getPrimeFonction(),
+                "prime_logement" => (int)$personal->getSalary()?->getPrimeLogement(),
+                "aventage_nature" => (int)$personal->getSalary()->getAvantage()?->getTotalAvantage(),
+                "prime_anciennete" => (int)$primeAnciennete ?? 0
+            ];
+        }
+        return new JsonResponse($personalPrime);
+    }
+
+    #[Route('/etat_salaire_globale', name: 'etat_salaire', methods: ['GET'])]
+    public function etatSalarialeGlobale(Request $request): JsonResponse
     {
         $startAt = $request->get('start_at');
         $endAt = $request->get('end_at');
@@ -103,6 +154,7 @@ class ApiReportingController extends AbstractController
 
         return new JsonResponse($data);
     }
+
 
     #[Route('/declaration_dgi', name: 'declaration_dgi', methods: ['GET'])]
     public function declarationDgi(Request $request): JsonResponse
@@ -245,6 +297,70 @@ class ApiReportingController extends AbstractController
 
             ];
         }
+        return new JsonResponse($data);
+    }
+
+    #[Route('/etat_salariale_mensuel', name: 'salariale_etat', methods: ['GET'])]
+    public function etatSalarialeMensuel(): JsonResponse
+    {
+        $today = Carbon::today();
+        $month = $today->month;
+        $year = $today->year;
+        $data = [];
+        $salariesEtat = $this->payrollRepository->findSalarialeCampagne(true, $year, $month);
+        foreach ($salariesEtat as $index => $salary) {
+            $primeAnciennete = $this->etatService->getPrimeAnciennete($salary['personal_id']);
+            $amountHeureSupp = (int)$salary['heure_supp'];
+            $gratification = $this->etatService->getGratification($salary['personal_id']);
+            $conges = $this->congeRepository->getLastCongeByID($salary['personal_id']);
+            $allocationConger = $conges?->getAllocationConge();
+            $categoryRateFDFP_TA = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_TA'])->getValue();
+            $categoryRateFDFP_FPC = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC'])->getValue();
+            $categoryRateRCNPS_CR = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_CR'])->getValue();
+            $categoryRateIS = $this->categoryChargeRepository->findOneBy(['codification' => 'IS'])->getValue();
+            $categoryRCNPS_AT = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_AT'])->getValue();
+            $categoryRCNPS_PF = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_PF'])->getValue();
+            $salaireBrut = $salary['brutAmount'] + $primeAnciennete + $amountHeureSupp + $gratification + $allocationConger;
+            $salaireImposable = $salary['imposableAmount'] + $primeAnciennete + $amountHeureSupp + $gratification + $allocationConger;
+            $retenueDivers = $salary['salaryCmu'] + $salary['salarySante'];
+            $retenueCNPS = ($salaireImposable * $categoryRateRCNPS_CR) / 100;
+            $itsPatronal = ($salaireImposable * $categoryRateIS) / 100;
+            $tauxApprentissage = ($salaireImposable * $categoryRateFDFP_TA) / 100;
+            $tfc = ($salaireImposable * $categoryRateFDFP_FPC) / 100;
+            $accidentTravail = ($salaireImposable * $categoryRCNPS_AT) / 100;
+            $prestationTravail = ($salaireImposable * $categoryRCNPS_PF) / 100;
+            $totalRetenue = $retenueCNPS + $itsPatronal + $tauxApprentissage + $tfc + $accidentTravail + $prestationTravail;
+            $salaireNet = $salaireBrut - $totalRetenue;
+            $data[] = [
+                'index' => ++$index,
+                'dateCreation' => date_format($salary['createdAt'], 'd/m/Y'),
+                'fullName' => $salary['firstName'] . ' ' . $salary['lastName'],
+                'matricule' => $salary['matricule'],
+                'salaireBase' => (int)$salary['baseAmount'],
+                'primeAnciennete' => $primeAnciennete,
+                'autrePrimes' => (int)$salary['prime_juridique'],
+                'amountHeureSupp' => (int)$amountHeureSupp,
+                'gratification' => (int)$gratification,
+                'congePaye' => (int)$allocationConger,
+                'salaireBrut' => (int)$salaireBrut,
+                'personalCnps' => (int)$salary['salaryCnps'],
+                'salaireImposable' => (int)$salaireImposable,
+                'itsNetCreditImpot' => (int)$salary['salaryIts'],
+                'prêtDuMois' => 0,
+                'retenueDivers' => (int)$retenueDivers,
+                'autreDroits' => 0,
+                'salaireNet' => (int)$salaireNet,
+                'observation' => '',
+                'cnpsPatronal' => (int)$retenueCNPS,
+                'itsPatronal' => (int)$itsPatronal,
+                'tauxApprentissage' => (int)$tauxApprentissage,
+                'TFC' => (int)$tfc,
+                'accidentTravail' => (int)$accidentTravail,
+                'prestationFamille' => (int)$prestationTravail
+            ];
+        }
+
+
         return new JsonResponse($data);
     }
 }

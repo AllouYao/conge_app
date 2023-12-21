@@ -17,7 +17,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        LISTE DES CONGES PLANIFIES
+                        LISTE DES CONGES PLANIFIES DU {{ mois }} MOIS DE L'ANNEE {{ annee }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -66,7 +66,7 @@
                             component: e.component,
                             worksheet,
                             autoFilterEnabled: true,
-                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
+                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50],
                             customizeCell: function (options) {
                                 const {gridCell, excelCell} = options;
                                 if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
@@ -163,13 +163,6 @@
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
-                    },
-                    {
-                        caption: 'Commentaire',
-                        dataType: 'string',
-                        dataField: 'commentaire',
-                        alignment: 'center',
-                        width: 120
                     },
                     {
                         caption: 'Est en congé ?',

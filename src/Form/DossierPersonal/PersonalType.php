@@ -109,12 +109,6 @@ class PersonalType extends AbstractType
             ->add('contract', ContractType::class, [
                 'required' => false
             ])
-            ->add('ancienity', TextType::class, [
-                'attr' => [
-                    'readonly' => true,
-                    'class' => 'text-end'
-                ],
-            ])
             ->add('salary', SalaryType::class, [
                 'label' => false,
             ])
@@ -128,7 +122,10 @@ class PersonalType extends AbstractType
                     'Caisse' => Status::CAISSE,
                 ],
                 'placeholder' => 'Sélectionner le mode de paiement'
-            ]);
+            ])
+            ->add('fonction')
+            ->add('service')
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

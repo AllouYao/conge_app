@@ -15,6 +15,7 @@ use App\Repository\Settings\PrimesRepository;
 use App\Utils\Status;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,6 +32,9 @@ class PersonalController extends AbstractController
         $this->personalRepository = $personalRepository;
     }
 
+    /**
+     * @throws NonUniqueResultException
+     */
     #[Route('/{uuid}/print', name: 'print_salary_info', methods: ['GET'])]
     public function print(
         Personal               $personal,
@@ -49,9 +53,9 @@ class PersonalController extends AbstractController
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
         $dateFin = $personal->getContract()->getDateFin();
         $today = new DateTime();
-        $anciennete = $dateEmbauche->diff($today)->y;
+        $anciennete = $today->diff($dateEmbauche)->y;
         $age = $personal->getBirthday()->diff($today)->y;
-        $dureeContrat = $dateEmbauche->diff($dateFin)->m;
+        $dureeContrat = ($dateFin->diff($dateEmbauche)->y) * 12;
 
         $numberEnfant = $personal->getChargePeople()->count();
 
@@ -98,8 +102,8 @@ class PersonalController extends AbstractController
                 'full_name' => $item['personal_name'] . ' ' . $item['personal_prenoms'],
                 'matricule' => $item['matricule'],
                 'date_embauche' => date_format($item['contrat_date_embauche'], 'd/m/Y'),
-                'fonction' => $item[''] ?? 'Aucune information',
-                'departement' => $item[''] ?? 'Aucune information',
+                'fonction' => $item['personal_fonction'],
+                'departement' => $item['personal_service'],
                 'category' => $item['categorie_name'],
                 'date_naissance' => date_format($item['personal_birthday'], 'd/m/Y'),
                 'adresse' => $item['personal_adresse'],
@@ -107,7 +111,7 @@ class PersonalController extends AbstractController
                 'compte_banque' => $item['code_banque'] . ' ' . $item['numero_compte'] . ' ' . $item['rib'],
                 'salaire_base' => $item['personal_salaire_base'],
                 'type_contract' => $item['type_contrat'],
-                'taux_horaire' => $item[''] ?? 'Aucune information',
+                'taux_horaire' => $item['personal_taux_horaire'],
                 'anciennete_mois' => $ancienneteEnMois,
                 'nom_banque' => $item ['name_banque'],
                 'category_grade' => $item['categorie_intitule'],

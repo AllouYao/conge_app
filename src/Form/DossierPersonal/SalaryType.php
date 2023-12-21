@@ -5,6 +5,8 @@ namespace App\Form\DossierPersonal;
 use App\Entity\DossierPersonal\Salary;
 use App\Entity\Settings\Avantage;
 use App\Repository\Settings\SmigRepository;
+use App\Repository\Settings\TauxHoraireRepository;
+use App\Service\EtatService;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -17,8 +19,17 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class SalaryType extends AbstractType
 {
-    public function __construct(private readonly SmigRepository $smigRepository)
+    private TauxHoraireRepository $horaireRepository;
+    private EtatService $etatService;
+
+    public function __construct(
+        private readonly SmigRepository $smigRepository,
+        TauxHoraireRepository           $horaireRepository,
+        EtatService                     $etatService
+    )
     {
+        $this->horaireRepository = $horaireRepository;
+        $this->etatService = $etatService;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -95,6 +106,13 @@ class SalaryType extends AbstractType
                 'attr' => [
                     'separator'
                 ]
+            ])
+            ->add('tauxHoraire', HiddenType::class, [
+                'label' => false,
+                'required' => false,
+                'attr' => [
+                    'separator'
+                ]
             ]);
 
         $builder
@@ -104,7 +122,10 @@ class SalaryType extends AbstractType
                     /** @var Salary $data */
                     $data = $event->getData();
                     $smig = $this->smigRepository->active();
-                    $data->setSmig($smig?->getAmount() ?? 0);
+                    $tauxHoraire = $this->horaireRepository->active();
+                    $data
+                        ->setSmig($smig?->getAmount() ?? 0)
+                        ->setTauxHoraire($tauxHoraire?->getAmount() ?? 0);
                 }
             );
 
@@ -114,6 +135,7 @@ class SalaryType extends AbstractType
                     /** @var Salary $data */
                     $data = $event->getData();
                     $totalPrime = 0;
+
                     foreach ($data->getDetailSalaries() as $detailSalary) {
                         $totalPrime += $detailSalary?->getAmountPrime();
                     }

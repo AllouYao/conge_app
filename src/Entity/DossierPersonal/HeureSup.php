@@ -4,6 +4,7 @@ namespace App\Entity\DossierPersonal;
 
 use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Utils\Horodatage;
+use Carbon\Carbon;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -133,8 +134,6 @@ class HeureSup
     {
 
         $diff = $this->startedHour->diff($this->endedHour);
-        $totalHorraire = $diff->format('%h');
-
-        return $totalHorraire;
+        return $diff->format('%h');
     }
 }

@@ -117,6 +117,21 @@
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Heure Suplementaire
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('personal_heure_sup_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('personal_heure_sup_index') }}"
+                                       class="dropdown-item">Liste heure suplementaire</a>
+                                    <a href="{{ path('personal_heure_sup_supp_book') }}"
+                                       class="dropdown-item">Livre heure suplementaire</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Congés & Absence
                                     <div class="arrow-down"></div>
                                 </a>
@@ -137,23 +152,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="dropdown">
-                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Heure Suplementaire
-                                    <div class="arrow-down"></div>
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                    <a href="{{ path('personal_heure_sup_new') }}"
-                                       class="dropdown-item">Créer</a>
-                                    <a href="{{ path('personal_heure_sup_index') }}"
-                                       class="dropdown-item">Liste heure suplementaire</a>
-                                    <a href="{{ path('personal_heure_sup_supp_book') }}"
-                                       class="dropdown-item">Livre heure suplementaire</a>
-                                </div>
-                            </div>
-
-
+                            <a href="{{ path('reporting_prime_indemnite') }}"
+                               class="dropdown-item">Primes et indemnités</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
@@ -172,6 +172,8 @@
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
                                     <a href="{{ path('campagne_open_campagne') }}"
                                        class="dropdown-item">Ouverture campagne</a>
+                                    <a href="{{ path('reporting_salaires') }}"
+                                       class="dropdown-item">Etat des salaires mensuel</a>
                                     <a href="{{ path('campagne_close') }}"
                                        class="dropdown-item">Ferméture campagne</a>
                                 </div>

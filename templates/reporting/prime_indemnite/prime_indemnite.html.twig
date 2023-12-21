@@ -1,9 +1,9 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}LIVRE DES HEURES SUP{% endblock %}
+{% block title %}LISTE DU PERSONNEL{% endblock %}
 {% block stylesheets %}
     <style>
-        #dataGridSupp {
+        #dataGridPrimeIndemnite {
             height: 400px;
             border-width: 50px;
 
@@ -17,15 +17,11 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        LIVRE DES HEURES SUP DU  {{ mois }} MOIS DE L'ANNEE {{ annee }}
+                        PRIMES ET INDEMNITES DU {{ mois }} MOIS DE L'ANNEE {{ annee }}
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div id="dataGridSupp"></div>
-                </div>
-                <div class="card-footer">
-                    <a href="{{ path('personal_heure_sup_new') }}" class="btn btn-primary float-end"
-                       style="color: white">Nouveau</a>
+                    <div id="dataGridPrimeIndemnite"></div>
                 </div>
             </div>
         </div>
@@ -42,8 +38,8 @@
         $(document).ready(function () {
             let debut;
             let fin;
-            $("#dataGridSupp").dxDataGrid({
-                dataSource: `{{ url('personal_heure_sup_api_heure_supp') }}`,
+            $("#dataGridPrimeIndemnite").dxDataGrid({
+                dataSource: `{{ url('api_reporting_prime_indemnite') }}`,
                 showBorders: true,
                 scrolling: {
                     columnRenderingMode: 'virtual',
@@ -61,12 +57,12 @@
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('Livre des heures supplémentaire');
+                        const worksheet = workbook.addWorksheet('PRIMES ET INDEMNITE');
                         DevExpress.excelExporter.exportDataGrid({
                             component: e.component,
                             worksheet,
                             autoFilterEnabled: true,
-                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
+                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
                             customizeCell: function (options) {
                                 const {gridCell, excelCell} = options;
                                 if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
@@ -77,7 +73,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Livre des heures supplémentaire ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `PRIMES ET INDEMNITES ${debut ?? " "} au ${fin ?? " "}.xlsx`);
                             });
                         });
                         e.cancel = true;
@@ -105,70 +101,70 @@
                         alignment: 'center',
                         dataType: 'number',
                         dataField: 'index',
-                        width: 80,
                         fixed: true
                     },
                     {
                         caption: 'Nom et prénoms',
                         alignment: 'left',
                         dataType: 'string',
-                        dataField: 'full_name',
-                        width: 120,
+                        dataField: 'fullName',
                         fixed: true
                     },
                     {
-                        caption: 'Heures Normales',
-                        dataType: 'number',
-                        dataField: 'heure_normal',
+                        caption: 'Prime et indemnité nom imposable',
                         alignment: 'center',
-                        width: 120,
+                        columns: [
+                            {
+                                caption: 'Prime de transport',
+                                dataType: 'number',
+                                dataField: 'prime_transport',
+                                alignment: 'right',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Prime de panier',
+                                dataType: 'number',
+                                dataField: 'prime_panier',
+                                alignment: 'right',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Prime de salissure',
+                                dataType: 'number',
+                                dataField: 'prime_salissure',
+                                alignment: 'right',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Prime d\'outillage',
+                                dataType: 'number',
+                                dataField: 'prime_outillage',
+                                alignment: 'right',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Prime de tenue de travail',
+                                dataType: 'number',
+                                dataField: 'prime_tenue_travail',
+                                alignment: 'right',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                        ],
                     },
                     {
-                        caption: 'Total Des Heures',
+                        caption: 'Prime de fonction',
                         dataType: 'number',
-                        dataField: 'total_heure',
-                        alignment: 'center',
-                        width: 120,
-                    },
-                    {
-                        caption: 'Heures à 15% (41è à 46è heure)',
-                        dataType: 'number',
-                        dataField: 'heure_15_%',
-                        alignment: 'center',
-                        width: 120,
-                    },
-                    {
-                        caption: 'Heures à 50% (47è heure et plus)',
-                        dataType: 'number',
-                        dataField: 'heure_50_%',
-                        alignment: 'center',
-                        width: 120,
-                    },
-                    {
-                        caption: 'Heures à 75% (heure de nuit)',
-                        dataType: 'number',
-                        dataField: 'heure_75_%_nuit',
-                        alignment: 'center',
-                        width: 120,
-                    },
-                    {
-                        caption: 'Heures à 75% (Dimanche et fériés de jour)',
-                        dataType: 'number',
-                        dataField: 'heure_75_%_jour',
-                        alignment: 'center',
-                        width: 120,
-                    },
-                    {
-                        caption: 'Heures à 100% (Dimanche et fériés de nuit)',
-                        dataType: 'number',
-                        dataField: 'heure_100_%_nuit',
-                        alignment: 'center',
-                        width: 120,
-                    },
-                    {
-                        caption: 'Salaire Horaire',
-                        dataType: 'number',
-                        dataField: 'taux_horaire',
+                        dataField: 'prime_fonction',
                         alignment: 'right',
                         width: 120,
                         customizeText: function (data) {
@@ -176,9 +172,9 @@
                         },
                     },
                     {
-                        caption: 'Montant Heures Supplementaires',
+                        caption: 'Prime de logement',
                         dataType: 'number',
-                        dataField: 'montant_heure_supp',
+                        dataField: 'prime_logement',
                         alignment: 'right',
                         width: 120,
                         customizeText: function (data) {
@@ -186,11 +182,24 @@
                         },
                     },
                     {
-                        caption: 'Statut',
-                        dataType: 'string',
-                        dataField: 'status',
-                        alignment: 'left',
+                        caption: 'Avantage en nature',
+                        dataType: 'number',
+                        dataField: 'aventage_nature',
+                        alignment: 'right',
                         width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Prime d\'ancienneté',
+                        dataType: 'number',
+                        dataField: 'prime_anciennete',
+                        alignment: 'right',
+                        width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
                     },
                 ],
             })
