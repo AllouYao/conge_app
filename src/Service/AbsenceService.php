@@ -25,13 +25,13 @@ class AbsenceService
      * @param Campagne $campagne
      * @throws NonUniqueResultException
      */
-    public function getAmountByMonth(Personal $personal, int $month, int $year,$salaireHorraire): float
+    public function getAmountByMonth(Personal $personal, int $month, int $year, $salaireHorraire): float
     {
         $totalAbsenceAmount = 0;
 
         $absences = $this->absenceRepository->getAbsenceByMonth($personal, $month, $year);
-        dd($absences); 
-        
+        dd($absences);
+
 
         foreach ($absences as $absence) {
 
@@ -41,15 +41,15 @@ class AbsenceService
         }
         return $totalAbsenceAmount;
     }
-    
+
     private function calculAbsenceTime(Absence $absence, $salaireHorraire)
     {
         $startedDate = $absence->getStartedDate();
-        $endedDate = $absence->getEndedDate(); 
+        $endedDate = $absence->getEndedDate();
         $diff = $endedDate->diff($startedDate);
         $totalAbsenceDay = $diff->format('%d');
-        $absenceAmount = $totalAbsenceDay*$salaireHorraire;
-        
+        $absenceAmount = $totalAbsenceDay * $salaireHorraire;
+
         return $absenceAmount;
     }
 }
