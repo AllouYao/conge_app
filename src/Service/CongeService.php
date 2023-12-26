@@ -5,12 +5,10 @@ namespace App\Service;
 use App\Entity\DossierPersonal\Conge;
 use App\Repository\DossierPersonal\CongeRepository;
 use App\Repository\Paiement\PayrollRepository;
-use App\Repository\Settings\PrimesRepository;
 use App\Utils\Status;
 use Carbon\Carbon;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use JetBrains\PhpStorm\NoReturn;
 
 class CongeService
 {
@@ -19,27 +17,32 @@ class CongeService
 
     private CongeRepository $congeRepository;
     private PayrollRepository $payrollRepository;
-    private PrimesRepository $primesRepository;
+    private EtatService $etatService;
 
-    public function __construct(CongeRepository $congeRepository, PayrollRepository $payrollRepository, PrimesRepository $primesRepository)
+    public function __construct(
+        CongeRepository   $congeRepository,
+        PayrollRepository $payrollRepository,
+        EtatService       $etatService
+    )
     {
         $this->congeRepository = $congeRepository;
         $this->payrollRepository = $payrollRepository;
-        $this->primesRepository = $primesRepository;
+        $this->etatService = $etatService;
     }
 
     /**
-     * @throws NonUniqueResultException
+     * @param Conge $conge
      * @throws NoResultException
+     * @throws NonUniqueResultException
      */
-    #[NoReturn] public function calculate(Conge $conge): void
+    public function calculate(Conge &$conge): void
     {
         $personal = $conge->getPersonal();
         $today = Carbon::now();
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
-        $anciennete = ceil(($today->diff($dateEmbauche)->y));
+        $anciennete = ($today->diff($dateEmbauche)->y); // anciennete en années
         $lastConge = $this->congeRepository->getLastConge($personal);
-        $returnDate = $lastConge?->getDateDernierRetour();
+        $returnDate = $lastConge?->getDateDernierRetour(); // date retour du dernier congé
 
 
         $genre = $personal->getGenre();
@@ -52,7 +55,12 @@ class CongeService
             $moisTravailler = (($today->diff($dateEmbauche)->days) + $this->echelonConge($anciennete)) / 30;
         }
 
-        $moisAcquis = self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE * $moisTravailler;
+        $gratification = $this->etatService->getGratifications($dateEmbauche, $today, $personal->getCategorie()->getAmount());
+        $annee = $today->year;
+        $premierJour = new Carbon("$annee-01-01");
+        $dernierJour = new Carbon("$annee-12-31");
+
+        $conge->getPersonal()->getSalary()->setGratification($gratification);
 
         if ($returnDate) {
             $salaireBrutPeriodique = $this->payrollRepository->getTotalSalarie($personal, $returnDate, $today);
@@ -60,16 +68,13 @@ class CongeService
             $salaireBrutPeriodique = $this->payrollRepository->getTotalSalarie($personal, $dateEmbauche, $today);
         }
 
-        $salaireCategoriel = $personal->getCategorie()->getAmount();
-        $tauxGratification = $this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux();
-        $gratification = ($salaireCategoriel * (int)$tauxGratification) / 100;
-        $salaireMoyen = ceil(($salaireBrutPeriodique + $gratification) / $moisTravailler);
-        $conge->setSalaireMoyen($salaireMoyen);
-        $allocationConge = ($salaireMoyen * $moisAcquis) / 30;
-        $conge->setAllocationConge($allocationConge)
+
+        $salaireMoyen = ($salaireBrutPeriodique * $moisTravailler) / $moisTravailler;
+        $conge->setSalaireMoyen((int)$salaireMoyen);
+        $allocationConge = ($salaireMoyen * self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE * $moisTravailler) / 30;
+        $conge->setAllocationConge((int)$allocationConge)
             ->getPersonal()->getSalary()
-            ->setCongePayer($allocationConge)
-            ->setGratification($gratification);
+            ->setCongePayer($allocationConge);
 
     }
 
@@ -100,20 +105,4 @@ class CongeService
             default => 0,
         };
     }
-
-    public function getWeekdaysInYear($year): int
-    {
-        $weekdays = 0;
-        $firstDay = Carbon::createFromDate($year, 1, 1);
-        $lastDate = Carbon::createFromDate($year, 12, 31);
-        for ($date = $firstDay; $date->lte($lastDate); $date->addDay()) {
-            // Vérifier si le jour n'est pas un week-end (samedi ou dimanche)
-            if ($date->isWeekday()) {
-                $weekdays++;
-            }
-        }
-
-        return $weekdays;
-    }
-
 }

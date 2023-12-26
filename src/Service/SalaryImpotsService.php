@@ -27,7 +27,6 @@ class SalaryImpotsService implements SalaryInterface
         ChargePersonalsRepository $chargePersonalsRepository,
         CategoryChargeRepository  $categoryChargeRepository,
         ChargeEmployeurRepository $chargeEmployeurRepository,
-        CongeRepository           $congeRepository,
     )
     {
         $this->manager = $manager;

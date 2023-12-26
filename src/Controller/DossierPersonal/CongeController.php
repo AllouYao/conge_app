@@ -114,12 +114,20 @@ class CongeController extends AbstractController
             $personal = $form->get('personal')->getData();
             $active = $this->congeRepository->active($personal);
             $checkPersonalCampagne = $this->campagneRepository->checkPersonalInCampagne($personal);
+            $dateEmbauche = $personal->getContract()->getDateEmbauche();
+
             if (!$checkPersonalCampagne) {
-                $this->addFlash('error', 'Monsieur ou Madame ' . $personal->getFirstName() . ' n\'est pas éligible pour obtenir un congé.');
+                $this->addFlash('error', 'Monsieur ou Madame ' . $personal->getFirstName() . ' ' . $personal->getLastName() . 'n\'est pas éligible pour obtenir un congé.');
                 return $this->redirectToRoute('conge_index');
             }
+
+            if (empty($date) && $today->diff($dateEmbauche)->y < 1 || ($today->diff($date)->days) / 30 < 11) {
+                $this->addFlash('error', 'Monsieur ou Madame ' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' n\'est pas  éligible pour obtenir un congé.');
+                return $this->redirectToRoute('conge_index');
+            }
+
             if ($active && $today->diff($date)->days <= 30) {
-                $this->addFlash('error', 'Monsieur ou Madame ' . $personal->getFirstName() . ' n\'est pas encore de retour du congé précédent.');
+                $this->addFlash('error', 'Monsieur ou Madame ' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' n\'est pas encore de retour du congé précédent.');
                 return $this->redirectToRoute('conge_index');
             }
 
@@ -141,13 +149,20 @@ class CongeController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Conge $conge, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Conge $conge, EntityManagerInterface $entityManager, CongeService $congeService): Response
     {
-        $form = $this->createForm(CongeType::class, $conge);
+        $form = $this->createForm(CongeType::class, $conge, [
+
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $congeService->calculate($conge);
             $entityManager->flush();
             flash()->addSuccess('Congé planifié modifier avec succès.');
             return $this->redirectToRoute('conge_index', [], Response::HTTP_SEE_OTHER);

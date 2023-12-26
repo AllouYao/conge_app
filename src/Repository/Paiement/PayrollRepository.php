@@ -72,7 +72,9 @@ class PayrollRepository extends ServiceEntityRepository
     public function getTotalSalarie(Personal $personal, mixed $start, mixed $end): float|int|null
     {
         return $this->createQueryBuilder('pr')
-            ->select('SUM(pr.brutAmount - pr.salaryTransport) as amount_moyen')
+            ->select('SUM((pr.brutAmount - pr.salaryTransport) + salary.gratification) as amount_moyen')
+            ->join('pr.personal', 'personal')
+            ->leftJoin('personal.salary', 'salary')
             ->where('pr.personal = :pr_personal')
             ->andWhere('pr.createdAt >= :start_date')
             ->andWhere('pr.createdAt <= :end_date')

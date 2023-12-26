@@ -23,31 +23,6 @@ class CongeRepository extends ServiceEntityRepository
         parent::__construct($registry, Conge::class);
     }
 
-//    /**
-//     * @return Conge[] Returns an array of Conge objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('c.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?Conge
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
-
     /**
      * @return Conge[]
      */
@@ -79,12 +54,23 @@ class CongeRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('co')
             ->where('co.personal = :personal')
+            ->andWhere('co.isConge = false')
             ->setMaxResults(1)
             ->setParameter('personal', $personal)
             ->orderBy('co.id', 'DESC')
             ->getQuery()->getOneOrNullResult();
     }
 
+    public function getLastCongeByID(int $personal): ?Conge
+    {
+        return $this->createQueryBuilder('co')
+            ->join('co.personal', 'personal')
+            ->where('personal.id = :personal')
+            ->setMaxResults(1)
+            ->setParameter('personal', $personal)
+            ->orderBy('co.id', 'DESC')
+            ->getQuery()->getOneOrNullResult();
+    }
     /**
      * @throws NonUniqueResultException
      */
@@ -100,14 +86,15 @@ class CongeRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    public function getLastCongeByID(int $personal): ?Conge
+    public function activeForAll(): ?array
     {
         return $this->createQueryBuilder('co')
             ->join('co.personal', 'personal')
-            ->where('personal.id = :personal')
-            ->setMaxResults(1)
-            ->setParameter('personal', $personal)
+            ->andWhere("co.isConge = true")
             ->orderBy('co.id', 'DESC')
-            ->getQuery()->getOneOrNullResult();
+            ->getQuery()
+            ->getResult();
     }
+
+
 }

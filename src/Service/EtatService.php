@@ -131,32 +131,17 @@ class EtatService
         return $creditImpot;
     }
 
-    public function getEnfantCharge(int $personal): array
+    public function getGratifications($dateEmbauche, $today, $salaireCategoriel): float|int
     {
-        $personals = $this->personalRepository->findBy(['id' => $personal]);
-        foreach ($personals as $personal) {
-            $enfantCharge = $personal->getChargePeople();
-            foreach ($enfantCharge as $enfant) {
-                $non = $enfant->getFirstName();
-                $prenoms = $enfant->getLastName();
-                $dateNaissance = $enfant->getBirthday();
-                $genre = $enfant->getGender();
-            }
-        }
 
-        return [
-            'nomEnfant' => $non,
-            'prenomsEnfant' => $prenoms,
-            'dateNaissanceEnfant' => date_format($dateNaissance, 'd/m/Y'),
-            'genreEnfant' => $genre
-        ];
-    }
-
-    public function getConjoint(int $personal): void
-    {
-        $personals = $this->personalRepository->findBy(['id' => $personal]);
-        foreach ($personals as $personal) {
-            $conjoint = $personal->getConjoint();
+        $dureeSalarie = ($today->diff($dateEmbauche)->days) / 30;
+        $tauxGratification = (int)$this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux();
+        if ($dureeSalarie < 12) {
+            $nombreJourTravailler = ($today->diff($dateEmbauche)->days);
+            $gratification = ((($salaireCategoriel * $tauxGratification) / 100) * $nombreJourTravailler) / 360;
+        } else {
+            $gratification = ($salaireCategoriel * $tauxGratification) / 100;
         }
+        return (int)$gratification;
     }
 }
