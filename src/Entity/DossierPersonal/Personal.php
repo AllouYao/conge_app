@@ -2,6 +2,7 @@
 
 namespace App\Entity\DossierPersonal;
 
+use App\Entity\DossierPersonal\HeureSup;
 use App\Entity\Impots\ChargeEmployeur;
 use App\Entity\Impots\ChargePersonals;
 use App\Entity\Paiement\Campagne;
@@ -9,7 +10,6 @@ use App\Entity\Paiement\Payroll;
 use App\Entity\Settings\Category;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Utils\Horodatage;
-use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -41,7 +41,7 @@ class Personal
     private ?string $genre = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?DateTimeInterface $birthday = null;
+    private ?\DateTimeInterface $birthday = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $lieuNaissance = null;
@@ -119,6 +119,9 @@ class Personal
     #[ORM\OneToMany(mappedBy: 'personal', targetEntity: HeureSup::class)]
     private Collection $heureSups;
 
+    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Absence::class)]
+    private Collection $absences;
+
     #[ORM\Column(length: 255)]
     private ?string $fonction = null;
 
@@ -135,6 +138,7 @@ class Personal
         $this->payrolls = new ArrayCollection();
         $this->conges = new ArrayCollection();
         $this->heureSups = new ArrayCollection();
+        $this->absences = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -190,12 +194,12 @@ class Personal
         return $this;
     }
 
-    public function getBirthday(): ?DateTimeInterface
+    public function getBirthday(): ?\DateTimeInterface
     {
         return $this->birthday;
     }
 
-    public function setBirthday(?DateTimeInterface $birthday): static
+    public function setBirthday(?\DateTimeInterface $birthday): static
     {
         $this->birthday = $birthday;
 
@@ -669,6 +673,36 @@ class Personal
             // set the owning side to null (unless already changed)
             if ($heureSup->getPersonal() === $this) {
                 $heureSup->setPersonal(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Absence>
+     */
+    public function getAbsences(): Collection
+    {
+        return $this->absences;
+    }
+
+    public function addAbsence(Absence $absence): static
+    {
+        if (!$this->absences->contains($absence)) {
+            $this->absences->add($absence);
+            $absence->setPersonal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAbsence(Absence $absence): static
+    {
+        if ($this->absences->removeElement($absence)) {
+            // set the owning side to null (unless already changed)
+            if ($absence->getPersonal() === $this) {
+                $absence->setPersonal(null);
             }
         }
 

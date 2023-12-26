@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des absences{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        Liste des heures suplementaire
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-responsive table-sm" id="basic-datatable">
+                        <thead class="table-light">
+                        <tr>
+                            <th class="text-center">Matricule</th>
+                            <th class="text-center">Nom</th>
+                            <th class="text-center">Prénom(s)</th>
+                            <th class="text-center">Date de naissance</th>
+                            <th class="text-center">Catégorie</th>
+                            <th class="text-center">Date d'embauche</th>
+                            <th class="text-center">Type d'absence</th>
+                            <th class="text-center">Date départ</th>
+                            <th class="text-center">Date retour</th>
+                            <th class="text-center">Justificatif apporté</th>
+                            <th class="text-center">Description</th>
+                            <th class="text-center">Durée (Jour)</th>
+                            <th class="text-center">Actions</th>    
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for absence in absences %}
+                            <tr>
+                               <td class="text-right">{{ absence.personal.matricule }}</td>
+                                <td class="text-left">{{ absence.personal.firstName }}</td>
+                                <td class="text-left">{{ absence.personal.lastName }}</td>
+                                <td class="text-center">{{ absence.personal.birthday ? absence.personal.birthday|date('d/m/Y') : '' }}</td>
+                                <td class="text-left">{{ absence.personal.categorie.intitule }}</td>
+                                <td class="text-center">{{ absence.personal.contract.dateEmbauche ? absence.personal.contract.dateEmbauche|date('d/m/Y') : '' }}</td>
+                                <td class="text-center">{{ absence.type}}</td>
+                                <td class="text-center">{{ absence.startedDate ? absence.startedDate|date('d/m/Y') : '' }}</td>
+                                <td class="text-center">{{ absence.endedDate ? absence.endedDate|date('d/m/Y') : '' }}</td>
+                                <td class="text-center">{{ absence.justified ? "OUI":"NON" }}</td>
+                                <td class="text-center">{{ absence.description}}</td>
+                                <td class="text-center">{{ absence.getTotalDay()}}</td>
+                                <td class="text-center">
+                                    <a href="{{ path('personal_absence_edit', {'uuid': absence.personal.uuid}) }}">
+                                        <i data-feather="edit" class="feather" style="color: yellow"></i></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('personal_absence_new') }}" class="btn btn-primary float-end" style="color: white">Nouveau</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

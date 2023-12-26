@@ -106,6 +106,21 @@ final class Status
     public const NUIT = "NUIT";
     public const NORMAL = "NORMAL";
     public const DIMANCHE_FERIE = "DIMANCHE/FÉRIÉ";
+    
+    public const TYPE_ABSENCE = [
+                                "CONVENANCES PERSONNELLES",
+                                "MALADIE","ACCIDENT DE TRAVAIL", "ACTIVITÉ SYNDICALE",
+                                "PREMIÈRE COMMUNION (1 OUR)","NAISSANCE D’UN ENFANT (2)",
+                                "MARIAGE D’UN ENFANT, D’UN FRÈRE, D’UNE SŒUR (2 JOURS)",
+                                "MARIAGE DU TRAVAILLEUR (4 JOURS)","DÉMÉNAGEMENT (1 JOUR)",
+                                "DÉCÈS D’UN ENFANT, PÈRE OU MÈRE (4 JOURS)",
+                                "DÉCÈS D’UN FRÈRE OU D’UNE SŒUR (2 JOURS)","BAPTÊME D’UN ENFANT",
+                                "CONGÉ DE MATERNITÉ", "DÉCÈS DU CONJOINT (5 JOURS)", 
+                                "DÉCÈS PEAU PÈRE OU BELLE-MÈRE (2 JOURS)"];
+
+
+    
+    
 
 
 }
