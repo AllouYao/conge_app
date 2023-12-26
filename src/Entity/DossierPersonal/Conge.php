@@ -45,6 +45,9 @@ class Conge
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $typeConge = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $gratification = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -142,6 +145,19 @@ class Conge
     public function setTypeConge(?string $typeConge): static
     {
         $this->typeConge = $typeConge;
+
+        return $this;
+    }
+
+
+    public function getGratification(): ?string
+    {
+        return $this->gratification;
+    }
+
+    public function setGratification(?string $gratification): static
+    {
+        $this->gratification = $gratification;
 
         return $this;
     }

@@ -128,6 +128,12 @@ class Personal
     #[ORM\Column(length: 255)]
     private ?string $service = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $older = null;
+
+    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Departure::class, orphanRemoval: true)]
+    private Collection $departures;
+
     public function __construct()
     {
         $this->chargePeople = new ArrayCollection();
@@ -139,6 +145,7 @@ class Personal
         $this->conges = new ArrayCollection();
         $this->heureSups = new ArrayCollection();
         $this->absences = new ArrayCollection();
+        $this->departures = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -729,6 +736,48 @@ class Personal
     public function setService(string $service): static
     {
         $this->service = $service;
+
+        return $this;
+    }
+
+    public function getOlder(): ?string
+    {
+        return $this->older;
+    }
+
+    public function setOlder(?string $older): static
+    {
+        $this->older = $older;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Departure>
+     */
+    public function getDepartures(): Collection
+    {
+        return $this->departures;
+    }
+
+    public function addDeparture(Departure $departure): static
+    {
+        if (!$this->departures->contains($departure)) {
+            $this->departures->add($departure);
+            $departure->setPersonal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDeparture(Departure $departure): static
+    {
+        if ($this->departures->removeElement($departure)) {
+            // set the owning side to null (unless already changed)
+            if ($departure->getPersonal() === $this) {
+                $departure->setPersonal(null);
+            }
+        }
 
         return $this;
     }

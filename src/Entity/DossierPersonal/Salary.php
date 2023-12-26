@@ -59,20 +59,8 @@ class Salary
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $totalPrimeJuridique = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2)]
-    private ?string $tauxHoraire = null;
-
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $primeAciennete = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
-    private ?string $gratification = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
-    private ?string $heursupplementaire = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
-    private ?string $congePayer = null;
 
     public function __construct()
     {
@@ -128,30 +116,6 @@ class Salary
     public function setPrimeTransport(?string $primeTransport): static
     {
         $this->primeTransport = $primeTransport;
-
-        return $this;
-    }
-
-    public function getIndemniteFonction(): ?string
-    {
-        return $this->indemniteFonction;
-    }
-
-    public function setIndemniteFonction(?string $indemniteFonction): static
-    {
-        $this->indemniteFonction = $indemniteFonction;
-
-        return $this;
-    }
-
-    public function getIndemniteLogement(): ?string
-    {
-        return $this->indemniteLogement;
-    }
-
-    public function setIndemniteLogement(?string $indemniteLogement): static
-    {
-        $this->indemniteLogement = $indemniteLogement;
 
         return $this;
     }
@@ -270,18 +234,6 @@ class Salary
         return $this;
     }
 
-    public function getTauxHoraire(): ?string
-    {
-        return $this->tauxHoraire;
-    }
-
-    public function setTauxHoraire(string $tauxHoraire): static
-    {
-        $this->tauxHoraire = $tauxHoraire;
-
-        return $this;
-    }
-
     public function getPrimeAciennete(): ?string
     {
         return $this->primeAciennete;
@@ -290,42 +242,6 @@ class Salary
     public function setPrimeAciennete(?string $primeAciennete): static
     {
         $this->primeAciennete = $primeAciennete;
-
-        return $this;
-    }
-
-    public function getGratification(): ?string
-    {
-        return $this->gratification;
-    }
-
-    public function setGratification(?string $gratification): static
-    {
-        $this->gratification = $gratification;
-
-        return $this;
-    }
-
-    public function getHeursupplementaire(): ?string
-    {
-        return $this->heursupplementaire;
-    }
-
-    public function setHeursupplementaire(?string $heursupplementaire): static
-    {
-        $this->heursupplementaire = $heursupplementaire;
-
-        return $this;
-    }
-
-    public function getCongePayer(): ?string
-    {
-        return $this->congePayer;
-    }
-
-    public function setCongePayer(?string $congePayer): static
-    {
-        $this->congePayer = $congePayer;
 
         return $this;
     }

@@ -4,7 +4,6 @@ namespace App\Entity\DossierPersonal;
 
 use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Utils\Horodatage;
-use Carbon\Carbon;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -40,6 +39,12 @@ class HeureSup
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?DateTimeInterface $endedDate = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amount = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2)]
+    private ?string $tauxHoraire = null;
 
     public function getId(): ?int
     {
@@ -130,9 +135,32 @@ class HeureSup
         return $this;
     }
 
-    public function getTotalHorraire()
+    public function getAmount(): ?string
     {
+        return $this->amount;
+    }
 
+    public function setAmount(?string $amount): static
+    {
+        $this->amount = $amount;
+
+        return $this;
+    }
+
+    public function getTauxHoraire(): ?string
+    {
+        return $this->tauxHoraire;
+    }
+
+    public function setTauxHoraire(?string $tauxHoraire): static
+    {
+        $this->tauxHoraire = $tauxHoraire;
+
+        return $this;
+    }
+
+    public function getTotalHorraire(): string
+    {
         $diff = $this->startedHour->diff($this->endedHour);
         return $diff->format('%h');
     }

@@ -21,11 +21,11 @@
 
 {% block _personal_heure_sup_heureSup_entry_widget %}
     <tr id="block_{{ id }}" data-id="{{ id }}" class="data-row">
-        
         <td>
             {{ form_widget(form.typeJourOrNuit,{'attr': {
                 "class": 'form-control form-control-sm',
             }}) }}
+            {{ form_widget(form.tauxHoraire) }}
         </td>
         <td>
             {{ form_widget(form.typeDay,{'attr': {

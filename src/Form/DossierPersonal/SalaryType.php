@@ -19,17 +19,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class SalaryType extends AbstractType
 {
-    private TauxHoraireRepository $horaireRepository;
-    private EtatService $etatService;
 
     public function __construct(
         private readonly SmigRepository $smigRepository,
-        TauxHoraireRepository           $horaireRepository,
-        EtatService                     $etatService
     )
     {
-        $this->horaireRepository = $horaireRepository;
-        $this->etatService = $etatService;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -106,13 +100,6 @@ class SalaryType extends AbstractType
                 'attr' => [
                     'separator'
                 ]
-            ])
-            ->add('tauxHoraire', HiddenType::class, [
-                'label' => false,
-                'required' => false,
-                'attr' => [
-                    'separator'
-                ]
             ]);
 
         $builder
@@ -122,10 +109,8 @@ class SalaryType extends AbstractType
                     /** @var Salary $data */
                     $data = $event->getData();
                     $smig = $this->smigRepository->active();
-                    $tauxHoraire = $this->horaireRepository->active();
                     $data
-                        ->setSmig($smig?->getAmount() ?? 0)
-                        ->setTauxHoraire($tauxHoraire?->getAmount() ?? 0);
+                        ->setSmig($smig?->getAmount() ?? 0);
                 }
             );
 
