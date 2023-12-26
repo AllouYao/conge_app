@@ -7,7 +7,6 @@ use App\Contract\SalaryInterface;
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Impots\ChargeEmployeur;
 use App\Entity\Impots\ChargePersonals;
-use App\Repository\DossierPersonal\CongeRepository;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Repository\Impots\ChargeEmployeurRepository;
 use App\Repository\Impots\ChargePersonalsRepository;
@@ -132,7 +131,7 @@ class SalaryImpotsService implements SalaryInterface
             if ($salaire > $limiteMin && $salaire >= $limiteMax) {
                 $montantImposable = ($limiteMax - $limiteMin) * $taux;
                 $impotBrut += $montantImposable;
-            } else if ($salaire > $limiteMin && $salaire < $limiteMax) {
+            } else if ($salaire > $limiteMin) {
                 $montantImposable = ($salaire - $limiteMin) * $taux;
                 $impotBrut += $montantImposable;
                 break;
