@@ -88,7 +88,7 @@
                 },
                 searchPanel: {
                     visible: true,
-                    width: 240,
+                   // width: 240,
                     placeholder: 'Rechercher...',
                 },
                 showColumnLines: true,
@@ -105,7 +105,7 @@
                         alignment: 'center',
                         dataType: 'number',
                         dataField: 'index',
-                        width: 80,
+                       // width: 80,
                         fixed: true
                     },
                     {
@@ -113,53 +113,53 @@
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'full_name',
-                        width: 120,
+                       // width: 120,
                         fixed: true
                     },
                     {
-                        caption: 'Date de départ en congé',
-                        dataType: 'date',
-                        dataField: 'date_depart',
-                        alignment: 'center',
-                        width: 120
-                    },
-                    {
-                        caption: 'Date de retour du \n dernier congé',
+                        caption: 'Dernier retour congé',
                         dataType: 'date',
                         dataField: 'dernier_conge',
                         alignment: 'center',
-                        width: 120
+                        // width: 120
                     },
                     {
-                        caption: 'Durée (en jours) des congés annuels',
+                        caption: 'Date de départ',
+                        dataType: 'date',
+                        dataField: 'date_depart',
+                        alignment: 'center',
+                       // width: 120
+                    },
+                    {
+                        caption: 'Durée (en jours)',
                         dataType: 'number',
                         dataField: 'conges_annuel_jour',
                         alignment: 'center',
-                        width: 120,
+                       // width: 120,
                     },
                     {
-                        caption: 'Date de retour des congé annuels',
+                        caption: 'Date de retour',
                         dataType: 'date',
                         dataField: 'date_retour',
                         alignment: 'center',
-                        width: 120
+                       // width: 120
                     },
                     {
                         caption: 'Salaire moyen mensuel',
                         dataType: 'number',
                         dataField: 'salaire_moyen',
                         alignment: 'right',
-                        width: 120,
+                       // width: 120,
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
                     },
                     {
-                        caption: 'Allocation pour les congés annuels',
+                        caption: 'Allocation  congé',
                         dataType: 'number',
                         dataField: 'allocation_annuel',
                         alignment: 'right',
-                        width: 120,
+                       // width: 120,
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
@@ -169,7 +169,7 @@
                         dataType: 'string',
                         dataField: 'en_conge_?',
                         alignment: 'center',
-                        width: 120
+                       // width: 120
                     },
                     {
                         dataField: 'modifier',
@@ -179,7 +179,6 @@
                             $("<a>")
                                 .html('<i data-feather="edit" style="color: yellow"></i>')
                                 .attr("href", options.data.modifier)
-                                .attr("target", '_blank')
                                 .appendTo(container);
                             feather.replace();
                         },

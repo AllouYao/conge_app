@@ -57,7 +57,8 @@ class AbsenceType extends AbstractType
             'data_class' => Absence::class,
         ]);
     }
-    private function getTypeAbsences(){
+    private function getTypeAbsences(): array
+    {
         $typeAbsences = [];
         foreach(Status::TYPE_ABSENCE as $typeAbsence){
             

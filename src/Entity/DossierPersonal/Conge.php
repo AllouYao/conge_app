@@ -48,6 +48,24 @@ class Conge
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $gratification = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2, nullable: true)]
+    private ?string $days = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2, nullable: true)]
+    private ?string $daysPlus = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $salaryDue = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2, nullable: true)]
+    private ?string $workMonths = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2, nullable: true)]
+    private ?string $totalDays = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2, nullable: true)]
+    private ?string $olderDays = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -158,6 +176,78 @@ class Conge
     public function setGratification(?string $gratification): static
     {
         $this->gratification = $gratification;
+
+        return $this;
+    }
+
+    public function getDays(): ?string
+    {
+        return $this->days;
+    }
+
+    public function setDays(?string $days): static
+    {
+        $this->days = $days;
+
+        return $this;
+    }
+
+    public function getDaysPlus(): ?string
+    {
+        return $this->daysPlus;
+    }
+
+    public function setDaysPlus(?string $daysPlus): static
+    {
+        $this->daysPlus = $daysPlus;
+
+        return $this;
+    }
+
+    public function getSalaryDue(): ?string
+    {
+        return $this->salaryDue;
+    }
+
+    public function setSalaryDue(?string $salaryDue): static
+    {
+        $this->salaryDue = $salaryDue;
+
+        return $this;
+    }
+
+    public function getWorkMonths(): ?string
+    {
+        return $this->workMonths;
+    }
+
+    public function setWorkMonths(?string $workMonths): static
+    {
+        $this->workMonths = $workMonths;
+
+        return $this;
+    }
+
+    public function getTotalDays(): ?string
+    {
+        return $this->totalDays;
+    }
+
+    public function setTotalDays(?string $totalDays): static
+    {
+        $this->totalDays = $totalDays;
+
+        return $this;
+    }
+
+    public function getOlderDays(): ?string
+    {
+        return $this->olderDays;
+    }
+
+    public function setOlderDays(?string $olderDays): static
+    {
+        $this->olderDays = $olderDays;
 
         return $this;
     }

@@ -35,49 +35,51 @@ class CongeService
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function calculate(Conge &$conge): void
+    public function calculate(Conge $conge): void
     {
         $personal = $conge->getPersonal();
-        $today = Carbon::now();
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
-        $anciennete = ($today->diff($dateEmbauche)->y); // anciennete en années
-        $lastConge = $this->congeRepository->getLastConge($personal);
-        $returnDate = $lastConge?->getDateDernierRetour(); // date retour du dernier congé
-
-
+        $anciennete = $personal->getOlder(); // anciennete en années
+        $startDate = $conge->getDateDepart();
+        $lastConge = $this->congeRepository->getLastCongeByID($personal->getId());
+        $lastDateReturn = !$lastConge ? $conge->getDateRetour() : $lastConge->getDateDernierRetour();
+        $dayConge = (new Carbon($conge->getDateRetour()))->diff($conge->getDateDepart())->days;
         $genre = $personal->getGenre();
         $chargPeapleOfPersonal = $personal->getChargePeople();
-        $suppConger = $this->suppConger($genre, $chargPeapleOfPersonal, $today);
+        $suppConger = $this->suppConger($genre, $chargPeapleOfPersonal, $startDate);
+        $echelonConge = $this->echelonConge($anciennete);
+        $olderDate = (new Carbon($startDate))->diff($dateEmbauche);
+        $gratification = $this->etatService->getGratifications($olderDate, $personal->getCategorie()->getAmount());
+        $moisTravailler = $this->getWorkMonths($dateEmbauche, $startDate, $genre, $echelonConge, $suppConger);
+        $totalDays = $dayConge + $echelonConge + $suppConger;
 
-        if ($genre === Status::FEMININ) {
-            $moisTravailler = ceil((($today->diff($dateEmbauche)->days) + $this->echelonConge($anciennete) + $suppConger) / 30);
+        if ($lastConge) {
+            $salaireBrutPeriodique = $this->payrollRepository->getTotalSalarie($personal, $lastDateReturn, $startDate);
         } else {
-            $moisTravailler = (($today->diff($dateEmbauche)->days) + $this->echelonConge($anciennete)) / 30;
+            $salaireBrutPeriodique = $this->payrollRepository->getTotalSalarie($personal, $dateEmbauche, $startDate);
         }
-
-        $gratification = $this->etatService->getGratifications($dateEmbauche, $today, $personal->getCategorie()->getAmount());
-        $annee = $today->year;
-        $premierJour = new Carbon("$annee-01-01");
-        $dernierJour = new Carbon("$annee-12-31");
-
-        $conge->getPersonal()->getSalary()->setGratification($gratification);
-
-        if ($returnDate) {
-            $salaireBrutPeriodique = $this->payrollRepository->getTotalSalarie($personal, $returnDate, $today);
-        } else {
-            $salaireBrutPeriodique = $this->payrollRepository->getTotalSalarie($personal, $dateEmbauche, $today);
-        }
-
-
-        $salaireMoyen = ($salaireBrutPeriodique * $moisTravailler) / $moisTravailler;
-        $conge->setSalaireMoyen((int)$salaireMoyen);
+        $salaireMoyen = (($salaireBrutPeriodique + $gratification)) / $moisTravailler;
         $allocationConge = ($salaireMoyen * self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE * $moisTravailler) / 30;
-        $conge->setAllocationConge((int)$allocationConge)
-            ->getPersonal()->getSalary()
-            ->setCongePayer($allocationConge);
-
+        $conge
+            ->setAllocationConge($allocationConge)
+            ->setGratification($gratification)
+            ->setDateDernierRetour($lastDateReturn)
+            ->setSalaireMoyen((int)$salaireMoyen)
+            ->setWorkMonths($moisTravailler)
+            ->setSalaryDue($personal->getSalary()->getBrutAmount())
+            ->setDaysPlus($suppConger)
+            ->setTotalDays($totalDays)
+            ->setDays($dayConge)
+            ->setOlderDays($echelonConge);
     }
 
+    /**
+     * Conges supplémentaires
+     * @param mixed $genre
+     * @param mixed $chargPeapleOfPersonal
+     * @param mixed $today
+     * @return int|float
+     */
     public function suppConger(mixed $genre, mixed $chargPeapleOfPersonal, mixed $today): int|float
     {
         $nbJrCongeSupp = 0;
@@ -104,5 +106,21 @@ class CongeService
             $anciennete > 25 => 7,
             default => 0,
         };
+    }
+
+    public function getWorkMonths(
+        mixed  $dateEmbauche,
+        mixed  $dateDepart,
+        string $genre,
+        mixed  $echelonConge,
+        mixed  $suppConger
+    ): int|float
+    {
+        $workDays = $dateDepart->diff($dateEmbauche)->days;
+        $workDays = $workDays + $echelonConge;
+        if ($genre === Status::FEMININ) {
+            $workDays = ($workDays + $suppConger);
+        }
+        return $workDays / 30;
     }
 }

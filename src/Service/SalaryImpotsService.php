@@ -185,6 +185,7 @@ class SalaryImpotsService implements SalaryInterface
 
     }
 
+
     public function calculateCMU(Personal $personal): float|int
     {
         $categoryRate = $this->CategoryChargeRt->findOneBy(['codification' => 'CMU']);
@@ -194,6 +195,7 @@ class SalaryImpotsService implements SalaryInterface
         $CMU = $categoryRate->getValue();
         return ($chargePeople * $CMU) + ($CMU * $marie) + $CMU;
     }
+
 
     public function chargeEmployeur(Personal $personal): void
     {

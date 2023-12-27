@@ -89,7 +89,6 @@ class PersonalRepository extends ServiceEntityRepository
                 'salary.primeFonction as personal_prime_fonction',
                 'salary.brutImposable as personal_salaire_imposable',
                 'salary.totalPrimeJuridique as personal_total_prime_juridique',
-                'salary.tauxHoraire as personal_taux_horaire',
                 'avantage.numPiece personal_avantage_piece',
                 'avantage.totalAvantage personal_avantage_total_amount',
                 'charge_personals.amountIts as charge_personal_its',

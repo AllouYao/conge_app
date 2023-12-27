@@ -27,17 +27,17 @@ class AbsenceController extends AbstractController
     
 
 
-    public function __construct(EntityManagerInterface $entityManager, AbsenceRepository $absenceRepository, AbsenceService $absenceService,PersonalRepository $personalRepository)
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        AbsenceRepository $absenceRepository,
+        AbsenceService $absenceService,
+        PersonalRepository $personalRepository
+    )
     {
         $this->entityManager = $entityManager;
         $this->absenceRepository = $absenceRepository;
         $this->absenceService = $absenceService;
         $this->PersonalRepository = $personalRepository;
-
-
-
-
-
     }
     #[Route('/', name: 'index')]
     public function index(): Response
@@ -56,10 +56,6 @@ class AbsenceController extends AbstractController
         return $this->render('dossier_personal/absence/index.html.twig', [
             'absences' => $this->absenceRepository->findAll(),
         ]);
-
-        // test
-
-        
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]

@@ -44,6 +44,7 @@ class CampagneRepository extends ServiceEntityRepository
             ->leftJoin('p.chargePersonals', 'ch')
             ->where("c.active = false")
             ->orderBy("c.id", "DESC")
+            ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
     }

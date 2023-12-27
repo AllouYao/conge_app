@@ -26,9 +26,7 @@ class CongeType extends AbstractType
                 'choice_label' => 'matricule',
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('p')
-                        ->join('p.contract', 'ct')
-                        ->leftJoin('p.conges', 'conges')
-                        ->andWhere('conges.isConge = false');
+                        ->join('p.contract', 'ct');
                 },
                 'placeholder' => 'Sélectionner un matricule',
                 'attr' => [

@@ -29,8 +29,8 @@
             </thead>
             <tbody>
             <tr>
-                <td class="text-center">{{ campagne.lastCampagne.createdAt | date("d/m/Y") }}</td>
-                <td class="text-center">{{ campagne.lastCampagne.createdAt | date("H:i") }}</td>
+                <td class="text-center">{{ campagne.lastCampagne.startedAt | date("d/m/Y") }}</td>
+                <td class="text-center">{{ campagne.lastCampagne.startedAt | date("H:i") }}</td>
                 <td class="text-center">{{ campagne.lastCampagne.updatedAt | date("d/m/Y") }}</td>
                 <td class="text-center">{{ campagne.lastCampagne.updatedAt | date("H:i") }}</td>
                 <td class="text-center">{{ lastCampagne.nombre_personal | number_format(0, ",", " ") }}</td>

@@ -150,23 +150,33 @@
                                                class="dropdown-item">Liste congés planifiés</a>
                                         </div>
                                     </div>
+                                    <div class="dropdown">
+                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                           aria-expanded="false">
+                                            Planifier absence
+                                            <div class="arrow-down"></div>
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                            <a href="{{ path('personal_absence_new') }}"
+                                               class="dropdown-item">Créer</a>
+                                            <a href="{{ path('personal_absence_index') }}"
+                                               class="dropdown-item">Liste absence planifiées</a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Absence
+                                    Départs personnel
                                     <div class="arrow-down"></div>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                    <a href="{{ path('personal_absence_new') }}"
+                                    <a href="{{ path('departure_new') }}"
                                        class="dropdown-item">Créer</a>
-                                    <a href="{{ path('personal_absence_index') }}"
-                                       class="dropdown-item">Liste absence</a>
                                 </div>
                             </div>
-
-
                             <a href="{{ path('reporting_prime_indemnite') }}"
                                class="dropdown-item">Primes et indemnités</a>
                         </div>

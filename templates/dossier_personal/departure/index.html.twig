@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Departure index{% endblock %}
+
+{% block body %}
+    <h1>Departure index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Date</th>
+                <th>IsPaied</th>
+                <th>CongeAmount</th>
+                <th>DissmissalAmount</th>
+                <th>NoticeAmount</th>
+                <th>Reason</th>
+                <th>SalaryDue</th>
+                <th>Gratification</th>
+                <th>Uuid</th>
+                <th>CreatedAt</th>
+                <th>UpdatedAt</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for departure in departures %}
+            <tr>
+                <td>{{ departure.id }}</td>
+                <td>{{ departure.date ? departure.date|date('Y-m-d') : '' }}</td>
+                <td>{{ departure.isPaied ? 'Yes' : 'No' }}</td>
+                <td>{{ departure.congeAmount }}</td>
+                <td>{{ departure.dissmissalAmount }}</td>
+                <td>{{ departure.noticeAmount }}</td>
+                <td>{{ departure.reason }}</td>
+                <td>{{ departure.salaryDue }}</td>
+                <td>{{ departure.gratification }}</td>
+                <td>{{ departure.uuid }}</td>
+                <td>{{ departure.createdAt ? departure.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ departure.updatedAt ? departure.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_dossier_personal_departure_show', {'id': departure.id}) }}">show</a>
+                    <a href="{{ path('app_dossier_personal_departure_edit', {'id': departure.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="13">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_dossier_personal_departure_new') }}">Create new</a>
+{% endblock %}

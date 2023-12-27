@@ -131,17 +131,17 @@ class EtatService
         return $creditImpot;
     }
 
-    public function getGratifications($dateEmbauche, $today, $salaireCategoriel): float|int
+    public function getGratifications(mixed $olderDay, $salaireCategoriel): float|int
     {
 
-        $dureeSalarie = ($today->diff($dateEmbauche)->days) / 30;
+        $days = $olderDay->days;
+        $olderMonth = $days / 30;
         $tauxGratification = (int)$this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux();
-        if ($dureeSalarie < 12) {
-            $nombreJourTravailler = ($today->diff($dateEmbauche)->days);
-            $gratification = ((($salaireCategoriel * $tauxGratification) / 100) * $nombreJourTravailler) / 360;
+        if ($olderMonth < 12) {
+            $gratification = ((($salaireCategoriel * $tauxGratification) / 100) * $days) / 360;
         } else {
             $gratification = ($salaireCategoriel * $tauxGratification) / 100;
         }
-        return (int)$gratification;
+        return $gratification;
     }
 }

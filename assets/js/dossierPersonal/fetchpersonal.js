@@ -19,17 +19,6 @@ let chargePeople = () => {
     $('#charge_category').val(category);
 }
 
-let depart = () => {
-    const selectedOption = $("#depart_personal :selected");
-    const name = selectedOption.attr('data-name');
-    const hireDate = selectedOption.attr('data-hireDate');
-    const category = selectedOption.attr('data-category');
-
-    $('#depart_name').val(name);
-    $('#depart_hireDate').val(hireDate);
-    $('#depart_category').val(category);
-}
-
 let conge = () => {
     const selectedOption = $("#conge_personal :selected");
     const name = selectedOption.attr('data-name');
@@ -52,12 +41,23 @@ let heureSupp = () => {
     $('#personal_heure_sup_category').val(category);
 }
 
-$('body').on('change', '#charge_personal, #account_personal, #depart_personal, #conge_personal, #personal_heure_sup_personal', function () {
+let depart = () => {
+    const selectedOption = $("#departure_personal :selected");
+    const name = selectedOption.attr('data-name');
+    const hireDate = selectedOption.attr('data-hireDate');
+    const category = selectedOption.attr('data-category');
+
+    $('#departure_name').val(name);
+    $('#departure_hireDate').val(hireDate);
+    $('#departure_category').val(category);
+}
+
+$('body').on('change', '#charge_personal, #account_personal, #departure_personal, #conge_personal, #personal_heure_sup_personal', function () {
     if ($(this).attr('id') === 'charge_personal') {
         chargePeople();
     } else if ($(this).attr('id') === 'account_personal') {
         accountPersonal();
-    } else if ($(this).attr('id') === 'depart_personal') {
+    } else if ($(this).attr('id') === 'departure_personal') {
         depart();
     } else if ($(this).attr('id') === 'conge_personal') {
         conge();

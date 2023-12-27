@@ -66,7 +66,7 @@
                             component: e.component,
                             worksheet,
                             autoFilterEnabled: true,
-                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
+                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
                             customizeCell: function (options) {
                                 const {gridCell, excelCell} = options;
                                 if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
@@ -194,13 +194,6 @@
                         caption: 'Type de contrat',
                         dataType: 'string',
                         dataField: 'type_contract',
-                        alignment: 'center',
-                        width: 120
-                    },
-                    {
-                        caption: 'Taux horaire',
-                        dataType: 'number',
-                        dataField: 'taux_horaire',
                         alignment: 'center',
                         width: 120
                     },

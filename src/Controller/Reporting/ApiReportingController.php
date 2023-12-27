@@ -57,7 +57,7 @@ class ApiReportingController extends AbstractController
     #[Route('/prime_indemnite', name: 'prime_indemnite', methods: ['GET'])]
     public function primeIndemnite(): JsonResponse
     {
-        $personals = $this->personalRepository->findPersonalWithContract();
+        $personals = $this->personalRepository->findAllPersonal();
         $personalPrime = [];
         foreach ($personals as $value => $personal) {
             $primePanier = $this->primesRepository->findOneBy(['code' => Status::PRIME_PANIER]);

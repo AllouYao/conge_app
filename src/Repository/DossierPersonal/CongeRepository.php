@@ -38,7 +38,8 @@ class CongeRepository extends ServiceEntityRepository
                 'co.allocationConge as allocation_conge',
                 'co.isConge as en_conge',
                 'co.dateDernierRetour as dernier_retour',
-                'co.uuid'
+                'co.uuid',
+                'co.totalDays',
             ])
             ->join('co.personal', 'p')
             ->where('co.personal is not null')
@@ -66,6 +67,7 @@ class CongeRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('co')
             ->join('co.personal', 'personal')
             ->where('personal.id = :personal')
+            ->andWhere('co.isConge = false')
             ->setMaxResults(1)
             ->setParameter('personal', $personal)
             ->orderBy('co.id', 'DESC')

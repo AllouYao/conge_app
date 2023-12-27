@@ -111,7 +111,6 @@ class PersonalController extends AbstractController
                 'compte_banque' => $item['code_banque'] . ' ' . $item['numero_compte'] . ' ' . $item['rib'],
                 'salaire_base' => $item['personal_salaire_base'],
                 'type_contract' => $item['type_contrat'],
-                'taux_horaire' => $item['personal_taux_horaire'],
                 'anciennete_mois' => $ancienneteEnMois,
                 'nom_banque' => $item ['name_banque'],
                 'category_grade' => $item['categorie_intitule'],
