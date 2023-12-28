@@ -35,6 +35,41 @@ class CampagneRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+    /**
+     * @throws NonUniqueResultException
+     */
+    public function getExceptionalCampagne(): ?Campagne
+    {
+        return $this->createQueryBuilder('c')
+            ->where("c.active = true")
+            ->andWhere("c.ordinary = false")
+            ->setMaxResults(1)
+            ->orderBy('c.id', 'DESC')
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    public function getOrdinaryCampagne(): ?Campagne
+    {
+        return $this->createQueryBuilder('c')
+            ->where("c.active = true")
+            ->andWhere("c.ordinary = true")
+            ->setMaxResults(1)
+            ->orderBy('c.id', 'DESC')
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+    
+    public function getCampagneActives(): ?array
+    {
+        return $this->createQueryBuilder('c')
+            ->where("c.active = true")
+            ->getQuery()
+            ->getResult();
+    }
 
 
     public function lastCampagne(): ?Campagne

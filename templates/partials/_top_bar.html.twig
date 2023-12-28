@@ -188,7 +188,7 @@
                             <div class="arrow-down"></div>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="topnav-components">
-                            <div class="dropdown">
+                            {#<div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Ouvrire/Fermer Campagne
@@ -201,6 +201,43 @@
                                        class="dropdown-item">Etat des salaires mensuel</a>
                                     <a href="{{ path('campagne_close') }}"
                                        class="dropdown-item">Ferméture campagne</a>
+                                </div>
+                            </div>#}
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Campagne
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <div class="dropdown">
+                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                           aria-expanded="false">
+                                            Campagne ordinaire
+                                            <div class="arrow-down"></div>
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                            <a href="{{ path('campagne_open_campagne') }}"
+                                            class="dropdown-item">Ouverture campagne ordinaire</a>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown">
+                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                           aria-expanded="false">
+                                            Campagne exceptionnelle
+                                            <div class="arrow-down"></div>
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                            <a href="{{ path('campagne_open_campagne_exceptional') }}"
+                                            class="dropdown-item">Ouverture campagne exceptionnelle</a>
+                                        </div>
+                                    </div>
+                                    <a href="{{ path('reporting_salaires') }}"
+                                    class="dropdown-item">Etat des salaires mensuel</a>
+                                    <a  href="{{ path('campagne_close') }}"
+                                    class="dropdown-item">Ferméture campagnes</a>
                                 </div>
                             </div>
                         </div>

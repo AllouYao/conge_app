@@ -31,6 +31,8 @@ class Campagne
 
     #[ORM\Column]
     private ?bool $active = null;
+    #[ORM\Column]
+    private ?bool $ordinary = null;
 
     #[ORM\OneToOne(inversedBy: 'campagne', targetEntity: self::class, cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: true)]
@@ -88,6 +90,17 @@ class Campagne
     public function setActive(bool $active): static
     {
         $this->active = $active;
+
+        return $this;
+    }
+    public function isOrdinary(): ?bool
+    {
+        return $this->ordinary;
+    }
+
+    public function setOrdinary(bool $ordinary): static
+    {
+        $this->ordinary = $ordinary;
 
         return $this;
     }
