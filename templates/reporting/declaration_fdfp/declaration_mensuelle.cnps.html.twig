@@ -1,0 +1,181 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Livre de paie{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridDeclarationCnps {
+            height: 500px;
+            border-width: 50px;
+
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        ETAT DES DECLARATION MENSUELLES DGI
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="dataGridDeclarationCnps">Cliquer sur recherche pour afficher le tableau</div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+
+        $(document).ready(function () {
+            let debut;
+            let fin;
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+            }
+
+            $('#dataGridDeclarationCnps').dxDataGrid({
+                dataSource: `{{ url('api_reporting_declaration_cnps_current_month') }}`,
+                showBorders: true,
+                scrolling: {
+                    mode: 'virtual',
+                    columnRenderingMode: 'virtual'
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('Employees');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then((buffer) => {
+                                saveAs(new Blob([buffer], {type: 'application /octet-stream'}), `Etat declaration cnps ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                columns: [
+                    {
+                        dataField: "index",
+                        dataType: "number",
+                        caption: "N°Ordre",
+                        alignment: "center",
+                        fixed: true,
+                    },
+                    {
+                        dataField: 'dateCreation',
+                        dataType: 'date',
+                        caption: 'Date',
+                        alignment: 'center',
+                        fixed: true,
+                    },
+                    {
+                        dataField: 'numeroCnps',
+                        dataType: 'string',
+                        caption: 'Numéro CNPS',
+                        alignment: 'center',
+                        fixed: true,
+                    },
+                    {
+                        dataField: 'nom',
+                        dataType: 'string',
+                        caption: 'Nom',
+                        alignment: 'left',
+                        fixed: true,
+                    },
+                    {
+                        dataField: 'prenoms',
+                        dataType: 'string',
+                        caption: 'Prénoms',
+                        alignment: 'left',
+                        fixed: true,
+                    },
+                    {
+                        dataField: 'anneeNaissance',
+                        dataType: 'date',
+                        caption: 'Année de naissance',
+                        alignment: 'center',
+                        fixed: true,
+                    },
+                    {
+                        dataField: 'dateEmbauche',
+                        dataType: 'date',
+                        caption: 'Date d\'embauche',
+                        alignment: 'center',
+                        fixed: true,
+                    },
+                    {
+                        dataField: 'dateDepart',
+                        dataType: 'date',
+                        caption: 'Date de depart',
+                        alignment: 'center',
+                        fixed: true,
+                    },
+                    {
+                        dataField: 'typeSalarie',
+                        dataType: 'string',
+                        caption: 'Type Salarié',
+                        alignment: 'center',
+                        fixed: true,
+                    },
+                    {
+                        dataField: "revenusNetImposable",
+                        dataType: 'number',
+                        caption: 'Remuneration net imposable',
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+
+                ],
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'numeroCnps',
+                            summaryType: 'count',
+                        },
+                        {
+                            column: 'revenusNetImposable', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                    ],
+                }
+            });
+        });
+    </script>
+{% endblock %}

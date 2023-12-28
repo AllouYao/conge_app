@@ -234,12 +234,21 @@
                                             class="dropdown-item">Ouverture campagne exceptionnelle</a>
                                         </div>
                                     </div>
-                                    <a href="{{ path('reporting_salaires') }}"
-                                    class="dropdown-item">Etat des salaires mensuel</a>
+        
                                     <a  href="{{ path('campagne_close') }}"
                                     class="dropdown-item">Ferméture campagnes</a>
+                                    
                                 </div>
+                                
                             </div>
+                                <a href="{{ path('reporting_salaires') }}"
+                                    class="dropdown-item">Etat des salaires mensuel</a>
+                                <a href="{{ path('reporting_declaration_dgi_current_month') }}"
+                                    class="dropdown-item">Etat declaration dgi mensuel</a>
+                                <a href="{{ path('reporting_declaration_cnps_current_month') }}"
+                                    class="dropdown-item">Etat declaration cnps mensuel</a>
+                                <a href="{{ path('reporting_declaration_fdfp_current_month') }}"
+                                    class="dropdown-item">Etat declaration fdfp mensuel</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">

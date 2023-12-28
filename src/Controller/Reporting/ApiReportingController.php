@@ -300,6 +300,149 @@ class ApiReportingController extends AbstractController
         return new JsonResponse($data);
     }
 
+    #[Route('/declaration_dgi/current/month', name: 'declaration_dgi_current_month', methods: ['GET'])]
+    public function declarationMonthDgi(): JsonResponse
+    {
+        $currentFullDate = new \DateTime('now');
+        
+        $data = [];
+        
+        $declarationDgi = $this->payrollRepository->findEtatSalaireCurrentMonth($currentFullDate);
+
+        if (!$declarationDgi) {
+            return $this->json(['data' => []]);
+        }
+
+        
+        foreach ($declarationDgi as $index => $declaration) {
+            $transportNomImposable = 30000;
+            $primeAnciennete = $this->etatService->getPrimeAnciennete($declaration['personal_id']);
+            $amountHeureSupp = $this->heureSupService->getAmountHeursSuppByID($declaration['personal_id']);
+            $gratification = $this->etatService->getGratification($declaration['personal_id']);
+            $conges = $this->congeRepository->getLastCongeByID($declaration['personal_id']);
+            $allocationConger = $conges?->getAllocationConge();
+            $itsSalarialBrut = $this->etatService->calculerImpotBrut($declaration['personal_id']);
+            $creditImpot = $this->etatService->calculateCreditImpot((float)$declaration['numberPart']);
+            $remunerationBrut = (int)$declaration['brutAmount'] + $primeAnciennete + $amountHeureSupp + $gratification + $allocationConger;
+            $revenusNetImposable = (int)$declaration['imposableAmount'] + $primeAnciennete + $amountHeureSupp + $gratification + $allocationConger;
+            $itsPatronal = ($revenusNetImposable * 1.2) / 100;
+            $data[] = [
+                'index' => ++$index,
+                'dateCreation' => date_format($declaration['createdAt'], 'd/m/Y'),
+                'matricule' => $declaration['matricule'],
+                'fullName' => $declaration['firstName'] . ' ' . $declaration['lastName'],
+                'remunerationBrut' => (int)$remunerationBrut,
+                'indemniteTransportNomImposable' => $transportNomImposable,
+                'autrePrimesEtIndemniteNomImposable' => (int)$declaration['prime_juridique'],
+                'indemniteDepartNonImposable' => 0, // à mêtre à jour plus tards
+                'AventageNature' => (int)$declaration['aventage_nature_imposable'],
+                'revenusNetImposable' => (int)$revenusNetImposable,
+                'itsSalarialBrut' => (int)$itsSalarialBrut,
+                'nombreDeParts' => (float)$declaration['numberPart'],
+                'creditImpot' => (int)$creditImpot,
+                'itsSalarialNet' => (int)$declaration['salaryIts'],
+                'itsPatronal' => (int)$itsPatronal
+            ];
+        }
+
+        return new JsonResponse($data);
+    }
+
+    #[Route('/declaration_cnps/current/month', name: 'declaration_cnps_current_month', methods: ['GET'])]
+    public function declarationMonthCnps(): JsonResponse
+    {
+        $currentFullDate = new \DateTime('now');
+
+        $data = [];
+
+        $declarationCnps = $this->payrollRepository->findEtatSalaireCurrentMonth($currentFullDate);
+
+        if (!$declarationCnps) {
+            return $this->json(['data' => []]);
+        }
+
+       
+        foreach ($declarationCnps as $index => $declaration) {
+            $primeAnciennete = $this->etatService->getPrimeAnciennete($declaration['personal_id']);
+            $amountHeureSupp = $this->heureSupService->getAmountHeursSuppByID($declaration['personal_id']);
+            $gratification = $this->etatService->getGratification($declaration['personal_id']);
+            $conges = $this->congeRepository->getLastCongeByID($declaration['personal_id']);
+            $allocationConger = $conges?->getAllocationConge();
+            $revenusNetImposable = (int)$declaration['imposableAmount'] + (int)$primeAnciennete + (int)$amountHeureSupp + (int)$gratification + (int)$allocationConger;
+            $data[] = [
+                'index' => ++$index,
+                'dateCreation' => date_format($declaration['createdAt'], 'd/m/Y'),
+                'numeroCnps' => $declaration['refCNPS'],
+                'nom' => $declaration['firstName'],
+                'prenoms' => $declaration['lastName'],
+                'anneeNaissance' => $declaration['personal_birthday'],
+                'dateEmbauche' => date_format($declaration['embauche'], 'd/m/Y'),
+                'dateDepart' => '',
+                'typeSalarie' => 'Mensuel',
+                'revenusNetImposable' => $revenusNetImposable,
+            ];
+        }
+
+        return new JsonResponse($data);
+    }
+
+    #[Route('/declaration_fdfp/current/month', name: 'declaration_fdfp_current_month', methods: ['GET'])]
+    public function declarationMonthFdfp(): JsonResponse
+    {
+        $currentFullDate = new \DateTime('now');
+
+        $data = [];
+
+        $declarationFdfp = $this->payrollRepository->findEtatSalaireCurrentMonth($currentFullDate);
+
+        if (!$declarationFdfp) {
+            return $this->json(['data' => []]);
+        }
+        foreach ($declarationFdfp as $index => $declaration) {
+            $primeAnciennete = $this->etatService->getPrimeAnciennete($declaration['personal_id']);
+            $amountHeureSupp = $this->heureSupService->getAmountHeursSuppByID($declaration['personal_id']);
+            $gratification = $this->etatService->getGratification($declaration['personal_id']);
+            $conges = $this->congeRepository->getLastCongeByID($declaration['personal_id']);
+            $allocationConger = $conges?->getAllocationConge();
+            $categoryRateFDFP_TA = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_TA'])->getValue();
+            $categoryRateFDFP_FPC = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC'])->getValue();
+            $revenusNetImposable = (int)$declaration['imposableAmount'] + (int)$primeAnciennete + (int)$amountHeureSupp + (int)$gratification + (int)$allocationConger;
+            $tauxApprentissage = ($revenusNetImposable * $categoryRateFDFP_TA) / 100;
+            $tfc = ($revenusNetImposable * $categoryRateFDFP_FPC) / 100;
+            $data[] = [
+                'index' => ++$index,
+                'dateCreation' => date_format($declaration['createdAt'], 'd/m/Y'),
+                'matricule' => $declaration['matricule'],
+                'fullName' => $declaration['firstName'] . '' . $declaration['lastName'],
+                'revenusNetImposable' => $revenusNetImposable,
+                'taux_apprentissage' => (int)$tauxApprentissage,
+                'tfc' => (int)$tfc
+            ];
+        }
+
+        return new JsonResponse($data);
+    }
+
+    #[Route('/declaration_cmu', name: 'declaration_cmu', methods: ['GET'])]
+    public function declarationMonthCmu(Request $request): JsonResponse
+    {
+        $startAt = $request->get('start_at');
+        $endAt = $request->get('end_at');
+        $personalID = (int)$request->get('personalsId');
+
+        if (!$request->isXmlHttpRequest()) {
+            return $this->json(['data' => []]);
+        }
+
+        $data = [];
+        $declarationCmu = $this->payrollRepository->findCnps($startAt, $endAt, $personalID);
+        foreach ($declarationCmu as $index => $declaration) {
+
+            $data[] = [];
+        }
+        return new JsonResponse($data);
+    }
+
     #[Route('/etat_salariale_mensuel', name: 'salariale_etat', methods: ['GET'])]
     public function etatSalarialeMensuel(): JsonResponse
     {
