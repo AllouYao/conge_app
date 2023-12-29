@@ -1,8 +1,19 @@
 version: '3'
 
 services:
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - "3000:80"
+    networks:
+      - orbis_paie
+    environment:
+      PMA_HOST: database
 ###> doctrine/doctrine-bundle ###
   database:
+    networks:
+      - orbis_paie
     image: mariadb:${POSTGRES_VERSION:-10.8.3}
     environment:
       MARIADB_DATABASE: ${POSTGRES_DB:-app}
@@ -18,3 +29,6 @@ volumes:
 ###> doctrine/doctrine-bundle ###
   paie_db:
 ###< doctrine/doctrine-bundle ###
+networks:
+  orbis_paie:
+    driver: bridge
