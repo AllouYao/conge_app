@@ -22,20 +22,17 @@ use Symfony\Component\Routing\Annotation\Route;
 class HeureSupController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
-    private HeureSupService $heureSupService;
     private PersonalRepository $personalRepository;
     private HeureSupRepository $heureSupRepository;
 
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        HeureSupService        $heureSupService,
         PersonalRepository     $personalRepository,
         HeureSupRepository     $heureSupRepository,
     )
     {
         $this->entityManager = $entityManager;
-        $this->heureSupService = $heureSupService;
         $this->personalRepository = $personalRepository;
         $this->heureSupRepository = $heureSupRepository;
     }
@@ -43,12 +40,7 @@ class HeureSupController extends AbstractController
     #[Route('/api/heure_supp', name: 'api_heure_supp', methods: ['GET'])]
     public function apiBookHour(): JsonResponse
     {
-        $heure_15 = 0;
-        $heure_50 = 0;
-        $heure_75_jour = 0;
-        $heure_75_nuit = 0;
-        $heure_100 = 0;
-        $totalHeure = 0;
+
         $jourNormalOrFerie = null;
         $jourOrNuit = null;
         $index = 0;

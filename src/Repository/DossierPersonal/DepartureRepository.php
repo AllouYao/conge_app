@@ -3,6 +3,7 @@
 namespace App\Repository\DossierPersonal;
 
 use App\Entity\DossierPersonal\Departure;
+use App\Entity\DossierPersonal\Personal;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -21,28 +22,21 @@ class DepartureRepository extends ServiceEntityRepository
         parent::__construct($registry, Departure::class);
     }
 
-//    /**
-//     * @return Departure[] Returns an array of Departure objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('d')
-//            ->andWhere('d.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('d.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?Departure
-//    {
-//        return $this->createQueryBuilder('d')
-//            ->andWhere('d.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * @param int $month
+     * @param int $year
+     * @return Departure[]
+     */
+    public function getDepartureByDate(int $month, int $year): array
+    {
+        return $this->createQueryBuilder('departure')
+            ->join('departure.personal', 'personal')
+            ->andWhere('YEAR(departure.date) = :year')
+            ->andWhere('MONTH(departure.date) = :month')
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
+            ->orderBy('departure.date', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }
