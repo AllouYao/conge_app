@@ -18,11 +18,6 @@ class Departure
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
-    #[ORM\ManyToOne(inversedBy: 'departures')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Personal $personal = null;
-
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
@@ -47,23 +42,15 @@ class Departure
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $gratification = null;
 
+    #[ORM\OneToOne(inversedBy: 'departures', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Personal $personal = null;
+
     public function getId(): ?int
     {
         return $this->id;
     }
-
-    public function getPersonal(): ?Personal
-    {
-        return $this->personal;
-    }
-
-    public function setPersonal(?Personal $personal): static
-    {
-        $this->personal = $personal;
-
-        return $this;
-    }
-
+    
     public function getDate(): ?\DateTimeInterface
     {
         return $this->date;
@@ -156,6 +143,18 @@ class Departure
     public function setGratification(?string $gratification): static
     {
         $this->gratification = $gratification;
+
+        return $this;
+    }
+
+    public function getPersonal(): ?Personal
+    {
+        return $this->personal;
+    }
+
+    public function setPersonal(Personal $personal): static
+    {
+        $this->personal = $personal;
 
         return $this;
     }

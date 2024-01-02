@@ -131,9 +131,8 @@ class Personal
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     private ?string $older = null;
 
-    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Departure::class, orphanRemoval: true)]
-    private Collection $departures;
-
+    #[ORM\OneToOne(mappedBy: 'personal', cascade: ['persist', 'remove'])]
+    private ?Departure $departures = null;
     public function __construct()
     {
         $this->chargePeople = new ArrayCollection();
@@ -145,7 +144,6 @@ class Personal
         $this->conges = new ArrayCollection();
         $this->heureSups = new ArrayCollection();
         $this->absences = new ArrayCollection();
-        $this->departures = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -565,7 +563,6 @@ class Personal
 
     public function __toString(): string
     {
-        // TODO: Implement __toString() method.
         return '( ' . $this->matricule . ' ) - ' . $this->firstName . ' ' . $this->lastName;
     }
 
@@ -752,32 +749,19 @@ class Personal
         return $this;
     }
 
-    /**
-     * @return Collection<int, Departure>
-     */
-    public function getDepartures(): Collection
+    public function getDepartures(): ?Departure
     {
         return $this->departures;
     }
 
-    public function addDeparture(Departure $departure): static
+    public function setDepartures(Departure $departures): static
     {
-        if (!$this->departures->contains($departure)) {
-            $this->departures->add($departure);
-            $departure->setPersonal($this);
+        // set the owning side of the relation if necessary
+        if ($departures->getPersonal() !== $this) {
+            $departures->setPersonal($this);
         }
 
-        return $this;
-    }
-
-    public function removeDeparture(Departure $departure): static
-    {
-        if ($this->departures->removeElement($departure)) {
-            // set the owning side to null (unless already changed)
-            if ($departure->getPersonal() === $this) {
-                $departure->setPersonal(null);
-            }
-        }
+        $this->departures = $departures;
 
         return $this;
     }

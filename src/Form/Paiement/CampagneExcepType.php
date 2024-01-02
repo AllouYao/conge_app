@@ -16,7 +16,7 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class CampagneType extends AbstractType
+class CampagneExcepType extends AbstractType
 {
     private PersonalRepository $repositoryPer;
 
@@ -48,7 +48,9 @@ class CampagneType extends AbstractType
                     'query_builder' => function (EntityRepository $er) {
                         return $er->createQueryBuilder('p')
                             ->join('p.contract', 'contract')
-                            ->where('contract.id is not null');
+                            ->join('p.departures', 'departures')
+                            ->where('contract.id is not null')
+                            ->andWhere('departures.id is not null');
                     },
                     'multiple' => true,
                     'group_by' => 'categorie',
