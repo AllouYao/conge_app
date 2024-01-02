@@ -68,7 +68,7 @@
                                 if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
                                     excelCell.text = formatNumber(gridCell.value)
                                     excelCell.font = {size: 9};
-                                    excelCell.alignment = {horizontal: 'left'};
+                                    excelCell.alignment = {horizontal: 'left'}; 
                                 }
                             }
                         }).then(() => {

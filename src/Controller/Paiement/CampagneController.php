@@ -123,8 +123,8 @@ class CampagneController extends AbstractController
     public function open(Request $request, EntityManagerInterface $manager): Response
     {
 
-        $active = $this->campagneRepository->active();
-        if ($active) {
+        $ordinaryCampagne = $this->campagneRepository->getOrdinaryCampagne();
+        if ($ordinaryCampagne) {
             $this->addFlash('error', 'Une campagne est déjà en cours !');
             return $this->redirectToRoute('campagne_livre');
         }
@@ -141,6 +141,8 @@ class CampagneController extends AbstractController
             }
             $campagne
                 ->setActive(true);
+            $campagne
+            ->setOrdinary(true);
             $manager->persist($campagne);
             $manager->flush();
             flash()->addSuccess('Campagne ouverte avec succès.');
@@ -153,6 +155,46 @@ class CampagneController extends AbstractController
             'lastCampagne' => $lastCampagne
         ]);
 
+    }
+    /**
+     * @throws NonUniqueResultException
+     */
+    #[Route('/paiement/campagne/exceptional/open', name: 'open_campagne_exceptional', methods: ['GET', 'POST'])]
+    public function openCampagneExcept(Request $request, EntityManagerInterface $manager): Response
+    {
+
+        $exceptionalCampagne = $this->campagneRepository->getExceptionalCampagne();
+        if ($exceptionalCampagne) {
+            
+            $this->addFlash('error', 'Une campagne exceptionnelle est déjà en cours !');
+            return $this->redirectToRoute('campagne_livre');
+        } 
+
+        $campagne = new Campagne();
+        $lastCampagne = $this->getDetailOfLastCampagne($campagne);
+
+        $form = $this->createForm(CampagneType::class, $campagne);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $personal = $form->get('personal')->getData();
+            foreach ($personal as $item) {
+                $this->payrollService->setPayroll($item, $campagne);
+            }
+            $campagne
+                ->setActive(true);
+            $campagne
+            ->setOrdinary(false);
+            $manager->persist($campagne);
+            $manager->flush();
+            flash()->addSuccess('Campagne ouverte avec succès.');
+            return $this->redirectToRoute('campagne_livre');
+        }
+
+        return $this->render('paiement/campagne_exceptionnelle/open.html.twig', [
+            'form' => $form->createView(),
+            'campagne' => $campagne,
+            'lastCampagne' => $lastCampagne
+        ]);
     }
 
     public function getDetailOfLastCampagne(Campagne $campagne): array
@@ -196,15 +238,17 @@ class CampagneController extends AbstractController
     public function closeCampagne(EntityManagerInterface $manager, CampagneRepository $campagneRepository): Response
     {
 
-        $campagneActive = $campagneRepository->active();
+        $campagneActives = $campagneRepository->getCampagneActives();
 
-        if (!$campagneActive) {
+        if (!$campagneActives) {
             $this->addFlash('error', 'Aucune campagne ouverte au préalable');
             return $this->redirectToRoute('app_home');
         }
-
-        $campagneActive->setClosedAt(new DateTime());
-        $campagneActive->setActive(false);
+        
+        foreach ($campagneActives as $campagneActive) {
+            $campagneActive->setClosedAt(new DateTime());
+            $campagneActive->setActive(false);
+        }
 
         $manager->flush();
         $this->addFlash('success', 'Campagne fermée avec succès');

@@ -140,7 +140,43 @@ class PayrollRepository extends ServiceEntityRepository
         }
         return $qb->getQuery()->getResult();
     }
-
+    public function findEtatSalaireCurrentMonth(mixed $currentFullDate): array
+    {
+        $qb = $this->createQueryBuilder('payroll');
+        $qb
+            ->select([
+                'personal.id as personal_id',
+                'personal.firstName',
+                'personal.lastName',
+                'personal.matricule',
+                'personal.refCNPS',
+                'YEAR(personal.birthday) as personal_birthday',
+                'contract.dateEmbauche as embauche',
+                'salary.totalPrimeJuridique as prime_juridique',
+                'salary.primeLogement as aventage_nature_imposable',
+                'contract.dateEmbauche',
+                'payroll.baseAmount',
+                'payroll.brutAmount',
+                'payroll.salaryCnps',
+                'payroll.imposableAmount',
+                'payroll.salaryIts',
+                'payroll.salaryCmu',
+                'payroll.salarySante',
+                'payroll.numberPart',
+                'payroll.createdAt'
+            ])
+            ->join('payroll.campagne', 'campagnes')
+            ->join('payroll.personal', 'personal')
+            ->leftJoin('personal.salary', 'salary')
+            ->leftJoin('personal.contract', 'contract')
+            ->where('campagnes.active = false')
+            ->andWhere('YEAR(payroll.createdAt) = :currentYear')
+            ->andWhere('Month(payroll.createdAt) = :currentMonth')
+            ->setParameters('currentYear', $currentFullDate->format('Y'))
+            ->setParameters('currentMonth', $currentFullDate->format('m'));
+            
+        return $qb->getQuery()->getResult();
+    }
 
     public function findCnps(): array
     {
@@ -265,4 +301,3 @@ class PayrollRepository extends ServiceEntityRepository
     }
 
 }
-

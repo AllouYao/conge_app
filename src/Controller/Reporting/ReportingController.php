@@ -43,6 +43,29 @@ class ReportingController extends AbstractController
             'personals' => $personalRepository->findPersonalWithContract()
         ]);
     }
+    #[Route('/declaration-dgi-current-month', name: 'declaration_dgi_current_month', methods: ['GET', 'POST'])]
+    public function viewDeclarationMensuelleDgi(PersonalRepository $personalRepository): Response
+    {
+        return $this->render('reporting/declaration_dgi/declaration_mensuelle.dgi.html.twig', [
+            'personals' => $personalRepository->findPersonalWithContract()
+        ]);
+    }
+
+    #[Route('/declaration_cnps-current-month', name: 'declaration_cnps_current_month', methods: ['GET', 'POST'])]
+    public function viewDeclarationMensuelleCnps(PersonalRepository $personalRepository): Response
+    {
+        return $this->render('reporting/declaration_fdfp/declaration_mensuelle.cnps.html.twig', [
+            'personals' => $personalRepository->findPersonalWithContract()
+        ]);
+    }
+
+    #[Route('/declaration_fdfp-current-month', name: 'declaration_fdfp_current_month', methods: ['GET', 'POST'])]
+    public function viewDeclarationMensuellelFdfp(PersonalRepository $personalRepository): Response
+    {
+        return $this->render('reporting/declaration_cnps/declaration_mensuelle.fdfp.html.twig', [
+            'personals' => $personalRepository->findPersonalWithContract()
+        ]);
+    }
 
     #[Route('/salariale_etat_mensuel', name: 'salaires', methods: ['GET', 'POST'])]
     public function viewEtatSalaireMensuel(): Response
