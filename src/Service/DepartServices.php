@@ -8,6 +8,7 @@ use App\Repository\Paiement\PayrollRepository;
 use App\Utils\Status;
 use Carbon\Carbon;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use JetBrains\PhpStorm\NoReturn;
 
 class DepartServices
@@ -43,6 +44,10 @@ class DepartServices
         ];
     }
 
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     public function getSalaireGlobalMoyenElement(Departure $departure): array
     {
         $anciennity = $this->getAncienneteByDepart($departure);
@@ -117,11 +122,12 @@ class DepartServices
         return (int)$indemnitePreavis;
     }
 
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     public function getIndemniteLicenciementByDepart(Departure $departure): int|float
     {
-        //$anciennete = $this->getAncienneteByDepart($departure);
-        //$ancienneteYear = $anciennete['ancienneteYear'];
-
         $element = $this->getSalaireGlobalMoyenElement($departure);
         $salaireGlobalMoyen = $element['Salaire_global_moyen'];
         $indemniteLicenciement = null;
@@ -147,7 +153,7 @@ class DepartServices
     /**
      * @param Departure $departure
      * @return void
-     * @throws NonUniqueResultException
+     * @throws NonUniqueResultException|NoResultException
      */
     #[NoReturn] public function rightAndIndemnityByDeparture(Departure $departure): void
     {

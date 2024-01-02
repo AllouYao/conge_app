@@ -60,6 +60,7 @@ class CongeService
         }
         $salaireMoyen = (($salaireBrutPeriodique + $gratification)) / $moisTravailler;
         $allocationConge = ($salaireMoyen * self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE * $moisTravailler) / 30;
+        $remainingVacation = $moisTravailler * self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE;
         $conge
             ->setAllocationConge($allocationConge)
             ->setGratification($gratification)
@@ -70,7 +71,8 @@ class CongeService
             ->setDaysPlus($suppConger)
             ->setTotalDays($totalDays)
             ->setDays($dayConge)
-            ->setOlderDays($echelonConge);
+            ->setOlderDays($echelonConge)
+            ->setRemainingVacation($remainingVacation);
     }
 
     /**
