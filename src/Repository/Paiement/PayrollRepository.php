@@ -31,6 +31,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->select([
                 'pr.id',
                 'p.firstName as first_name',
+                'p.id as personalId',
                 'p.lastName as last_name',
                 'cy.intitule as categories_name',
                 'pr.numberPart as nombre_part',
@@ -247,12 +248,12 @@ class PayrollRepository extends ServiceEntityRepository
             ])
             ->join('pr.personal', 'p')
             ->join('p.chargePersonals', 'charge_personals')
-            ->join('p.conges', 'conges')
+            ->leftJoin('p.conges', 'conges')
             ->join('p.categorie', 'cy')
             ->join('cy.categorySalarie', 'categories_salarie')
-            ->leftJoin('p.contract', 'contract')
+            ->join('p.contract', 'contract')
             ->leftJoin('p.salary', 'salary')
-            ->join('salary.avantage', 'avantage')
+            ->leftJoin('salary.avantage', 'avantage')
             ->join('pr.campagne', 'c')
             ->andWhere('c.active = :active')
             ->andWhere('p.id = :personal')

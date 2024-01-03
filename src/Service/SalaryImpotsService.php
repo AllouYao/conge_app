@@ -182,7 +182,6 @@ class SalaryImpotsService implements SalaryInterface
         $salaire = $personal->getSalary()->getBrutImposable();
         $categoryRate = $this->CategoryChargeRt->findOneBy(['codification' => 'CNPS']);
         return $salaire * $categoryRate->getValue() / 100;
-
     }
 
 

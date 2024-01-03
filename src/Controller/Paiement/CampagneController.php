@@ -7,10 +7,12 @@ use App\Entity\Paiement\Campagne;
 use App\Form\Paiement\CampagneExcepType;
 use App\Form\Paiement\CampagneType;
 use App\Repository\DossierPersonal\CongeRepository;
+use App\Repository\DossierPersonal\DetailSalaryRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Repository\Paiement\CampagneRepository;
 use App\Repository\Paiement\PayrollRepository;
+use App\Repository\Settings\PrimesRepository;
 use App\Service\EtatService;
 use App\Service\HeureSupService;
 use App\Service\PayrollService;
@@ -115,6 +117,7 @@ class CampagneController extends AbstractController
                  * Masse de salaire global du salarié
                  */
                 'masse_salariale' => $item['masse_salary'],
+                'print_bulletin' => $this->generateUrl('campagne_make_bulletin',['id' => $item['personalId']])
                 //'debuts' => $item['debut'] ? date_format($item['debut'], 'd/m/Y') : "",
             ];
         }
@@ -261,13 +264,31 @@ class CampagneController extends AbstractController
     }
 
     #[Route('/bulletin/{id}', name: 'make_bulletin', methods: ['GET'])]
-    public function makeBulletin(PersonalRepository $personalRepository, Personal $personal): Response
+    public function makeBulletin(
+        PersonalRepository $personalRepository,
+        Personal $personal,
+        PrimesRepository $primesRepository,
+        DetailSalaryRepository $detailSalaryRepository
+    ): Response
     {
+        $primeSalissure = $primesRepository->findOneBy(['code' => Status::PRIME_SALISSURE]);
+        $primeOutillage = $primesRepository->findOneBy(['code' => Status::PRIME_OUTILLAGE]);
+        $primePanier = $primesRepository->findOneBy(['code' => Status::PRIME_PANIER]);
+        $primeTt = $primesRepository->findOneBy(['code' => Status::PRIME_TENUE_TRAVAIL]);
+
+        $amountSalissure = $detailSalaryRepository->findOneBy(['prime' => $primeSalissure, 'salary' => $personal->getSalary()]);
+        $amountOutillage = $detailSalaryRepository->findOneBy(['prime' => $primeOutillage, 'salary' => $personal->getSalary()]);
+        $amountPanier = $detailSalaryRepository->findOneBy(['prime' => $primePanier, 'salary' => $personal->getSalary()]);
+        $amountTt = $detailSalaryRepository->findOneBy(['prime' => $primeTt, 'salary' => $personal->getSalary()]);
         $data = [
-            'fonction' => 'GERANTE',
-            'departement' => 'DIRECTION',
+            'fonction' => $personal->getFonction(),
+            'departement' => $personal->getService(),
             'taux_its' => '0% à 32%',
             'acompte_avance_pret' => 0,
+            'primePanier' => $amountPanier?->getAmountPrime() ?? 0,
+            'primeOutil' => $amountOutillage?->getAmountPrime() ?? 0,
+            'primeSalissure' => $amountSalissure?->getAmountPrime() ?? 0,
+            'primeTt' => $amountTt?->getAmountPrime() ?? 0,
         ];
         $dataPayroll = [];
         $personal = $personalRepository->find($personal->getId());
@@ -291,7 +312,7 @@ class CampagneController extends AbstractController
                 'period_debut' => $payroll['debut'],
                 'period_fin' => $payroll['fin'],
                 'matricule' => $payroll['personal_matricule'],
-                'index' => $index,
+                'index' => ++$index,
                 'grade' => $payroll['categories_name'],
                 'embauche' => $payroll['date_embauche'],
                 'anciennete' => $anciennete,
@@ -299,25 +320,28 @@ class CampagneController extends AbstractController
                 'categorie_salarie' => $payroll['categories_code'],
                 'etat_civil' => $payroll['personal_etat_civil'],
                 'nombre_enfant' => $nombreEnfant,
-                'date_retour_dernier_conge' => '',
+                'date_retour_dernier_conge' => $conges?->getDateDernierRetour()->format('d/m/Y') ?? '-',
                 'fullName_salaried' => $payroll['first_name'] . ' ' . $payroll['last_name'],
-                'nombre_jour_conge' => 3,
-                'date_depart_conge' => '',
-                'date_retour_conge' => '',
+                'nombre_jour_conge' => $conges?->getTotalDays() ,
+                'date_depart_conge' => $conges?->getDateDepart()->format('d/m/Y'),
+                'date_retour_conge' => $conges?->getDateRetour()->format('d/m/Y'),
                 'taux_horaire' => Status::TAUX_HEURE,
                 'salaire_horaire' => (int)$salaireHoraire,
                 'salaire_base' => (int)$payroll['base_salary'],
-                'prime_anciennete' => (int)$primeAnciennete,
-                'autre_prime_indemnite' => (int)$payroll['prime_juridique'],
+                'prime_transport' => (int)$payroll['salary_transport'],
+                'prime_anciennete' => (int)$primeAnciennete ?? 0,
+                'autre_prime_indemnite' => (int)$payroll['prime_juridique'] ?? 0,
                 'heure_supplementaire' => (int)$amountHeureSupp,
-                'gratification' => (int)$gratification,
-                'conge_payes' => (int)$allocationConger,
+                'gratification' => (int)$gratification ?? 0,
+                'conge_payes' => (int)$allocationConger ?? 0,
                 'salaire_brut' => (int)$salaireBrut,
-                'salaire_brut_imposable' => (int)$salaireImposable,
+                'salaire_brut_imposable' => (int)$salaireImposable ?? 0,
                 'taux_cnps' => $categoryRateCNPS,
                 'cnps_salaried' => (int)$amountCnpsPersonal,
-                'its_salaried' => (int)$payroll['personal_its'],
+                'its_salaried' => (int)$payroll['personal_its'] ?? 0,
                 'retenue_diverse' => (int)$payroll['salary_cmu'] + (int)$payroll['salary_assurance'],
+                'cmu' => (int)$payroll['salary_cmu'],
+                'assurance' => (int)$payroll['salary_assurance'],
                 'total_retenue' => (int)$payroll['total_revenu_divers'],
                 'charge_salariale' => (int)$payroll['montant_fixcal_salary'],
                 'charge_patronal' => (int)$payroll['fixcal_amount_employeur'],

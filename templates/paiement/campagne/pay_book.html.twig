@@ -343,6 +343,19 @@
                             return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
                         },
                     },
+                    {
+                        dataField: 'print_bulletin',
+                        caption: 'Imprimer bulletin',
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<a>")
+                                .html('<i data-feather="book" style="color: yellow"></i>')
+                                .attr("href", options.data.print_bulletin)
+                                .attr("target", '_blank')
+                                .appendTo(container);
+                            feather.replace();
+                        },
+                    },
 
                 ]
 

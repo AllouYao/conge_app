@@ -191,6 +191,8 @@ class PersonalController extends AbstractController
                 $detailSalary->setSalary($personal->getSalary());
                 $entityManager->persist($detailSalary);
             }
+            $salary->chargePersonal($personal);
+            $salary->chargeEmployeur($personal);
 
             $entityManager->flush();
             flash()->addSuccess('Salarié modifier avec succès.');
