@@ -66,6 +66,9 @@ class Conge
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2, nullable: true)]
     private ?string $olderDays = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $remainingVacation = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -248,6 +251,18 @@ class Conge
     public function setOlderDays(?string $olderDays): static
     {
         $this->olderDays = $olderDays;
+
+        return $this;
+    }
+
+    public function getRemainingVacation(): ?string
+    {
+        return $this->remainingVacation;
+    }
+
+    public function setRemainingVacation(?string $remainingVacation): static
+    {
+        $this->remainingVacation = $remainingVacation;
 
         return $this;
     }

@@ -1,55 +1,209 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Departure index{% endblock %}
+{% block title %}LISTE CESSATION DE CONTRACT{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridDeparture {
+            height: 400px;
+            border-width: 50px;
 
+        }
+    </style>
+{% endblock %}
 {% block body %}
-    <h1>Departure index</h1>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        LIVRE DE CESSATION DE CONTRACT DU {{ mois }} MOIS DE L'ANNEE {{ annee }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="dataGridDeparture"></div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('departure_new') }}" class="btn btn-primary float-end"
+                       style="color: white">Nouveau</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Date</th>
-                <th>IsPaied</th>
-                <th>CongeAmount</th>
-                <th>DissmissalAmount</th>
-                <th>NoticeAmount</th>
-                <th>Reason</th>
-                <th>SalaryDue</th>
-                <th>Gratification</th>
-                <th>Uuid</th>
-                <th>CreatedAt</th>
-                <th>UpdatedAt</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for departure in departures %}
-            <tr>
-                <td>{{ departure.id }}</td>
-                <td>{{ departure.date ? departure.date|date('Y-m-d') : '' }}</td>
-                <td>{{ departure.isPaied ? 'Yes' : 'No' }}</td>
-                <td>{{ departure.congeAmount }}</td>
-                <td>{{ departure.dissmissalAmount }}</td>
-                <td>{{ departure.noticeAmount }}</td>
-                <td>{{ departure.reason }}</td>
-                <td>{{ departure.salaryDue }}</td>
-                <td>{{ departure.gratification }}</td>
-                <td>{{ departure.uuid }}</td>
-                <td>{{ departure.createdAt ? departure.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ departure.updatedAt ? departure.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_dossier_personal_departure_show', {'id': departure.id}) }}">show</a>
-                    <a href="{{ path('app_dossier_personal_departure_edit', {'id': departure.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="13">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+{% block javascripts %}
 
-    <a href="{{ path('app_dossier_personal_departure_new') }}">Create new</a>
+    <script>
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        $(document).ready(function () {
+            let debut;
+            let fin;
+            $("#dataGridDeparture").dxDataGrid({
+                dataSource: `{{ url('departure_api') }}`,
+                showBorders: true,
+                scrolling: {
+                    columnRenderingMode: 'virtual',
+                    height: 400,
+                    mode: "virtual"
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('Livre cessation de contract');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
+                            customizeCell: function (options) {
+                                const {gridCell, excelCell} = options;
+                                if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
+                                    excelCell.text = formatNumber(gridCell.value)
+                                    excelCell.font = {size: 9};
+                                    excelCell.alignment = {horizontal: 'left'};
+                                }
+                            }
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then(function (buffer) {
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Livre des cessations de contract ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    // width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                columns: [
+                    {
+                        caption: 'N°Ordre',
+                        alignment: 'center',
+                        dataType: 'number',
+                        dataField: 'index',
+                        fixed: true
+                    },
+                    {
+                        caption: 'Nom et prénoms',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'full_name',
+                        fixed: true
+                    },
+                    {
+                        caption: 'Date cessation',
+                        dataType: 'date',
+                        dataField: 'dateCessation',
+                        alignment: 'center',
+                    },
+                    {
+                        caption: 'Motif de la cessation',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'motifCessation',
+                    },
+                    {
+                        caption: 'Salaire moyen mensuel',
+                        dataType: 'number',
+                        dataField: 'salaireMoyen',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Date de retour',
+                        dataType: 'date',
+                        dataField: 'dateRetourDrnConges',
+                        alignment: 'center',
+                    },
+                    {
+                        caption: 'Gratification',
+                        dataType: 'number',
+                        dataField: 'gratification',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Indemnité de congé',
+                        dataType: 'number',
+                        dataField: 'indemniteConges',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Préavis',
+                        dataType: 'number',
+                        dataField: 'preavis',
+                        alignment: 'right',
+                    },
+                    {
+                        caption: 'Indemnité de préavis',
+                        dataType: 'number',
+                        dataField: 'indemnitePreavis',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Ancienneté (en mois)',
+                        dataType: 'number',
+                        dataField: 'anciennete',
+                        alignment: 'right',
+                    },
+                    {
+                        caption: 'Indemnité de cessation',
+                        dataType: 'number',
+                        dataField: 'indemniteCessation',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        dataField: 'modifier',
+                        caption: 'Modifier',
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<a>")
+                                .html('<i data-feather="edit" style="color: yellow"></i>')
+                                .attr("href", options.data.modifier)
+                                .appendTo(container);
+                            feather.replace();
+                        },
+                    },
+                ],
+            })
+        })
+    </script>
+
 {% endblock %}

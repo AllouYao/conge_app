@@ -86,6 +86,23 @@ class PayrollRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    public function getTotalSalarieBaseAndSursalaire(Personal $personal, mixed $start, mixed $end): float|int|null
+    {
+        return $this->createQueryBuilder('pr')
+            ->select('SUM((pr.baseAmount + pr.sursalaire)) as amount_moyen')
+            ->join('pr.personal', 'personal')
+            ->leftJoin('personal.salary', 'salary')
+            ->where('pr.personal = :pr_personal')
+            ->andWhere('pr.createdAt >= :start_date')
+            ->andWhere('pr.createdAt <= :end_date')
+            ->setParameter('pr_personal', $personal)
+            ->setParameter('start_date', $start)
+            ->setParameter('end_date', $end)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     public function findEtatSalaire(mixed $mouth1, mixed $mouth2, ?int $personalId): array
     {
         $qb = $this->createQueryBuilder('payroll');

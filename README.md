@@ -1,17 +1,2 @@
-$conges = $this->congeRepository->getLastConge($p);
-$primeAnciennete = (int)$this->etatService->getPrimeAnciennete($p);
-$autrePrime = (int)$p->getSalary()->getTotalPrimeJuridique();
-$amountHeureSupp = (int)$this->heureSupService->getAmountHeursSupp($p);
-$gratification = $this->etatService->getGratification($p);
-$etatSalaire = $this->payrollRepository->findEtatSalaire($startMonth, $endMonth, $personalId);
-$allocationConger = (int)$conges?->getAllocationConge();
-$salaireBrut = $p->getSalary()->getBrutAmount() + $primeAnciennete + $amountHeureSupp + $gratification + $allocationConger;
-$netImposable = $p->getSalary()->getBrutImposable() + $primeAnciennete + $amountHeureSupp + $gratification + $allocationConger;
-$retenueCNPS = ceil(($netImposable * 7.7) / 100);
-$itsPatronal = ceil(($netImposable * 1.2) / 100);
-$tfc = ceil(($netImposable * 0.6) / 100);
-$tauxApprentissage = ceil(($netImposable * 0.4) / 100);
-$accidentTravail = ceil(($netImposable * 2) / 100);
-$prestationTravail = ceil(($netImposable * 5.75) / 100);
-$totalRetenue = $retenueCNPS + $itsPatronal + $tauxApprentissage + $tfc + $accidentTravail + $prestationTravail;
-$netSalary = $salaireBrut - $totalRetenue;
+Pour activer mon server Mysql:
+- docker compose up -d

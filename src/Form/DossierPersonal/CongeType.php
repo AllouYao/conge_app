@@ -66,33 +66,24 @@ class CongeType extends AbstractType
                 function (FormEvent $event) {
                     /** @var Conge $data */
                     $data = $event->getData();
-                    $form = $event->getForm();
-                    $personal = $data->getPersonal();
-                    if ($data instanceof Conge && $data->getId()) {
-                        $form->add('personal', EntityType::class, [
-                            'class' => Personal::class,
-                            'choice_label' => 'matricule',
-                            'query_builder' => function (EntityRepository $er) use ($personal) {
-                                return $er->createQueryBuilder('p')
-                                    ->join('p.contract', 'ct')
-                                    ->leftJoin('p.conges', 'conges')
-                                    ->andWhere('conges.isConge = true')
-                                    ->andWhere('p.id = :personal')
-                                    ->setParameter('personal', $personal->getId());
-                            },
-                            'placeholder' => 'Sélectionner un matricule',
-                            'attr' => [
-                                'data-plugin' => 'customselect',
-                            ],
-                            'choice_attr' => function (Personal $personal) {
-                                return [
-                                    'data-name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
-                                    'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y'),
-                                    'data-category' => '( ' . $personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' . $personal->getCategorie()->getIntitule()
-                                ];
-                            }
-                        ]);
+                    if ($data instanceof Conge) {
+                        $workMonth = $data->getWorkMonths();
+                        $vacationDay = $workMonth * 2.2 * 1.25;
+                        $data->setRemainingVacation($vacationDay);
                     }
+                }
+            );
+
+        $builder
+            ->addEventListener(
+                FormEvents::POST_SUBMIT,
+                function (FormEvent $event) {
+                    /** @var Conge $data */
+                    $data = $event->getData();
+                    $totalDay = $data->getTotalDays();
+                    $vacationDay = $data->getRemainingVacation();
+                    $remainingVacation = $vacationDay - $totalDay;
+                    $data->setRemainingVacation($remainingVacation);
                 }
             );
     }

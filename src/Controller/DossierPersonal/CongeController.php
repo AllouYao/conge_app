@@ -5,7 +5,6 @@ namespace App\Controller\DossierPersonal;
 use App\Entity\DossierPersonal\Conge;
 use App\Form\DossierPersonal\CongeType;
 use App\Repository\DossierPersonal\CongeRepository;
-use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\Paiement\CampagneRepository;
 use App\Service\CongeService;
 use App\Utils\Status;
@@ -23,21 +22,15 @@ use Symfony\Component\Routing\Annotation\Route;
 class CongeController extends AbstractController
 {
 
-    private PersonalRepository $personalRepository;
     private CongeRepository $congeRepository;
-    private CongeService $congeService;
     private CampagneRepository $campagneRepository;
 
     public function __construct(
-        PersonalRepository $personalRepository,
         CongeRepository    $congeRepository,
-        CongeService       $congeService,
         CampagneRepository $campagneRepository
     )
     {
-        $this->personalRepository = $personalRepository;
         $this->congeRepository = $congeRepository;
-        $this->congeService = $congeService;
         $this->campagneRepository = $campagneRepository;
     }
 
@@ -113,7 +106,7 @@ class CongeController extends AbstractController
                 return $this->redirectToRoute('conge_index');
             }
 
-            if (!$lastConge && $personal->getOlder() < 1 ) {
+            if (!$lastConge && $personal->getOlder() < 1) {
                 $this->addFlash('error', 'Monsieur ou Madame ' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' n\'est pas  éligible pour obtenir un congé.');
                 return $this->redirectToRoute('conge_index');
             }
@@ -136,7 +129,7 @@ class CongeController extends AbstractController
 
         return $this->render('dossier_personal/conge/new.html.twig', [
             'conge' => $conge,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -145,13 +138,17 @@ class CongeController extends AbstractController
      * @throws NoResultException
      */
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Conge $conge, EntityManagerInterface $entityManager, CongeService $congeService): Response
+    public function edit(
+        Request                $request,
+        Conge                  $conge,
+        EntityManagerInterface $entityManager,
+    ): Response
     {
         $form = $this->createForm(CongeType::class, $conge);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $congeService->calculate($conge);
+            $entityManager->persist($conge);
             $entityManager->flush();
             flash()->addSuccess('Congé planifié modifier avec succès.');
             return $this->redirectToRoute('conge_index', [], Response::HTTP_SEE_OTHER);
@@ -159,7 +156,7 @@ class CongeController extends AbstractController
 
         return $this->render('dossier_personal/conge/edit.html.twig', [
             'conge' => $conge,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 

@@ -4,6 +4,7 @@ namespace App\Controller\Paiement;
 
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Campagne;
+use App\Form\Paiement\CampagneExcepType;
 use App\Form\Paiement\CampagneType;
 use App\Repository\DossierPersonal\CongeRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
@@ -40,6 +41,10 @@ class CampagneController extends AbstractController
      * @param PayrollService $payrollService
      * @param PayrollRepository $payrollRepository
      * @param CampagneRepository $campagneRepository
+     * @param EtatService $etatService
+     * @param HeureSupService $heureSupService
+     * @param CongeRepository $congeRepository
+     * @param CategoryChargeRepository $categoryChargeRepository
      */
     public function __construct(
         PayrollService           $payrollService,
@@ -142,7 +147,7 @@ class CampagneController extends AbstractController
             $campagne
                 ->setActive(true);
             $campagne
-            ->setOrdinary(true);
+                ->setOrdinary(true);
             $manager->persist($campagne);
             $manager->flush();
             flash()->addSuccess('Campagne ouverte avec succès.');
@@ -156,6 +161,7 @@ class CampagneController extends AbstractController
         ]);
 
     }
+
     /**
      * @throws NonUniqueResultException
      */
@@ -165,15 +171,14 @@ class CampagneController extends AbstractController
 
         $exceptionalCampagne = $this->campagneRepository->getExceptionalCampagne();
         if ($exceptionalCampagne) {
-            
             $this->addFlash('error', 'Une campagne exceptionnelle est déjà en cours !');
             return $this->redirectToRoute('campagne_livre');
-        } 
+        }
 
         $campagne = new Campagne();
         $lastCampagne = $this->getDetailOfLastCampagne($campagne);
 
-        $form = $this->createForm(CampagneType::class, $campagne);
+        $form = $this->createForm(CampagneExcepType::class, $campagne);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $personal = $form->get('personal')->getData();
@@ -183,7 +188,7 @@ class CampagneController extends AbstractController
             $campagne
                 ->setActive(true);
             $campagne
-            ->setOrdinary(false);
+                ->setOrdinary(false);
             $manager->persist($campagne);
             $manager->flush();
             flash()->addSuccess('Campagne ouverte avec succès.');
@@ -237,14 +242,13 @@ class CampagneController extends AbstractController
     #[Route('/paiement/campagne/close', name: 'close', methods: ['GET', 'POST'])]
     public function closeCampagne(EntityManagerInterface $manager, CampagneRepository $campagneRepository): Response
     {
-
         $campagneActives = $campagneRepository->getCampagneActives();
 
         if (!$campagneActives) {
             $this->addFlash('error', 'Aucune campagne ouverte au préalable');
             return $this->redirectToRoute('app_home');
         }
-        
+
         foreach ($campagneActives as $campagneActive) {
             $campagneActive->setClosedAt(new DateTime());
             $campagneActive->setActive(false);
@@ -295,7 +299,7 @@ class CampagneController extends AbstractController
                 'categorie_salarie' => $payroll['categories_code'],
                 'etat_civil' => $payroll['personal_etat_civil'],
                 'nombre_enfant' => $nombreEnfant,
-                'date_retour_dernier_conge' => '' ,
+                'date_retour_dernier_conge' => '',
                 'fullName_salaried' => $payroll['first_name'] . ' ' . $payroll['last_name'],
                 'nombre_jour_conge' => 3,
                 'date_depart_conge' => '',

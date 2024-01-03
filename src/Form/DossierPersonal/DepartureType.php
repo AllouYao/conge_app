@@ -42,9 +42,11 @@ class DepartureType extends AbstractType
                 'choices' => [
                     'Démission' => Status::DEMISSION,
                     'Retraite' => Status::RETRAITE,
-                    'Licenciement' => Status::LICENCIEMENT,
+                    'Licenciement collectif' => Status::LICENCIEMENT_COLLECTIF,
+                    'Licenciement faute lourde' => Status::LICENCIEMENT_FAUTE_LOURDE,
+                    'Licenciement du fait de l\'employeur' => Status::LICENCIEMENT_FAIT_EMPLOYEUR,
                     'Abandon de poste' => Status::ABANDON_DE_POST,
-                    'Maladies' => Status::MALADIE,
+                    'Licenciement pour maladie' => Status::MALADIE,
                     'Décès' => Status::DECES
                 ],
                 'placeholder' => 'Sélectionner la raison du départ'
