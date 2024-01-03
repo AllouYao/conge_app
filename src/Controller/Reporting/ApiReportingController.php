@@ -307,8 +307,7 @@ class ApiReportingController extends AbstractController
         
         $data = [];
         
-        $declarationDgi = $this->payrollRepository->findEtatSalaireCurrentMonth($currentFullDate);
-
+        $declarationDgi = $this->payrollRepository->findEtatSalaireCurrentMonth(true ,$currentFullDate);
         if (!$declarationDgi) {
             return $this->json(['data' => []]);
         }
@@ -355,7 +354,9 @@ class ApiReportingController extends AbstractController
 
         $data = [];
 
-        $declarationCnps = $this->payrollRepository->findEtatSalaireCurrentMonth($currentFullDate);
+        $declarationCnps = $this->payrollRepository->findEtatSalaireCurrentMonth(true, $currentFullDate);
+        
+        dd($declarationCnps);
 
         if (!$declarationCnps) {
             return $this->json(['data' => []]);
@@ -393,7 +394,7 @@ class ApiReportingController extends AbstractController
 
         $data = [];
 
-        $declarationFdfp = $this->payrollRepository->findEtatSalaireCurrentMonth($currentFullDate);
+        $declarationFdfp = $this->payrollRepository->findEtatSalaireCurrentMonth(true, $currentFullDate);
 
         if (!$declarationFdfp) {
             return $this->json(['data' => []]);
@@ -453,7 +454,7 @@ class ApiReportingController extends AbstractController
         $salariesEtat = $this->payrollRepository->findSalarialeCampagne(true, $year, $month);
         foreach ($salariesEtat as $index => $salary) {
             $primeAnciennete = $this->etatService->getPrimeAnciennete($salary['personal_id']);
-            $amountHeureSupp = (int)$salary['heure_supp'];
+            $amountHeureSupp = 0;
             $gratification = $this->etatService->getGratification($salary['personal_id']);
             $conges = $this->congeRepository->getLastCongeByID($salary['personal_id']);
             $allocationConger = $conges?->getAllocationConge();
