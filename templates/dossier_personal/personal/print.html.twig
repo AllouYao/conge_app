@@ -75,45 +75,43 @@
                                 <table class="table table-bordered table-responsive table-sm">
                                     <tr>
                                         <td>Salaire de base</td>
-                                        <td class="text-end">{{ personals.salary.baseAmount|number_format(0, ',', ' ') }}</td>
+                                        <td class="text-end">{{ salaireBase|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                     <tr>
                                         <td>Prime de panier</td>
-                                        <td class="text-end">{{ primePanier.amountPrime ?? '' }}</td>
+                                        <td class="text-end">{{ primePanier|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                     <tr>
                                         <td>Prime de salissure</td>
-                                        <td class="text-end">{{ primeSalissure.amountPrime ?? '' }}</td>
+                                        <td class="text-end">{{ primeSalissure|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                     <tr>
                                         <td>Prime de tenue de travail</td>
-                                        <td class="text-end">{{ primeTT.amountPrime ?? '' }}</td>
+                                        <td class="text-end">{{ primeTT|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                     <tr>
                                         <td>Prime outillage</td>
-                                        <td class="text-end">{{ primeOutil.amountPrime ?? '' }}</td>
+                                        <td class="text-end">{{ primeOutil|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                     <tr>
                                         <td>Prime de transport</td>
-                                        <td class="text-end">{{ personals.salary.primeTransport|number_format(0, ',', ' ') }}</td>
+                                        <td class="text-end">{{ primeTransport|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                     <tr>
                                         <td>Prime de fonction</td>
-                                        <td class="text-end">{{ personals.salary.primeFonction|number_format(0, ',', ' ') }}</td>
+                                        <td class="text-end">{{ primeFonction|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                     <tr>
                                         <td>Prime de logement</td>
-                                        <td class="text-end">{{ personals.salary.primeLogement|number_format(0, ',', ' ') }}</td>
+                                        <td class="text-end">{{ primeLogement|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                     <tr>
                                         <td>Avantage en nature</td>
-                                        <td class="text-end">{{ personals.salary.avantage.totalAvantage|number_format(0, ',', ' ') }}</td>
+                                        <td class="text-end">{{ avantageAmount|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                     <tr>
-                                        {% set amountTT = personals.salary.baseAmount + primePanier.amountPrime ?? 0 +
-                                            primeSalissure.amountPrime ?? 0 + primeTT.amountPrime ?? 0 + primeOutil.amountPrime ?? 0 + personals.salary.primeTransport +
-                                            personals.salary.primeFonction + personals.salary.primeLogement +
-                                            personals.salary.avantage.totalAvantage %}
+                                        {% set amountTT = salaireBase + primePanier + primeSalissure + primeTT
+                                            + primeOutil + primeTransport + primeFonction + primeLogement + avantageAmount %}
                                         <th>TOTAL</th>
                                         <td class="text-end">{{ amountTT|number_format(0, ',', ' ') }}</td>
                                     </tr>
@@ -133,7 +131,6 @@
                href="{{ path('app_home') }}">
                 retour</a>
         </div>
-    </div>
     </div>
 {% endblock %}
 
