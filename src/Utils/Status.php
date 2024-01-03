@@ -136,7 +136,7 @@ final class Status
     public const LICENCIEMENT_COLLECTIF = 'LICENCIEMENT COLLECTIF';
     public const LICENCIEMENT_FAUTE_LOURDE = 'LICENCIEMENT FAUTE LOURDE';
     public const LICENCIEMENT_FAIT_EMPLOYEUR = 'LICENCIEMENT DU FAIT DE EMPLOYEUR';
-    public const ABANDON_DE_POST = 'ABANDON_POST';
+    public const ABANDON_DE_POST = 'ABANDON DE POST';
     public const MALADIE = 'MALADIE';
     public const DECES = 'DECES';
 }

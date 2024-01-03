@@ -6,8 +6,11 @@ use App\Entity\DossierPersonal\Departure;
 use App\Form\DossierPersonal\DepartureType;
 use App\Repository\DossierPersonal\DepartureRepository;
 use App\Service\DepartServices;
+use App\Utils\Status;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -40,23 +43,30 @@ class DepartureController extends AbstractController
         $departures = $this->departureRepository->getDepartureByDate($month, $years);
         foreach ($departures as $departure) {
             $personal = $departure->getPersonal();
-            $congeElements = $this->departServices->getCongeElementInDepart($departure);
+            $reason = $departure->getReason();
             $anciennete = $this->departServices->getAncienneteByDepart($departure);
-            $dureePreavis = $this->departServices->getPreavisByDepart($anciennete['ancienneteYear']);
-            $indemnitePreavis = $this->departServices->getIndemnitePreavisByDepart($departure);
+            $dureePreavis = null;
+            if (
+                $reason === Status::LICENCIEMENT_COLLECTIF ||
+                $reason === Status::MALADIE ||
+                $reason === Status::LICENCIEMENT_FAIT_EMPLOYEUR
+            ) {
+                $dureePreavis = $this->departServices->getPreavisByDepart($anciennete['ancienneteYear']);
+            }
+
             $apiDeparture[] = [
                 'index' => ++$index,
                 'full_name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
                 'dateCessation' => date_format($departure->getDate(), 'd/m/Y'),
                 'motifCessation' => $departure->getReason(),
-                'salaireMoyen' => $congeElements['salaireMoyen'],
-                'gratification' => $congeElements['gratification'],
-                'dateRetourDrnConges' => $congeElements['dateDernierConge'],
-                'indemniteConges' => $congeElements['indemniteConge'],
+                'salaireMoyen' => $departure->getSalaryDue(),
+                'gratification' => $departure->getGratification(),
+                'dateRetourDrnConges' => null,
+                'indemniteConges' => $departure->getCongeAmount(),
                 'preavis' => $dureePreavis, // le préavis ici est determiné en mois
-                'indemnitePreavis' => $indemnitePreavis,
+                'indemnitePreavis' => $departure->getNoticeAmount(),
                 'anciennete' => $anciennete['ancienneteMonth'],
-                'indemniteCessation' => null,
+                'indemniteCessation' => $departure->getDissmissalAmount(),
                 'modifier' => $this->generateUrl('departure_edit', ['uuid' => $departure->getUuid()])
             ];
         }
@@ -77,8 +87,12 @@ class DepartureController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $manager): Response
     {
         $departure = new Departure();
         $form = $this->createForm(DepartureType::class, $departure);
@@ -86,8 +100,8 @@ class DepartureController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->departServices->rightAndIndemnityByDeparture($departure);
-            $entityManager->persist($departure);
-            $entityManager->flush();
+            $manager->persist($departure);
+            $manager->flush();
 
             flash()->addSuccess('Depart enregistrer avec succès.');
             return $this->redirectToRoute('departure_index', [], Response::HTTP_SEE_OTHER);
@@ -115,7 +129,6 @@ class DepartureController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
             flash()->addSuccess('Départ modifier avec succès.');
             return $this->redirectToRoute('departure_index', [], Response::HTTP_SEE_OTHER);
         }

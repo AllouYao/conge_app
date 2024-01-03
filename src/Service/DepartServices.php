@@ -70,6 +70,13 @@ class DepartServices
         $preavis = $this->getIndemnitePreavisByDepart($departure);
         $salairePeriodique = $this->payrollRepository->getTotalSalarieBaseAndSursalaire($departure->getPersonal(), $dateEmbauche, $dateDepart);
         $salaireGlobalMoyen = $salairePeriodique + $primeAciennete + $allocationConge + $gratification + $preavis;
+        $conges = $departure->getPersonal()->getConges();
+        $dernierRetour = null;
+        if ($conges) {
+            foreach ($conges as $conge) {
+                $dernierRetour = $conge?->getDateDernierRetour();
+            }
+        }
         return [
             'Gratification' => $gratification,
             'Allocation_conge' => $allocationConge,
@@ -77,24 +84,10 @@ class DepartServices
             'Sursalaire' => $sursalaire,
             'Prime_anciennete' => $primeAciennete,
             'Salaire_global_moyen' => (int)$salaireGlobalMoyen,
-            'Preavis' => $preavis
+            'Preavis' => $preavis,
+            'retourConge' => $dernierRetour->format('d/m/Y')
         ];
 
-    }
-
-    public function getCongeElementInDepart(Departure $departure): array
-    {
-        $congeElement = [];
-        $personal = $departure->getPersonal();
-        foreach ($personal->getConges()->toArray() as $conge) {
-            $congeElement = [
-                'salaireMoyen' => $conge?->getSalaireMoyen(),
-                'gratification' => $conge?->getGratification(),
-                'dateDernierConge' => $conge?->getDateDernierRetour(),
-                'indemniteConge' => $conge?->getAllocationConge(),
-            ];
-        }
-        return $congeElement;
     }
 
     public function getPreavisByDepart(mixed $anciennete): int
@@ -161,48 +154,23 @@ class DepartServices
         $salaireDue = $departure->getPersonal()->getSalary()->getBrutAmount();
         $elements = $this->getSalaireGlobalMoyenElement($departure);
         $indemniteLicenciement = $this->getIndemniteLicenciementByDepart($departure);
+        $departure
+            ->setSalaryDue($salaireDue)
+            ->setGratification($elements['Gratification'])
+            ->setCongeAmount($elements['Allocation_conge'])
+        ;
         if ($reason === Status::RETRAITE) {
-            $departure
-                ->setSalaryDue($salaireDue)
-                ->setGratification($elements['Gratification'])
-                ->setCongeAmount($elements['Allocation_conge'])
-                ->setDissmissalAmount($indemniteLicenciement);
-        } elseif ($reason === Status::ABANDON_DE_POST) {
-            $departure
-                ->setSalaryDue($salaireDue)
-                ->setGratification($elements['Gratification'])
-                ->setCongeAmount($elements['Allocation_conge']);
-
+            $departure->setDissmissalAmount($indemniteLicenciement);
         } elseif ($reason === Status::MALADIE) {
             $departure
-                ->setSalaryDue($salaireDue)
-                ->setGratification($elements['Gratification'])
-                ->setCongeAmount($elements['Allocation_conge'])
                 ->setNoticeAmount($elements['Preavis'])
                 ->setDissmissalAmount($indemniteLicenciement);
-        } elseif ($reason === Status::DEMISSION) {
-            $departure
-                ->setSalaryDue($salaireDue)
-                ->setGratification($elements['Gratification'])
-                ->setCongeAmount($elements['Allocation_conge']);
         } elseif ($reason === Status::DECES) {
-            $departure
-                ->setSalaryDue($salaireDue)
-                ->setGratification($elements['Gratification'])
-                ->setCongeAmount($elements['Allocation_conge'])
-                ->setDissmissalAmount($indemniteLicenciement);
+            $departure->setDissmissalAmount($indemniteLicenciement);
         } elseif ($reason === Status::LICENCIEMENT_COLLECTIF) {
             $departure
-                ->setSalaryDue($salaireDue)
-                ->setGratification($elements['Gratification'])
-                ->setCongeAmount($elements['Allocation_conge'])
                 ->setNoticeAmount($elements['Preavis'])
                 ->setDissmissalAmount($indemniteLicenciement);
-        } elseif ($reason === Status::LICENCIEMENT_FAUTE_LOURDE) {
-            $departure
-                ->setSalaryDue($salaireDue)
-                ->setGratification($elements['Gratification'])
-                ->setCongeAmount($elements['Allocation_conge']);
         } elseif ($reason === Status::LICENCIEMENT_FAIT_EMPLOYEUR) {
             $active = $this->congeRepository->active($departure->getPersonal());
             $dateDepart = $departure->getDate();
@@ -217,13 +185,8 @@ class DepartServices
                 $supplement_indemnite = $salaireDue * 2;
             }
             $departure
-                ->setSalaryDue($salaireDue)
-                ->setGratification($elements['Gratification'])
-                ->setCongeAmount($elements['Allocation_conge'])
                 ->setNoticeAmount($elements['Preavis'] + $supplement_indemnite)
                 ->setDissmissalAmount($indemniteLicenciement);
         }
-
-        dd($departure);
     }
 }

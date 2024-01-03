@@ -133,10 +133,7 @@ class CongeController extends AbstractController
         ]);
     }
 
-    /**
-     * @throws NonUniqueResultException
-     * @throws NoResultException
-     */
+
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(
         Request                $request,
