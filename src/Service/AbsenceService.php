@@ -30,8 +30,6 @@ class AbsenceService
         $totalAbsenceAmount = 0;
 
         $absences = $this->absenceRepository->getAbsenceByMonth($personal, $month, $year);
-        dd($absences);
-
 
         foreach ($absences as $absence) {
 
