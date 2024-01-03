@@ -20,5 +20,11 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    App\EventListener\CampagneEventListener:
+        tags:
+            - {name: 'kernel.event.listener', event: 'kernel.requests', method: 'onKernelRequest'}
+    
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+ 

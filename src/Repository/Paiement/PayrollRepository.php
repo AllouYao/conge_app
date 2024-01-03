@@ -141,10 +141,12 @@ class PayrollRepository extends ServiceEntityRepository
         }
         return $qb->getQuery()->getResult();
     }
-    public function findEtatSalaireCurrentMonth(mixed $currentFullDate): array
+    public function findEtatSalaireCurrentMonth(bool $campagne, mixed $currentFullDate): array
     {
-        $qb = $this->createQueryBuilder('payroll');
-        $qb
+        $currentMonth = $currentFullDate->format('m');
+        $currentYear = $currentFullDate->format('Y');
+        
+        return $this->createQueryBuilder('payroll')
             ->select([
                 'personal.id as personal_id',
                 'personal.firstName',
@@ -170,13 +172,15 @@ class PayrollRepository extends ServiceEntityRepository
             ->join('payroll.personal', 'personal')
             ->leftJoin('personal.salary', 'salary')
             ->leftJoin('personal.contract', 'contract')
-            ->where('campagnes.active = false')
+            ->where('campagnes.active = :active')
+            ->andWhere('MONTH(payroll.createdAt) = :currentMonth')
             ->andWhere('YEAR(payroll.createdAt) = :currentYear')
-            ->andWhere('Month(payroll.createdAt) = :currentMonth')
-            ->setParameters('currentYear', $currentFullDate->format('Y'))
-            ->setParameters('currentMonth', $currentFullDate->format('m'));
-            
-        return $qb->getQuery()->getResult();
+            ->setParameters([
+                'currentMonth' => $currentMonth,
+                'currentYear' => $currentYear,
+                'active' => $campagne
+            ])
+            ->getQuery()->getResult();
     }
 
     public function findCnps(): array
@@ -275,7 +279,7 @@ class PayrollRepository extends ServiceEntityRepository
                 'contract.dateEmbauche as embauche',
                 'salary.totalPrimeJuridique as prime_juridique',
                 'salary.primeLogement as aventage_nature_imposable',
-                'salary.heursupplementaire as heure_supp',
+               // 'salary.heursupplementaire as heure_supp',
                 'contract.dateEmbauche',
                 'payroll.baseAmount',
                 'payroll.brutAmount',

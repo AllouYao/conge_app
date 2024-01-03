@@ -50,8 +50,6 @@ class AbsenceController extends AbstractController
         $personal = $this->PersonalRepository->find(3);
         
         $totalAmount = $this->absenceService->getAmountByMonth($personal,$month, $year,1000);
-
-        dd($totalAmount);
         
         return $this->render('dossier_personal/absence/index.html.twig', [
             'absences' => $this->absenceRepository->findAll(),

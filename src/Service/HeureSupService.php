@@ -62,8 +62,9 @@ class HeureSupService
         }
 
         $tauxHoraire = $this->horaireRepository->active();
+        
         $heureSups = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
-        $salaireHoraire = $salaireBase / (double)$tauxHoraire?->getAmount();
+        $salaireHoraire = $salaireBase / (double)$tauxHoraire?->getAmount() ;
         $amountHeureSup = 0;
 
         foreach ($heureSups as $sup) {
