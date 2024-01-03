@@ -355,8 +355,6 @@ class ApiReportingController extends AbstractController
         $data = [];
 
         $declarationCnps = $this->payrollRepository->findEtatSalaireCurrentMonth(true, $currentFullDate);
-        
-        dd($declarationCnps);
 
         if (!$declarationCnps) {
             return $this->json(['data' => []]);
