@@ -5,6 +5,7 @@ namespace App\Form\DossierPersonal;
 use App\Entity\DossierPersonal\Conge;
 use App\Entity\DossierPersonal\Personal;
 use App\Form\CustomType\DateCustomType;
+use App\Service\CongeService;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -16,6 +17,13 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class CongeType extends AbstractType
 {
+    private CongeService $congeService;
+
+    public function __construct(CongeService $congeService)
+    {
+        $this->congeService = $congeService;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -62,15 +70,12 @@ class CongeType extends AbstractType
 
         $builder
             ->addEventListener(
-                FormEvents::PRE_SET_DATA,
+                FormEvents::SUBMIT,
                 function (FormEvent $event) {
                     /** @var Conge $data */
                     $data = $event->getData();
-                    if ($data instanceof Conge) {
-                        $workMonth = $data->getWorkMonths();
-                        $vacationDay = $workMonth * 2.2 * 1.25;
-                        $data->setRemainingVacation($vacationDay);
-                    }
+                    $this->congeService->calculate($data);
+
                 }
             );
 
@@ -84,6 +89,22 @@ class CongeType extends AbstractType
                     $vacationDay = $data->getRemainingVacation();
                     $remainingVacation = $vacationDay - $totalDay;
                     $data->setRemainingVacation($remainingVacation);
+                }
+            );
+
+        $builder
+            ->addEventListener(
+                FormEvents::POST_SUBMIT,
+                function (FormEvent $event) {
+                    /** @var Conge $data */
+                    $data = $event->getData();
+                    if ($data instanceof Conge) {
+                        $workMonth = $data->getWorkMonths();
+                        $vacationDay = $workMonth * 2.2 * 1.25;
+                        $totalDay = $data->getTotalDays();
+                        $remainingVacation = $vacationDay - $totalDay;
+                        $data->setRemainingVacation($remainingVacation);
+                    }
                 }
             );
     }

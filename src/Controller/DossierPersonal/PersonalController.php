@@ -69,6 +69,11 @@ class PersonalController extends AbstractController
         $amountTT = $detailSalaryRepository->findPrimeBySalary($personal, $primeTT);
         $amountOutil = $detailSalaryRepository->findPrimeBySalary($personal, $primeOutil);
 
+        $salaireBase = $personal->getSalary()->getBaseAmount();
+        $salarieTransport = $personal->getSalary()->getPrimeTransport();
+        $salarieLogement = $personal->getSalary()->getPrimeLogement();
+        $salarieFonction = $personal->getSalary()->getPrimeFonction();
+        $avantageAmount = $personal->getSalary()->getAvantage()?->getTotalAvantage();
         return $this->render('dossier_personal/personal/print.html.twig', [
             'personals' => $personal,
             'accountBanque' => $accountNumber,
@@ -77,10 +82,15 @@ class PersonalController extends AbstractController
             'age' => $age,
             'dureeContrat' => $dureeContrat,
             'nombreEnfant' => $numberEnfant,
-            'primePanier' => $amountPanier,
-            'primeSalissure' => $amountSalissure,
-            'primeTT' => $amountTT,
-            'primeOutil' => $amountOutil
+            'salaireBase' => $salaireBase ?? 0,
+            'primePanier' => $amountPanier !== null ? (int)$amountPanier['amountPrime'] : 0,
+            'primeSalissure' => $amountSalissure !== null ? (int)$amountSalissure['amountPrime'] : 0,
+            'primeTT' => $amountTT !== null ? (int)$amountTT['amountPrime'] : 0,
+            'primeOutil' => $amountOutil !== null ? (int)$amountOutil['amountPrime'] : 0,
+            'primeTransport' => $salarieTransport !== 0 ? (int)$salarieTransport : 0,
+            'primeLogement' => $salarieLogement !== 0 ? (int)$salarieLogement : 0,
+            'primeFonction' => $salarieFonction !== 0 ? (int)$salarieFonction : 0,
+            'avantageAmount' => $avantageAmount !== 0 ? (int)$avantageAmount : 0,
         ]);
     }
 
@@ -149,10 +159,6 @@ class PersonalController extends AbstractController
                 $detailSalary->setSalary($personal->getSalary());
                 $entityManager->persist($detailSalary);
             }
-            /** Service pour le calcule des impôts sur salaire du salarié et aussi celui dû par l'employeur */
-            $salary->chargePersonal($personal);
-            $salary->chargeEmployeur($personal);
-
             $entityManager->flush();
             flash()->addSuccess('Salarié enregistré avec succès.');
             return $this->redirectToRoute('personal_show', ['uuid' => $personal->getUuid()]);
@@ -185,10 +191,6 @@ class PersonalController extends AbstractController
                 $detailSalary->setSalary($personal->getSalary());
                 $entityManager->persist($detailSalary);
             }
-
-            /** Service pour le calcule des impôts sur salaire du salarié et aussi celui dû par l'employeur */
-            $salary->chargePersonal($personal);
-            $salary->chargeEmployeur($personal);
 
             $entityManager->flush();
             flash()->addSuccess('Salarié modifier avec succès.');

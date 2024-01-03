@@ -10,7 +10,6 @@ use App\Service\HeureSupService;
 use App\Utils\Status;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -126,24 +125,21 @@ class HeureSupController extends AbstractController
         ]);
     }
 
-
-    /**
-     * @throws Exception
-     */
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, HeureSupService $supService): Response
     {
         $form = $this->createForm(PersonalHeureSupType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $supService->heureSupp($form->getData());
+            $data = $form->getData();
+            $supService->heureSupp($data);
             $this->entityManager->flush();
             flash()->addSuccess('Heure suplementaire ajouté avec succès.');
             return $this->redirectToRoute('personal_heure_sup_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('dossier_personal/heure_sup/new.html.twig', [
-            'form' => $form
+            'form' => $form->createView()
         ]);
     }
 
