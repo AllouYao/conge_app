@@ -17,8 +17,22 @@ class AbsenceType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('startedDate', DateCustomType::class)
-            ->add('endedDate', DateCustomType::class)
+            ->add('startedDate', DateCustomType::class, [
+            'attr' => [
+                'class' => 'form-control form-control-sm'
+            ],
+            'html5' => true,
+            'widget' => 'single_text',
+            'required' => true
+        ])
+            ->add('endedDate', DateCustomType::class, [
+            'attr' => [
+                'class' => 'form-control form-control-sm'
+            ],
+            'html5' => true,
+            'widget' => 'single_text',
+            'required' => true
+        ])
             ->add(
                 'justified',
                 ChoiceType::class,

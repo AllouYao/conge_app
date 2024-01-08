@@ -50,16 +50,16 @@ class AbsenceRepository extends ServiceEntityRepository
 
     public function getAbsenceByMonth(Personal $personal, int $month, int $year): ?array
     {
-        return $this->createQueryBuilder('a')
-            ->andWhere('a.personal = :personal')
-            ->andWhere('YEAR(a.startedDate) = :year')
-            ->andWhere('MONTH(a.startedDate) = :month')
-            ->andWhere('MONTH(a.justified) = :justified')
+        return $this->createQueryBuilder('abs')
+            ->andWhere('abs.personal = :personal')
+            ->andWhere('YEAR(abs.startedDate) = :year')
+            ->andWhere('MONTH(abs.startedDate) = :month')
+            ->andWhere('abs.justified = :justified')
             ->setParameter('personal', $personal)
             ->setParameter('year', $year)
             ->setParameter('month', $month)
-            ->setParameter('justified', true)
-            ->orderBy('a.startedDate', 'ASC')
+            ->setParameter('justified', false)
+            ->orderBy('abs.startedDate', 'ASC')
             ->getQuery()
             ->getResult();
     }

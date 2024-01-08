@@ -2,12 +2,13 @@
 
 namespace App\Service;
 
+use App\Utils\Status;
+use App\Entity\Paiement\Campagne;
 use App\Entity\DossierPersonal\Absence;
 use App\Entity\DossierPersonal\Personal;
-use App\Entity\Paiement\Campagne;
-use App\Repository\DossierPersonal\AbsenceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use App\Repository\DossierPersonal\AbsenceRepository;
 
 class AbsenceService
 {
@@ -25,29 +26,32 @@ class AbsenceService
      * @param Campagne $campagne
      * @throws NonUniqueResultException
      */
-    public function getAmountByMonth(Personal $personal, int $month, int $year, $salaireHorraire): float
+    public function getAmountByMonth(Personal $personal, int $month, int $year): float
     {
-        $totalAbsenceAmount = 0;
-
+        $salaireCategoriel = $personal->getSalary()->getBaseAmount();
+        $salaireHorraire = $salaireCategoriel / Status::TAUX_HEURE;
+        $amountMonth = 0;
+        $workHours = Status::TAUX_HEURE;
         $absences = $this->absenceRepository->getAbsenceByMonth($personal, $month, $year);
-
+        
         foreach ($absences as $absence) {
-
-            $amount = $this->calculAbsenceTime($absence, $salaireHorraire);
-
-            $totalAbsenceAmount += $amount;
+            
+            $totalHours = $this->getHours($absence, $salaireHorraire);
+            $workHours -=  $totalHours; // TAUX_HORRAIRE - NBRE HEURE ABSENEC
         }
-        return $totalAbsenceAmount;
+        
+        $amountMonth = $workHours* $salaireHorraire;
+        return $amountMonth;
     }
 
-    private function calculAbsenceTime(Absence $absence, $salaireHorraire)
+    private function getHours(Absence $absence)
     {
         $startedDate = $absence->getStartedDate();
         $endedDate = $absence->getEndedDate();
         $diff = $endedDate->diff($startedDate);
-        $totalAbsenceDay = $diff->format('%d');
-        $absenceAmount = $totalAbsenceDay * $salaireHorraire;
-
-        return $absenceAmount;
+        $totalAbsenceDay = (int)$diff->format('%d');
+        $totalHours = $totalAbsenceDay*8; // 8 heure par jour de travail
+        
+        return $totalHours;
     }
 }
