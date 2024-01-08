@@ -342,4 +342,10 @@ class CampagneController extends AbstractController
         }
         dd($personal, $payrolls);
     }
+    #[Route('/alert/campagne/progess', name: 'alert_progess', methods: ['GET'])]
+    public function campagneProgess()
+    {
+        $this->addFlash('error', 'Une camapagne est en cours');
+        return $this->redirectToRoute('app_home');
+    }
 }
