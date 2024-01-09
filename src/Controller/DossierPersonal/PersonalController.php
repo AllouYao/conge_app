@@ -2,15 +2,13 @@
 
 namespace App\Controller\DossierPersonal;
 
-use App\Contract\SalaryInterface;
 use App\Entity\DossierPersonal\Contract;
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\DossierPersonal\Salary;
 use App\Form\DossierPersonal\PersonalType;
+use App\Repository\DossierPersonal\DetailPrimeSalaryRepository;
 use App\Repository\DossierPersonal\DetailSalaryRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
-use App\Repository\Impots\ChargeEmployeurRepository;
-use App\Repository\Impots\ChargePersonalsRepository;
 use App\Repository\Settings\PrimesRepository;
 use App\Utils\Status;
 use DateTime;
@@ -37,9 +35,10 @@ class PersonalController extends AbstractController
      */
     #[Route('/{uuid}/print', name: 'print_salary_info', methods: ['GET'])]
     public function print(
-        Personal               $personal,
-        DetailSalaryRepository $detailSalaryRepository,
-        PrimesRepository       $primesRepository
+        Personal                    $personal,
+        DetailSalaryRepository      $detailSalaryRepository,
+        PrimesRepository            $primesRepository,
+        DetailPrimeSalaryRepository $detailPrimeSalaryRepository
     ): Response
     {
         $accountNumber = null;
@@ -63,16 +62,25 @@ class PersonalController extends AbstractController
         $primeSalissure = $primesRepository->findOneBy(['code' => Status::PRIME_SALISSURE]);
         $primeTT = $primesRepository->findOneBy(['code' => Status::PRIME_TENUE_TRAVAIL]);
         $primeOutil = $primesRepository->findOneBy(['code' => Status::PRIME_OUTILLAGE]);
+        $primeFonction = $primesRepository->findOneBy(['code' => Status::PRIME_FONCTION]);
+        $primeLogement = $primesRepository->findOneBy(['code' => Status::PRIME_LOGEMENT]);
+        $primeRendement = $primesRepository->findOneBy(['code' => Status::PRIME_RENDEMENT]);
+        $indemniteFonction = $primesRepository->findOneBy(['code' => Status::INDEMNITE_FONCTION]);
+        $indemniteLogement = $primesRepository->findOneBy(['code' => Status::INDEMNITE_LOGEMENTS]);
+
 
         $amountPanier = $detailSalaryRepository->findPrimeBySalary($personal, $primePanier);
         $amountSalissure = $detailSalaryRepository->findPrimeBySalary($personal, $primeSalissure);
         $amountTT = $detailSalaryRepository->findPrimeBySalary($personal, $primeTT);
         $amountOutil = $detailSalaryRepository->findPrimeBySalary($personal, $primeOutil);
+        $amountFonction = $detailPrimeSalaryRepository->findPrimeBySalaries($personal, $primeFonction);
+        $amountLogement = $detailPrimeSalaryRepository->findPrimeBySalaries($personal, $primeLogement);
+        $amountRendement = $detailSalaryRepository->findPrimeBySalary($personal, $primeRendement);
+        $amountIndemFonction = $detailPrimeSalaryRepository->findPrimeBySalaries($personal, $indemniteFonction);
+        $amountIndemLogement = $detailPrimeSalaryRepository->findPrimeBySalaries($personal, $indemniteLogement);
 
         $salaireBase = $personal->getSalary()->getBaseAmount();
         $salarieTransport = $personal->getSalary()->getPrimeTransport();
-        $salarieLogement = $personal->getSalary()->getPrimeLogement();
-        $salarieFonction = $personal->getSalary()->getPrimeFonction();
         $avantageAmount = $personal->getSalary()->getAvantage()?->getTotalAvantage();
         return $this->render('dossier_personal/personal/print.html.twig', [
             'personals' => $personal,
@@ -87,9 +95,12 @@ class PersonalController extends AbstractController
             'primeSalissure' => $amountSalissure !== null ? (int)$amountSalissure['amountPrime'] : 0,
             'primeTT' => $amountTT !== null ? (int)$amountTT['amountPrime'] : 0,
             'primeOutil' => $amountOutil !== null ? (int)$amountOutil['amountPrime'] : 0,
+            'primeRendement' => $amountRendement !== null ? (int)$amountRendement['amountPrime'] : 0,
             'primeTransport' => $salarieTransport !== 0 ? (int)$salarieTransport : 0,
-            'primeLogement' => $salarieLogement !== 0 ? (int)$salarieLogement : 0,
-            'primeFonction' => $salarieFonction !== 0 ? (int)$salarieFonction : 0,
+            'primeLogement' => $amountLogement !== null ? (int)$amountLogement['amount'] : 0,
+            'primeFonction' => $amountFonction !== null ? (int)$amountFonction['amount'] : 0,
+            'indemniteFonction' => $amountIndemFonction !== null ? (int)$amountIndemFonction['amount'] : 0,
+            'indemniteLogement' => $amountIndemLogement !== null ? (int)$amountIndemLogement['amount'] : 0,
             'avantageAmount' => $avantageAmount !== 0 ? (int)$avantageAmount : 0,
         ]);
     }
@@ -137,27 +148,34 @@ class PersonalController extends AbstractController
     public function index(): Response
     {
         $personal = $this->personalRepository->findPersonalSalaried();
-
         return $this->render('dossier_personal/personal/index.html.twig', [
             'personals' => $personal
         ]);
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, SalaryInterface $salary): Response
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $personal = new Personal();
         $salaire = (new Salary());
         $contract = (new Contract());
-        $personal->setSalary($salaire)->setContract($contract);
+        $personal
+            ->setSalary($salaire)
+            ->setContract($contract);
+
         $form = $this->createForm(PersonalType::class, $personal);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
             $entityManager->persist($personal);
             foreach ($personal->getSalary()->getDetailSalaries() as $detailSalary) {
                 $detailSalary->setSalary($personal->getSalary());
                 $entityManager->persist($detailSalary);
+            }
+            foreach ($personal->getSalary()->getDetailPrimeSalaries() as $detailPrimeSalary) {
+                $detailPrimeSalary->setSalary($personal->getSalary());
+                $entityManager->persist($detailPrimeSalary);
             }
             $entityManager->flush();
             flash()->addSuccess('Salarié enregistré avec succès.');
@@ -171,17 +189,17 @@ class PersonalController extends AbstractController
     }
 
     #[Route('{uuid}/show', name: 'show', methods: ['GET'])]
-    public function show(Personal $personal, ChargePersonalsRepository $chargePersonalsRepository, ChargeEmployeurRepository $chargeEmployeurRepository): Response
+    public function show(
+        Personal $personal,
+    ): Response
     {
         return $this->render('dossier_personal/personal/show.html.twig', [
             'personal' => $personal,
-            'charge_personal' => $chargePersonalsRepository->findOneBy(['personal' => $personal]),
-            'charge_employeur' => $chargeEmployeurRepository->findOneBy(['personal' => $personal])
         ]);
     }
 
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Personal $personal, EntityManagerInterface $entityManager, SalaryInterface $salary): Response
+    public function edit(Request $request, Personal $personal, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(PersonalType::class, $personal);
         $form->handleRequest($request);
@@ -191,9 +209,10 @@ class PersonalController extends AbstractController
                 $detailSalary->setSalary($personal->getSalary());
                 $entityManager->persist($detailSalary);
             }
-            $salary->chargePersonal($personal);
-            $salary->chargeEmployeur($personal);
-
+            foreach ($personal->getSalary()->getDetailPrimeSalaries() as $detailPrimeSalary) {
+                $detailPrimeSalary->setSalary($personal->getSalary());
+                $entityManager->persist($detailPrimeSalary);
+            }
             $entityManager->flush();
             flash()->addSuccess('Salarié modifier avec succès.');
             return $this->redirectToRoute('personal_show', ['uuid' => $personal->getUuid()]);
@@ -201,19 +220,8 @@ class PersonalController extends AbstractController
 
         return $this->render('dossier_personal/personal/edit.html.twig', [
             'personal' => $personal,
-            'form' => $form,
+            'form' => $form->createView(),
             'editing' => true
         ]);
-    }
-
-    #[Route('/{uuid}/delete', name: 'delete', methods: ['POST'])]
-    public function delete(Request $request, Personal $personal, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete' . $personal->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($personal);
-            $entityManager->flush();
-        }
-
-        return $this->redirectToRoute('personal_index', [], Response::HTTP_SEE_OTHER);
     }
 }

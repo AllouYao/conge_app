@@ -6,7 +6,6 @@
         #dataGridPersonal {
             height: 400px;
             border-width: 50px;
-
         }
     </style>
 {% endblock %}
@@ -66,7 +65,6 @@
                             component: e.component,
                             worksheet,
                             autoFilterEnabled: true,
-                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
                             customizeCell: function (options) {
                                 const {gridCell, excelCell} = options;
                                 if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
@@ -126,7 +124,7 @@
                     },
                     {
                         caption: 'Date d\'embauche ou \n de recrutement',
-                        dataType: 'date',
+                        dataType: 'string',
                         dataField: 'date_embauche',
                         alignment: 'center',
                         width: 120
@@ -154,7 +152,7 @@
                     },
                     {
                         caption: 'Date de naissance',
-                        dataType: 'date',
+                        dataType: 'string',
                         dataField: 'date_naissance',
                         alignment: 'center',
                         width: 120
@@ -257,7 +255,6 @@
                                     $("<a>")
                                         .html('<i data-feather="edit" style="color: yellow"></i>')
                                         .attr("href", options.data.modifier)
-                                        .attr("target", '_blank')
                                         .appendTo(container);
                                     feather.replace();
                                 }

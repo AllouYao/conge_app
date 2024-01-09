@@ -16,7 +16,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 
 #[Route('/dossier/personal/absence', name: 'personal_absence_')]
-
 class AbsenceController extends AbstractController
 {
     private $entityManager;
@@ -24,14 +23,12 @@ class AbsenceController extends AbstractController
     private $absenceService;
     private $PersonalRepository;
 
-    
-
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        AbsenceRepository $absenceRepository,
-        AbsenceService $absenceService,
-        PersonalRepository $personalRepository
+        AbsenceRepository      $absenceRepository,
+        AbsenceService         $absenceService,
+        PersonalRepository     $personalRepository
     )
     {
         $this->entityManager = $entityManager;
@@ -39,53 +36,58 @@ class AbsenceController extends AbstractController
         $this->absenceService = $absenceService;
         $this->PersonalRepository = $personalRepository;
     }
+
     #[Route('/', name: 'index')]
     public function index(): Response
     {
         $fullDate = new DateTime();
         $month = $fullDate->format("m");
         $year = $fullDate->format("Y");
+        $personal = null;
+        $absence = $this->absenceRepository->findAll();
+        foreach ($absence as $item) {
+            $personal = $item->getPersonal();
+        }
+        $totalAmount = $this->absenceService->getAmountByMonth($personal, $month, $year, 1000);
+        //dd($absence, $totalAmount);
 
-        
-        $personal = $this->PersonalRepository->find(3);
-        
-        $totalAmount = $this->absenceService->getAmountByMonth($personal,$month, $year,1000);
-        
         return $this->render('dossier_personal/absence/index.html.twig', [
-            'absences' => $this->absenceRepository->findAll(),
+            'absences' => $absence,
+            'totalAmount' => $totalAmount
         ]);
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request,): Response {
+    public function new(Request $request,): Response
+    {
 
         $form = $this->createForm(PersonalAbsence::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $PersonalAbsence = $form->get('absence')->getData();
             $personal = $form->get('personal')->getData();
-            
+
             foreach ($PersonalAbsence as $absence) {
 
                 $absence->setPersonal($personal);
                 $this->entityManager->persist($absence);
             }
             $this->entityManager->persist($personal);
-            
+
             $this->entityManager->flush();
             flash()->addSuccess('Absence ajouté avec succès.');
             return $this->redirectToRoute('personal_absence_index', [], Response::HTTP_SEE_OTHER);
         }
 
 
-        
         return $this->render('dossier_personal/absence/new.html.twig', [
             'form' => $form
         ]);
     }
 
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(Personal $personal, Request $request): Response {
+    public function edit(Personal $personal, Request $request): Response
+    {
         $form = $this->createForm(PersonalAbsence::class, [
             'personal' => $personal,
             'absence' => $personal->getAbsences(),
@@ -109,6 +111,6 @@ class AbsenceController extends AbstractController
             'editing' => true
         ]);
     }
-    
+
 
 }

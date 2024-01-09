@@ -1,0 +1,142 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Catégories Professionnelles{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridCategoryProfessional {
+            border-width: 50px;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        LISTE DES CATEGORIES PROFESSIONNELLES
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="card-body">
+                        <div id="dataGridCategoryProfessional"></div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('settings_category_salarie_new') }}"
+                       class="btn btn-primary float-end" style="color: white">Nouveau</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        $(document).ready(function () {
+            let debut;
+            let fin;
+            $("#dataGridCategoryProfessional").dxDataGrid({
+                dataSource: `{{ url('settings_category_salarie_api_categorySalaire') }}`,
+                showBorders: true,
+                scrolling: {
+                    columnRenderingMode: 'virtual',
+                    mode: "virtual"
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('CATEGORIES PROFESSIONNELLES');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                            customizeCell: function (options) {
+                                const {gridCell, excelCell} = options;
+                                if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
+                                    excelCell.text = formatNumber(gridCell.value)
+                                    excelCell.font = {size: 9};
+                                    excelCell.alignment = {horizontal: 'left'};
+                                }
+                            }
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then(function (buffer) {
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Catégorie professionnelles ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                columns: [
+                    {
+                        caption: 'Intitulé',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'name',
+                    },
+                    {
+                        caption: 'Codification',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'code',
+                    },
+                    {
+                        caption: 'Description',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'description',
+                    },
+                    {
+                        caption: 'Ajouté le',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_creation',
+                    },
+                    {
+                        caption: 'Action',
+                        dataField: 'modifier',
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<a title='modifier'>")
+                                .html('<i data-feather="edit" style="color: #C9971C"></i>')
+                                .attr("href", options.data.modifier)
+                                .appendTo(container);
+                            feather.replace();
+                        },
+                    },
+                ],
+            })
+        })
+    </script>
+
+{% endblock %}

@@ -13,65 +13,70 @@
                              id="header">
                             <h4 class="text-center"><strong>FICHE D'INFORMATION SALARIE </strong></h4>
                         </div>
-                        <br><br><br><br>
-
+                        <br><br>
                         <div class="card mb-4">
                             <div class="card-body">
-                                <div class="col-md-12 row">
-                                    <div class="col-md-6 left">
-                                        <p>
-                                            <span class="h5 text-center">N° Ordre : </span> <span class="h5"
-                                                                                                  style="margin-left: 10px">{{ index }}</span><br><br>
-                                            <span class="h5 text-center">Nom et prénoms : </span> <span class="h5"
-                                                                                                        style="margin-left: 10px">{{ personals.firstName|upper }} {{ personals.lastName|upper }}</span><br><br>
-                                            <span class="h5 text-center">Date d'embauche : </span> <span class="h5"
-                                                                                                         style="margin-left: 10px">{{ personals.contract.dateEmbauche|date('d/m/Y') }}</span><br><br>
-                                            <span class="h5 text-center">Date de naissance : </span> <span
-                                                    class="h5"
-                                                    style="margin-left: 10px">{{ personals.birthday|date('d/m/Y') }}</span><br><br>
-                                            <span class="h5 text-center">Fonction : </span> <span class="h5"
-                                                                                                  style="margin-left: 10px">{{ personals.fonction|capitalize }}</span><br><br>
-                                            <span class="h5 text-center">Département ou service : </span> <span
-                                                    class="h5"
-                                                    style="margin-left: 10px">{{ personals.service|capitalize }}</span><br><br>
-                                            <span class="h5 text-center">Diplôme : </span> <span class="h5"
-                                                                                                 style="margin-left: 10px">{{ personals.niveauFormation|upper }}</span><br><br>
-                                            <span class="h5 text-center">Compte banque : </span> <span class="h5"
-                                                                                                       style="margin-left: 10px">{{ accountBanque|upper }}</span><br><br>
-                                            <span class="h5 text-center">Nom banque : </span> <span class="h5"
-                                                                                                    style="margin-left: 10px">{{ '' }}</span><br><br>
-                                            <span class="h5 text-center">Grade catégoriel : </span> <span class="h5"
-                                                                                                          style="margin-left: 10px">{{ personals.categorie.intitule }}</span><br><br>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-6 right ">
-                                        <p style="margin-left: 25%">
-                                            <span class="h5 text-center">Matricule : </span> <span class="h5"
-                                                                                                   style="margin-left: 10px">{{ personals.matricule }}</span><br><br>
-                                            <span class="h5 text-center">Ancienneté (en année) : </span> <span
-                                                    class="h5" style="margin-left: 10px">{{ anciennete }}</span><br><br>
-                                            <span class="h5 text-center">Age (en année) : </span> <span class="h5"
-                                                                                                        style="margin-left: 10px">{{ age }}</span><br><br>
-                                            <span class="h5 text-center">Catégorie : </span> <span class="h5"
-                                                                                                   style="margin-left: 10px">{{ personals.categorie.categorySalarie.name|upper }}</span><br><br>
-                                            <span class="h5 text-center">Adresse : </span> <span class="h5"
-                                                                                                 style="margin-left: 10px">{{ personals.address|upper }}</span><br><br>
-                                            <span class="h5 text-center">Type de contrat : </span> <span class="h5"
-                                                                                                         style="margin-left: 10px">{{ personals.contract.typeContrat|upper }}</span><br><br>
-                                            <span class="h5 text-center">Durée du contrat (en mois) : </span> <span
-                                                    class="h5"
-                                                    style="margin-left: 10px">{{ dureeContrat }}</span><br><br>
-                                            <span class="h5 text-center">Nature, N° pièce d'identité : </span> <span
-                                                    class="h5"
-                                                    style="margin-left: 10px">{{ personals.piece|upper }}{{ '° ' }}{{ personals.refPiece|upper }}</span><br><br>
-                                            <span class="h5 text-center">Etat Civil : </span> <span class="h5"
-                                                                                                    style="margin-left: 10px">{{ personals.etatCivil|upper }}</span><br><br>
-                                            <span class="h5 text-center">Nombre enfant : </span> <span class="h5"
-                                                                                                       style="margin-left: 10px">{{ nombreEnfant }}{{ ' enfant (s)' }}</span><br><br>
 
-                                        </p>
-                                    </div>
-                                </div>
+                                <table class="table table-bordered table-responsive table-sm">
+                                    <thead>
+                                    <tr style="font-size: x-small; line-height: normal">
+                                        <th class="text-center">N° Ordre</th>
+                                        <th class="text-center">Nom et prénoms</th>
+                                        <th class="text-center">Date d'embauche</th>
+                                        <th class="text-center">Date de naissance</th>
+                                        <th class="text-center">Fonction</th>
+                                        <th class="text-center">Département ou service</th>
+                                        <th class="text-center">Diplôme</th>
+                                        <th class="text-center">Compte banque</th>
+                                        <th class="text-center">Nom banque</th>
+                                        <th class="text-center">Grade catégoriel</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr style="font-size: xx-small; line-height: normal">
+                                        <td class="text-center">{{ index }}</td>
+                                        <td>{{ personals.firstName|upper }} {{ personals.lastName|upper }}</td>
+                                        <td class="text-center">{{ personals.contract.dateEmbauche|date('d/m/Y') }}</td>
+                                        <td class="text-center">{{ personals.birthday|date('d/m/Y') }}</td>
+                                        <td>{{ personals.fonction|capitalize }}</td>
+                                        <td>{{ personals.service|capitalize }}</td>
+                                        <td class="text-center">{{ personals.niveauFormation|upper }}</td>
+                                        <td class="text-center">{{ accountBanque|upper }}</td>
+                                        <td>{{ '' }}</td>
+                                        <td class="text-center">{{ personals.categorie.intitule }}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <table class="table table-bordered table-responsive table-sm">
+                                    <thead>
+                                    <tr style="font-size: x-small; line-height: normal">
+                                        <th class="text-center">Matricule</th>
+                                        <th class="text-center">Ancienneté (en année)</th>
+                                        <th class="text-center">Age (en année)</th>
+                                        <th class="text-center">Catégorie</th>
+                                        <th class="text-center">Adresse</th>
+                                        <th class="text-center">Type de contrat</th>
+                                        <th class="text-center">Durée du contrat (en mois)</th>
+                                        <th class="text-center">Nature, N° pièce d'identité</th>
+                                        <th class="text-center">Etat Civil</th>
+                                        <th class="text-center">Nombre enfant</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr style="font-size: xx-small; line-height: normal">
+                                        <td class="text-center">{{ personals.matricule }}</td>
+                                        <td class="text-center">{{ anciennete }}</td>
+                                        <td class="text-center">{{ age }}</td>
+                                        <td>{{ personals.categorie.categorySalarie.name|upper }}</td>
+                                        <td>{{ personals.address|upper }}</td>
+                                        <td>{{ personals.contract.typeContrat|upper }}</td>
+                                        <td class="text-center">{{ dureeContrat }}</td>
+                                        <td class="text-center">{{ personals.piece|upper }}{{ '° ' }}{{ personals.refPiece|upper }}</td>
+                                        <td>{{ personals.etatCivil|upper }}</td>
+                                        <td class="text-center">{{ nombreEnfant }}{{ ' enfant (s)' }}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
                                 <table class="table table-bordered table-responsive table-sm">
                                     <tr>
                                         <td>Salaire de base</td>
@@ -94,6 +99,10 @@
                                         <td class="text-end">{{ primeOutil|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                     <tr>
+                                        <td>Prime rendement</td>
+                                        <td class="text-end">{{ primeRendement|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                    <tr>
                                         <td>Prime de transport</td>
                                         <td class="text-end">{{ primeTransport|number_format(0, ',', ' ') }}</td>
                                     </tr>
@@ -106,17 +115,25 @@
                                         <td class="text-end">{{ primeLogement|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                     <tr>
+                                        <td>Indemnité de fonction</td>
+                                        <td class="text-end">{{ indemniteFonction|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Indemnité de logement</td>
+                                        <td class="text-end">{{ indemniteLogement|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                    <tr>
                                         <td>Avantage en nature</td>
                                         <td class="text-end">{{ avantageAmount|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                     <tr>
                                         {% set amountTT = salaireBase + primePanier + primeSalissure + primeTT
-                                            + primeOutil + primeTransport + primeFonction + primeLogement + avantageAmount %}
+                                            + primeOutil + primeTransport + primeFonction + primeLogement +
+                                            primeRendement + indemniteFonction + indemniteLogement + avantageAmount %}
                                         <th>TOTAL</th>
                                         <td class="text-end">{{ amountTT|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                 </table>
-
                             </div>
                         </div>
                     </div>

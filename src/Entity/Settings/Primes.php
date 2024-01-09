@@ -2,6 +2,7 @@
 
 namespace App\Entity\Settings;
 
+use App\Entity\DossierPersonal\DetailPrimeSalary;
 use App\Entity\DossierPersonal\DetailSalary;
 use App\Repository\Settings\PrimesRepository;
 use App\Utils\Horodatage;
@@ -25,7 +26,7 @@ class Primes
     private ?string $intitule = null;
 
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     private ?string $taux = null;
 
     #[ORM\Column(length: 255)]
@@ -35,9 +36,16 @@ class Primes
     #[ORM\OneToMany(mappedBy: 'prime', targetEntity: DetailSalary::class)]
     private Collection $detailSalaries;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $description = null;
+
+    #[ORM\OneToMany(mappedBy: 'prime', targetEntity: DetailPrimeSalary::class, orphanRemoval: true)]
+    private Collection $detailPrimeSalaries;
+
     public function __construct()
     {
         $this->detailSalaries = new ArrayCollection();
+        $this->detailPrimeSalaries = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -110,6 +118,48 @@ class Primes
             // set the owning side to null (unless already changed)
             if ($detailSalary->getPrime() === $this) {
                 $detailSalary->setPrime(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DetailPrimeSalary>
+     */
+    public function getDetailPrimeSalaries(): Collection
+    {
+        return $this->detailPrimeSalaries;
+    }
+
+    public function addDetailPrimeSalary(DetailPrimeSalary $detailPrimeSalary): static
+    {
+        if (!$this->detailPrimeSalaries->contains($detailPrimeSalary)) {
+            $this->detailPrimeSalaries->add($detailPrimeSalary);
+            $detailPrimeSalary->setPrime($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDetailPrimeSalary(DetailPrimeSalary $detailPrimeSalary): static
+    {
+        if ($this->detailPrimeSalaries->removeElement($detailPrimeSalary)) {
+            // set the owning side to null (unless already changed)
+            if ($detailPrimeSalary->getPrime() === $this) {
+                $detailPrimeSalary->setPrime(null);
             }
         }
 

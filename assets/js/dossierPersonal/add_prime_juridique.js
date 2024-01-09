@@ -7,11 +7,11 @@ let $amountAventage = 0;
 let $amountBrut = 0;
 let $amountBrutImposable = 0;
 let lastIndexDemandeAchat = 0;
+let lastIndexAutrePrimes = 0;
+let total = 0;
 
 let sursalaire = 0;
 let transport = 0;
-let fonction = 0;
-let logement = 0;
 let amountBrut = 0;
 
 
@@ -44,11 +44,8 @@ const addTagFormDeleteLinkPrime = () => {
         const target = $(this).attr('data-target');
         $(target).remove();
         calculateTotalPrimeJuridique()
-        calculateSalaireNet()
     });
 };
-
-
 let calculatePrimeJuridique = () => {
     $('body').on('change', '.prime-salary', function () {
         const parentId = $(this).parent().parent().attr('data-id');
@@ -71,7 +68,6 @@ let calculatePrimeJuridique = () => {
         let $montant = $smigHoraire * $taux;
         $(`#${parentId}_amountPrime`).val($montant)
         calculateTotalPrimeJuridique()
-        calculateSalaireNet()
     })
 }
 const calculateTotalPrimeJuridique = () => {
@@ -95,8 +91,6 @@ const salaireBase = () => {
         calculateSalaireNet()
     });
 }
-
-
 const avantageNature = () => {
     $('body').on('change', '#personal_salary_avantage', function () {
         const $selectAventage = $('#personal_salary_avantage :selected');
@@ -104,50 +98,94 @@ const avantageNature = () => {
         calculateSalaireNet()
     })
 }
-
-
-const calculatePrimeNonJuridique = () => {
+const calculatePrimes = () => {
     $('body').on('input', '.total-prime', function () {
         sursalaire = +$('#personal_salary_sursalaire').val();
         transport = +$('#personal_salary_primeTransport').val();
-        fonction = +$('#personal_salary_primeFonction').val();
-        logement = +$('#personal_salary_primeLogement').val();
         calculateSalaireNet()
     })
 }
 
 
+$('#add-collection-widget-personal-autre-prime').click(function () {
+    const list = $($(this).attr('data-list-selector'));
+    const $widget = $('#widget-counter-personal-autre-prime');
+    const index = +$widget.val();
+    // Try to find the counter of the list or use the length of the list
+
+    // grab the prototype template
+    let newWidget = list.attr('data-prototype');
+    // replace the "__name__" used in the id and name of the prototype
+    // with a number that's unique to your emails
+    // end name attribute looks like name="contact[emails][2]"
+    newWidget = newWidget.replace(/__name__/g, index);
+    // Increase the counter
+    $widget.val(index + 1);
+    // And store it, the length cannot be used if deleting widgets is allowed
+    list.data('widget-counter-personal-autre-prime', index);
+    lastIndexAutrePrimes = index;
+    // create a new list element and add it to the list
+    $('#detail_personal_autre_primes_table tbody').append(newWidget);
+    addTagFormDeleteLinkAutrePrime(newWidget);
+    //$('select.select2').select2({width: '100%', theme: 'bootstrap'});
+    $('[data-plugin="customselect"]').select2();
+    runInputmask()
+});
+const addTagFormDeleteLinkAutrePrime = () => {
+    $('body').on('click', '.delete-personal-autre-prime', function () {
+        const target = $(this).attr('data-target');
+        $(target).remove();
+        calculateTotalAutrePrime()
+        calculateSalaireNet()
+    });
+};
+
+const prime = () => {
+    $('body').on('change', '.autre-prime, .amount-autre-prime', function () {
+        //const parentId = $(this).parent().parent().attr('data-id');
+        // const $selected = $(".autre-prime :selected");
+        //const primes = $(`#${parentId}_prime`).val();
+        calculateTotalAutrePrime()
+        calculateSalaireNet()
+    });
+}
+const calculateTotalAutrePrime = () => {
+    const sum = [];
+    $('.amount-autre-prime').each(function () {
+        sum.push(+$(this).val());
+    });
+    if (sum.length > 0) {
+        total = sum.reduce((previousValue, currentValue) => previousValue + currentValue);
+    } else {
+        total = 0;
+    }
+    $('#total_autre_prime').html(new Intl.NumberFormat('fr-FR').format(total || 0));
+}
+
 const calculateSalaireNet = () => {
-    const DEFAULT_TRANSPORT = 30000;
-    amountBrut = $salaireBase + $amountPrimes + sursalaire + fonction;
-    let $logements = +$('#personal_salary_primeLogement').val();
-    console.log('seconds logements: ', $logements)
-    console.log('avantage en nature: ', $amountAventage)
-
-    let $avantagesImposable = $logements > $amountAventage ? $logements - $amountAventage : 0;
-    console.log('aventage imposable: ', $avantagesImposable)
-    let $amountImposableWithAvantage = $avantagesImposable !== 0 && $amountAventage !== 0 ? amountBrut + logement + $avantagesImposable : amountBrut + logement;
-    console.log('brut imposable avec avantage imposable: ', $amountImposableWithAvantage)
-
+    const DEFAULT_TRANSPORT = +$('#personal_salary_transportImposable').val();
+    let $logements = +$('#personal_salary_amountAventage').val(); // cette est en realité la valeur de l'avantage en nature donner par l'employeur.
     let $transport = +$('#personal_salary_primeTransport').val();
-    console.log('seconds transport: ', $transport)
+    let $avantagesImposable = $logements > $amountAventage ? $logements - $amountAventage : 0;
+    let $autrePrime = total;
+    amountBrut = $salaireBase + sursalaire + total;
 
+    let $amountImposableWithAvantage = $avantagesImposable !== 0 && $amountAventage !== 0 ? amountBrut + $avantagesImposable : amountBrut;
     let $transportImposable = $transport > DEFAULT_TRANSPORT ? $transport - DEFAULT_TRANSPORT : 0;
-    console.log('transport imposable: ', $transportImposable)
-    let $amountImposableWithTransport = $transportImposable !== 0 && $transport > DEFAULT_TRANSPORT ? $transportImposable : DEFAULT_TRANSPORT;
-    console.log('brut imposable avec transport imposable: ', $amountImposableWithTransport)
+    let $amountImposableWithTransport = $transportImposable !== 0 && $transport > DEFAULT_TRANSPORT ? $transportImposable : 0;
+    $amountBrut = amountBrut + $transport;
 
-    $amountBrut = amountBrut + logement + $transport;
-    console.log('Montant brut: ', $amountBrut)
+
     $amountBrutImposable = $amountImposableWithAvantage + $amountImposableWithTransport;
-    console.log('Montant brut imposable: ', $amountBrutImposable)
+    console.log('autre prime: ', $autrePrime)
 
+    console.log('Montant brut: ', $amountBrut)
+    console.log('Montant brut imposable: ', $amountBrutImposable)
     $('#personal_salary_baseAmount').val($salaireBase);
-    $('#personal_salary_brutAmount').val($amountBrut)
+    $('#personal_salary_brutAmount').val($amountBrut);
     $('#personal_salary_brutImposable').val($amountBrutImposable);
 
 };
-
 
 
 $('.prime-salary').each(function () {
@@ -171,14 +209,11 @@ $('.prime-salary').each(function () {
     let $montant = $smigHoraire * $taux;
     $(`#${parentId}_amountPrime`).val($montant);
     calculateTotalPrimeJuridique()
-    calculateSalaireNet()
 });
 
 $('.total-prime').each(function () {
     sursalaire = +$('#personal_salary_sursalaire').val();
     transport = +$('#personal_salary_primeTransport').val();
-    fonction = +$('#personal_salary_primeFonction').val();
-    logement = +$('#personal_salary_primeLogement').val();
     calculateSalaireNet()
 });
 
@@ -195,12 +230,18 @@ $(`#personal_salary_avantage`).each(function () {
 });
 
 
+prime();
+calculateTotalAutrePrime()
+addTagFormDeleteLinkAutrePrime()
 
 salaireBase()
 avantageNature()
 calculatePrimeJuridique()
-calculatePrimeNonJuridique()
+calculatePrimes()
 calculateSalaireNet()
 addTagFormDeleteLinkPrime()
 calculateTotalPrimeJuridique()
+
 runInputmask()
+
+

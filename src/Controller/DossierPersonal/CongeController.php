@@ -5,7 +5,6 @@ namespace App\Controller\DossierPersonal;
 use App\Entity\DossierPersonal\Conge;
 use App\Form\DossierPersonal\CongeType;
 use App\Repository\DossierPersonal\CongeRepository;
-use App\Repository\Paiement\CampagneRepository;
 use App\Service\CongeService;
 use App\Utils\Status;
 use Carbon\Carbon;
@@ -23,15 +22,12 @@ class CongeController extends AbstractController
 {
 
     private CongeRepository $congeRepository;
-    private CampagneRepository $campagneRepository;
 
     public function __construct(
-        CongeRepository    $congeRepository,
-        CampagneRepository $campagneRepository
+        CongeRepository $congeRepository,
     )
     {
         $this->congeRepository = $congeRepository;
-        $this->campagneRepository = $campagneRepository;
     }
 
 
@@ -99,22 +95,8 @@ class CongeController extends AbstractController
             $date = new Carbon($lastDateReturn);
             $personal = $conge->getPersonal();
             $active = $this->congeRepository->active($personal);
-            $checkPersonalCampagne = $this->campagneRepository->checkPersonalInCampagne($personal);
 
-            if (!$checkPersonalCampagne) {
-                $this->addFlash('error', 'Monsieur ou Madame ' . $personal->getFirstName() . ' ' . $personal->getLastName() . 'n\'est pas éligible pour obtenir un congé en du manque de campagne.');
-                return $this->redirectToRoute('conge_index');
-            }
 
-            if (!$lastConge && $personal->getOlder() < 1) {
-                $this->addFlash('error', 'Monsieur ou Madame ' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' n\'est pas  éligible pour obtenir un congé.');
-                return $this->redirectToRoute('conge_index');
-            }
-
-            if ($active && $today->diff($date)->days <= 30) {
-                $this->addFlash('error', 'Monsieur ou Madame ' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' n\'est pas encore de retour du congé précédent.');
-                return $this->redirectToRoute('conge_index');
-            }
 
             $congeService->calculate($conge);
             $conge

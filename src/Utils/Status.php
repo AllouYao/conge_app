@@ -28,25 +28,17 @@ final class Status
     /**
      * Etat Civil
      */
-    public const CONCUBIN = 'CONCUBIN';
     public const CELIBATAIRE = 'CELIBATAIRE';
     public const DIVORCE = 'DIVORCE';
     public const MARIEE = 'MARIE';
-    public const SEPARE = 'SEPARE';
     public const VEUF = 'VEUF';
 
-    /**
-     * Diplome
-     */
-    public const BAC = 'BAC';
-    public const LICENCE = 'LICENCE';
-    public const MASTER_1 = 'MASTER 1';
-    public const MASTER_2 = 'MASTER 2';
-    public const DOCTORAL = 'DOCTORAL';
 
     /**
      * Niveau de formation
      */
+    public const BAC = 'BAC';
+
     public const BTS = 'BTS (Bac +2)';
     public const MAITRISE = 'MAITRISE (Bac + 4)';
     public const Master = 'MASTER (Bac + 5)';
@@ -63,25 +55,36 @@ final class Status
      * Type Temps Contractuel
      */
     public const TEMPS_PLEIN = 'TEMPS PlEIN';
-    public const TEMPS_PARTIEL = 'TEMPS_PARTIEL';
+    public const TEMPS_PARTIEL = 'TEMPS PARTIEL';
 
     /**
      * Prime non juridique
      */
-    public const PRIME_PANIER = 'PRIME_PANIER';
+    public const PRIME_PANIER = 'PRIME PANIER';
 
-    public const PRIME_SALISSURE = 'PRIME_SALISSURE';
+    public const PRIME_SALISSURE = 'PRIME SALISSURE';
 
-    public const PRIME_TENUE_TRAVAIL = 'PRIME_TENUE_TRAVAIL';
+    public const PRIME_TENUE_TRAVAIL = 'PRIME TENUE TRAVAIL';
 
-    public const PRIME_OUTILLAGE = 'PRIME_OUTILLAGE';
+    public const PRIME_OUTILLAGE = 'PRIME OUTILLAGE';
     public const GRATIFICATION = 'GRATIFICATION';
+    public const TRANSPORT_NON_IMPOSABLE = 'PRIME DE TRANSPORT';
+
+    public const PRIME_RENDEMENT = 'PRIME DE RENDEMENT';
+
+    /**
+     * Prime juridique
+     */
+    public const PRIME_FONCTION = 'PRIME DE FONCTION';
+    public const PRIME_LOGEMENT = 'PRIME DE LOGEMENT';
+    public const INDEMNITE_LOGEMENTS = 'INDEMNITE DE LOGEMENTS';
+    public const INDEMNITE_FONCTION = 'INDEMNITE DE FONCTION';
 
     /**
      * Type Congés
      */
-    public const CONGE_GLOBAL = 'CONGES_GLOBAL';
-    public const CONGE_MATERNITY = 'CONGE_MATERNITY';
+    public const CONGE_GLOBAL = 'CONGES GLOBAL';
+    public const CONGE_MATERNITY = 'CONGE MATERNITY';
 
     /**
      * Salaire horraire
@@ -123,7 +126,7 @@ final class Status
         "DEMISSION",
         "RETRAITE",
         "LICENCIEMENT",
-        "ABANDON_DE_POST",
+        "ABANDON DE POST",
         "MALADIE",
         "DECES"
     ];
@@ -139,4 +142,10 @@ final class Status
     public const ABANDON_DE_POST = 'ABANDON DE POST';
     public const MALADIE = 'MALADIE';
     public const DECES = 'DECES';
+
+    /**
+     * Type de charge
+     */
+    public const PERSONAL_CHARGE = 'CHARGE SALARIALE';
+    public const EMPLOYER_CHARGE = 'CHARGE PATRONNALE';
 }

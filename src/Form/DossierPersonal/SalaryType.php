@@ -4,9 +4,9 @@ namespace App\Form\DossierPersonal;
 
 use App\Entity\DossierPersonal\Salary;
 use App\Entity\Settings\Avantage;
+use App\Repository\Settings\PrimesRepository;
 use App\Repository\Settings\SmigRepository;
-use App\Repository\Settings\TauxHoraireRepository;
-use App\Service\EtatService;
+use App\Utils\Status;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -21,7 +21,8 @@ class SalaryType extends AbstractType
 {
 
     public function __construct(
-        private readonly SmigRepository $smigRepository,
+        private readonly SmigRepository   $smigRepository,
+        private readonly PrimesRepository $primesRepository
     )
     {
     }
@@ -61,13 +62,7 @@ class SalaryType extends AbstractType
                     'class' => 'total-prime separator text-end'
                 ],
             ])
-            ->add('primeLogement', TextType::class, [
-                'required' => true,
-                'attr' => [
-                    'class' => 'total-prime separator text-end'
-                ]
-            ])
-            ->add('primeFonction', TextType::class, [
+            ->add('amountAventage', TextType::class, [
                 'required' => true,
                 'attr' => [
                     'class' => 'total-prime separator text-end'
@@ -94,7 +89,23 @@ class SalaryType extends AbstractType
                 ],
                 'by_reference' => false,
             ])
+            ->add('detailPrimeSalaries', CollectionType::class, [
+                "entry_type" => AutrePrimeType::class,
+                "allow_add" => true,
+                "allow_delete" => true,
+                "entry_options" => [
+                    "label" => false
+                ],
+                'by_reference' => false,
+            ])
             ->add('smig', HiddenType::class, [
+                'label' => false,
+                'required' => false,
+                'attr' => [
+                    'separator'
+                ]
+            ])
+            ->add('transportImposable', HiddenType::class, [
                 'label' => false,
                 'required' => false,
                 'attr' => [
@@ -115,6 +126,19 @@ class SalaryType extends AbstractType
             );
 
         $builder
+            ->addEventListener(
+                FormEvents::PRE_SET_DATA,
+                function (FormEvent $event) {
+                    /** @var Salary $data */
+                    $data = $event->getData();
+                    $transportNonImposable = $this->primesRepository->findOneBy(
+                        ['code' => Status::TRANSPORT_NON_IMPOSABLE]
+                    );
+                    $data->setTransportImposable($transportNonImposable?->getTaux());
+                }
+            );
+
+        $builder
             ->addEventListener(FormEvents::POST_SUBMIT,
                 function (FormEvent $event) {
                     /** @var Salary $data */
@@ -126,6 +150,20 @@ class SalaryType extends AbstractType
                     }
                     $data
                         ->setTotalPrimeJuridique($totalPrime);
+                }
+            );
+
+        $builder
+            ->addEventListener(
+                FormEvents::POST_SUBMIT,
+                function (FormEvent $event) {
+                    /** @var Salary $data */
+                    $data = $event->getData();
+                    $totalAutrePrime = 0;
+                    foreach ($data->getDetailPrimeSalaries() as $detailPrimeSalary) {
+                        $totalAutrePrime += $detailPrimeSalary?->getAmount();
+                    }
+                    $data->setTotalAutrePrimes($totalAutrePrime);
                 }
             );
 

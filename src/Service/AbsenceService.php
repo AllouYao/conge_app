@@ -22,8 +22,10 @@ class AbsenceService
 
     /**
      * @param Personal $personal
-     * @param Campagne $campagne
-     * @throws NonUniqueResultException
+     * @param int $month
+     * @param int $year
+     * @param $salaireHorraire
+     * @return float
      */
     public function getAmountByMonth(Personal $personal, int $month, int $year, $salaireHorraire): float
     {
@@ -40,14 +42,12 @@ class AbsenceService
         return $totalAbsenceAmount;
     }
 
-    private function calculAbsenceTime(Absence $absence, $salaireHorraire)
+    private function calculAbsenceTime(Absence $absence, $salaireHorraire): float|int
     {
         $startedDate = $absence->getStartedDate();
         $endedDate = $absence->getEndedDate();
         $diff = $endedDate->diff($startedDate);
         $totalAbsenceDay = $diff->format('%d');
-        $absenceAmount = $totalAbsenceDay * $salaireHorraire;
-
-        return $absenceAmount;
+        return $totalAbsenceDay * $salaireHorraire;
     }
 }

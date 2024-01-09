@@ -85,25 +85,12 @@ class PersonalRepository extends ServiceEntityRepository
                 'salary.sursalaire as personal_sursalaire',
                 'salary.brutAmount as personal_salaire_brut',
                 'salary.primeTransport as personal_prime_transport',
-                'salary.primeLogement as personal_prime_logement',
-                'salary.primeFonction as personal_prime_fonction',
+                //'salary.primeLogement as personal_prime_logement',
+                //'salary.primeFonction as personal_prime_fonction',
                 'salary.brutImposable as personal_salaire_imposable',
                 'salary.totalPrimeJuridique as personal_total_prime_juridique',
                 'avantage.numPiece personal_avantage_piece',
                 'avantage.totalAvantage personal_avantage_total_amount',
-                'charge_personals.amountIts as charge_personal_its',
-                'charge_personals.amountCNPS as charge_personal_cnps',
-                'charge_personals.amountCMU as charge_personal_cmu',
-                'charge_personals.AmountTotalChargePersonal as total_charge_personal',
-                'charge_personals.numPart as charge_personal_nombre_part',
-                'charge_employeurs.amountIS as charge_employeur_is',
-                'charge_employeurs.amountFDFP as charge_employeur_fdfp',
-                'charge_employeurs.amountCR as charge_employeur_cr',
-                'charge_employeurs.amountPF as charge_employeur_pf',
-                'charge_employeurs.amountAT as charge_employeur_at',
-                'charge_employeurs.amountCMU as charge_employeur_cmu',
-                'charge_employeurs.totalRetenuCNPS as total_retenu_cnps',
-                'charge_employeurs.totalChargeEmployeur as total_charge_employeur',
                 'account_banks.bankId as name_banque',
                 'account_banks.code as code_banque',
                 'account_banks.numCompte as numero_compte',
@@ -115,8 +102,6 @@ class PersonalRepository extends ServiceEntityRepository
             ->leftJoin('p.accountBanks', 'account_banks')
             ->join('category.categorySalarie', 'categorie_salary')
             ->leftJoin('salary.avantage', 'avantage')
-            ->join('p.chargePersonals', 'charge_personals')
-            ->join('p.chargeEmployeurs', 'charge_employeurs')
             ->getQuery()
             ->getResult();
     }

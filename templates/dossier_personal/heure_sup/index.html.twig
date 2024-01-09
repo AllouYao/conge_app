@@ -9,7 +9,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        Liste des heures suplementaire
+                        LISTE DES HEURES SUPPLEMENTAIRES
                     </h5>
                 </div>
                 <div class="card-body">
@@ -43,7 +43,7 @@
                                 <td class="text-center">{{ heureSup.startedHour ? heureSup.startedHour|date('H:i') : '' }}</td>
                                 <td class="text-center">{{ heureSup.endedDate ? heureSup.endedDate|date('d/m/Y') : '' }}</td>
                                 <td class="text-center">{{ heureSup.endedHour ? heureSup.endedHour|date('H:i') : '' }}</td>
-                                <td class="text-center">{{ heureSup.getTotalHorraire()}}</td>
+                                <td class="text-center">{{ heureSup.getTotalHorraire() }}</td>
                                 <td class="text-center">
                                     <a href="{{ path('personal_heure_sup_edit', {'uuid': heureSup.personal.uuid}) }}">
                                         <i data-feather="edit" class="feather" style="color: yellow"></i></a>
@@ -54,7 +54,8 @@
                     </table>
                 </div>
                 <div class="card-footer">
-                    <a href="{{ path('personal_heure_sup_new') }}" class="btn btn-primary float-end" style="color: white">Nouveau</a>
+                    <a href="{{ path('personal_heure_sup_new') }}" class="btn btn-primary float-end"
+                       style="color: white">Nouveau</a>
                 </div>
             </div>
         </div>

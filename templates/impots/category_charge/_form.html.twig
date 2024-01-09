@@ -1,5 +1,11 @@
 <fieldset>
     <div class="mb-2 row">
+        <label class="col-md-2 col-form-label">Type charge <span class="text-danger">*</span></label>
+        <div class="col-md-6">
+            {{ form_widget(form.typeCharge) }}
+        </div>
+    </div>
+    <div class="mb-2 row">
         <label class="col-md-2 col-form-label">Intitulé <span class="text-danger">*</span></label>
         <div class="col-md-6">
             {{ form_widget(form.intitule) }}
@@ -9,6 +15,18 @@
         <label class="col-md-2 col-form-label">Codification <span class="text-danger">*</span></label>
         <div class="col-md-6">
             {{ form_widget(form.codification) }}
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label class="col-md-2 col-form-label">Description </label>
+        <div class="col-md-6">
+            {{ form_widget(form.description) }}
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label class="col-md-2 col-form-label"> Taux <span class="text-danger">*</span></label>
+        <div class="col-md-6">
+            {{ form_widget(form.value) }}
         </div>
     </div>
 </fieldset>

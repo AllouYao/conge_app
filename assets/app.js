@@ -734,6 +734,7 @@ import './js/delete.form.collection';
 import './js/dossierPersonal/personnel';
 import './js/dossierPersonal/add_prime_juridique';
 import './js/dossierPersonal/fetchpersonal'
+import './js/dossierPersonal/personal'
 
 import './js/app';
 

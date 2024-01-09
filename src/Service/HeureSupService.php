@@ -32,20 +32,6 @@ class HeureSupService
         $this->manager = $manager;
     }
 
-    public function getAmountHeursSupp(Personal $personal): int|float
-    {
-        $today = Carbon::now();
-        $years = $today->year;
-        $month = $today->month;
-        $heureSups = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
-        $salaireHorraire = 0;
-
-        foreach ($heureSups as $sup) {
-            $salaireHorraire = $salaireHorraire + $sup->getAmount();
-        }
-        return $salaireHorraire;
-    }
-
     /**
      * @throws NonUniqueResultException
      */
@@ -95,13 +81,11 @@ class HeureSupService
         return $amountHeureSup;
     }
 
-    public function heureSupp(array $data): void
+    public function heureSupp(array $data, Personal $personal): void
     {
         $heureSupps = $data['heureSup'];
-        /** @var HeureSup $heureSupp */
-        foreach ($heureSupps as $index => $heureSupp) {
-            /** @var Personal $personal */
-            $personal = $heureSupp->getPersonal();
+        /** @var HeureSup $heureSupps */
+        foreach ($heureSupps as $heureSupp) {
             $tauxHoraire = (double)$heureSupp->getTauxHoraire();
             $salaireBase = (int)$personal->getCategorie()->getAmount();
             $salaireHoraire = $salaireBase / $tauxHoraire;
@@ -145,7 +129,9 @@ class HeureSupService
                 // 75% jour ferié or dimanche nuit ~ 200%
                     $amountHeureSup = ($salaireHoraire * Status::TAUX_NUIT_NON_OUVRABLE) * $totalHorraire;
             }
-            $heureSupp->setPersonal($personal)->setAmount((int)$amountHeureSup);
+            $heureSupp
+                ->setPersonal($personal)
+                ->setAmount((int)$amountHeureSup);
             $this->manager->persist($heureSupp);
         }
 

@@ -131,8 +131,9 @@ class HeureSupController extends AbstractController
         $form = $this->createForm(PersonalHeureSupType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $personal = $form->get('personal')->getData();
             $data = $form->getData();
-            $supService->heureSupp($data);
+            $supService->heureSupp($data, $personal);
             $this->entityManager->flush();
             flash()->addSuccess('Heure suplementaire ajouté avec succès.');
             return $this->redirectToRoute('personal_heure_sup_index', [], Response::HTTP_SEE_OTHER);
@@ -158,7 +159,7 @@ class HeureSupController extends AbstractController
                 $this->entityManager->persist($heureSup);
             }
             $data = $form->getData();
-            $heureSupService->heureSupp($data);
+            $heureSupService->heureSupp($data, $personal);
             $this->entityManager->flush();
             flash()->addSuccess('Heure suplementaire modifié avec succès.');
             return $this->redirectToRoute('personal_heure_sup_index', [], Response::HTTP_SEE_OTHER);

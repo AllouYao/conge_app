@@ -18,33 +18,72 @@
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Categories salarié
+                                    Smig légal
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('settings_smig_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('settings_smig_index') }}"
+                                       class="dropdown-item">Liste smig</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Taux horaire légal
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('settings_taux_horaire_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('settings_taux_horaire_index') }}"
+                                       class="dropdown-item">Liste taux horaire</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Catégories professionnelles
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('settings_category_salarie_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('settings_category_salarie_index') }}"
+                                       class="dropdown-item">Liste catégories professionnelles</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Grille de salaire
                                     <div class="arrow-down"></div>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
                                     <a href="{{ path('settings_category_new') }}"
                                        class="dropdown-item">Créer</a>
                                     <a href="{{ path('settings_category_index') }}"
-                                       class="dropdown-item">Liste catégories salariés</a>
+                                       class="dropdown-item">Grille salariale</a>
                                 </div>
                             </div>
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Catégories charge
+                                    Catégories charges
                                     <div class="arrow-down"></div>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                    <a href="{{ path('import_category_charge_new') }}"
+                                    <a href="{{ path('impot_category_charge_new') }}"
                                        class="dropdown-item">Créer</a>
-                                    <a href="{{ path('import_category_charge_index') }}"
-                                       class="dropdown-item">Liste catégorie charge</a>
+                                    <a href="{{ path('impot_category_charge_index') }}"
+                                       class="dropdown-item">Liste catégories charges</a>
                                 </div>
                             </div>
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Prime
+                                    Primes
                                     <div class="arrow-down"></div>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
@@ -190,7 +229,7 @@
                             <div class="arrow-down"></div>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="topnav-components">
-                            {#<div class="dropdown">
+                            {# <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Ouvrire/Fermer Campagne
@@ -204,7 +243,7 @@
                                     <a href="{{ path('campagne_close') }}"
                                        class="dropdown-item">Ferméture campagne</a>
                                 </div>
-                            </div>#}
+                            </div> #}
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -221,7 +260,7 @@
                                         </a>
                                         <div class="dropdown-menu" aria-labelledby="topnav-map">
                                             <a href="{{ path('campagne_open_campagne') }}"
-                                            class="dropdown-item">Ouverture campagne ordinaire</a>
+                                               class="dropdown-item">Ouverture campagne ordinaire</a>
                                         </div>
                                     </div>
                                     <div class="dropdown">
@@ -233,24 +272,24 @@
                                         </a>
                                         <div class="dropdown-menu" aria-labelledby="topnav-map">
                                             <a href="{{ path('campagne_open_campagne_exceptional') }}"
-                                            class="dropdown-item">Ouverture campagne exceptionnelle</a>
+                                               class="dropdown-item">Ouverture campagne exceptionnelle</a>
                                         </div>
                                     </div>
-        
-                                    <a  href="{{ path('campagne_close') }}"
-                                    class="dropdown-item">Ferméture campagnes</a>
-                                    
+
+                                    <a href="{{ path('campagne_close') }}"
+                                       class="dropdown-item">Ferméture campagnes</a>
+
                                 </div>
-                                
+
                             </div>
-                                <a href="{{ path('reporting_salaires') }}"
-                                    class="dropdown-item">Etat des salaires mensuel</a>
-                                <a href="{{ path('reporting_declaration_dgi_current_month') }}"
-                                    class="dropdown-item">Etat declaration dgi mensuel</a>
-                                <a href="{{ path('reporting_declaration_cnps_current_month') }}"
-                                    class="dropdown-item">Etat declaration cnps mensuel</a>
-                                <a href="{{ path('reporting_declaration_fdfp_current_month') }}"
-                                    class="dropdown-item">Etat declaration fdfp mensuel</a>
+                            <a href="{{ path('reporting_salaires') }}"
+                               class="dropdown-item">Etat des salaires mensuel</a>
+                            <a href="{{ path('reporting_declaration_dgi_current_month') }}"
+                               class="dropdown-item">Etat declaration dgi mensuel</a>
+                            <a href="{{ path('reporting_declaration_cnps_current_month') }}"
+                               class="dropdown-item">Etat declaration cnps mensuel</a>
+                            <a href="{{ path('reporting_declaration_fdfp_current_month') }}"
+                               class="dropdown-item">Etat declaration fdfp mensuel</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">

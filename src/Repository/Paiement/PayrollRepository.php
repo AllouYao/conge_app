@@ -127,7 +127,8 @@ class PayrollRepository extends ServiceEntityRepository
                 'payroll.salaryCmu',
                 'payroll.salarySante',
                 'payroll.numberPart',
-                'payroll.createdAt'
+                'payroll.createdAt',
+                'campagnes.startedAt'
             ])
             ->join('payroll.campagne', 'campagnes')
             ->join('payroll.personal', 'personal')
@@ -141,11 +142,12 @@ class PayrollRepository extends ServiceEntityRepository
         }
         return $qb->getQuery()->getResult();
     }
+
     public function findEtatSalaireCurrentMonth(bool $campagne, mixed $currentFullDate): array
     {
         $currentMonth = $currentFullDate->format('m');
         $currentYear = $currentFullDate->format('Y');
-        
+
         return $this->createQueryBuilder('payroll')
             ->select([
                 'personal.id as personal_id',
@@ -279,7 +281,7 @@ class PayrollRepository extends ServiceEntityRepository
                 'contract.dateEmbauche as embauche',
                 'salary.totalPrimeJuridique as prime_juridique',
                 'salary.primeLogement as aventage_nature_imposable',
-               // 'salary.heursupplementaire as heure_supp',
+                // 'salary.heursupplementaire as heure_supp',
                 'contract.dateEmbauche',
                 'payroll.baseAmount',
                 'payroll.brutAmount',

@@ -1,0 +1,39 @@
+<fieldset>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Intitulé<span
+                            class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    {{ form_widget(form.name) }}
+                    {{ form_errors(form.name) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Codification <span class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    {{ form_widget(form.code) }}
+                    {{ form_errors(form.code) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Description </label>
+                <div class="col-md-8">
+                    {{ form_widget(form.description) }}
+                    {{ form_errors(form.description) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+
+

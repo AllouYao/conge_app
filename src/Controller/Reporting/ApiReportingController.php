@@ -93,6 +93,7 @@ class ApiReportingController extends AbstractController
         $startAt = $request->get('start_at');
         $endAt = $request->get('end_at');
         $personalID = (int)$request->get('personalsId');
+
         if (!$request->isXmlHttpRequest()) {
             return $this->json(['data' => []]);
         }
@@ -124,7 +125,7 @@ class ApiReportingController extends AbstractController
             $salaireNet = $salaireBrut - $totalRetenue;
             $data[] = [
                 'index' => ++$index,
-                'dateCreation' => date_format($salary['createdAt'], 'd/m/Y'),
+                'dateCreation' => date_format($salary['startedAt'], 'd/m/Y'),
                 'fullName' => $salary['firstName'] . ' ' . $salary['lastName'],
                 'matricule' => $salary['matricule'],
                 'salaireBase' => (int)$salary['baseAmount'],
@@ -183,7 +184,7 @@ class ApiReportingController extends AbstractController
             $itsPatronal = ($revenusNetImposable * 1.2) / 100;
             $data[] = [
                 'index' => ++$index,
-                'dateCreation' => date_format($declaration['createdAt'], 'd/m/Y'),
+                'dateCreation' => date_format($declaration['startedAt'], 'd/m/Y'),
                 'matricule' => $declaration['matricule'],
                 'fullName' => $declaration['firstName'] . ' ' . $declaration['lastName'],
                 'remunerationBrut' => (int)$remunerationBrut,
@@ -225,7 +226,7 @@ class ApiReportingController extends AbstractController
             $revenusNetImposable = (int)$declaration['imposableAmount'] + (int)$primeAnciennete + (int)$amountHeureSupp + (int)$gratification + (int)$allocationConger;
             $data[] = [
                 'index' => ++$index,
-                'dateCreation' => date_format($declaration['createdAt'], 'd/m/Y'),
+                'dateCreation' => date_format($declaration['startedAt'], 'd/m/Y'),
                 'numeroCnps' => $declaration['refCNPS'],
                 'nom' => $declaration['firstName'],
                 'prenoms' => $declaration['lastName'],
@@ -266,7 +267,7 @@ class ApiReportingController extends AbstractController
             $tfc = ($revenusNetImposable * $categoryRateFDFP_FPC) / 100;
             $data[] = [
                 'index' => ++$index,
-                'dateCreation' => date_format($declaration['createdAt'], 'd/m/Y'),
+                'dateCreation' => date_format($declaration['startedAt'], 'd/m/Y'),
                 'matricule' => $declaration['matricule'],
                 'fullName' => $declaration['firstName'] . '' . $declaration['lastName'],
                 'revenusNetImposable' => $revenusNetImposable,
@@ -278,7 +279,7 @@ class ApiReportingController extends AbstractController
         return new JsonResponse($data);
     }
 
-    #[Route('/declaration_cmu', name: 'declaration_cmu', methods: ['GET'])]
+    #[Route('/declaration_cmu', name: 'declaration_cmu_global', methods: ['GET'])]
     public function declarationCmu(Request $request): JsonResponse
     {
         $startAt = $request->get('start_at');
@@ -304,15 +305,15 @@ class ApiReportingController extends AbstractController
     public function declarationMonthDgi(): JsonResponse
     {
         $currentFullDate = new \DateTime('now');
-        
+
         $data = [];
-        
-        $declarationDgi = $this->payrollRepository->findEtatSalaireCurrentMonth(true ,$currentFullDate);
+
+        $declarationDgi = $this->payrollRepository->findEtatSalaireCurrentMonth(true, $currentFullDate);
         if (!$declarationDgi) {
             return $this->json(['data' => []]);
         }
 
-        
+
         foreach ($declarationDgi as $index => $declaration) {
             $transportNomImposable = 30000;
             $primeAnciennete = $this->etatService->getPrimeAnciennete($declaration['personal_id']);
@@ -360,7 +361,7 @@ class ApiReportingController extends AbstractController
             return $this->json(['data' => []]);
         }
 
-       
+
         foreach ($declarationCnps as $index => $declaration) {
             $primeAnciennete = $this->etatService->getPrimeAnciennete($declaration['personal_id']);
             $amountHeureSupp = $this->heureSupService->getAmountHeursSuppByID($declaration['personal_id']);

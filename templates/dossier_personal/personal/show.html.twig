@@ -166,6 +166,35 @@
                         <br>
                     {% endif %}
 
+                    {% if personal.salary.detailSalaries %}
+                        <fieldset>
+                            <legend>AUTRES PRIMES</legend>
+                            <table class="table table-bordered table-sm">
+                                <thead class="table-light">
+                                <tr style="font-size: 11px">
+                                    <th class="text-center">Intitule</th>
+                                    <th class="text-center">Montant</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for detail in personal.salary.detailPrimeSalaries %}
+                                    <tr style="font-size: 10px">
+                                        <td class="text-start">{{ detail.prime.intitule }}</td>
+                                        <td class="text-end">{{ detail.amount|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                <tr style="font-size: 11px">
+                                    <th colspan="1" class="text-center">TOTAL</th>
+                                    <th class="text-end">{{ personal.salary.totalAutrePrimes|number_format(0, ',', ' ') }}</th>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </fieldset>
+                        <br>
+                    {% endif %}
+
                     <fieldset>
                         <legend>SALAIRE</legend>
                         <table class="table table-bordered table-sm">
@@ -174,8 +203,6 @@
                                 <th class="text-center">Salaire catégoriel</th>
                                 <th class="text-center">Sursalaire</th>
                                 <th class="text-center">Prime de transport</th>
-                                <th class="text-center">Prime de fonction</th>
-                                <th class="text-center">Prime de logement</th>
                                 <th class="text-center">Avantage en nature</th>
                                 <th class="text-center">Salaire brut</th>
                                 <th class="text-center">Salaire brut Imposable</th>
@@ -186,8 +213,6 @@
                                 <td class="text-end">{{ personal.categorie.amount|number_format(0, ',', ' ') }}</td>
                                 <td class="text-end">{{ personal.salary.sursalaire|number_format(0, ',', ' ') }}</td>
                                 <td class="text-end">{{ personal.salary.primeTransport|number_format(0, ',', ' ') }}</td>
-                                <td class="text-end">{{ personal.salary.primeFonction|number_format(0, ',', ' ') }}</td>
-                                <td class="text-end">{{ personal.salary.primeLogement|number_format(0, ',', ' ') }}</td>
                                 <td class="text-center">{{ personal.salary.avantage }} </td>
                                 <td class="text-end">{{ personal.salary.brutAmount|number_format(0, ',', ' ') }}</td>
                                 <td class="text-end">{{ personal.salary.brutImposable|number_format(0, ',', ' ') }}</td>

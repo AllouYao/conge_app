@@ -33,12 +33,6 @@ class Salary
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $primeTransport = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
-    private ?string $primeLogement = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
-    private ?string $primeFonction = null;
-
     #[ORM\OneToOne(inversedBy: 'salary', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?Personal $personal = null;
@@ -62,9 +56,22 @@ class Salary
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $primeAciennete = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $transportImposable = null;
+
+    #[ORM\OneToMany(mappedBy: 'salary', targetEntity: DetailPrimeSalary::class)]
+    private Collection $detailPrimeSalaries;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountAventage = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $totalAutrePrimes = null;
+
     public function __construct()
     {
         $this->detailSalaries = new ArrayCollection();
+        $this->detailPrimeSalaries = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -116,30 +123,6 @@ class Salary
     public function setPrimeTransport(?string $primeTransport): static
     {
         $this->primeTransport = $primeTransport;
-
-        return $this;
-    }
-
-    public function getPrimeLogement(): ?string
-    {
-        return $this->primeLogement;
-    }
-
-    public function setPrimeLogement(?string $primeLogement): static
-    {
-        $this->primeLogement = $primeLogement;
-
-        return $this;
-    }
-
-    public function getPrimeFonction(): ?string
-    {
-        return $this->primeFonction;
-    }
-
-    public function setPrimeFonction(?string $primeFonction): static
-    {
-        $this->primeFonction = $primeFonction;
 
         return $this;
     }
@@ -242,6 +225,72 @@ class Salary
     public function setPrimeAciennete(?string $primeAciennete): static
     {
         $this->primeAciennete = $primeAciennete;
+
+        return $this;
+    }
+
+    public function getTransportImposable(): ?string
+    {
+        return $this->transportImposable;
+    }
+
+    public function setTransportImposable(?string $transportImposable): static
+    {
+        $this->transportImposable = $transportImposable;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DetailPrimeSalary>
+     */
+    public function getDetailPrimeSalaries(): Collection
+    {
+        return $this->detailPrimeSalaries;
+    }
+
+    public function addDetailPrimeSalary(DetailPrimeSalary $detailPrimeSalary): static
+    {
+        if (!$this->detailPrimeSalaries->contains($detailPrimeSalary)) {
+            $this->detailPrimeSalaries->add($detailPrimeSalary);
+            $detailPrimeSalary->setSalary($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDetailPrimeSalary(DetailPrimeSalary $detailPrimeSalary): static
+    {
+        if ($this->detailPrimeSalaries->removeElement($detailPrimeSalary)) {
+            // set the owning side to null (unless already changed)
+            if ($detailPrimeSalary->getSalary() === $this) {
+                $detailPrimeSalary->setSalary(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getAmountAventage(): ?string
+    {
+        return $this->amountAventage;
+    }
+
+    public function setAmountAventage(?string $amountAventage): static
+    {
+        $this->amountAventage = $amountAventage;
+
+        return $this;
+    }
+
+    public function getTotalAutrePrimes(): ?string
+    {
+        return $this->totalAutrePrimes;
+    }
+
+    public function setTotalAutrePrimes(?string $totalAutrePrimes): static
+    {
+        $this->totalAutrePrimes = $totalAutrePrimes;
 
         return $this;
     }

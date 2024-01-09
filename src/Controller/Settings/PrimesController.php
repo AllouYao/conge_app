@@ -7,6 +7,7 @@ use App\Form\Settings\PrimesType;
 use App\Repository\Settings\PrimesRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,12 +15,29 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/settings/primes', name: 'settings_prime_')]
 class PrimesController extends AbstractController
 {
-    #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(PrimesRepository $primesRepository): Response
+    #[Route('/api_primes/', name: 'api_primes', methods: ['GET'])]
+    public function apiPrimes(PrimesRepository $primesRepository): JsonResponse
     {
-        return $this->render('settings/primes/index.html.twig', [
-            'primes' => $primesRepository->findAll(),
-        ]);
+        $primes = $primesRepository->findAll();
+        $apiPrimes = [];
+        foreach ($primes as $prime) {
+            $apiPrimes[] = [
+                'intitule' => $prime->getIntitule(),
+                'code' => $prime->getCode(),
+                'description' => $prime->getDescription(),
+                'valeur' => $prime->getTaux(),
+                'date_creation' => date_format($prime->getCreatedAt(), 'd/m/Y'),
+                'modifier' => $this->generateUrl('settings_prime_edit', ['uuid' => $prime->getUuid()])
+            ];
+        }
+
+        return new JsonResponse($apiPrimes);
+    }
+
+    #[Route('/', name: 'index', methods: ['GET'])]
+    public function index(): Response
+    {
+        return $this->render('settings/primes/index.html.twig');
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
@@ -42,14 +60,6 @@ class PrimesController extends AbstractController
         ]);
     }
 
-    #[Route('/{uuid}/show', name: 'show', methods: ['GET'])]
-    public function show(Primes $prime): Response
-    {
-        return $this->render('settings/primes/show.html.twig', [
-            'prime' => $prime,
-        ]);
-    }
-
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Primes $prime, EntityManagerInterface $entityManager): Response
     {
@@ -66,16 +76,5 @@ class PrimesController extends AbstractController
             'prime' => $prime,
             'form' => $form,
         ]);
-    }
-
-    #[Route('/{uuid}/delete', name: 'delete', methods: ['POST'])]
-    public function delete(Request $request, Primes $prime, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete' . $prime->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($prime);
-            $entityManager->flush();
-        }
-
-        return $this->redirectToRoute('settings_prime_index', [], Response::HTTP_SEE_OTHER);
     }
 }

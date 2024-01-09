@@ -8,6 +8,7 @@ use App\Repository\Settings\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Flasher\Prime\FlasherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,12 +16,27 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/settings/category', name: 'settings_category_')]
 class CategoryController extends AbstractController
 {
-    #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(CategoryRepository $categoryRepository): Response
+    #[Route('/api_categorie', name: 'api_category', methods: ['GET'])]
+    public function apiCategory(CategoryRepository $categoryRepository): JsonResponse
     {
-        return $this->render('settings/category/index.html.twig', [
-            'categories' => $categoryRepository->findAll(),
-        ]);
+        $category = $categoryRepository->findAll();
+        $apiCategorie = [];
+        foreach ($category as $item) {
+            $apiCategorie[] = [
+                'intitule' => $item->getCategorySalarie()->getName(),
+                'categorie' => $item->getIntitule(),
+                'amount' => $item->getAmount(),
+                'date_creation' => date_format($item->getCreatedAt(), 'd/m/Y'),
+                'modifier' => $this->generateUrl('settings_category_edit', ['uuid' => $item->getUuid()])
+            ];
+        }
+        return new JsonResponse($apiCategorie);
+    }
+
+    #[Route('/', name: 'index', methods: ['GET'])]
+    public function index(): Response
+    {
+        return $this->render('settings/category/index.html.twig');
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
@@ -33,21 +49,13 @@ class CategoryController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($category);
             $entityManager->flush();
-            $flasher->addSuccess('Catégorie crée avec succès.');
+            $flasher->addSuccess('Catégorie salariale crée avec succès.');
             return $this->redirectToRoute('settings_category_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('settings/category/new.html.twig', [
             'category' => $category,
             'form' => $form,
-        ]);
-    }
-
-    #[Route('/{uuid}/show', name: 'show', methods: ['GET'])]
-    public function show(Category $category): Response
-    {
-        return $this->render('settings/category/show.html.twig', [
-            'category' => $category,
         ]);
     }
 
@@ -59,7 +67,7 @@ class CategoryController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-            flash()->addFlash('success', 'Catégorie modifiée avec succès.');
+            flash()->addFlash('success', 'Catégorie salariale modifiée avec succès.');
             return $this->redirectToRoute('settings_category_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -67,16 +75,5 @@ class CategoryController extends AbstractController
             'category' => $category,
             'form' => $form,
         ]);
-    }
-
-    #[Route('/{uuid}/delete', name: 'delete', methods: ['POST'])]
-    public function delete(Request $request, Category $category, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete' . $category->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($category);
-            $entityManager->flush();
-        }
-
-        return $this->redirectToRoute('settings_category_index', [], Response::HTTP_SEE_OTHER);
     }
 }

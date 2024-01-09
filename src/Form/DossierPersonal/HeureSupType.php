@@ -79,12 +79,12 @@ class HeureSupType extends AbstractType
             ]);
         $builder
             ->addEventListener(
-                FormEvents::PRE_SET_DATA,
+                FormEvents::POST_SUBMIT,
                 function (FormEvent $event) {
                     /** @var HeureSup $data */
                     $data = $event->getData();
                     $tauxHoraire = $this->horaireRepository->active();
-                    $data?->setTauxHoraire($tauxHoraire?->getAmount() ?? 0);
+                    $data?->setTauxHoraire($tauxHoraire?->getAmount());
                 }
             );
     }

@@ -28,6 +28,12 @@ class CategoryCharge
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     private ?string $value = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $typeCharge = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $description = null;
+
 
     public function getId(): ?int
     {
@@ -66,6 +72,30 @@ class CategoryCharge
     public function setValue(?string $value): static
     {
         $this->value = $value;
+
+        return $this;
+    }
+
+    public function getTypeCharge(): ?string
+    {
+        return $this->typeCharge;
+    }
+
+    public function setTypeCharge(string $typeCharge): static
+    {
+        $this->typeCharge = $typeCharge;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
 
         return $this;
     }

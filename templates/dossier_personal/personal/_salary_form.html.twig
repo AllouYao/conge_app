@@ -16,20 +16,6 @@
     </div>
 </div>
 <div class="mb-2 row">
-    <label class="col-md-2 col-form-label">Prime de Fonction</label>
-    <div class="col-md-2">
-        {{ form_widget(form.salary.primeFonction) }}
-    </div>
-    <label class="col-md-2 col-form-label">Prime de Logement</label>
-    <div class="col-md-2">
-        {{ form_widget(form.salary.primeLogement) }}
-    </div>
-    <label class="col-md-2 col-form-label">Avantage en nature</label>
-    <div class="col-md-2">
-        {{ form_widget(form.salary.avantage) }}
-    </div>
-</div>
-<div class="mb-2 row">
     <label class="col-md-2 col-form-label"> Salaire brut <span
                 class="text-danger">*</span></label>
     <div class="col-md-2">
@@ -44,5 +30,15 @@
                 class="text-danger">*</span></label>
     <div class="col-md-2">
         {{ form_widget(form.modePaiement) }}
+    </div>
+</div>
+<div class="mb-2 row">
+    <label class="col-md-2 col-form-label">Montant avantage en nature</label>
+    <div class="col-md-4">
+        {{ form_widget(form.salary.amountAventage) }}
+    </div>
+    <label class="col-md-2 col-form-label">Avantage en nature</label>
+    <div class="col-md-4">
+        {{ form_widget(form.salary.avantage) }}
     </div>
 </div>

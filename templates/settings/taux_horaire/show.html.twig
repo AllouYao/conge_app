@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}TauxHoraire{% endblock %}
+
+{% block body %}
+    <h1>TauxHoraire</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ taux_horaire.id }}</td>
+            </tr>
+            <tr>
+                <th>DateDebut</th>
+                <td>{{ taux_horaire.dateDebut ? taux_horaire.dateDebut|date('Y-m-d') : '' }}</td>
+            </tr>
+            <tr>
+                <th>DateFin</th>
+                <td>{{ taux_horaire.dateFin ? taux_horaire.dateFin|date('Y-m-d') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Amount</th>
+                <td>{{ taux_horaire.amount }}</td>
+            </tr>
+            <tr>
+                <th>IsActive</th>
+                <td>{{ taux_horaire.isActive ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>Uuid</th>
+                <td>{{ taux_horaire.uuid }}</td>
+            </tr>
+            <tr>
+                <th>CreatedAt</th>
+                <td>{{ taux_horaire.createdAt ? taux_horaire.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>UpdatedAt</th>
+                <td>{{ taux_horaire.updatedAt ? taux_horaire.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_settings_taux_horaire_index') }}">back to list</a>
+
+    <a href="{{ path('app_settings_taux_horaire_edit', {'id': taux_horaire.id}) }}">edit</a>
+
+    {{ include('settings/taux_horaire/_delete_form.html.twig') }}
+{% endblock %}

@@ -1,7 +1,13 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Liste des catégories de charge{% endblock %}
-
+{% block stylesheets %}
+    <style>
+        #dataGridCategoryCharge {
+            border-width: 50px;
+        }
+    </style>
+{% endblock %}
 {% block body %}
     <div class="row">
         <div class="col-12">
@@ -13,35 +19,137 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <table class="table table-bordered table-responsive table-sm" id="basic-datatable">
-                        <thead class="table-light">
-                        <tr>
-                            <th class="text-center">Intitulé</th>
-                            <th class="text-center">Codification</th>
-                            <th class="text-center">Crée le</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for category in category_charges %}
-                            <tr>
-                                <td class="text-left">{{ category.intitule }}</td>
-                                <td class="text-left">{{ category.codification }}</td>
-                                <td class="text-center">{{ category.createdAt ? category.createdAt|date('d/m/Y') : '' }}</td>
-                                <td class="text-center">
-                                    <a href="{{ path('import_category_charge_edit', {'uuid': category.uuid}) }}">
-                                        <i data-feather="edit" class="feather" style="color: yellow"></i></a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                    <div id="dataGridCategoryCharge"></div>
                 </div>
                 <div class="card-footer">
-                    <a href="{{ path('import_category_charge_new') }}" class="btn btn-primary float-end"
+                    <a href="{{ path('impot_category_charge_new') }}" class="btn btn-primary float-end"
                        style="color: white">Nouveau</a>
                 </div>
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        $(document).ready(function () {
+            let debut;
+            let fin;
+            $("#dataGridCategoryCharge").dxDataGrid({
+                dataSource: `{{ url('impot_category_charge_api_categorie_charge') }}`,
+                showBorders: true,
+                scrolling: {
+                    columnRenderingMode: 'virtual',
+                    mode: "virtual"
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('CATEGORIE CHARGE');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                            customizeCell: function (options) {
+                                const {gridCell, excelCell} = options;
+                                if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
+                                    excelCell.text = formatNumber(gridCell.value)
+                                    excelCell.font = {size: 9};
+                                    excelCell.alignment = {horizontal: 'left'};
+                                }
+                            }
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then(function (buffer) {
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Catégorie charge ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                columns: [
+                    {
+                        caption: 'Type de charge',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'type_charge',
+                    },
+                    {
+                        caption: 'Intitulé',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'intitule',
+                    },
+                    {
+                        caption: 'Codification',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'codification',
+                    },
+                    {
+                        caption: 'Description',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'description',
+                    },
+                    {
+                        caption: 'Taux',
+                        dataType: 'number',
+                        dataField: 'taux',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Ajouté le',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_creation',
+                    },
+                    {
+                        caption: 'Action',
+                        dataField: 'modifier',
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<a title='modifier'>")
+                                .html('<i data-feather="edit" style="color: #C9971C"></i>')
+                                .attr("href", options.data.modifier)
+                                .appendTo(container);
+                            feather.replace();
+                        },
+                    },
+                ],
+            })
+        })
+    </script>
+
 {% endblock %}
