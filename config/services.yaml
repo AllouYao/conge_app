@@ -22,7 +22,8 @@ services:
 
     App\EventListener\CampagneEventListener:
         tags:
-            - {name: 'kernel.event.listener', event: 'kernel.requests', method: 'onKernelRequest'}
+            - {name: kernel.event_listener, event: kernel.request}
+
     
 
     # add more service definitions when explicit configuration is needed

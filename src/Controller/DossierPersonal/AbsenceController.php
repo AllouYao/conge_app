@@ -16,6 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 
 #[Route('/dossier/personal/absence', name: 'personal_absence_')]
+
 class AbsenceController extends AbstractController
 {
     private $entityManager;
@@ -23,12 +24,14 @@ class AbsenceController extends AbstractController
     private $absenceService;
     private $PersonalRepository;
 
+    
+
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        AbsenceRepository      $absenceRepository,
-        AbsenceService         $absenceService,
-        PersonalRepository     $personalRepository
+        AbsenceRepository $absenceRepository,
+        AbsenceService $absenceService,
+        PersonalRepository $personalRepository
     )
     {
         $this->entityManager = $entityManager;
@@ -36,13 +39,18 @@ class AbsenceController extends AbstractController
         $this->absenceService = $absenceService;
         $this->PersonalRepository = $personalRepository;
     }
-
     #[Route('/', name: 'index')]
     public function index(): Response
     {
         $fullDate = new DateTime();
         $month = $fullDate->format("m");
         $year = $fullDate->format("Y");
+
+        $personal = $this->PersonalRepository->find(3);
+
+        $totalAmount = $this->absenceService->getAmountByMonth($personal,$month, $year);
+        // dd($totalAmount);
+        
         $personal = null;
         $absence = $this->absenceRepository->findAll();
         foreach ($absence as $item) {
