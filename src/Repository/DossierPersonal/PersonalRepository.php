@@ -120,4 +120,12 @@ class PersonalRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findLastId()
+    {
+        return $this->createQueryBuilder('t')
+            ->select('MAX(t.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

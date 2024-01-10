@@ -10,6 +10,7 @@ use App\Repository\DossierPersonal\DetailPrimeSalaryRepository;
 use App\Repository\DossierPersonal\DetailSalaryRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\Settings\PrimesRepository;
+use App\Service\MatriculeGenerator;
 use App\Utils\Status;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -154,9 +155,10 @@ class PersonalController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager,MatriculeGenerator $matriculeGenerator): Response
     {
-        $personal = new Personal();
+        $matricule = $matriculeGenerator->generateMatricule();
+        $personal = (new Personal())->setMatricule($matricule);
         $salaire = (new Salary());
         $contract = (new Contract());
         $personal
