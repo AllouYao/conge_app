@@ -51,8 +51,18 @@ let depart = () => {
     $('#departure_hireDate').val(hireDate);
     $('#departure_category').val(category);
 }
+let absence = () => {
+    const selectedOption = $("#personal_absence_personal :selected");
+    const name = selectedOption.attr('data-name');
+    const hireDate = selectedOption.attr('data-hireDate');
+    const category = selectedOption.attr('data-category');
 
-$('body').on('change', '#charge_personal, #account_personal, #departure_personal, #conge_personal, #personal_heure_sup_personal', function () {
+    $('#personal_absence_name').val(name);
+    $('#personal_absence_hireDate').val(hireDate);
+    $('#personal_absence_category').val(category);
+}
+
+$('body').on('change', '#charge_personal, #account_personal, #departure_personal, #conge_personal, #personal_heure_sup_personal, #personal_absence_personal', function () {
     if ($(this).attr('id') === 'charge_personal') {
         chargePeople();
     } else if ($(this).attr('id') === 'account_personal') {
@@ -63,6 +73,8 @@ $('body').on('change', '#charge_personal, #account_personal, #departure_personal
         conge();
     } else if ($(this).attr('id') === 'personal_heure_sup_personal') {
         heureSupp();
+    } else if ($(this).attr('id') === 'personal_absence_personal') {
+        absence();
     }
 });
 
@@ -71,3 +83,4 @@ accountPersonal();
 depart();
 conge();
 heureSupp();
+absence();

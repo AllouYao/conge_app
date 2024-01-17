@@ -32,6 +32,10 @@ class DepartureController extends AbstractController
         $this->departServices = $departServices;
     }
 
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     #[Route('/api/depart', name: 'api', methods: ['GET'])]
     public function apiDepart(): JsonResponse
     {
@@ -43,8 +47,11 @@ class DepartureController extends AbstractController
         $departures = $this->departureRepository->getDepartureByDate($month, $years);
         foreach ($departures as $departure) {
             $personal = $departure->getPersonal();
+            $salaireBase = $personal->getCategorie()->getAmount();
             $reason = $departure->getReason();
             $anciennete = $this->departServices->getAncienneteByDepart($departure);
+            $globalElement = $this->departServices->getSalaireGlobalMoyenElement($departure);
+            $dernierRetourConger = $globalElement['retourConge'];
             $dureePreavis = null;
             if (
                 $reason === Status::LICENCIEMENT_COLLECTIF ||
@@ -59,11 +66,12 @@ class DepartureController extends AbstractController
                 'full_name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
                 'dateCessation' => date_format($departure->getDate(), 'd/m/Y'),
                 'motifCessation' => $departure->getReason(),
+                'salaire_base' => $salaireBase,
                 'salaireMoyen' => $departure->getSalaryDue(),
                 'gratification' => $departure->getGratification(),
-                'dateRetourDrnConges' => null,
+                'dateRetourDrnConges' => $dernierRetourConger ?? null,
                 'indemniteConges' => $departure->getCongeAmount(),
-                'preavis' => $dureePreavis, // le préavis ici est determiné en mois
+                'preavis' => $dureePreavis ?? 0, // le préavis ici est determiné en mois
                 'indemnitePreavis' => $departure->getNoticeAmount(),
                 'anciennete' => $anciennete['ancienneteMonth'],
                 'indemniteCessation' => $departure->getDissmissalAmount(),
@@ -113,14 +121,10 @@ class DepartureController extends AbstractController
         ]);
     }
 
-    #[Route('/show/{uuid}', name: 'show', methods: ['GET'])]
-    public function show(Departure $departure): Response
-    {
-        return $this->render('dossier_personal/departure/show.html.twig', [
-            'departure' => $departure,
-        ]);
-    }
-
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Departure $departure, EntityManagerInterface $entityManager): Response
     {
@@ -128,6 +132,7 @@ class DepartureController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->departServices->rightAndIndemnityByDeparture($departure);
             $entityManager->flush();
             flash()->addSuccess('Départ modifier avec succès.');
             return $this->redirectToRoute('departure_index', [], Response::HTTP_SEE_OTHER);

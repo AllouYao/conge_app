@@ -27,9 +27,6 @@ class ChargeEmployeur
     private ?string $amountIS = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
-    private ?string $amountFDFP = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $amountCR = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
@@ -46,6 +43,15 @@ class ChargeEmployeur
 
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $amountCMU = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountTA = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountFPC = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountAnnuelFPC = null;
 
     public function getId(): ?int
     {
@@ -72,18 +78,6 @@ class ChargeEmployeur
     public function setAmountIS(?string $amountIS): static
     {
         $this->amountIS = $amountIS;
-
-        return $this;
-    }
-
-    public function getAmountFDFP(): ?string
-    {
-        return $this->amountFDFP;
-    }
-
-    public function setAmountFDFP(?string $amountFDFP): static
-    {
-        $this->amountFDFP = $amountFDFP;
 
         return $this;
     }
@@ -156,6 +150,42 @@ class ChargeEmployeur
     public function setAmountCMU(?string $amountCMU): static
     {
         $this->amountCMU = $amountCMU;
+
+        return $this;
+    }
+
+    public function getAmountTA(): ?string
+    {
+        return $this->amountTA;
+    }
+
+    public function setAmountTA(?string $amountTA): static
+    {
+        $this->amountTA = $amountTA;
+
+        return $this;
+    }
+
+    public function getAmountFPC(): ?string
+    {
+        return $this->amountFPC;
+    }
+
+    public function setAmountFPC(?string $amountFPC): static
+    {
+        $this->amountFPC = $amountFPC;
+
+        return $this;
+    }
+
+    public function getAmountAnnuelFPC(): ?string
+    {
+        return $this->amountAnnuelFPC;
+    }
+
+    public function setAmountAnnuelFPC(?string $amountAnnuelFPC): static
+    {
+        $this->amountAnnuelFPC = $amountAnnuelFPC;
 
         return $this;
     }

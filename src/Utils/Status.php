@@ -71,6 +71,7 @@ final class Status
     public const TRANSPORT_NON_IMPOSABLE = 'PRIME DE TRANSPORT';
 
     public const PRIME_RENDEMENT = 'PRIME DE RENDEMENT';
+    public const PRIME_TRANSPORT = 'PRIME DE TRANSPORT';
 
     /**
      * Prime juridique

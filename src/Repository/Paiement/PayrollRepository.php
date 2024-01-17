@@ -25,41 +25,30 @@ class PayrollRepository extends ServiceEntityRepository
         parent::__construct($registry, Payroll::class);
     }
 
-    public function findPayrollByCampaign(bool $campagne): array
+    /**
+     * @param bool $campagne
+     * @param Personal $personal
+     * @return Payroll[]|null
+     */
+    public function findBulletinByCampaign(bool $campagne, Personal $personal): ?array
     {
         return $this->createQueryBuilder('pr')
-            ->select([
-                'pr.id',
-                'p.firstName as first_name',
-                'p.id as personalId',
-                'p.lastName as last_name',
-                'cy.intitule as categories_name',
-                'pr.numberPart as nombre_part',
-                'pr.baseAmount as base_salary',
-                'pr.sursalaire as sursalaire',
-                'pr.brutAmount as brut_salary',
-                'pr.imposableAmount as imposable_salary',
-                'pr.salaryIts as salary_its',
-                'pr.salaryCnps as salary_cnps',
-                'pr.salaryCmu as salary_cmu',
-                'pr.salarySante as salary_assurance',
-                'pr.salaryTransport as salary_transport',
-                'pr.fixcalAmount as montant_fixcal_salary',
-                'pr.netPayer as net_payer',
-                'pr.employeurIs as employeur_is',
-                'pr.employeurFdfp as employeur_fdfp',
-                'pr.employeurCmu as employeur_cmu',
-                'pr.employeurPf as employeur_pf',
-                'pr.employeurAt as employeur_at',
-                'pr.employeurCnps as employeur_cnps',
-                'pr.employeurCr as employeur_cr',
-                'pr.employeurSante as employeur_assurance',
-                'pr.fixcalAmountEmployeur as fixcal_amount_employeur',
-                'pr.masseSalary as masse_salary',
-                'c.startedAt as debut'
-            ])
             ->join('pr.personal', 'p')
-            ->join('p.categorie', 'cy')
+            ->join('pr.campagne', 'c')
+            ->andWhere('c.active = :active')
+            ->andWhere('p.id = :personal')
+            ->setParameters(['active' => $campagne, 'personal' => $personal->getId()])
+            ->getQuery()->getResult();
+    }
+
+    /**
+     * @param bool $campagne
+     * @return Payroll[]|null
+     */
+    public function findPayrollByCampaign(bool $campagne): ?array
+    {
+        return $this->createQueryBuilder('pr')
+            ->join('pr.personal', 'p')
             ->join('pr.campagne', 'c')
             ->andWhere('c.active = :active')
             ->setParameter('active', $campagne)
@@ -205,68 +194,6 @@ class PayrollRepository extends ServiceEntityRepository
             ->where('campagnes.active = false');
         return $qb->getQuery()->getResult();
     }
-
-    public function findBulletinByCampaign(bool $campagne, Personal $personal): array
-    {
-        return $this->createQueryBuilder('pr')
-            ->select([
-                'p.id as personal_id',
-                'p.firstName as first_name',
-                'p.lastName as last_name',
-                'p.matricule as personal_matricule',
-                'p.refCNPS as numero_cnps',
-                'p.etatCivil as personal_etat_civil',
-                'contract.dateEmbauche as date_embauche',
-                'conges.dateDernierRetour as dernier_retour_conge',
-                'conges.dateDepart as date_depart',
-                'conges.dateRetour as date_retour',
-                'cy.intitule as categories_name',
-                'categories_salarie.code as categories_code',
-                'salary.totalPrimeJuridique as prime_juridique',
-                'salary.primeLogement as prime_logement',
-                'charge_personals.amountIts as personal_its',
-                'charge_personals.AmountTotalChargePersonal as total_revenu_divers',
-                'pr.id',
-                'pr.numberPart as nombre_part',
-                'pr.baseAmount as base_salary',
-                'pr.sursalaire as sursalaire',
-                'pr.brutAmount as brut_salary',
-                'pr.imposableAmount as imposable_salary',
-                'pr.salaryIts as salary_its',
-                'pr.salaryCnps as salary_cnps',
-                'pr.salaryCmu as salary_cmu',
-                'pr.salarySante as salary_assurance',
-                'pr.salaryTransport as salary_transport',
-                'pr.fixcalAmount as montant_fixcal_salary',
-                'pr.netPayer as net_payer',
-                'pr.employeurIs as employeur_is',
-                'pr.employeurFdfp as employeur_fdfp',
-                'pr.employeurCmu as employeur_cmu',
-                'pr.employeurPf as employeur_pf',
-                'pr.employeurAt as employeur_at',
-                'pr.employeurCnps as employeur_cnps',
-                'pr.employeurCr as employeur_cr',
-                'pr.employeurSante as employeur_assurance',
-                'pr.fixcalAmountEmployeur as fixcal_amount_employeur',
-                'pr.masseSalary as masse_salary',
-                'c.startedAt as debut',
-                'c.closedAt as fin'
-            ])
-            ->join('pr.personal', 'p')
-            ->join('p.chargePersonals', 'charge_personals')
-            ->leftJoin('p.conges', 'conges')
-            ->join('p.categorie', 'cy')
-            ->join('cy.categorySalarie', 'categories_salarie')
-            ->join('p.contract', 'contract')
-            ->leftJoin('p.salary', 'salary')
-            ->leftJoin('salary.avantage', 'avantage')
-            ->join('pr.campagne', 'c')
-            ->andWhere('c.active = :active')
-            ->andWhere('p.id = :personal')
-            ->setParameters(['active' => $campagne, 'personal' => $personal->getId()])
-            ->getQuery()->getResult();
-    }
-
     public function findSalarialeCampagne(bool $campagne, mixed $years, mixed $month): array
     {
         $qb = $this->createQueryBuilder('payroll');
@@ -278,11 +205,6 @@ class PayrollRepository extends ServiceEntityRepository
                 'personal.matricule',
                 'personal.refCNPS',
                 'YEAR(personal.birthday) as personal_birthday',
-                'contract.dateEmbauche as embauche',
-                'salary.totalPrimeJuridique as prime_juridique',
-                'salary.primeLogement as aventage_nature_imposable',
-                // 'salary.heursupplementaire as heure_supp',
-                'contract.dateEmbauche',
                 'payroll.baseAmount',
                 'payroll.brutAmount',
                 'payroll.salaryCnps',
@@ -291,12 +213,11 @@ class PayrollRepository extends ServiceEntityRepository
                 'payroll.salaryCmu',
                 'payroll.salarySante',
                 'payroll.numberPart',
-                'payroll.createdAt'
+                'payroll.createdAt',
+                'campagnes.startedAt'
             ])
             ->join('payroll.campagne', 'campagnes')
             ->join('payroll.personal', 'personal')
-            ->leftJoin('personal.salary', 'salary')
-            ->leftJoin('personal.contract', 'contract')
             ->where('campagnes.active = :active')
             ->andWhere('YEAR(payroll.createdAt) = :year')
             ->andWhere('MONTH(payroll.createdAt) = :month');

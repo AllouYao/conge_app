@@ -41,10 +41,10 @@ class HeureSupType extends AbstractType
                 ChoiceType::class,
                 [
                     'choices' => [
-                        'NORMAL' => Status::NORMAL,
-                        'DIMANCHE/FÉRIÉ' => Status::DIMANCHE_FERIE,
+                        'Ouvrable' => Status::NORMAL,
+                        'Dimanche ou férié' => Status::DIMANCHE_FERIE,
                     ],
-                    'placeholder' => ' ',
+                    'placeholder' => 'Sélectionner le type de journée',
                     'label' => 'Type',
                     'multiple' => false,
                     'expanded' => false,
@@ -58,10 +58,10 @@ class HeureSupType extends AbstractType
                 ChoiceType::class,
                 [
                     'choices' => [
-                        'JOUR' => Status::JOUR,
-                        'NUIT' => Status::NUIT,
+                        'Jour' => Status::JOUR,
+                        'Nuit' => Status::NUIT,
                     ],
-                    'placeholder' => ' ',
+                    'placeholder' => 'Sélectionner la période de la journée',
                     'label' => 'Type',
                     'multiple' => false,
                     'expanded' => false,

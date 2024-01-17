@@ -62,7 +62,7 @@
                             component: e.component,
                             worksheet,
                             autoFilterEnabled: true,
-                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
+                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
                             customizeCell: function (options) {
                                 const {gridCell, excelCell} = options;
                                 if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
@@ -159,47 +159,102 @@
                                     return new Intl.NumberFormat('fr-FR').format(data.value);
                                 },
                             },
+                            {
+                                caption: 'Prime de rendement',
+                                dataType: 'number',
+                                dataField: 'prime_rendement',
+                                alignment: 'right',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Avantage en nature',
+                                dataType: 'number',
+                                dataField: 'aventage_nature',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
                         ],
                     },
                     {
-                        caption: 'Prime de fonction',
-                        dataType: 'number',
-                        dataField: 'prime_fonction',
-                        alignment: 'right',
-                        width: 120,
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                    },
-                    {
-                        caption: 'Prime de logement',
-                        dataType: 'number',
-                        dataField: 'prime_logement',
-                        alignment: 'right',
-                        width: 120,
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                    },
-                    {
-                        caption: 'Avantage en nature',
-                        dataType: 'number',
-                        dataField: 'aventage_nature',
-                        alignment: 'right',
-                        width: 120,
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                    },
-                    {
-                        caption: 'Prime d\'ancienneté',
-                        dataType: 'number',
-                        dataField: 'prime_anciennete',
-                        alignment: 'right',
-                        width: 120,
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
+                        caption: 'Prime et indemnité imposable',
+                        alignment: 'center',
+                        columns: [
+                            {
+                                caption: 'Prime de fonction',
+                                dataType: 'number',
+                                dataField: 'prime_fonction',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Prime de logement',
+                                dataType: 'number',
+                                dataField: 'prime_logement',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Prime transport imposable',
+                                dataType: 'number',
+                                dataField: 'primeTransport_imposable',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Indemnite de fonction',
+                                dataType: 'number',
+                                dataField: 'indemnite_fonction',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Indemnite de logement',
+                                dataType: 'number',
+                                dataField: 'indemnite_logement',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Avantage en nature imposable',
+                                dataType: 'number',
+                                dataField: 'aventage_nature_imposable',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Prime d\'ancienneté',
+                                dataType: 'number',
+                                dataField: 'prime_anciennete',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            }
+                        ]
                     },
                 ],
             })

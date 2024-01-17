@@ -26,7 +26,8 @@ class ChargePeopleType extends AbstractType
                 'choices' => [
                     'Masculin' => Status::MASCULIN,
                     'Féminin' => Status::FEMININ
-                ]
+                ],
+                'placeholder' => 'Sélectionner un genre'
             ])
             ->add('numPiece')
             ->add('contact', TextType::class, [

@@ -1,7 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des comptes{% endblock %}
-
+{% block title %}Liste des comptes en banque{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridAccountBank {
+            border-width: 50px;
+        }
+    </style>
+{% endblock %}
 {% block body %}
     <div class="row">
         <div class="col-12">
@@ -9,47 +15,163 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        LISTE DES COMPTES
+                        LISTE DES COMPTES POUR SALARIE
                     </h5>
                 </div>
                 <div class="card-body">
-                    <table class="table table-bordered table-responsive table-sm" id="basic-datatable">
-                        <thead class="table-light">
-                        <tr>
-                            <th class="text-center">Matricule employé</th>
-                            <th class="text-center">Nom & prénom(s)</th>
-                            <th class="text-center">Catégorie</th>
-                            <th class="text-center">Date d'embauche</th>
-                            <th class="text-center">N° compte</th>
-                            <th class="text-center">Banque</th>
-                            <th class="text-center">Rib</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for accountBank in accountBanks %}
-                            <tr>
-                                <td class="text-left">{{ accountBank.personal.matricule }}</td>
-                                <td class="text-left">{{ accountBank.personal.firstName }} {{ accountBank.personal.lastName }}</td>
-                                <td class="text-left">{{ accountBank.personal.categorie.intitule }}</td>
-                                <td class="text-center">{{ accountBank.personal.contract.dateEmbauche ?  accountBank.personal.contract.dateEmbauche|date('d/m/Y') : ''}}</td>
-                                <td class="text-left">{{ accountBank.numCompte }}</td>
-                                <td class="text-left">{{ accountBank.bankId }}</td>
-                                <td class="text-left">{{ accountBank.rib }}</td>
-                                <td class="text-center">
-                                    <a href="{{ path('personal_account_bank_edit', {'uuid': accountBank.personal.uuid}) }}" >
-                                        <i data-feather="edit" class="feather" style="color: yellow"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                    <div id="dataGridAccountBank"></div>
                 </div>
                 <div class="card-footer">
-                    <a href="{{ path('personal_account_bank_new') }}" class="btn btn-primary float-end" style="color: white">Nouveau</a>
+                    <a href="{{ path('personal_account_bank_new') }}" class="btn btn-primary float-end"
+                       style="color: white">Nouveau</a>
                 </div>
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        $(document).ready(function () {
+            let debut;
+            let fin;
+            $("#dataGridAccountBank").dxDataGrid({
+                dataSource: `{{ url('personal_account_bank_api_account_bank') }}`,
+                showBorders: true,
+                height: 400,
+                scrolling: {
+                    columnRenderingMode: 'virtual',
+                    mode: "virtual"
+                },
+                groupPanel: {
+                    visible: true,
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('CHARGE PEOPLE');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                            customizeCell: function (options) {
+                                const {gridCell, excelCell} = options;
+                                if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
+                                    excelCell.text = formatNumber(gridCell.value)
+                                    excelCell.font = {size: 9};
+                                    excelCell.alignment = {horizontal: 'left'};
+                                }
+                            }
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then(function (buffer) {
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Charge people ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                columns: [
+                    {
+                        caption: 'Matricule',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'matricule',
+                    },
+                    {
+                        caption: 'Nom',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'name',
+                    },
+                    {
+                        caption: 'Prénom(s)',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'last_name',
+                    },
+                    {
+                        caption: 'Date de naissance',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_naissance',
+                    },
+                    {
+                        caption: 'Catégorie salarié',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'categorie_salarie',
+                    },
+                    {
+                        caption: 'Date d\'embauche',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_embauche',
+                    },
+                    {
+                        caption: 'N° compte',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'number_compte',
+                    },
+                    {
+                        caption: 'Banque',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'bank',
+                    },
+                    {
+                        caption: 'Rib',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'rib',
+                    },
+                    {
+                        caption: 'Ajouté le',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_creation',
+                    },
+                    {
+                        caption: 'Action',
+                        dataField: 'modifier',
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<a title='modifier'>")
+                                .html('<i data-feather="edit" style="color: #C9971C"></i>')
+                                .attr("href", options.data.modifier)
+                                .appendTo(container);
+                            feather.replace();
+                        },
+                    },
+                ],
+            })
+        })
+    </script>
+
 {% endblock %}

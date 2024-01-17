@@ -1,5 +1,5 @@
 <fieldset>
-    <legend>Information personnel salarié</legend>
+    <legend>Information du salarié</legend>
     <div class="mb-2 row">
         <label class="col-md-2 col-form-label">Matricule <span class="text-danger">*</span></label>
         <div class="col-md-4">
@@ -15,7 +15,7 @@
         <div class="col-md-4">
             {{ form_widget(form.hireDate) }}
         </div>
-        <label class="col-md-2 col-form-label">Catégorie <span class="text-danger">*</span></label>
+        <label class="col-md-2 col-form-label">Catégorie salarié <span class="text-danger">*</span></label>
         <div class="col-md-4">
             {{ form_widget(form.category) }}
         </div>
@@ -23,14 +23,14 @@
 </fieldset>
 <br>
 <fieldset>
-    <legend>Information heure suplementaire</legend>
+    <legend>Détail heure suplementaire</legend>
     <div class="row">
         <div class="col-md-12 table-responsive">
             <table class="table table-bordered table-sm table-responsive-sm">
                 <thead class="table-secondary">
                 <tr>
-                    <th class="text-center">Jour/Nuit</th>
-                    <th class="text-center">Normal/Dimanche/Férié</th>
+                    <th class="text-center">Période journée</th>
+                    <th class="text-center">Type journée</th>
                     <th class="text-center">Date début</th>
                     <th class="text-center">Heure début</th>
                     <th class="text-center">Date fin</th>
@@ -40,7 +40,7 @@
                 </thead>
                 {% form_theme form 'dossier_personal/heure_sup/_collection_heure_sup.html.twig' %}
                 <tbody id="detail_heure_sup_table">
-                    {{ form_widget(form.heureSup) }}
+                {{ form_widget(form.heureSup) }}
                 </tbody>
             </table>
         </div>

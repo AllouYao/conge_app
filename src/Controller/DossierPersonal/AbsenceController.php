@@ -3,80 +3,98 @@
 namespace App\Controller\DossierPersonal;
 
 use App\Entity\DossierPersonal\Personal;
-use App\Form\DossierPersonal\PersonalAbsence;
+use App\Form\DossierPersonal\PersonalAbsenceType;
 use App\Repository\DossierPersonal\AbsenceRepository;
-use App\Repository\DossierPersonal\PersonalRepository;
 use App\Service\AbsenceService;
-use DateTime;
+use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 
 #[Route('/dossier/personal/absence', name: 'personal_absence_')]
-
 class AbsenceController extends AbstractController
 {
-    private $entityManager;
-    private $absenceRepository;
-    private $absenceService;
-    private $PersonalRepository;
-
-    
-
+    private EntityManagerInterface $entityManager;
+    private AbsenceRepository $absenceRepository;
+    private AbsenceService $absenceService;
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        AbsenceRepository $absenceRepository,
-        AbsenceService $absenceService,
-        PersonalRepository $personalRepository
+        AbsenceRepository      $absenceRepository,
+        AbsenceService         $absenceService
     )
     {
         $this->entityManager = $entityManager;
         $this->absenceRepository = $absenceRepository;
         $this->absenceService = $absenceService;
-        $this->PersonalRepository = $personalRepository;
     }
-    #[Route('/', name: 'index')]
-    public function index(): Response
+
+    #[Route('/api_absence', name: 'api_absence', methods: ['GET'])]
+    public function apiAbsence(): JsonResponse
     {
-        $fullDate = new DateTime();
-        $month = $fullDate->format("m");
-        $year = $fullDate->format("Y");
-
-        $personal = $this->PersonalRepository->find(3);
-
-        $totalAmount = $this->absenceService->getAmountByMonth($personal,$month, $year);
-        // dd($totalAmount);
-        
-        $personal = null;
+        $now = Carbon::today();
         $absence = $this->absenceRepository->findAll();
+        $personal = null;
         foreach ($absence as $item) {
             $personal = $item->getPersonal();
         }
-        $totalAmount = $this->absenceService->getAmountByMonth($personal, $month, $year, 1000);
-        //dd($absence, $totalAmount);
+        $apiAbsences = [];
+        $absencesRequests = $this->absenceRepository->getAbsenceByMonth($personal, $now->month, $now->year);
+        //$absencesRequests = $this->absenceRepository->findAll();
+        foreach ($absencesRequests as $absences) {
+            $newBaseAmount = $this->absenceService->getAmountByMonth($personal, $now->month, $now->year);
+            $apiAbsences[] = [
+                'matricule' => $absences->getPersonal()->getMatricule(),
+                'name' => $absences->getPersonal()->getFirstName(),
+                'last_name' => $absences->getPersonal()->getLastName(),
+                'date_naissance' => date_format($absences->getPersonal()->getBirthday(), 'd/m/Y'),
+                'categorie_salarie' => '(' . $absences->getPersonal()->getCategorie()->getCategorySalarie()->getName() . ')' .
+                    '-' . $absences->getPersonal()->getCategorie()->getIntitule(),
+                'date_embauche' => date_format($absences->getPersonal()->getContract()->getDateEmbauche(), 'd/m/Y'),
+                'type_absence' => $absences->getType(),
+                'date_depart' => date_format($absences->getStartedDate(), 'd/m/Y'),
+                'date_retour' => date_format($absences->getEndedDate(), 'd/m/Y'),
+                'status' => $absences->isJustified() ? 'OUI' : 'NON',
+                'description' => $absences->getDescription(),
+                'duree_jour' => $absences->getTotalDay(),
+                'nouveau_salaire_base' => $newBaseAmount,
+                'date_creation' => date_format($absences->getPersonal()->getCreatedAt(), 'd/m/Y'),
+                'modifier' => $this->generateUrl('personal_absence_edit', ['uuid' => $absences->getPersonal()->getUuid()])
+            ];
+        }
 
+        return new JsonResponse($apiAbsences);
+    }
+
+    #[Route('/', name: 'index')]
+    public function index(): Response
+    {
+        $absence = $this->absenceRepository->findAll();
+        $today = Carbon::now();
+        $years = $today->year;
+        $month = $today->month;
         return $this->render('dossier_personal/absence/index.html.twig', [
             'absences' => $absence,
-            'totalAmount' => $totalAmount
+            'mois' => $month,
+            'annee' => $years
         ]);
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request,): Response
+    public function new(Request $request): Response
     {
 
-        $form = $this->createForm(PersonalAbsence::class);
+        $form = $this->createForm(PersonalAbsenceType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $PersonalAbsence = $form->get('absence')->getData();
             $personal = $form->get('personal')->getData();
 
             foreach ($PersonalAbsence as $absence) {
-
                 $absence->setPersonal($personal);
                 $this->entityManager->persist($absence);
             }
@@ -96,7 +114,7 @@ class AbsenceController extends AbstractController
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Personal $personal, Request $request): Response
     {
-        $form = $this->createForm(PersonalAbsence::class, [
+        $form = $this->createForm(PersonalAbsenceType::class, [
             'personal' => $personal,
             'absence' => $personal->getAbsences(),
         ]);
@@ -114,7 +132,7 @@ class AbsenceController extends AbstractController
         }
 
         return $this->render('dossier_personal/absence/edit.html.twig', [
-            'absence' => $personal,
+            'personals' => $personal,
             'form' => $form,
             'editing' => true
         ]);

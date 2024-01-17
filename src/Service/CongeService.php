@@ -39,8 +39,8 @@ class CongeService
     {
         $personal = $conge->getPersonal();
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
-        $anciennete = $personal->getOlder(); // anciennete en années
         $startDate = $conge->getDateDepart();
+        $anciennete = $personal->getOlder(); // anciennete en années
         $lastConge = $this->congeRepository->getLastCongeByID($personal->getId());
         $lastDateReturn = !$lastConge ? $conge->getDateRetour() : $lastConge->getDateDernierRetour();
         $dayConge = (new Carbon($conge->getDateRetour()))->diff($conge->getDateDepart())->days;
@@ -51,16 +51,15 @@ class CongeService
         $olderDate = (new Carbon($startDate))->diff($dateEmbauche);
         $gratification = $this->etatService->getGratifications($olderDate, $personal->getCategorie()->getAmount());
         $moisTravailler = $this->getWorkMonths($dateEmbauche, $startDate, $genre, $echelonConge, $suppConger);
-        $totalDays = $dayConge + $echelonConge + $suppConger;
-
+        $totalDays = self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE * $moisTravailler + $echelonConge + $suppConger;
         if ($lastConge) {
             $salaireBrutPeriodique = $this->payrollRepository->getTotalSalarie($personal, $lastDateReturn, $startDate);
         } else {
             $salaireBrutPeriodique = $this->payrollRepository->getTotalSalarie($personal, $dateEmbauche, $startDate);
         }
         $salaireMoyen = (($salaireBrutPeriodique + $gratification)) / $moisTravailler;
-        $allocationConge = ($salaireMoyen * self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE * $moisTravailler) / 30;
-        $remainingVacation = $moisTravailler * self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE;
+        $allocationConge = ($salaireMoyen * $totalDays) / 30;
+        $remainingVacation = $totalDays - $dayConge;
         $conge
             ->setAllocationConge($allocationConge)
             ->setGratification($gratification)

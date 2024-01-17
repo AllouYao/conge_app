@@ -5,7 +5,6 @@ namespace App\Service;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\Settings\PrimesRepository;
 use App\Utils\Status;
-use Carbon\Carbon;
 
 class EtatService
 {
@@ -18,42 +17,40 @@ class EtatService
         $this->personalRepository = $personalRepository;
     }
 
-    public function getPrimeAnciennete(int $personal): float|int
+    public function getPrimeAnciennete($personal): float|int
     {
-        $today = Carbon::now();
-        $personals = $this->personalRepository->findBy(['id' => $personal]);
-        foreach ($personals as $personal) {
-            $salaireCategoriel = $personal->getCategorie()->getAmount();
-            $dateEmbauche = $personal->getContract()->getDateEmbauche();
-        }
-        $anciennete = ceil(($dateEmbauche->diff($today)->y));
-        $primeAnciennete = 0;
+        $salaireCategoriel = (int)$personal->getCategorie()->getAmount();
+        $anciennete = (double)$personal->getOlder();
         switch ($anciennete) {
-            case $anciennete == 2:
-                $primeAnciennete = ceil(($salaireCategoriel * 2) / 100);
+            case $anciennete >= 2 && $anciennete < 3:
+                $primeAnciennete = $salaireCategoriel * 2 / 100;
                 break;
             case $anciennete >= 3 && $anciennete <= 25:
-                $primeAnciennete = ceil(($salaireCategoriel * $anciennete) / 100);
+                $primeAnciennete = ($salaireCategoriel * $anciennete) / 100;
                 break;
             case $anciennete >= 26:
-                $primeAnciennete = ceil(($salaireCategoriel * 25) / 100);
+                $primeAnciennete = ($salaireCategoriel * 25) / 100;
                 break;
+            default:
+                $primeAnciennete = 0;
         }
         return $primeAnciennete;
     }
 
-    public function getGratification(int $personal): float|int
+    public function
+    getGratification(int $personal): float|int
     {
-        $today = Carbon::now();
+        $anciennete = null;
+        $salaireCategoriel = null;
         $personals = $this->personalRepository->findBy(['id' => $personal]);
         foreach ($personals as $personal) {
             $salaireCategoriel = $personal->getCategorie()->getAmount();
-            $dateEmbauche = $personal->getContract()->getDateEmbauche();
+            $anciennete = $personal->getOlder();
         }
-        $dureeSalarie = ceil(($dateEmbauche->diff($today)->days) / 30);
+        $dureeSalarie = $anciennete * 12;
         $tauxGratification = (int)$this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux();
         if ($dureeSalarie < 12) {
-            $nombreJourTravailler = ceil(($dateEmbauche->diff($today)->days) / 360);
+            $nombreJourTravailler = ceil($dureeSalarie * 30);
             $gratification = ceil((($salaireCategoriel * $tauxGratification) / 100) * $nombreJourTravailler);
         } else {
             $gratification = ceil(($salaireCategoriel * $tauxGratification) / 100);

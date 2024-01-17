@@ -3,13 +3,13 @@
 namespace App\Form\DossierPersonal;
 
 use App\Entity\DossierPersonal\Absence;
+use App\Form\CustomType\DateCustomType;
+use App\Utils\Status;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use App\Form\CustomType\DateCustomType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use App\Utils\Status;
 
 
 class AbsenceType extends AbstractType
@@ -18,21 +18,21 @@ class AbsenceType extends AbstractType
     {
         $builder
             ->add('startedDate', DateCustomType::class, [
-            'attr' => [
-                'class' => 'form-control form-control-sm'
-            ],
-            'html5' => true,
-            'widget' => 'single_text',
-            'required' => true
-        ])
+                'attr' => [
+                    'class' => 'form-control form-control-sm'
+                ],
+                'html5' => true,
+                'widget' => 'single_text',
+                'required' => true
+            ])
             ->add('endedDate', DateCustomType::class, [
-            'attr' => [
-                'class' => 'form-control form-control-sm'
-            ],
-            'html5' => true,
-            'widget' => 'single_text',
-            'required' => true
-        ])
+                'attr' => [
+                    'class' => 'form-control form-control-sm'
+                ],
+                'html5' => true,
+                'widget' => 'single_text',
+                'required' => true
+            ])
             ->add(
                 'justified',
                 ChoiceType::class,
@@ -45,8 +45,9 @@ class AbsenceType extends AbstractType
                     'multiple' => false,
                     'expanded' => false,
                     'attr' => [
-                        'class' => 'form-select select2',
+                        'data-plugin' => 'customselect',
                     ],
+                    'placeholder' => ' '
                 ]
             )
             ->add(
@@ -58,11 +59,12 @@ class AbsenceType extends AbstractType
                     'multiple' => false,
                     'expanded' => false,
                     'attr' => [
-                        'class' => 'form-select select2',
+                        'data-plugin' => 'customselect',
                     ],
+                    'placeholder' => 'Sélectionner le type d\'absence'
                 ]
             )
-            ->add('description',TextType::class);
+            ->add('description', TextType::class);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -71,13 +73,14 @@ class AbsenceType extends AbstractType
             'data_class' => Absence::class,
         ]);
     }
+
     private function getTypeAbsences(): array
     {
         $typeAbsences = [];
-        foreach(Status::TYPE_ABSENCE as $typeAbsence){
-            
-            $typeAbsences[$typeAbsence] =  $typeAbsence;
-            
+        foreach (Status::TYPE_ABSENCE as $typeAbsence) {
+
+            $typeAbsences[$typeAbsence] = $typeAbsence;
+
         }
         return $typeAbsences;
     }

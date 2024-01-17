@@ -1,7 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste du personnel salarié{% endblock %}
-
+{% block title %}Liste des salariés à personne à charge{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridChargePeople {
+            border-width: 50px;
+        }
+    </style>
+{% endblock %}
 {% block body %}
     <div class="row">
         <div class="col-12">
@@ -9,39 +15,11 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        LISTE DU PERSONNEL SALARIE
+                        LISTE DES SALARIES A PERSONNE A CHARGE
                     </h5>
                 </div>
                 <div class="card-body">
-                    <table class="table table-bordered table-responsive table-sm" id="basic-datatable">
-                        <thead class="table-light">
-                        <tr>
-                            <th class="text-center">Matricule</th>
-                            <th class="text-center">Nom</th>
-                            <th class="text-center">Prénom(s)</th>
-                            <th class="text-center">Date de naissance</th>
-                            <th class="text-center">Catégorie</th>
-                            <th class="text-center">Date d'embauche</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for personal in personals %}
-                            <tr>
-                                <td class="text-right">{{ personal.matricule }}</td>
-                                <td class="text-left">{{ personal.firstName }}</td>
-                                <td class="text-left">{{ personal.lastName }}</td>
-                                <td class="text-center">{{ personal.birthday ? personal.birthday|date('d/m/Y') : '' }}</td>
-                                <td class="text-left">{{ personal.categorie.intitule }}</td>
-                                <td class="text-center">{{ personal.contract.dateEmbauche ? personal.contract.dateEmbauche|date('d/m/Y') : '' }}</td>
-                                <td class="text-center">
-                                    <a href="{{ path('charge_people_edit', {'uuid': personal.uuid}) }}">
-                                        <i data-feather="edit" class="feather" style="color: yellow"></i></a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                    <div id="dataGridChargePeople"></div>
                 </div>
                 <div class="card-footer">
                     <a href="{{ path('charge_people_new') }}" class="btn btn-primary float-end" style="color: white">Nouveau</a>
@@ -49,4 +27,141 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        $(document).ready(function () {
+            let debut;
+            let fin;
+            $("#dataGridChargePeople").dxDataGrid({
+                dataSource: `{{ url('charge_people_api_charge_people') }}`,
+                showBorders: true,
+                height: 400,
+                scrolling: {
+                    columnRenderingMode: 'virtual',
+                    mode: "virtual"
+                },
+                groupPanel: {
+                    visible: true,
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('CHARGE PEOPLE');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                            customizeCell: function (options) {
+                                const {gridCell, excelCell} = options;
+                                if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
+                                    excelCell.text = formatNumber(gridCell.value)
+                                    excelCell.font = {size: 9};
+                                    excelCell.alignment = {horizontal: 'left'};
+                                }
+                            }
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then(function (buffer) {
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Charge people ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                columns: [
+                    {
+                        caption: 'Matricule',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'matricule',
+                    },
+                    {
+                        caption: 'Nom',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'name',
+                    },
+                    {
+                        caption: 'Prénom(s)',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'last_name',
+                    },
+                    {
+                        caption: 'Date de naissance',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_naissance',
+                    },
+                    {
+                        caption: 'Catégorie salarié',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'categorie_salarie',
+                    },
+                    {
+                        caption: 'Date d\'embauche',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_embauche',
+                    },
+                    {
+                        caption: 'Nombre d\'enfant à charge',
+                        alignment: 'center',
+                        dataType: 'number',
+                        dataField: 'number_children',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Ajouté le',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_creation',
+                    },
+                    {
+                        caption: 'Action',
+                        dataField: 'modifier',
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<a title='modifier'>")
+                                .html('<i data-feather="edit" style="color: #C9971C"></i>')
+                                .attr("href", options.data.modifier)
+                                .appendTo(container);
+                            feather.replace();
+                        },
+                    },
+                ],
+            })
+        })
+    </script>
+
 {% endblock %}

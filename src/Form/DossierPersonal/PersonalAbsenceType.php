@@ -12,7 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class PersonalAbsence extends AbstractType
+class PersonalAbsenceType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {

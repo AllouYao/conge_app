@@ -37,4 +37,18 @@ class DetailPrimeSalaryRepository extends ServiceEntityRepository
             ]);
         return $qb->getQuery()->getOneOrNullResult();
     }
+
+    public function findPrimes(Personal $personal, Primes $primes): ?DetailPrimeSalary
+    {
+        $qb = $this->createQueryBuilder('d');
+        $qb
+            ->join('d.salary', 'salary')
+            ->where('salary.personal =:personal')
+            ->andWhere('d.prime =:prime')
+            ->setParameters([
+                'personal' => $personal,
+                'prime' => $primes
+            ]);
+        return $qb->getQuery()->getOneOrNullResult();
+    }
 }
