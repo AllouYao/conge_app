@@ -183,11 +183,11 @@ class CampagneController extends AbstractController
                 $this->payrollService->setPayroll($item, $campagne);
             }
             $campagne
-                ->setActive(true);
-            $campagne
+                ->setActive(true)
                 ->setOrdinary(false);
             $manager->persist($campagne);
-            $manager->flush();
+            dd($campagne);
+            //$manager->flush();
             flash()->addSuccess('Campagne ouverte avec succès.');
             return $this->redirectToRoute('campagne_livre');
         }

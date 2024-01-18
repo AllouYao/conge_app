@@ -61,6 +61,7 @@ class PayrollRepository extends ServiceEntityRepository
      */
     public function getTotalSalarie(Personal $personal, mixed $start, mixed $end): float|int|null
     {
+
         return $this->createQueryBuilder('pr')
             ->select('SUM((pr.brutAmount - 30000)) as amount_moyen')
             ->join('pr.personal', 'personal')
@@ -76,18 +77,29 @@ class PayrollRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
-    public function getTotalSalarieBaseAndSursalaire(Personal $personal, mixed $start, mixed $end): float|int|null
+
+    public function getTotalSalarieBaseAndSursalaire(Personal $personal, mixed $start): float|int|null
     {
+        $dateDepart = $start;
+        $lastTwelveMonths = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $date = clone $dateDepart;
+            $date->modify("-$i months");
+            $lastTwelveMonths[] = $date->format('Y-m');
+        }
+
         return $this->createQueryBuilder('pr')
-            ->select('SUM((pr.baseAmount + pr.sursalaire)) as amount_moyen')
+            ->select('SUM((pr.baseAmount + pr.sursalaire + pr.primeFonctionAmount + pr.primeLogementAmount 
+            + pr.indemniteFonctionAmount + pr.indemniteLogementAmount + pr.amountPrimePanier + pr.amountPrimeSalissure
+            + pr.amountPrimeOutillage + pr.amountPrimeTenueTrav + pr.amountPrimeRendement)) as amount_moyen')
             ->join('pr.personal', 'personal')
+            ->join('personal.departures', 'departures')
             ->leftJoin('personal.salary', 'salary')
             ->where('pr.personal = :pr_personal')
-            ->andWhere('pr.createdAt >= :start_date')
-            ->andWhere('pr.createdAt <= :end_date')
+            ->andWhere('departures.date BETWEEN :start AND :end')
             ->setParameter('pr_personal', $personal)
-            ->setParameter('start_date', $start)
-            ->setParameter('end_date', $end)
+            ->setParameter('start', $lastTwelveMonths[11])
+            ->setParameter('end', $lastTwelveMonths[0])
             ->setMaxResults(1)
             ->getQuery()
             ->getSingleScalarResult();
@@ -194,6 +206,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->where('campagnes.active = false');
         return $qb->getQuery()->getResult();
     }
+
     public function findSalarialeCampagne(bool $campagne, mixed $years, mixed $month): array
     {
         $qb = $this->createQueryBuilder('payroll');

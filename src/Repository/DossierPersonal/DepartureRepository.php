@@ -39,4 +39,14 @@ class DepartureRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+
+    public function findDeparturesByPersonal($personal): ?Departure
+    {
+        return $this->createQueryBuilder('d')
+            ->where('d.personal = :personal')
+            ->setParameter('personal', $personal)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Form\Paiement;
 
+use App\Contract\SalaryInterface;
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Campagne;
 use App\Repository\DossierPersonal\PersonalRepository;
@@ -19,12 +20,13 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class CampagneExcepType extends AbstractType
 {
     private PersonalRepository $repositoryPer;
+    private SalaryInterface $salaryInterface;
 
-    public function __construct(PersonalRepository $repository)
+    public function __construct(PersonalRepository $repository, SalaryInterface $salaryInterface)
     {
         $this->repositoryPer = $repository;
+        $this->salaryInterface = $salaryInterface;
     }
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -41,7 +43,7 @@ class CampagneExcepType extends AbstractType
             $form
                 ->add('personal', EntityType::class, [
                     'class' => Personal::class,
-                    'required' => true,
+                    'required' => false,
                     'attr' => [
                         'data-plugin' => 'customselect'
                     ],
@@ -80,9 +82,11 @@ class CampagneExcepType extends AbstractType
                 $checkedAll = $event->getForm()->get('checkedAll')->getData();
                 if ($checkedAll === true) {
                     $campagne = $event->getForm()->getData();
-                    $personal = $this->repositoryPer->findAllPersonal();
+                    $personal = $this->repositoryPer->findAllPersonalDepart();
                     foreach ($personal as $individual) {
                         $campagne->addPersonal($individual);
+                        $this->salaryInterface->chargePersonal($individual);
+                        $this->salaryInterface->chargeEmployeur($individual);
                     }
                 }
 

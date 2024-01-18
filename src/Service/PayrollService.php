@@ -163,4 +163,25 @@ class PayrollService
         $this->manager->persist($payroll);
         $this->manager->persist($salary);
     }
+
+    public function setPayrollDeparture(Personal $personal, Campagne $campagne): void
+    {
+        /** l'indemnité de licenciement imposable */
+        $indemniteLicenciementImposable = $this->utimePaiementService->getIndemniteLicenciementImposable($personal);
+        /** l'indemnite de préavis */
+        $indemnitePreavis = $this->utimePaiementService->getIndemnitePreavis($personal);
+        /** Gratification pour départs */
+        $gratificationD = $this->utimePaiementService->getGratifDepart($personal);
+        /** Allocation de congés pour depart */
+        $allocationAmount = $this->utimePaiementService->getAllocationDepart($personal);
+
+        /** Récupération des élements personnel du salarié */
+        $matricule = $personal->getMatricule();
+        $service = $personal->getService();
+        $categorie = '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ') -' . $personal->getCategorie()->getIntitule();
+        $departement = $personal->getFonction();
+        $dateEmbauche = $personal->getContract()->getDateEmbauche();
+        $numeroCnps = $personal->getRefCNPS();
+
+    }
 }

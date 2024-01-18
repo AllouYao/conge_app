@@ -14,27 +14,27 @@ use JetBrains\PhpStorm\NoReturn;
 
 class DepartServices
 {
-    private EtatService $etatService;
     private CongeService $congeService;
     private PayrollRepository $payrollRepository;
     const JOUR_CONGE_OUVRABLE = 2.2;
     const JOUR_CONGE_CALANDAIRE = 1.25;
     private CongeRepository $congeRepository;
     private PrimesRepository $primesRepository;
+    private UtimePaiementService $utimePaiementService;
 
     public function __construct(
-        EtatService       $etatService,
-        CongeService      $congeService,
-        PayrollRepository $payrollRepository,
-        CongeRepository   $congeRepository,
-        PrimesRepository  $primesRepository
+        CongeService         $congeService,
+        PayrollRepository    $payrollRepository,
+        CongeRepository      $congeRepository,
+        PrimesRepository     $primesRepository,
+        UtimePaiementService $utimePaiementService,
     )
     {
-        $this->etatService = $etatService;
         $this->congeService = $congeService;
         $this->payrollRepository = $payrollRepository;
         $this->congeRepository = $congeRepository;
         $this->primesRepository = $primesRepository;
+        $this->utimePaiementService = $utimePaiementService;
     }
 
     public function getAncienneteByDepart(Departure $departure): array
@@ -61,29 +61,31 @@ class DepartServices
         $salaireBase = (int)$departure->getPersonal()->getSalary()->getBaseAmount();
         $sursalaire = (int)$departure->getPersonal()->getSalary()->getSursalaire();
         $dateEmbauche = $departure->getPersonal()->getContract()->getDateEmbauche();
-        $dateDepart = $departure->getDate();
-        $anciennityDays = (new Carbon($dateDepart))->diff($dateEmbauche);
         $genre = $departure->getPersonal()->getGenre();
         $echelons = $this->congeService->echelonConge($anciennityYear);
         $chargPeapleOfPersonal = $departure->getPersonal()->getChargePeople();
+        $dateDepart = $departure->getDate();
         $jourSupp = $this->congeService->suppConger($genre, $chargPeapleOfPersonal, $dateDepart);
+
+
         if ($conges) {
             foreach ($conges as $conge) {
                 $dernierRetour = $conge?->getDateDernierRetour();
             }
             $salaireBrutPeriodique = $this->payrollRepository->getTotalSalarie($departure->getPersonal(), $dernierRetour, $dateDepart);
             $moisTravailler = $this->congeService->getWorkMonths($dernierRetour, $dateDepart, $genre, $echelons, $jourSupp);
-            $salairePeriodique = $this->payrollRepository->getTotalSalarieBaseAndSursalaire($departure->getPersonal(), $dernierRetour, $dateDepart);
+            $salairePeriodique = $this->payrollRepository->getTotalSalarieBaseAndSursalaire($departure->getPersonal(), $dernierRetour);
         } else {
             $salaireBrutPeriodique = $this->payrollRepository->getTotalSalarie($departure->getPersonal(), $dateEmbauche, $dateDepart);
             $moisTravailler = $this->congeService->getWorkMonths($dateEmbauche, $dateDepart, $genre, $echelons, $jourSupp);
-            $salairePeriodique = $this->payrollRepository->getTotalSalarieBaseAndSursalaire($departure->getPersonal(), $dateEmbauche, $dateDepart);
+            $salairePeriodique = $this->payrollRepository->getTotalSalarieBaseAndSursalaire($departure->getPersonal(), $dateDepart);
         }
+
         $tauxGratification = (int)$this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux() / 100;
         $gratification = $salaireBase * $tauxGratification * ceil($moisTravailler) / 12;
         $salaireMoyen = ($salaireBrutPeriodique + $gratification) / ceil($moisTravailler);
         $allocationConge = ($salaireMoyen * self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE * ceil($moisTravailler)) / 30;
-        $primeAciennete = $this->etatService->getPrimeAnciennete($departure->getPersonal()->getId(), $dateDepart);
+        $primeAciennete = $this->utimePaiementService->getAmountAnciennete($departure->getPersonal());
         $preavis = $this->getIndemnitePreavisByDepart($departure);
         $salaireGlobalMoyen = $salairePeriodique + $primeAciennete + $allocationConge + $gratification + $preavis;
         return [
@@ -116,11 +118,22 @@ class DepartServices
 
     public function getIndemnitePreavisByDepart(Departure $departure): int|float
     {
-        $salaireBrut = $departure->getPersonal()->getSalary()->getBrutAmount();
+        $salaryEntity = $departure->getPersonal()->getSalary();
+        $salaireBase = $this->utimePaiementService->getAmountSalaireBrutAndImposable($departure->getPersonal());
+        $sursalaire = $salaryEntity->getSursalaire();
+        $primeAnciennete = $this->utimePaiementService->getAmountAnciennete($departure->getPersonal());
+        $primeIndemnite = $salaryEntity->getTotalAutrePrimes();
+        $primeTransport = $salaryEntity->getPrimeTransport();
+        $transportExonere = $this->utimePaiementService->getPrimeTransportLegal();
+        $salaireBrut = $salaireBase['salaire_categoriel'] + $sursalaire + $primeAnciennete + $primeIndemnite + $primeTransport;
+        $plafondIndemniteTheorique = ($salaireBrut - $transportExonere) * (10 / 100);
         $anciennete = $this->getAncienneteByDepart($departure);
         $dureePreavis = $this->getPreavisByDepart($anciennete['ancienneteYear']);
-        $indemnitePreavis = $salaireBrut * $dureePreavis;
-
+        $brutImposable = $salaireBrut - $plafondIndemniteTheorique;
+        $indemnitePreavis = $brutImposable * $dureePreavis;
+        if ($plafondIndemniteTheorique > $indemnitePreavis) {
+            $indemnitePreavis = $plafondIndemniteTheorique;
+        }
         return (int)$indemnitePreavis;
     }
 
@@ -133,6 +146,15 @@ class DepartServices
         $element = $this->getSalaireGlobalMoyenElement($departure);
         $salaireGlobalMoyen = $element['Salaire_global_moyen'];
         $indemniteLicenciement = null;
+        //
+        $salaryEntity = $departure->getPersonal()->getSalary();
+        $salaireBase = $this->utimePaiementService->getAmountSalaireBrutAndImposable($departure->getPersonal());
+        $sursalaire = $salaryEntity->getSursalaire();
+        $primeAnciennete = $this->utimePaiementService->getAmountAnciennete($departure->getPersonal());
+        $allocationConge = $element['Allocation_conge'];
+        $gratifProrata = $element['Gratification'];
+
+        $preavis = $this->getIndemnitePreavisByDepart($departure);
 
         $anciennity = $this->getAncienneteByDepart($departure);
         $anciennityYear = $anciennity['ancienneteYear'];

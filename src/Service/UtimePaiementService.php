@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\DossierPersonal\Personal;
+use App\Repository\DossierPersonal\DepartureRepository;
 use App\Repository\DossierPersonal\DetailPrimeSalaryRepository;
 use App\Repository\DossierPersonal\DetailSalaryRepository;
 use App\Repository\Impots\CategoryChargeRepository;
@@ -17,13 +18,15 @@ class UtimePaiementService
     private PrimesRepository $primesRepository;
     private DetailSalaryRepository $detailSalaryRepository;
     private DetailPrimeSalaryRepository $detailPrimeSalaryRepository;
+    private DepartureRepository $departureRepository;
 
     public function __construct(
         AbsenceService              $absenceService,
         CategoryChargeRepository    $categoryChargeRepository,
         PrimesRepository            $primesRepository,
         DetailSalaryRepository      $detailSalaryRepository,
-        DetailPrimeSalaryRepository $detailPrimeSalaryRepository
+        DetailPrimeSalaryRepository $detailPrimeSalaryRepository,
+        DepartureRepository         $departureRepository
     )
     {
         $this->absenceService = $absenceService;
@@ -31,6 +34,7 @@ class UtimePaiementService
         $this->primesRepository = $primesRepository;
         $this->detailSalaryRepository = $detailSalaryRepository;
         $this->detailPrimeSalaryRepository = $detailPrimeSalaryRepository;
+        $this->departureRepository = $departureRepository;
     }
 
     /** Montant de la majoration des heures supplémentaire */
@@ -384,4 +388,43 @@ class UtimePaiementService
         $primeTransport = $this->primesRepository->findOneBy(['code' => Status::PRIME_TRANSPORT]);
         return (int)$primeTransport->getTaux();
     }
+
+    // Obtention des éléments du Départ de personal
+
+    /** Determiner l'indemnite de licenciement imposable */
+    public function getIndemniteLicenciementImposable(Personal $personal): float|int
+    {
+        $departure = $this->departureRepository->findDeparturesByPersonal($personal);
+        $indemniteLicenciement = $departure?->getDissmissalAmount();
+        if ($indemniteLicenciement <= 50000) {
+            $indemniteImposable = 0;
+        } else {
+            $indemniteImposable = ($indemniteLicenciement * 50) / 100;
+        }
+
+        return $indemniteImposable;
+    }
+
+    /** Determiner l'indemnité de préavis */
+    public function getIndemnitePreavis(Personal $personal): float|int
+    {
+        $departure = $this->departureRepository->findDeparturesByPersonal($personal);
+        return $departure->getNoticeAmount();
+    }
+
+    /** Determiner la gratification */
+    public function getGratifDepart(Personal $personal): float|int
+    {
+        $departure = $this->departureRepository->findDeparturesByPersonal($personal);
+        return $departure->getGratification();
+    }
+
+    /** Determiner l'allocation congés */
+    public function getAllocationDepart(Personal $personal): float|int
+    {
+        $departure = $this->departureRepository->findDeparturesByPersonal($personal);
+        return $departure->getCongeAmount();
+    }
+
+
 }

@@ -37,6 +37,21 @@ class PersonalRepository extends ServiceEntityRepository
     /**
      * @return Personal[] Returns an array of Personal objects
      */
+    public function findAllPersonalDepart(): array
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->join('p.departures', 'departures')
+            ->join('p.contract', 'contract')
+            ->where('departures.id is not null')
+            ->andWhere('contract.id is not null')->getQuery()->getResult();
+        return array_map(function ($result) {
+            return $result;
+        }, $qb);
+    }
+
+    /**
+     * @return Personal[] Returns an array of Personal objects
+     */
     public function findAllWomanPersonal(): array
     {
         $qb = $this->createQueryBuilder('p')->where('p.genre = :genre')->setParameter('genre', Status::FEMININ)->getQuery()->getResult();
