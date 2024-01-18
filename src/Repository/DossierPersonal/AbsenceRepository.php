@@ -3,9 +3,9 @@
 namespace App\Repository\DossierPersonal;
 
 use App\Entity\DossierPersonal\Absence;
+use App\Entity\DossierPersonal\Personal;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use App\Entity\DossierPersonal\Personal;
 
 
 /**
@@ -48,6 +48,12 @@ class AbsenceRepository extends ServiceEntityRepository
     //        ;
     //    }
 
+    /**
+     * @param Personal $personal
+     * @param int $month
+     * @param int $year
+     * @return Absence[]|null Returns an array of Absence objects
+     */
     public function getAbsenceByMonth(Personal $personal, int $month, int $year): ?array
     {
         return $this->createQueryBuilder('abs')

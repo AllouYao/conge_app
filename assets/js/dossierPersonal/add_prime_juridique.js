@@ -14,7 +14,7 @@ let sursalaire = 0;
 let transport = 0;
 let amountBrut = 0;
 
-
+// debut pour la gestion de la collection des primes juridique
 $('#add-collection-widget-personal-salary-prime').click(function () {
     const list = $($(this).attr('data-list-selector'));
     const $widget = $('#widget-counter-personal-salary-prime');
@@ -82,6 +82,7 @@ const calculateTotalPrimeJuridique = () => {
     }
     $('#total_montant_prime_salary').html(new Intl.NumberFormat('fr-FR').format($amountPrimes || 0));
 }
+// fin pour la gestion de la collection des primes juridique
 
 
 const salaireBase = () => {
@@ -107,6 +108,7 @@ const calculatePrimes = () => {
 }
 
 
+// debut pour la gestion de la collection des autres primes
 $('#add-collection-widget-personal-autre-prime').click(function () {
     const list = $($(this).attr('data-list-selector'));
     const $widget = $('#widget-counter-personal-autre-prime');
@@ -142,9 +144,6 @@ const addTagFormDeleteLinkAutrePrime = () => {
 
 const prime = () => {
     $('body').on('change', '.autre-prime, .amount-autre-prime', function () {
-        //const parentId = $(this).parent().parent().attr('data-id');
-        // const $selected = $(".autre-prime :selected");
-        //const primes = $(`#${parentId}_prime`).val();
         calculateTotalAutrePrime()
         calculateSalaireNet()
     });
@@ -161,6 +160,8 @@ const calculateTotalAutrePrime = () => {
     }
     $('#total_autre_prime').html(new Intl.NumberFormat('fr-FR').format(total || 0));
 }
+// fin pour la gestion de la collection des autres primes
+
 
 const calculateSalaireNet = () => {
     const DEFAULT_TRANSPORT = +$('#personal_salary_transportImposable').val();
@@ -173,7 +174,7 @@ const calculateSalaireNet = () => {
     let $amountImposableWithAvantage = $avantagesImposable !== 0 && $amountAventage !== 0 ? amountBrut + $avantagesImposable : amountBrut;
     let $transportImposable = $transport > DEFAULT_TRANSPORT ? $transport - DEFAULT_TRANSPORT : 0;
     let $amountImposableWithTransport = $transportImposable !== 0 && $transport > DEFAULT_TRANSPORT ? $transportImposable : 0;
-    $amountBrut = amountBrut + $transport;
+    $amountBrut = amountBrut + $transport + $logements;
 
 
     $amountBrutImposable = $amountImposableWithAvantage + $amountImposableWithTransport;

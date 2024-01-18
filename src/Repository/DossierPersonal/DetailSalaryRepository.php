@@ -46,7 +46,6 @@ class DetailSalaryRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('d');
         $qb
-            //->select('d.amountPrime')
             ->join('d.salary', 'salary')
             ->where('salary.personal =:personal')
             ->andWhere('d.prime =:prime')

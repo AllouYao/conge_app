@@ -43,5 +43,18 @@ class HeureSupRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function getNbHeursSupp(Personal $personal, int $month, int $year): ?HeureSup
+    {
+        return $this->createQueryBuilder('h')
+            ->andWhere('h.personal = :personal')
+            ->andWhere('YEAR(h.startedDate) = :year')
+            ->andWhere('MONTH(h.startedDate) = :month')
+            ->setParameter('personal', $personal)
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
 
 }

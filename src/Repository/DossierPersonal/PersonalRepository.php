@@ -121,11 +121,15 @@ class PersonalRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findLastId()
+    /**
+     * @return Personal[] Returns an array of Personal objects
+     */
+    public function findPersonalWithChargePeaple(): array
     {
-        return $this->createQueryBuilder('t')
-            ->select('MAX(t.id)')
+        return $this->createQueryBuilder('p')
+            ->join('p.chargePeople', 'charge_people')
+            ->where('charge_people.id is not null')
             ->getQuery()
-            ->getSingleScalarResult();
+            ->getResult();
     }
 }

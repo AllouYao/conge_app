@@ -8,6 +8,7 @@ use App\Repository\DossierPersonal\PersonalRepository;
 use App\Service\SalaryImpotsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,12 +16,33 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/dossier/personal/charge_people', name: 'charge_people_')]
 class ChargePeopleController extends AbstractController
 {
-    #[Route('/', name: 'index')]
-    public function index(PersonalRepository $personalRepository): Response
+    #[Route('/api_charge_peaple', name: 'api_charge_people', methods: ['GET'])]
+    public function apiChargePeople(PersonalRepository $personalRepository): JsonResponse
     {
-        return $this->render('dossier_personal/charge_people/index.html.twig', [
-            'personals' => $personalRepository->findAll(),
-        ]);
+        $personals = $personalRepository->findPersonalWithChargePeaple();
+        $apiChargePeaple = [];
+
+        foreach ($personals as $personal) {
+            $personalChildren = count($personal->getChargePeople());
+            $apiChargePeaple[] = [
+                'number_children' => $personalChildren,
+                'matricule' => $personal->getMatricule(),
+                'name' => $personal->getFirstName(),
+                'last_name' => $personal->getLastName(),
+                'date_naissance' => date_format($personal->getBirthday(), 'd/m/Y'),
+                'categorie_salarie' => '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ')' . '-' . $personal->getCategorie()->getIntitule(),
+                'date_embauche' => date_format($personal->getContract()->getDateEmbauche(), 'd/m/Y'),
+                'date_creation' => date_format($personal->getCreatedAt(), 'd/m/Y'),
+                'modifier' => $this->generateUrl('charge_people_edit', ['uuid' => $personal->getUuid()])
+            ];
+        }
+        return new JsonResponse($apiChargePeaple);
+    }
+
+    #[Route('/', name: 'index')]
+    public function index(): Response
+    {
+        return $this->render('dossier_personal/charge_people/index.html.twig');
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]

@@ -53,7 +53,7 @@ class PersonalController extends AbstractController
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
         $dateFin = $personal->getContract()->getDateFin();
         $today = new DateTime();
-        $anciennete = $today->diff($dateEmbauche)->y;
+        $anciennete = (int)$personal->getOlder();
         $age = $personal->getBirthday()->diff($today)->y;
         $dureeContrat = ($dateFin->diff($dateEmbauche)->y) * 12;
 

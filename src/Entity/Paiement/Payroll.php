@@ -94,6 +94,79 @@ class Payroll
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $masseSalary = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $matricule = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $service = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $departement = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $categories = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateEmbauche = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $numCnps = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $majorationAmount = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $AncienneteAmount = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $congesPayesAmount = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $primeFonctionAmount = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $primeLogementAmount = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $indemniteFonctionAmount = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $indemniteLogementAmount = null;
+
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountTA = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountAnnuelFPC = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountFPC = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountTransImposable = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountAvantageImposable = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $aventageNonImposable = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountPrimePanier = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountPrimeSalissure = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountPrimeOutillage = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountPrimeTenueTrav = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountPrimeRendement = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -383,6 +456,294 @@ class Payroll
     public function setMasseSalary(?string $masseSalary): static
     {
         $this->masseSalary = $masseSalary;
+
+        return $this;
+    }
+
+    public function getMatricule(): ?string
+    {
+        return $this->matricule;
+    }
+
+    public function setMatricule(?string $matricule): static
+    {
+        $this->matricule = $matricule;
+
+        return $this;
+    }
+
+    public function getService(): ?string
+    {
+        return $this->service;
+    }
+
+    public function setService(?string $service): static
+    {
+        $this->service = $service;
+
+        return $this;
+    }
+
+    public function getDepartement(): ?string
+    {
+        return $this->departement;
+    }
+
+    public function setDepartement(?string $departement): static
+    {
+        $this->departement = $departement;
+
+        return $this;
+    }
+
+    public function getCategories(): ?string
+    {
+        return $this->categories;
+    }
+
+    public function setCategories(?string $categories): static
+    {
+        $this->categories = $categories;
+
+        return $this;
+    }
+
+    public function getDateEmbauche(): ?\DateTimeInterface
+    {
+        return $this->dateEmbauche;
+    }
+
+    public function setDateEmbauche(?\DateTimeInterface $dateEmbauche): static
+    {
+        $this->dateEmbauche = $dateEmbauche;
+
+        return $this;
+    }
+
+    public function getNumCnps(): ?string
+    {
+        return $this->numCnps;
+    }
+
+    public function setNumCnps(?string $numCnps): static
+    {
+        $this->numCnps = $numCnps;
+
+        return $this;
+    }
+
+    public function getMajorationAmount(): ?string
+    {
+        return $this->majorationAmount;
+    }
+
+    public function setMajorationAmount(?string $majorationAmount): static
+    {
+        $this->majorationAmount = $majorationAmount;
+
+        return $this;
+    }
+
+    public function getAncienneteAmount(): ?string
+    {
+        return $this->AncienneteAmount;
+    }
+
+    public function setAncienneteAmount(?string $AncienneteAmount): static
+    {
+        $this->AncienneteAmount = $AncienneteAmount;
+
+        return $this;
+    }
+
+    public function getCongesPayesAmount(): ?string
+    {
+        return $this->congesPayesAmount;
+    }
+
+    public function setCongesPayesAmount(?string $congesPayesAmount): static
+    {
+        $this->congesPayesAmount = $congesPayesAmount;
+
+        return $this;
+    }
+
+    public function getPrimeFonctionAmount(): ?string
+    {
+        return $this->primeFonctionAmount;
+    }
+
+    public function setPrimeFonctionAmount(?string $primeFonctionAmount): static
+    {
+        $this->primeFonctionAmount = $primeFonctionAmount;
+
+        return $this;
+    }
+
+    public function getPrimeLogementAmount(): ?string
+    {
+        return $this->primeLogementAmount;
+    }
+
+    public function setPrimeLogementAmount(?string $primeLogementAmount): static
+    {
+        $this->primeLogementAmount = $primeLogementAmount;
+
+        return $this;
+    }
+
+    public function getIndemniteFonctionAmount(): ?string
+    {
+        return $this->indemniteFonctionAmount;
+    }
+
+    public function setIndemniteFonctionAmount(?string $indemniteFonctionAmount): static
+    {
+        $this->indemniteFonctionAmount = $indemniteFonctionAmount;
+
+        return $this;
+    }
+
+    public function getIndemniteLogementAmount(): ?string
+    {
+        return $this->indemniteLogementAmount;
+    }
+
+    public function setIndemniteLogementAmount(?string $indemniteLogementAmount): static
+    {
+        $this->indemniteLogementAmount = $indemniteLogementAmount;
+
+        return $this;
+    }
+
+    public function getAmountTA(): ?string
+    {
+        return $this->amountTA;
+    }
+
+    public function setAmountTA(?string $amountTA): static
+    {
+        $this->amountTA = $amountTA;
+
+        return $this;
+    }
+
+    public function getAmountAnnuelFPC(): ?string
+    {
+        return $this->amountAnnuelFPC;
+    }
+
+    public function setAmountAnnuelFPC(?string $amountAnnuelFPC): static
+    {
+        $this->amountAnnuelFPC = $amountAnnuelFPC;
+
+        return $this;
+    }
+
+    public function getAmountFPC(): ?string
+    {
+        return $this->amountFPC;
+    }
+
+    public function setAmountFPC(?string $amountFPC): static
+    {
+        $this->amountFPC = $amountFPC;
+
+        return $this;
+    }
+
+    public function getAmountTransImposable(): ?string
+    {
+        return $this->amountTransImposable;
+    }
+
+    public function setAmountTransImposable(?string $amountTransImposable): static
+    {
+        $this->amountTransImposable = $amountTransImposable;
+
+        return $this;
+    }
+
+    public function getAmountAvantageImposable(): ?string
+    {
+        return $this->amountAvantageImposable;
+    }
+
+    public function setAmountAvantageImposable(?string $amountAvantageImposable): static
+    {
+        $this->amountAvantageImposable = $amountAvantageImposable;
+
+        return $this;
+    }
+
+    public function getAventageNonImposable(): ?string
+    {
+        return $this->aventageNonImposable;
+    }
+
+    public function setAventageNonImposable(?string $aventageNonImposable): static
+    {
+        $this->aventageNonImposable = $aventageNonImposable;
+
+        return $this;
+    }
+
+    public function getAmountPrimePanier(): ?string
+    {
+        return $this->amountPrimePanier;
+    }
+
+    public function setAmountPrimePanier(?string $amountPrimePanier): static
+    {
+        $this->amountPrimePanier = $amountPrimePanier;
+
+        return $this;
+    }
+
+    public function getAmountPrimeSalissure(): ?string
+    {
+        return $this->amountPrimeSalissure;
+    }
+
+    public function setAmountPrimeSalissure(?string $amountPrimeSalissure): static
+    {
+        $this->amountPrimeSalissure = $amountPrimeSalissure;
+
+        return $this;
+    }
+
+    public function getAmountPrimeOutillage(): ?string
+    {
+        return $this->amountPrimeOutillage;
+    }
+
+    public function setAmountPrimeOutillage(?string $amountPrimeOutillage): static
+    {
+        $this->amountPrimeOutillage = $amountPrimeOutillage;
+
+        return $this;
+    }
+
+    public function getAmountPrimeTenueTrav(): ?string
+    {
+        return $this->amountPrimeTenueTrav;
+    }
+
+    public function setAmountPrimeTenueTrav(?string $amountPrimeTenueTrav): static
+    {
+        $this->amountPrimeTenueTrav = $amountPrimeTenueTrav;
+
+        return $this;
+    }
+
+    public function getAmountPrimeRendement(): ?string
+    {
+        return $this->amountPrimeRendement;
+    }
+
+    public function setAmountPrimeRendement(?string $amountPrimeRendement): static
+    {
+        $this->amountPrimeRendement = $amountPrimeRendement;
 
         return $this;
     }

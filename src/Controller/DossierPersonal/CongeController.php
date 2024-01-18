@@ -45,10 +45,12 @@ class CongeController extends AbstractController
                 'date_depart' => date_format($dateDebut, 'd/m/Y'),
                 'date_retour' => date_format($dateRetour, 'd/m/Y'),
                 'conges_annuel_jour' => $item['totalDays'],
+                'conges_jour_pris' => $item['days'],
                 'dernier_conge' => date_format($item['dernier_retour'], 'd/m/Y'),
                 'salaire_moyen' => $item['salaire_moyen'],
                 'allocation_annuel' => $item['allocation_conge'],
-                'en_conge_?' => $item['en_conge'] === true ? 'OUI' : 'NOM',
+                'status' => $item['en_conge'] === true ? 'OUI' : 'NON',
+                'jour_restant' => $item['remainingVacation'],
                 'modifier' => $this->generateUrl('conge_edit', ['uuid' => $item['uuid']])
             ];
         }
@@ -83,7 +85,6 @@ class CongeController extends AbstractController
         $conge = new Conge();
         $form = $this->createForm(CongeType::class, $conge);
         $form->handleRequest($request);
-        $today = Carbon::today();
         if ($form->isSubmitted() && $form->isValid()) {
             $lastConge = $congeRepository->getLastCongeByID($conge->getPersonal()->getId());
             if (!$lastConge) {
@@ -92,12 +93,6 @@ class CongeController extends AbstractController
                 $lastDateReturn = $lastConge->getDateDernierRetour();
             }
             $conge->setDateDernierRetour($lastDateReturn);
-            $date = new Carbon($lastDateReturn);
-            $personal = $conge->getPersonal();
-            $active = $this->congeRepository->active($personal);
-
-
-
             $congeService->calculate($conge);
             $conge
                 ->setTypeConge(Status::CONGE_GLOBAL)

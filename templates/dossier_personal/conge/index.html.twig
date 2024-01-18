@@ -66,7 +66,7 @@
                             component: e.component,
                             worksheet,
                             autoFilterEnabled: true,
-                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50],
+                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
                             customizeCell: function (options) {
                                 const {gridCell, excelCell} = options;
                                 if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
@@ -88,7 +88,6 @@
                 },
                 searchPanel: {
                     visible: true,
-                   // width: 240,
                     placeholder: 'Rechercher...',
                 },
                 showColumnLines: true,
@@ -105,7 +104,6 @@
                         alignment: 'center',
                         dataType: 'number',
                         dataField: 'index',
-                       // width: 80,
                         fixed: true
                     },
                     {
@@ -113,43 +111,49 @@
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'full_name',
-                       // width: 120,
                         fixed: true
                     },
                     {
                         caption: 'Dernier retour congé',
-                        dataType: 'date',
+                        dataType: 'string',
                         dataField: 'dernier_conge',
                         alignment: 'center',
-                        // width: 120
                     },
                     {
                         caption: 'Date de départ',
-                        dataType: 'date',
+                        dataType: 'string',
                         dataField: 'date_depart',
                         alignment: 'center',
-                       // width: 120
                     },
                     {
-                        caption: 'Durée (en jours)',
+                        caption: 'Durée congé à prendre (en jours)',
                         dataType: 'number',
                         dataField: 'conges_annuel_jour',
                         alignment: 'center',
-                       // width: 120,
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Durée congé pris (en jours)',
+                        dataType: 'number',
+                        dataField: 'conges_jour_pris',
+                        alignment: 'center',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
                     },
                     {
                         caption: 'Date de retour',
-                        dataType: 'date',
+                        dataType: 'string',
                         dataField: 'date_retour',
                         alignment: 'center',
-                       // width: 120
                     },
                     {
                         caption: 'Salaire moyen mensuel',
                         dataType: 'number',
                         dataField: 'salaire_moyen',
                         alignment: 'right',
-                       // width: 120,
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
@@ -159,17 +163,35 @@
                         dataType: 'number',
                         dataField: 'allocation_annuel',
                         alignment: 'right',
-                       // width: 120,
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
                     },
                     {
-                        caption: 'Est en congé ?',
-                        dataType: 'string',
-                        dataField: 'en_conge_?',
+                        caption: 'Jours de congé restant',
+                        dataType: 'number',
+                        dataField: 'jour_restant',
                         alignment: 'center',
-                       // width: 120
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Statut',
+                        dataType: 'string',
+                        dataField: 'status',
+                        alignment: 'center',
+                        cellTemplate: function(container, options) {
+                            var status = options.data.status;
+                            var statusText = status === 'OUI' ? 'En cour' : 'Terminer';
+                            var labelClass = status === 'OUI' ? 'bg-primary' : 'bg-success';
+
+                            // Créer une structure HTML personnalisée pour la cellule
+                            var htmlContent = '<span class="badge ' + labelClass + '">' + statusText + '</span>';
+
+                            // Ajouter la structure HTML à la cellule
+                            container.append(htmlContent);
+                        },
                     },
                     {
                         dataField: 'modifier',
@@ -177,7 +199,7 @@
                         alignment: 'center',
                         cellTemplate: function (container, options) {
                             $("<a>")
-                                .html('<i data-feather="edit" style="color: yellow"></i>')
+                                .html('<i data-feather="edit" style="color: #C9971C"></i>')
                                 .attr("href", options.data.modifier)
                                 .appendTo(container);
                             feather.replace();

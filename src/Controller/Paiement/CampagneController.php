@@ -6,15 +6,10 @@ use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Campagne;
 use App\Form\Paiement\CampagneExcepType;
 use App\Form\Paiement\CampagneType;
-use App\Repository\DossierPersonal\CongeRepository;
-use App\Repository\DossierPersonal\DetailSalaryRepository;
-use App\Repository\DossierPersonal\PersonalRepository;
+use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Repository\Paiement\CampagneRepository;
 use App\Repository\Paiement\PayrollRepository;
-use App\Repository\Settings\PrimesRepository;
-use App\Service\EtatService;
-use App\Service\HeureSupService;
 use App\Service\PayrollService;
 use App\Utils\Status;
 use Carbon\Carbon;
@@ -34,44 +29,34 @@ class CampagneController extends AbstractController
     private PayrollService $payrollService;
     private PayrollRepository $payrollRepository;
     private CampagneRepository $campagneRepository;
-    private EtatService $etatService;
-    private HeureSupService $heureSupService;
-    private CongeRepository $congeRepository;
     private CategoryChargeRepository $categoryChargeRepository;
+    private HeureSupRepository $heureSupRepository;
 
     /**
      * @param PayrollService $payrollService
      * @param PayrollRepository $payrollRepository
      * @param CampagneRepository $campagneRepository
-     * @param EtatService $etatService
-     * @param HeureSupService $heureSupService
-     * @param CongeRepository $congeRepository
      * @param CategoryChargeRepository $categoryChargeRepository
      */
     public function __construct(
         PayrollService           $payrollService,
         PayrollRepository        $payrollRepository,
         CampagneRepository       $campagneRepository,
-        EtatService              $etatService,
-        HeureSupService          $heureSupService,
-        CongeRepository          $congeRepository,
-        CategoryChargeRepository $categoryChargeRepository
+        CategoryChargeRepository $categoryChargeRepository,
+        HeureSupRepository       $heureSupRepository
     )
     {
         $this->payrollService = $payrollService;
         $this->payrollRepository = $payrollRepository;
         $this->campagneRepository = $campagneRepository;
-        $this->etatService = $etatService;
-        $this->heureSupService = $heureSupService;
-        $this->congeRepository = $congeRepository;
         $this->categoryChargeRepository = $categoryChargeRepository;
+        $this->heureSupRepository = $heureSupRepository;
     }
 
     #[Route('/index', name: 'livre', methods: ['GET'])]
     public function index(): Response
     {
         $payBooks = $this->payrollRepository->findPayrollByCampaign(true);
-
         return $this->render('paiement/campagne/pay_book.html.twig', [
             'payBooks' => $payBooks
         ]);
@@ -84,41 +69,51 @@ class CampagneController extends AbstractController
         $payBookData = [];
         foreach ($payroll as $item) {
             $payBookData[] = [
+                'type_campagne' => $item->getCampagne()->isOrdinary() ? 'Ordinaire' : 'Exceptionnelle',
                 /**
                  * element en rapport avec le salarié
                  */
-                'full_name_salaried' => $item['first_name'] . ' ' . $item['last_name'],
-                'category_salaried' => $item['categories_name'],
-                'number_part_salaried' => $item['nombre_part'],
-                'salaire_base_salaried' => $item['base_salary'],
-                'sursalaire_salaried' => $item['sursalaire'],
-                'salaire_brut_salaried' => $item['brut_salary'],
-                'salaire_imposable_salaried' => $item['imposable_salary'],
-                'its_salaried' => $item['salary_its'],
-                'cnps_salaried' => $item['salary_cnps'],
-                'cmu_salaried' => $item['salary_cmu'],
-                'assurance_salaried' => $item['salary_assurance'],
-                'total_fixcal_salaried' => $item['salary_transport'],
-                'transport_salaried' => $item['montant_fixcal_salary'],
-                'net_payer_salaried' => $item['net_payer'],
+                'matricule' => $item->getMatricule(),
+                'full_name_salaried' => $item->getPersonal()->getFirstName() . ' ' . $item->getPersonal()->getLastName(),
+                'service' => $item->getService(),
+                'category_salaried' => $item->getCategories(),
+                'number_part_salaried' => $item->getNumberPart(),
+                'date_embauche' => date_format($item->getDateEmbauche(), 'd/m/Y'),
+                'num_cnps' => $item->getNumCnps(),
+                'salaire_base_salaried' => $item->getBaseAmount(),
+                'sursalaire_salaried' => $item->getSursalaire(),
+                'majoration_heurs_supp' => $item->getMajorationAmount(),
+                'conge_payes' => $item->getCongesPayesAmount(),
+                'prime_anciennete' => $item->getAncienneteAmount(),
+                'prime_transport_imposable' => $item->getAmountTransImposable(),
+                'avantage_imposable' => $item->getAmountAvantageImposable(),
+                'prime_fonction' => $item->getPrimeFonctionAmount(),
+                'prime_logement' => $item->getPrimeLogementAmount(),
+                'indemnite_fonction' => $item->getIndemniteFonctionAmount(),
+                'indemnite_logement' => $item->getIndemniteLogementAmount(),
+                'salaire_brut_salaried' => $item->getBrutAmount(),
+                'salaire_imposable_salaried' => $item->getImposableAmount(),
+                'its_salaried' => $item->getSalaryIts(),
+                'cnps_salaried' => $item->getSalaryCnps(),
+                'cmu_salaried' => $item->getSalaryCmu(),
+                'charge_salarial' => $item->getFixcalAmount(),
+                'prime_transport_legal' => $item->getSalaryTransport(),
+                'net_payer_salaried' => $item->getNetPayer(),
                 /**
                  * element en rapport avec l'employeur
                  */
-                'employer_is' => $item['employeur_is'],
-                'employer_fdfp' => $item['employeur_fdfp'],
-                'employer_cr' => $item['employeur_cr'],
-                'employer_cmu' => $item['employeur_cmu'],
-                'employer_pr' => $item['employeur_pf'],
-                'employer_at' => $item['employeur_at'],
-                'employer_cnps' => $item['employeur_cnps'],
-                'total_fixcal_employer' => $item['fixcal_amount_employeur'],
-                'assurance_employer' => $item['employeur_assurance'],
+                'employer_is' => $item->getEmployeurIs(),
+                'employer_cr' => $item->getEmployeurCr(),
+                'employer_cmu' => $item->getEmployeurCmu(),
+                'employer_pr' => $item->getEmployeurPf(),
+                'employer_at' => $item->getEmployeurAt(),
+                'employer_cnps' => $item->getEmployeurCnps(),
+                'charge_patronal' => $item->getFixcalAmountEmployeur(),
                 /**
                  * Masse de salaire global du salarié
                  */
-                'masse_salariale' => $item['masse_salary'],
-                'print_bulletin' => $this->generateUrl('campagne_make_bulletin',['id' => $item['personalId']])
-                //'debuts' => $item['debut'] ? date_format($item['debut'], 'd/m/Y') : "",
+                'masse_salariale' => $item->getMasseSalary(),
+                'print_bulletin' => $this->generateUrl('campagne_make_bulletin', ['uuid' => $item->getPersonal()->getUuid()])
             ];
         }
         return new JsonResponse($payBookData);
@@ -148,8 +143,7 @@ class CampagneController extends AbstractController
                 $this->payrollService->setPayroll($item, $campagne);
             }
             $campagne
-                ->setActive(true);
-            $campagne
+                ->setActive(true)
                 ->setOrdinary(true);
             $manager->persist($campagne);
             $manager->flush();
@@ -263,109 +257,87 @@ class CampagneController extends AbstractController
 
     }
 
-    #[Route('/bulletin/{id}', name: 'make_bulletin', methods: ['GET'])]
+    #[Route('/bulletin/{uuid}', name: 'make_bulletin', methods: ['GET'])]
     public function makeBulletin(
-        PersonalRepository $personalRepository,
-        Personal $personal,
-        PrimesRepository $primesRepository,
-        DetailSalaryRepository $detailSalaryRepository
+        Personal $personal
     ): Response
     {
-        $primeSalissure = $primesRepository->findOneBy(['code' => Status::PRIME_SALISSURE]);
-        $primeOutillage = $primesRepository->findOneBy(['code' => Status::PRIME_OUTILLAGE]);
-        $primePanier = $primesRepository->findOneBy(['code' => Status::PRIME_PANIER]);
-        $primeTt = $primesRepository->findOneBy(['code' => Status::PRIME_TENUE_TRAVAIL]);
-
-        $amountSalissure = $detailSalaryRepository->findOneBy(['prime' => $primeSalissure, 'salary' => $personal->getSalary()]);
-        $amountOutillage = $detailSalaryRepository->findOneBy(['prime' => $primeOutillage, 'salary' => $personal->getSalary()]);
-        $amountPanier = $detailSalaryRepository->findOneBy(['prime' => $primePanier, 'salary' => $personal->getSalary()]);
-        $amountTt = $detailSalaryRepository->findOneBy(['prime' => $primeTt, 'salary' => $personal->getSalary()]);
-        $data = [
-            'fonction' => $personal->getFonction(),
-            'departement' => $personal->getService(),
-            'taux_its' => '0% à 32%',
-            'acompte_avance_pret' => 0,
-            'primePanier' => $amountPanier?->getAmountPrime() ?? 0,
-            'primeOutil' => $amountOutillage?->getAmountPrime() ?? 0,
-            'primeSalissure' => $amountSalissure?->getAmountPrime() ?? 0,
-            'primeTt' => $amountTt?->getAmountPrime() ?? 0,
-        ];
-        $dataPayroll = [];
-        $personal = $personalRepository->find($personal->getId());
         $payrolls = $this->payrollRepository->findBulletinByCampaign(true, $personal);
-        $today = Carbon::now();
         foreach ($payrolls as $index => $payroll) {
-            $nombreEnfant = $personal->getChargePeople()->count();
-            $anciennete = ceil(($payroll['date_embauche']->diff($today)->y));
-            $salaireHoraire = $payroll['base_salary'] / Status::TAUX_HEURE;
-            $primeAnciennete = $this->etatService->getPrimeAnciennete($payroll['personal_id']);
-            $amountHeureSupp = $this->heureSupService->getAmountHeursSuppByID($payroll['personal_id']);
-            $gratification = $this->etatService->getGratification($payroll['personal_id']);
-            $conges = $this->congeRepository->getLastCongeByID($payroll['personal_id']);
-            $allocationConger = $conges?->getAllocationConge();
-            $salaireBrut = $payroll['brut_salary'] + $primeAnciennete + $amountHeureSupp + $gratification + $allocationConger;
-            $salaireImposable = $payroll['imposable_salary'] + $primeAnciennete + $amountHeureSupp + $gratification + $allocationConger;
-            $categoryRateCNPS = $this->categoryChargeRepository->findOneBy(['codification' => 'CNPS'])->getValue();
-            $amountCnpsPersonal = ($salaireImposable * $categoryRateCNPS) / 100;
-
+            $tauxCnpsSalarial = $this->categoryChargeRepository->findOneBy(['codification' => 'CNPS'])->getValue();
+            $tauxCrEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_CR'])->getValue();
+            $tauxPfEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_PF'])->getValue();
+            $tauxAtEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_AT'])->getValue();
+            $tauxIsEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'IS'])->getValue();
+            $tauxTaEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_TA'])->getValue();
+            $tauxFPCEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC'])->getValue();
+            $tauxFPCAnnuelEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC_VER'])->getValue();
+            $carbon = new Carbon();
+            $nbHeureSupp = $this->heureSupRepository->getNbHeursSupp($personal, $carbon->month, $carbon->year)?->getTotalHorraire();
             $dataPayroll = [
-                'period_debut' => $payroll['debut'],
-                'period_fin' => $payroll['fin'],
-                'matricule' => $payroll['personal_matricule'],
                 'index' => ++$index,
-                'grade' => $payroll['categories_name'],
-                'embauche' => $payroll['date_embauche'],
-                'anciennete' => $anciennete,
-                'numeroCnps' => $payroll['numero_cnps'],
-                'categorie_salarie' => $payroll['categories_code'],
-                'etat_civil' => $payroll['personal_etat_civil'],
-                'nombre_enfant' => $nombreEnfant,
-                'date_retour_dernier_conge' => $conges?->getDateDernierRetour()->format('d/m/Y') ?? '-',
-                'fullName_salaried' => $payroll['first_name'] . ' ' . $payroll['last_name'],
-                'nombre_jour_conge' => $conges?->getTotalDays() ,
-                'date_depart_conge' => $conges?->getDateDepart()->format('d/m/Y'),
-                'date_retour_conge' => $conges?->getDateRetour()->format('d/m/Y'),
-                'taux_horaire' => Status::TAUX_HEURE,
-                'salaire_horaire' => (int)$salaireHoraire,
-                'salaire_base' => (int)$payroll['base_salary'],
-                'prime_transport' => (int)$payroll['salary_transport'],
-                'prime_anciennete' => (int)$primeAnciennete ?? 0,
-                'autre_prime_indemnite' => (int)$payroll['prime_juridique'] ?? 0,
-                'heure_supplementaire' => (int)$amountHeureSupp,
-                'gratification' => (int)$gratification ?? 0,
-                'conge_payes' => (int)$allocationConger ?? 0,
-                'salaire_brut' => (int)$salaireBrut,
-                'salaire_brut_imposable' => (int)$salaireImposable ?? 0,
-                'taux_cnps' => $categoryRateCNPS,
-                'cnps_salaried' => (int)$amountCnpsPersonal,
-                'its_salaried' => (int)$payroll['personal_its'] ?? 0,
-                'retenue_diverse' => (int)$payroll['salary_cmu'] + (int)$payroll['salary_assurance'],
-                'cmu' => (int)$payroll['salary_cmu'],
-                'assurance' => (int)$payroll['salary_assurance'],
-                'total_retenue' => (int)$payroll['total_revenu_divers'],
-                'charge_salariale' => (int)$payroll['montant_fixcal_salary'],
-                'charge_patronal' => (int)$payroll['fixcal_amount_employeur'],
-                'avantage_nature' => (int)$payroll['prime_logement'],
-                'net_payer' => (int)$payroll['net_payer']
+                'matricule' => $payroll->getMatricule(),
+                'service' => $payroll->getService(),
+                'grade_categoriel' => $payroll->getCategories(),
+                'embauche' => date_format($payroll->getDateEmbauche(), 'd/m/Y'),
+                'number_part' => number_format($payroll->getNumberPart()),
+                'numeroCnps' => $payroll->getNumCnps(),
+                'periode' => $carbon->monthName . ' ' . $carbon->year,
+                'date_edition' => date_format($payroll->getCampagne()->getStartedAt(), 'd/m/Y'),
+                'fullName_salaried' => $payroll->getPersonal()->getFirstName() . ' ' . $payroll->getPersonal()->getLastName(),
+                'departement' => $payroll->getDepartement(),
+                'salaire_base' => number_format($payroll->getBaseAmount(), 2, ',', ' '),
+                'sursalaire' => number_format($payroll->getSursalaire(), 2, ',', ' '),
+                'majoration_heure_sup' => number_format($payroll->getMajorationAmount(), 2, ',', ' '),
+                'transport_imposable' => number_format($payroll->getAmountTransImposable(), 2, ',', ' '),
+                'avantage_imposable' => number_format($payroll->getAmountAvantageImposable(), 2, ',', ' '),
+                'prime_fonction' => number_format($payroll->getPrimeFonctionAmount(), 2, ',', ' '),
+                'prime_logement' => number_format($payroll->getPrimeLogementAmount(), 2, ',', ' '),
+                'indemnite_fonction' => number_format($payroll->getIndemniteFonctionAmount(), 2, ',', ' '),
+                'indemnite_logement' => number_format($payroll->getIndemniteLogementAmount(), 2, ',', ' '),
+                'total_brut' => number_format($payroll->getImposableAmount(), 2, ',', ' '),
+                'amount_its_salarial' => number_format($payroll->getSalaryIts(), 2, ',', ' '),
+                'taux_cnps_salarial' => number_format($tauxCnpsSalarial, 2, ',', ' '),
+                'amount_cnps_salarial' => number_format($payroll->getSalaryCnps(), 2, ',', ' '),
+                'taux_cr_employeur' => number_format($tauxCrEmployeur, 2, ',', ' '),
+                'amount_cr_employeur' => number_format($payroll->getEmployeurCr(), 2, ',', ' '),
+                'taux_pf_employeur' => number_format($tauxPfEmployeur, 2, ',', ' '),
+                'amount_pf_employeur' => number_format($payroll->getEmployeurPf(), 2, ',', ' '),
+                'taux_at_employeur' => number_format($tauxAtEmployeur, 2, ',', ' '),
+                'amount_at_employeur' => number_format($payroll->getEmployeurAt(), 2, ',', ' '),
+                'taux_is_employeur' => number_format($tauxIsEmployeur, 2, ',', ' '),
+                'amount_is_employeur' => number_format($payroll->getEmployeurIs(), 2, ',', ' '),
+                'taux_ta_employeur' => number_format($tauxTaEmployeur, 2, ',', ' '),
+                'amount_ta_employeur' => number_format($payroll->getAmountTA(), 2, ',', ' '),
+                'taux_fpc_employeur' => number_format($tauxFPCEmployeur, 2, ',', ' '),
+                'amount_fpc_employeur' => number_format($payroll->getAmountFPC(), 2, ',', ' '),
+                'taux_fpc_annuel_employeur' => number_format($tauxFPCAnnuelEmployeur, 2, ',', ' '),
+                'amount_fpc_annuel_employeur' => number_format($payroll->getAmountAnnuelFPC(), 2, ',', ' '),
+                'amount_cmu_salarial' => number_format($payroll->getSalaryCmu(), 2, ',', ' '),
+                'amount_cmu_patronal' => number_format($payroll->getEmployeurCmu(), 2, ',', ' '),
+                'charge_salarial' => number_format($payroll->getFixcalAmount(), 2, ',', ' '),
+                'charge_patronal' => number_format($payroll->getFixcalAmountEmployeur(), 2, ',', ' '),
+                'prime_transport' => number_format($payroll->getSalaryTransport(), 2, ',', ' '),
+                'amount_prime_panier' => number_format($payroll->getAmountPrimePanier(), 2, ',', ' '),
+                'amount_prime_salissure' => number_format($payroll->getAmountPrimeSalissure(), 2, ',', ' '),
+                'amount_prime_tt' => number_format($payroll->getAmountPrimeTenueTrav(), 2, ',', ' '),
+                'amount_prime_outi' => number_format($payroll->getAmountPrimeOutillage(), 2, ',', ' '),
+                'amount_prime_rendement' => number_format($payroll->getAmountPrimeRendement(), 2, ',', ' '),
+                'salaire_brut' => number_format($payroll->getBrutAmount(), 2, ',', ' '),
+                'amount_avantage' => number_format($payroll->getAventageNonImposable(), 2, ',', ' '),
+                'net_imposable' => number_format($payroll->getImposableAmount(), 2, ',', ' '),
+                'heure_travailler' => number_format(Status::TAUX_HEURE, 0, ',', ' '),
+                'nb_heure_supp' => number_format($nbHeureSupp, 0, ',', ' '),
+                'net_payes' => number_format($payroll->getNetPayer(), 2, ',', ' '),
+                'mode_paiement' => $payroll->getPersonal()->getModePaiement(),
+                'num_compte' => $payroll->getPersonal()->getAccountBanks()
             ];
         }
-        //dd($dataPayroll);
-        return $this->render('paiement/campagne/bulletin.html.twig', [
-            'data' => $data,
+        return $this->render('test/test/index.html.twig', [
             'payrolls' => $dataPayroll
         ]);
     }
 
-    #[Route('/bulletin/{id}', name: 'bulletin', methods: ['GET'])]
-    public function bulletin(PersonalRepository $personalRepository, Personal $personal): void
-    {
-        $personal = $personalRepository->find($personal->getId());
-        $payrolls = $this->payrollRepository->findBulletinByCampaign(false, $personal);
-        if (!$payrolls) {
-            throw $this->createNotFoundException('Employé non trouvé');
-        }
-        dd($personal, $payrolls);
-    }
     #[Route('/alert/campagne/progess', name: 'alert_progess', methods: ['GET'])]
     public function campagneProgess()
     {

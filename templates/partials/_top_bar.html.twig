@@ -156,7 +156,7 @@
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Heure Suplementaire
+                                    Heures suplementaires
                                     <div class="arrow-down"></div>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
@@ -165,7 +165,7 @@
                                     <a href="{{ path('personal_heure_sup_index') }}"
                                        class="dropdown-item">Liste heure suplementaire</a>
                                     <a href="{{ path('personal_heure_sup_supp_book') }}"
-                                       class="dropdown-item">Livre heure suplementaire</a>
+                                       class="dropdown-item">Livre majoration heure supp</a>
                                 </div>
                             </div>
                             <div class="dropdown">
@@ -229,21 +229,6 @@
                             <div class="arrow-down"></div>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="topnav-components">
-                            {# <div class="dropdown">
-                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Ouvrire/Fermer Campagne
-                                    <div class="arrow-down"></div>
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                    <a href="{{ path('campagne_open_campagne') }}"
-                                       class="dropdown-item">Ouverture campagne</a>
-                                    <a href="{{ path('reporting_salaires') }}"
-                                       class="dropdown-item">Etat des salaires mensuel</a>
-                                    <a href="{{ path('campagne_close') }}"
-                                       class="dropdown-item">Ferméture campagne</a>
-                                </div>
-                            </div> #}
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -275,12 +260,11 @@
                                                class="dropdown-item">Ouverture campagne exceptionnelle</a>
                                         </div>
                                     </div>
-
+                                    <a href="{{ path('campagne_livre') }}"
+                                       class="dropdown-item">Livre de paie de la periode</a>
                                     <a href="{{ path('campagne_close') }}"
                                        class="dropdown-item">Ferméture campagnes</a>
-
                                 </div>
-
                             </div>
                             <a href="{{ path('reporting_salaires') }}"
                                class="dropdown-item">Etat des salaires mensuel</a>

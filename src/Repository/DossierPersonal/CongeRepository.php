@@ -40,10 +40,11 @@ class CongeRepository extends ServiceEntityRepository
                 'co.dateDernierRetour as dernier_retour',
                 'co.uuid',
                 'co.totalDays',
+                'co.days',
+                'co.remainingVacation',
             ])
             ->join('co.personal', 'p')
             ->where('co.personal is not null')
-            ->andWhere('co.isConge = true')
             ->andWhere('co.typeConge = :type_conge')
             ->setParameter('type_conge', $typeConges)
             ->orderBy('co.dateDernierRetour', 'DESC')
@@ -51,11 +52,10 @@ class CongeRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function getLastConge(Personal $personal): ?Conge
+    public function getCongeInDepart(Personal $personal): ?Conge
     {
         return $this->createQueryBuilder('co')
             ->where('co.personal = :personal')
-            ->andWhere('co.isConge = false')
             ->setMaxResults(1)
             ->setParameter('personal', $personal)
             ->orderBy('co.id', 'DESC')

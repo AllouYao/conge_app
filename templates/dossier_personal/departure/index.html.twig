@@ -127,6 +127,15 @@
                         dataField: 'motifCessation',
                     },
                     {
+                        caption: 'Salaire catégoriel',
+                        dataType: 'number',
+                        dataField: 'salaire_base',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
                         caption: 'Salaire moyen mensuel',
                         dataType: 'number',
                         dataField: 'salaireMoyen',
@@ -136,13 +145,13 @@
                         },
                     },
                     {
-                        caption: 'Date de retour',
-                        dataType: 'date',
+                        caption: 'Date dernier retour congé',
+                        dataType: 'string',
                         dataField: 'dateRetourDrnConges',
                         alignment: 'center',
                     },
                     {
-                        caption: 'Gratification',
+                        caption: 'Gratification cessation',
                         dataType: 'number',
                         dataField: 'gratification',
                         alignment: 'right',
@@ -195,7 +204,7 @@
                         alignment: 'center',
                         cellTemplate: function (container, options) {
                             $("<a>")
-                                .html('<i data-feather="edit" style="color: yellow"></i>')
+                                .html('<i data-feather="edit" style="color: #C9971C"></i>')
                                 .attr("href", options.data.modifier)
                                 .appendTo(container);
                             feather.replace();
