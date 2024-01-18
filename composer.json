@@ -8,6 +8,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "beberlei/doctrineextensions": "dev-master",
+        "cron/cron-bundle": "^3.0",
         "doctrine/doctrine-bundle": "^2.10",
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.16",
@@ -30,7 +31,8 @@
         "symfony/webpack-encore-bundle": "^2.1",
         "symfony/yaml": "6.3.*",
         "twig/extra-bundle": "^3.7",
-        "twig/twig": "^3.7"
+        "twig/twig": "^3.7",
+        "zenstruck/schedule-bundle": "^1.8"
     },
     "require-dev": {
         "symfony/maker-bundle": "^1.51",
