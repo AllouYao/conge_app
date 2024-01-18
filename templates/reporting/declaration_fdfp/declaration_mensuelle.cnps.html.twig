@@ -17,7 +17,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        ETAT DES DECLARATION MENSUELLES DGI
+                        ETAT DES DECLARATION MENSUEL CNPS
                     </h5>
                 </div>
                 <div class="card-body">
@@ -34,6 +34,7 @@
         $(document).ready(function () {
             let debut;
             let fin;
+
             function formatNumber(num) {
                 return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
             }
@@ -94,14 +95,14 @@
                         fixed: true,
                     },
                     {
-                        dataField: 'dateCreation',
-                        dataType: 'date',
+                        dataField: 'date_ouverture',
+                        dataType: 'string',
                         caption: 'Date',
                         alignment: 'center',
                         fixed: true,
                     },
                     {
-                        dataField: 'numeroCnps',
+                        dataField: 'numero_cnps',
                         dataType: 'string',
                         caption: 'Numéro CNPS',
                         alignment: 'center',
@@ -122,14 +123,14 @@
                         fixed: true,
                     },
                     {
-                        dataField: 'anneeNaissance',
-                        dataType: 'date',
+                        dataField: 'annee_naissance',
+                        dataType: 'string',
                         caption: 'Année de naissance',
                         alignment: 'center',
                         fixed: true,
                     },
                     {
-                        dataField: 'dateEmbauche',
+                        dataField: 'date_embauche',
                         dataType: 'date',
                         caption: 'Date d\'embauche',
                         alignment: 'center',
@@ -150,6 +151,16 @@
                         fixed: true,
                     },
                     {
+                        dataField: "anciennete",
+                        dataType: 'number',
+                        caption: 'Durée travaillée',
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
                         dataField: "revenusNetImposable",
                         dataType: 'number',
                         caption: 'Remuneration net imposable',
@@ -164,8 +175,12 @@
                 summary: {
                     totalItems: [
                         {
-                            column: 'numeroCnps',
-                            summaryType: 'count',
+                            column: 'index',
+                            summaryType: "count",
+                            customizeTex() {
+                                return 'Total';
+                            }
+
                         },
                         {
                             column: 'revenusNetImposable', summaryType: 'sum',

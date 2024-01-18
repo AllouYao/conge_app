@@ -17,7 +17,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        ETAT DES DECLARATIONS MENSUELLES FDFP 
+                        ETAT DES DECLARATIONS MENSUEL FDFP
                     </h5>
                 </div>
                 <div class="card-body">
@@ -34,6 +34,7 @@
         $(document).ready(function () {
             let debut;
             let fin;
+
             function formatNumber(num) {
                 return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
             }
@@ -94,8 +95,8 @@
                         fixed: true,
                     },
                     {
-                        dataField: 'dateCreation',
-                        dataType: 'date',
+                        dataField: 'date_ouverture',
+                        dataType: 'string',
                         caption: 'Date',
                         alignment: 'center',
                         fixed: true,
@@ -150,8 +151,11 @@
                 summary: {
                     totalItems: [
                         {
-                            column: 'numeroCnps',
+                            column: 'index',
                             summaryType: 'count',
+                            customizeText() {
+                                return 'Total'
+                            }
                         },
                         {
                             column: 'revenusNetImposable', summaryType: 'sum',

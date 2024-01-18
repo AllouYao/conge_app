@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Livre de paie{% endblock %}
+{% block title %}Etat mensuel DGI{% endblock %}
 {% block stylesheets %}
     <style>
         #dataGridDeclarationDgi {
@@ -18,11 +18,11 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        ETAT DES DECLARATION MENSUELLES DGI
+                        ETAT DES DECLARATION MENSUEL DGI
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div id="dataGridDeclarationMensuelleDgi">Cliquer sur recherche pour afficher le tableau</div>
+                    <div id="dataGridDeclarationDgi">Cliquer sur recherche pour afficher le tableau</div>
                 </div>
             </div>
         </div>
@@ -39,7 +39,7 @@
                 return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
             }
 
-            $('#dataGridDeclarationMensuelleDgi').dxDataGrid({
+            $('#dataGridDeclarationDgi').dxDataGrid({
                 dataSource: `{{ url('api_reporting_declaration_dgi_current_month') }}`,
                 showBorders: true,
                 scrolling: {
@@ -93,15 +93,13 @@
                         caption: "N°Ordre",
                         alignment: "center",
                         fixed: true,
-                        width: 120
                     },
                     {
-                        dataField: "dateCreation",
-                        dataType: "date",
-                        caption: "Date",
+                        caption: "Date ouverture",
+                        dataField: "date_ouverture",
+                        dataType: "string",
                         alignment: "center",
                         fixed: true,
-                        width: 120
                     },
                     {
                         dataField: 'matricule',
@@ -109,49 +107,92 @@
                         caption: 'Matricule',
                         alignment: 'center',
                         fixed: true,
-                        width: 120
                     },
                     {
-                        dataField: 'fullName',
+                        dataField: 'full_name_salaried',
                         dataType: 'string',
                         caption: 'Nom et Prénoms',
                         alignment: 'left',
                         fixed: true,
-                        width: 120
                     },
                     {
-                        dataField: "remunerationBrut",
-                        dataType: 'number',
                         caption: 'Remuneration brutes',
+                        dataField: "remuneration_Brut",
+                        dataType: 'number',
                         alignment: 'right',
                         summaryType: 'sum',
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
-                        width: 120
                     },
                     {
+                        caption: 'Imdemnité de transport non imposable',
                         dataField: "indemniteTransportNomImposable",
                         dataType: 'number',
-                        caption: 'Imdemnité de transport non imposable',
                         alignment: 'right',
                         summaryType: 'sum',
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
-                        width: 120
                     },
+
                     {
-                        dataField: "autrePrimesEtIndemniteNomImposable",
-                        dataType: 'number',
                         caption: 'Autre prime et indemnite non imposable',
-                        alignment: 'right',
-                        summaryType: 'sum',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                        width: 120
+                        alignment: 'center',
+                        columns: [
+                            {
+                                caption: 'Prime de panier',
+                                dataField: "amount_prime_panier",
+                                dataType: 'number',
+                                alignment: 'right',
+                                summaryType: 'sum',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Prime de salissure',
+                                dataField: "amount_prime_salissure",
+                                dataType: 'number',
+                                alignment: 'right',
+                                summaryType: 'sum',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Prime de outillage',
+                                dataField: "amount_prime_outil",
+                                dataType: 'number',
+                                alignment: 'right',
+                                summaryType: 'sum',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Prime de tenue de travail',
+                                dataField: "amount_prime_tt",
+                                dataType: 'number',
+                                alignment: 'right',
+                                summaryType: 'sum',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Prime de rendement',
+                                dataField: "amount_prime_rendement",
+                                dataType: 'number',
+                                alignment: 'right',
+                                summaryType: 'sum',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                        ]
                     },
+
                     {
                         dataField: "indemniteDepartNonImposable",
                         dataType: 'number',
@@ -161,8 +202,8 @@
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
-                        width: 120
                     },
+
                     {
                         dataField: "AventageNature",
                         dataType: 'number',
@@ -172,7 +213,6 @@
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
-                        width: 120
                     },
                     {
                         dataField: "revenusNetImposable",
@@ -183,7 +223,6 @@
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
-                        width: 120
                     },
                     {
                         dataField: "itsSalarialBrut",
@@ -193,7 +232,6 @@
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
-                        width: 120
                     },
                     {
                         dataField: "nombreDeParts",
@@ -203,7 +241,6 @@
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
-                        width: 120
                     },
                     {
                         dataField: "creditImpot",
@@ -213,7 +250,6 @@
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
-                        width: 120
                     },
                     {
                         dataField: "itsSalarialNet",
@@ -223,7 +259,6 @@
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
-                        width: 120
                     },
                     {
                         dataField: "itsPatronal",
@@ -234,7 +269,6 @@
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
-                        width: 120
                     },
 
                 ],
@@ -245,7 +279,7 @@
                             summaryType: 'count',
                         },
                         {
-                            column: 'remunerationBrut', summaryType: 'sum',
+                            column: 'remuneration_Brut', summaryType: 'sum',
                             customizeText: (data) => {
                                 return new Intl.NumberFormat('fr-FR').format(data.value)
                             },
@@ -257,7 +291,31 @@
                             },
                         },
                         {
-                            column: 'autrePrimesEtIndemniteNomImposable', summaryType: 'sum',
+                            column: 'amount_prime_panier', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'amount_prime_salissure', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'amount_prime_outil', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'amount_prime_tt', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'amount_prime_rendement', summaryType: 'sum',
                             customizeText: (data) => {
                                 return new Intl.NumberFormat('fr-FR').format(data.value)
                             },
