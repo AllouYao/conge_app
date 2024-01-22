@@ -295,8 +295,8 @@ class UtimePaiementService
     /** Determiner le montant de la prestation familliale du salarie, charge patronal */
     public function calculateAmountRCNPS_PF(Personal $personal): float|int
     {
-        $salaireBrut = $this->getAmountSalaireBrutAndImposable($personal);
-        $amountBrut = $salaireBrut['brut_amount'];
+
+        $amountBrut = $personal->getSalary()->getSmig();
         $categoryRateRCNPS_PF = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_PF']);
         return $amountBrut * $categoryRateRCNPS_PF->getValue() / 100;
     }
@@ -304,8 +304,7 @@ class UtimePaiementService
     /** Determiner le montant de l'accident de travail du salarie, charge patronal */
     public function calculateAmountRCNPS_AT(Personal $personal): float|int
     {
-        $salaireBrut = $this->getAmountSalaireBrutAndImposable($personal);
-        $amountBrut = $salaireBrut['brut_amount'];
+        $amountBrut = $personal->getSalary()->getSmig();
         $categoryRateRCNPS_AT = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_AT']);
         return $amountBrut * $categoryRateRCNPS_AT->getValue() / 100;
     }

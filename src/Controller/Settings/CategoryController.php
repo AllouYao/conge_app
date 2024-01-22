@@ -19,7 +19,7 @@ class CategoryController extends AbstractController
     #[Route('/api_categorie', name: 'api_category', methods: ['GET'])]
     public function apiCategory(CategoryRepository $categoryRepository): JsonResponse
     {
-        $category = $categoryRepository->findAll();
+        $category = $categoryRepository->findCategorie();
         $apiCategorie = [];
         foreach ($category as $item) {
             $apiCategorie[] = [

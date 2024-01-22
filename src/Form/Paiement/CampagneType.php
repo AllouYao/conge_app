@@ -54,7 +54,6 @@ class CampagneType extends AbstractType
                             ->where('contract.id is not null');
                     },
                     'multiple' => true,
-                    'group_by' => 'categorie',
                     'help' => 'La campagne est fonction des salarié'
                 ])
                 ->add('checkedAll', CheckboxType::class, [

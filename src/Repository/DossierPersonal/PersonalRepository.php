@@ -71,6 +71,7 @@ class PersonalRepository extends ServiceEntityRepository
                 'categorie_salary.name as categorie_name',
                 'p.id as personal_id',
                 'p.uuid',
+                'p.older',
                 'p.matricule as matricule',
                 'p.firstName as personal_name',
                 'p.lastName as personal_prenoms',
@@ -100,8 +101,6 @@ class PersonalRepository extends ServiceEntityRepository
                 'salary.sursalaire as personal_sursalaire',
                 'salary.brutAmount as personal_salaire_brut',
                 'salary.primeTransport as personal_prime_transport',
-                //'salary.primeLogement as personal_prime_logement',
-                //'salary.primeFonction as personal_prime_fonction',
                 'salary.brutImposable as personal_salaire_imposable',
                 'salary.totalPrimeJuridique as personal_total_prime_juridique',
                 'avantage.numPiece personal_avantage_piece',
@@ -146,5 +145,13 @@ class PersonalRepository extends ServiceEntityRepository
             ->where('charge_people.id is not null')
             ->getQuery()
             ->getResult();
+    }
+
+    public function findLastId(): float|bool|int|string|null
+    {
+        return $this->createQueryBuilder('t')
+            ->select('MAX(t.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 }

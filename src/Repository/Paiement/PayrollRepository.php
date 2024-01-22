@@ -8,7 +8,6 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
-use function Doctrine\ORM\QueryBuilder;
 
 /**
  * @extends ServiceEntityRepository<Payroll>
@@ -89,9 +88,7 @@ class PayrollRepository extends ServiceEntityRepository
         }
 
         return $this->createQueryBuilder('pr')
-            ->select('SUM((pr.baseAmount + pr.sursalaire + pr.primeFonctionAmount + pr.primeLogementAmount 
-            + pr.indemniteFonctionAmount + pr.indemniteLogementAmount + pr.amountPrimePanier + pr.amountPrimeSalissure
-            + pr.amountPrimeOutillage + pr.amountPrimeTenueTrav + pr.amountPrimeRendement)) as amount_moyen')
+            ->select('SUM(pr.brutAmount - pr.salaryTransport) as amount_moyen')
             ->join('pr.personal', 'personal')
             ->join('personal.departures', 'departures')
             ->leftJoin('personal.salary', 'salary')

@@ -6,6 +6,7 @@ namespace App\Repository\DossierPersonal;
 use App\Entity\DossierPersonal\HeureSup;
 use App\Entity\DossierPersonal\Personal;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -24,12 +25,12 @@ class HeureSupRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param Personal $personal
+     * @param Personal|null $personal
      * @param int $month
      * @param int $year
      * @return HeureSup[]
      */
-    public function getHeureSupByDate(Personal $personal, int $month, int $year): array
+    public function getHeureSupByDate(?Personal $personal, int $month, int $year): array
     {
         return $this->createQueryBuilder('h')
             ->andWhere('h.personal = :personal')
@@ -43,7 +44,10 @@ class HeureSupRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function getNbHeursSupp(Personal $personal, int $month, int $year): ?HeureSup
+    /**
+     * @return HeureSup[]|null
+     */
+    public function getNbHeursSupp(Personal $personal, int $month, int $year): ?array
     {
         return $this->createQueryBuilder('h')
             ->andWhere('h.personal = :personal')
@@ -53,7 +57,7 @@ class HeureSupRepository extends ServiceEntityRepository
             ->setParameter('year', $year)
             ->setParameter('month', $month)
             ->getQuery()
-            ->getOneOrNullResult();
+            ->getResult();
     }
 
 

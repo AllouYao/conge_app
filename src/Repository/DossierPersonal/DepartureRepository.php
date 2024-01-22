@@ -3,7 +3,6 @@
 namespace App\Repository\DossierPersonal;
 
 use App\Entity\DossierPersonal\Departure;
-use App\Entity\DossierPersonal\Personal;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

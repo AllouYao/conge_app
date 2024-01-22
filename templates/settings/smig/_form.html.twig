@@ -1,49 +1,32 @@
 <fieldset>
     <div class="row">
-        <div class="col-10">
-            <div class="mb-3 row">
-                <label class="col-md-2 col-form-label" for="example-placeholder">Date debut<span
-                            class="text-danger">*</span></label>
-                <div class="col-md-8">
-                    {{ form_widget(form.dateDebut) }}
-                    {{ form_errors(form.dateDebut) }}
-                </div>
+        <div class="mb-3 row">
+            <label class="col-md-2 col-form-label" for="example-placeholder">Date debut<span
+                        class="text-danger">*</span></label>
+            <div class="col-md-4">
+                {{ form_widget(form.dateDebut) }}
+                {{ form_errors(form.dateDebut) }}
+            </div>
+            <label class="col-md-2 col-form-label" for="example-placeholder">Date fin <span
+                        class="text-danger">*</span></label>
+            <div class="col-md-4">
+                {{ form_widget(form.dateFin) }}
+                {{ form_errors(form.dateFin) }}
             </div>
         </div>
     </div>
     <div class="row">
-        <div class="col-10">
-            <div class="mb-3 row">
-                <label class="col-md-2 col-form-label" for="example-placeholder">Date fin <span
-                            class="text-danger">*</span></label>
-                <div class="col-md-8">
-                    {{ form_widget(form.dateFin) }}
-                    {{ form_errors(form.dateFin) }}
-                </div>
+        <div class="mb-3 row">
+            <label class="col-md-2 col-form-label" for="example-placeholder">Montant (Fcfa) <span
+                        class="text-danger">*</span></label>
+            <div class="col-md-4">
+                {{ form_widget(form.amount) }}
+                {{ form_errors(form.amount) }}
             </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-10">
-            <div class="mb-3 row">
-                <label class="col-md-2 col-form-label" for="example-placeholder">Montant <span
-                            class="text-danger">*</span></label>
-                <div class="col-md-8">
-                    {{ form_widget(form.amount) }}
-                    {{ form_errors(form.amount) }}
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-10">
-            <div class="mb-3 row">
-                <label class="col-md-2 col-form-label" for="example-placeholder">Activé ? <span
-                            class="text-danger">*</span></label>
-                <div class="col-md-8">
-                    {{ form_widget(form.isActive) }}
-                    {{ form_errors(form.isActive) }}
-                </div>
+            <label class="col-md-2 col-form-label" for="example-placeholder">Activé ? <span class="text-danger">*</span></label>
+            <div class="col-md-4">
+                {{ form_widget(form.isActive) }}
+                {{ form_errors(form.isActive) }}
             </div>
         </div>
     </div>

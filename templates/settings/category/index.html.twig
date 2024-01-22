@@ -45,12 +45,13 @@
             $("#dataGridCategorySalarial").dxDataGrid({
                 dataSource: `{{ url('settings_category_api_category') }}`,
                 showBorders: true,
+                height: 400,
                 scrolling: {
                     columnRenderingMode: 'virtual',
-                    mode: "virtual"
+                    mode: "virtual",
                 },
                 groupPanel: {
-                    visible: true
+                    visible: true,
                 },
                 export: {
                     enabled: true,

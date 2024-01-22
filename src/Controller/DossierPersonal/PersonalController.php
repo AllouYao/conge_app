@@ -112,10 +112,8 @@ class PersonalController extends AbstractController
         $personal = $this->personalRepository->findPersonalSalaried();
         $personalSalaried = [];
         foreach ($personal as $value => $item) {
-            $dateEmbauche = $item['contrat_date_embauche'];
-            $today = new DateTime();
-            $anciennete = $dateEmbauche->diff($today);
-            $ancienneteEnMois = $anciennete->y * 12 + $anciennete->m;
+            $anciennete = $item['older'];
+            $ancienneteEnMois = $anciennete * 12;
             $personalSalaried[] = [
                 /**
                  * Information du salarié
@@ -133,7 +131,7 @@ class PersonalController extends AbstractController
                 'compte_banque' => $item['code_banque'] . ' ' . $item['numero_compte'] . ' ' . $item['rib'],
                 'salaire_base' => $item['personal_salaire_base'],
                 'type_contract' => $item['type_contrat'],
-                'anciennete_mois' => $ancienneteEnMois,
+                'anciennete_mois' => number_format($ancienneteEnMois, 2, ',', ' '),
                 'nom_banque' => $item ['name_banque'],
                 'category_grade' => $item['categorie_intitule'],
                 'nature_piece' => $item['personal_piece'] . '° ' . $item['personal_numero_piece'],
@@ -155,10 +153,11 @@ class PersonalController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager,MatriculeGenerator $matriculeGenerator): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, MatriculeGenerator $matriculeGenerator): Response
     {
         $matricule = $matriculeGenerator->generateMatricule();
-        $personal = (new Personal())->setMatricule($matricule);
+        $numCNPS = $matriculeGenerator->generateNumCnps();
+        $personal = (new Personal())->setMatricule($matricule)->setRefCNPS($numCNPS);
         $salaire = (new Salary());
         $contract = (new Contract());
         $personal

@@ -146,15 +146,6 @@ class DepartServices
         $element = $this->getSalaireGlobalMoyenElement($departure);
         $salaireGlobalMoyen = $element['Salaire_global_moyen'];
         $indemniteLicenciement = null;
-        //
-        $salaryEntity = $departure->getPersonal()->getSalary();
-        $salaireBase = $this->utimePaiementService->getAmountSalaireBrutAndImposable($departure->getPersonal());
-        $sursalaire = $salaryEntity->getSursalaire();
-        $primeAnciennete = $this->utimePaiementService->getAmountAnciennete($departure->getPersonal());
-        $allocationConge = $element['Allocation_conge'];
-        $gratifProrata = $element['Gratification'];
-
-        $preavis = $this->getIndemnitePreavisByDepart($departure);
 
         $anciennity = $this->getAncienneteByDepart($departure);
         $anciennityYear = $anciennity['ancienneteYear'];

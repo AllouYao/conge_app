@@ -22,6 +22,15 @@ class MatriculeGenerator
         return "M$date$suffix";
     }
 
+    public function generateNumCnps(): string
+    {
+        $count = (int)$this->personalRepository->findLastId() ?? 0;
+        ++$count;
+        $suffix = $this->count($count);
+        $date = date('Y');
+        return "CNPS$date$suffix";
+    }
+
     private function count($val): string
     {
         switch ($val) {

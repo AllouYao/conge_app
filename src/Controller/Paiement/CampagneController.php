@@ -37,6 +37,7 @@ class CampagneController extends AbstractController
      * @param PayrollRepository $payrollRepository
      * @param CampagneRepository $campagneRepository
      * @param CategoryChargeRepository $categoryChargeRepository
+     * @param HeureSupRepository $heureSupRepository
      */
     public function __construct(
         PayrollService           $payrollService,
@@ -257,6 +258,10 @@ class CampagneController extends AbstractController
 
     }
 
+    /**
+     * @param Personal $personal
+     * @return Response
+     */
     #[Route('/bulletin/{uuid}', name: 'make_bulletin', methods: ['GET'])]
     public function makeBulletin(
         Personal $personal
@@ -273,14 +278,23 @@ class CampagneController extends AbstractController
             $tauxFPCEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC'])->getValue();
             $tauxFPCAnnuelEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC_VER'])->getValue();
             $carbon = new Carbon();
-            $nbHeureSupp = $this->heureSupRepository->getNbHeursSupp($personal, $carbon->month, $carbon->year)?->getTotalHorraire();
+            $nbHeureSupp = $this->heureSupRepository->getNbHeursSupp($personal, $carbon->month, $carbon->year);
+            $nbHeure = 0;
+            foreach ($nbHeureSupp as $item) {
+                $nbHeure += $item?->getTotalHorraire();
+            }
+            $accountNumber = null;
+            $accountBanque = $payroll->getPersonal()->getAccountBanks();
+            foreach ($accountBanque as $value) {
+                $accountNumber = $value->getCode() . ' ' . $value->getNumCompte() . ' ' . $value->getRib();
+            }
             $dataPayroll = [
                 'index' => ++$index,
                 'matricule' => $payroll->getMatricule(),
                 'service' => $payroll->getService(),
                 'grade_categoriel' => $payroll->getCategories(),
                 'embauche' => date_format($payroll->getDateEmbauche(), 'd/m/Y'),
-                'number_part' => number_format($payroll->getNumberPart()),
+                'number_part' => number_format($payroll->getNumberPart(), 1, ',', ' '),
                 'numeroCnps' => $payroll->getNumCnps(),
                 'periode' => $carbon->monthName . ' ' . $carbon->year,
                 'date_edition' => date_format($payroll->getCampagne()->getStartedAt(), 'd/m/Y'),
@@ -327,10 +341,10 @@ class CampagneController extends AbstractController
                 'amount_avantage' => number_format($payroll->getAventageNonImposable(), 2, ',', ' '),
                 'net_imposable' => number_format($payroll->getImposableAmount(), 2, ',', ' '),
                 'heure_travailler' => number_format(Status::TAUX_HEURE, 0, ',', ' '),
-                'nb_heure_supp' => number_format($nbHeureSupp, 0, ',', ' '),
+                'nb_heure_supp' => number_format($nbHeure, 0, ',', ' '),
                 'net_payes' => number_format($payroll->getNetPayer(), 2, ',', ' '),
                 'mode_paiement' => $payroll->getPersonal()->getModePaiement(),
-                'num_compte' => $payroll->getPersonal()->getAccountBanks()
+                'num_compte' => $accountNumber
             ];
         }
         return $this->render('test/test/index.html.twig', [
