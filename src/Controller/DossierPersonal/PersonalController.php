@@ -11,6 +11,7 @@ use App\Repository\DossierPersonal\DetailSalaryRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\Settings\PrimesRepository;
 use App\Service\MatriculeGenerator;
+use App\Service\SalaryImpotsService;
 use App\Utils\Status;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -25,10 +26,12 @@ use Symfony\Component\Routing\Annotation\Route;
 class PersonalController extends AbstractController
 {
     private PersonalRepository $personalRepository;
+    private SalaryImpotsService $service;
 
-    public function __construct(PersonalRepository $personalRepository)
+    public function __construct(PersonalRepository $personalRepository, SalaryImpotsService $service)
     {
         $this->personalRepository = $personalRepository;
+        $this->service = $service;
     }
 
     /**
@@ -153,7 +156,11 @@ class PersonalController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, MatriculeGenerator $matriculeGenerator): Response
+    public function new(
+        Request                $request,
+        EntityManagerInterface $entityManager,
+        MatriculeGenerator     $matriculeGenerator
+    ): Response
     {
         $matricule = $matriculeGenerator->generateMatricule();
         $numCNPS = $matriculeGenerator->generateNumCnps();
@@ -178,6 +185,7 @@ class PersonalController extends AbstractController
                 $detailPrimeSalary->setSalary($personal->getSalary());
                 $entityManager->persist($detailPrimeSalary);
             }
+            $this->service->variableElement($personal);
             $entityManager->flush();
             flash()->addSuccess('Salarié enregistré avec succès.');
             return $this->redirectToRoute('personal_show', ['uuid' => $personal->getUuid()]);
@@ -214,6 +222,7 @@ class PersonalController extends AbstractController
                 $detailPrimeSalary->setSalary($personal->getSalary());
                 $entityManager->persist($detailPrimeSalary);
             }
+            $this->service->variableElement($personal);
             $entityManager->flush();
             flash()->addSuccess('Salarié modifier avec succès.');
             return $this->redirectToRoute('personal_show', ['uuid' => $personal->getUuid()]);

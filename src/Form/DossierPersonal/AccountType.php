@@ -22,7 +22,10 @@ class AccountType extends AbstractType
                 'choice_label' => 'matricule',
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('p')
+                        ->join('p.contract', 'contract')
+                        ->leftJoin('p.departures', 'departures')
                         ->where('p.modePaiement in (:modePaiement)')
+                        ->andWhere('departures.id IS NULL')
                         ->setParameter('modePaiement', [Status::VIREMENT, Status::CHEQUE]);
                 },
                 'placeholder' => 'Sélectionner un matricule',

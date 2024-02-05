@@ -4,6 +4,12 @@ namespace App\Utils;
 
 final class Status
 {
+    /** Category salarie */
+    public const OUVRIER_EMPLOYE = 'Ouvriers / Employés';
+    public const CHAUFFEUR = 'Chauffeurs';
+    public const AGENT_DE_MAITRISE = 'Agents de maitrise';
+    public const CADRE = 'Cadres';
+
     /**
      * Identity Document
      */

@@ -3,6 +3,7 @@
 namespace App\Entity\DossierPersonal;
 
 use App\Entity\DossierPersonal\HeureSup;
+use App\Entity\ElementVariable\VariablePaie;
 use App\Entity\Impots\ChargeEmployeur;
 use App\Entity\Impots\ChargePersonals;
 use App\Entity\Paiement\Campagne;
@@ -133,6 +134,9 @@ class Personal
 
     #[ORM\OneToOne(mappedBy: 'personal', cascade: ['persist', 'remove'])]
     private ?Departure $departures = null;
+
+    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: VariablePaie::class)]
+    private Collection $variablePaies;
     public function __construct()
     {
         $this->chargePeople = new ArrayCollection();
@@ -144,6 +148,7 @@ class Personal
         $this->conges = new ArrayCollection();
         $this->heureSups = new ArrayCollection();
         $this->absences = new ArrayCollection();
+        $this->variablePaies = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -762,6 +767,36 @@ class Personal
         }
 
         $this->departures = $departures;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, VariablePaie>
+     */
+    public function getVariablePaies(): Collection
+    {
+        return $this->variablePaies;
+    }
+
+    public function addVariablePaie(VariablePaie $variablePaie): static
+    {
+        if (!$this->variablePaies->contains($variablePaie)) {
+            $this->variablePaies->add($variablePaie);
+            $variablePaie->setPersonal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVariablePaie(VariablePaie $variablePaie): static
+    {
+        if ($this->variablePaies->removeElement($variablePaie)) {
+            // set the owning side to null (unless already changed)
+            if ($variablePaie->getPersonal() === $this) {
+                $variablePaie->setPersonal(null);
+            }
+        }
 
         return $this;
     }

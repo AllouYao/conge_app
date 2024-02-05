@@ -71,7 +71,7 @@ class ChargePeopleController extends AbstractController
             return $this->redirectToRoute('charge_people_index', [], Response::HTTP_SEE_OTHER);
         }
         return $this->render('dossier_personal/charge_people/new.html.twig', [
-            'form' => $form
+            'form' => $form->createView()
         ]);
     }
 
@@ -105,7 +105,7 @@ class ChargePeopleController extends AbstractController
 
         return $this->render('dossier_personal/charge_people/edit.html.twig', [
             'charges' => $personal,
-            'form' => $form,
+            'form' => $form->createView(),
             'editing' => true
         ]);
     }

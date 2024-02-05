@@ -28,7 +28,11 @@ class PersonalRepository extends ServiceEntityRepository
      */
     public function findAllPersonal(): array
     {
-        $qb = $this->createQueryBuilder('p')->getQuery()->getResult();
+        $qb = $this->createQueryBuilder('p')
+            ->leftJoin('p.departures', 'departures')
+            ->where('departures.id IS NULL')
+            ->getQuery()
+            ->getResult();
         return array_map(function ($result) {
             return $result;
         }, $qb);

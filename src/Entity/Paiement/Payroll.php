@@ -167,6 +167,21 @@ class Payroll
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $amountPrimeRendement = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $preavisAmount = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $licemciementImposable = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $licenciementNoImpo = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $gratificationD = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $allocationCongeD = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -744,6 +759,66 @@ class Payroll
     public function setAmountPrimeRendement(?string $amountPrimeRendement): static
     {
         $this->amountPrimeRendement = $amountPrimeRendement;
+
+        return $this;
+    }
+
+    public function getPreavisAmount(): ?string
+    {
+        return $this->preavisAmount;
+    }
+
+    public function setPreavisAmount(?string $preavisAmount): static
+    {
+        $this->preavisAmount = $preavisAmount;
+
+        return $this;
+    }
+
+    public function getLicemciementImposable(): ?string
+    {
+        return $this->licemciementImposable;
+    }
+
+    public function setLicemciementImposable(?string $licemciementImposable): static
+    {
+        $this->licemciementImposable = $licemciementImposable;
+
+        return $this;
+    }
+
+    public function getLicenciementNoImpo(): ?string
+    {
+        return $this->licenciementNoImpo;
+    }
+
+    public function setLicenciementNoImpo(?string $licenciementNoImpo): static
+    {
+        $this->licenciementNoImpo = $licenciementNoImpo;
+
+        return $this;
+    }
+
+    public function getGratificationD(): ?string
+    {
+        return $this->gratificationD;
+    }
+
+    public function setGratificationD(?string $gratificationD): static
+    {
+        $this->gratificationD = $gratificationD;
+
+        return $this;
+    }
+
+    public function getAllocationCongeD(): ?string
+    {
+        return $this->allocationCongeD;
+    }
+
+    public function setAllocationCongeD(?string $allocationCongeD): static
+    {
+        $this->allocationCongeD = $allocationCongeD;
 
         return $this;
     }

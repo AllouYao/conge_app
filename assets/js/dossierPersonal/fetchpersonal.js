@@ -24,10 +24,14 @@ let conge = () => {
     const name = selectedOption.attr('data-name');
     const hireDate = selectedOption.attr('data-hireDate');
     const category = selectedOption.attr('data-category');
+    const dernierRetour = selectedOption.attr('data-dernier-retour');
+    const remaining = selectedOption.attr('data-remaining');
 
     $('#conge_name').val(name);
     $('#conge_hireDate').val(hireDate);
     $('#conge_category').val(category);
+    $('#conge_dernierRetour').val(dernierRetour);
+    $('#conge_remaining').val(remaining);
 }
 
 let heureSupp = () => {

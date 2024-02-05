@@ -2,7 +2,7 @@
 
 namespace App\Controller\DossierPersonal;
 
-use App\Entity\DossierPersonal\Personal;
+use App\Entity\DossierPersonal\AccountBank;
 use App\Form\DossierPersonal\AccountType;
 use App\Repository\DossierPersonal\AccountBankRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -72,18 +72,18 @@ class AccountBankController extends AbstractController
     }
 
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Personal $personal, EntityManagerInterface $manager): Response
+    public function edit(Request $request, AccountBank $accountBank, EntityManagerInterface $manager): Response
     {
         $form = $this->createForm(AccountType::class, [
-            'personal' => $personal,
-            'accountBanks' => $personal->getAccountBanks()
+            'personal' => $accountBank->getPersonal(),
+            'accountBanks' => $accountBank->getPersonal()->getAccountBanks()
         ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            foreach ($personal->getAccountBanks() as $accountBank) {
-                $accountBank->setPersonal($personal);
-                $manager->persist($accountBank);
+            foreach ($accountBank as $accountB) {
+                $accountB->setPersonal($accountBank->getPersonal());
+                $manager->persist($accountB);
             }
             $manager->flush();
             flash()->addSuccess('Compte banque modifié avec succès.');
@@ -91,7 +91,7 @@ class AccountBankController extends AbstractController
         }
 
         return $this->render('dossier_personal/account_bank/edit.html.twig', [
-            'personals' => $personal,
+            'personal' => $accountBank->getPersonal(),
             'form' => $form,
             'editing' => true
         ]);

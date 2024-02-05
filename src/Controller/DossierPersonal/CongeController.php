@@ -9,8 +9,7 @@ use App\Service\CongeService;
 use App\Utils\Status;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -37,6 +36,8 @@ class CongeController extends AbstractController
         $conges = $this->congeRepository->findConge(Status::CONGE_GLOBAL);
         $congeSalaried = [];
         foreach ($conges as $conge => $item) {
+            $link = $this->generateUrl('conge_edit', ['uuid' => $item['uuid']]);
+            $modifier = $item['en_conge'] === true ? $link : null;
             $dateDebut = $item['depart'];
             $dateRetour = $item['retour'];
             $congeSalaried[] = [
@@ -51,7 +52,7 @@ class CongeController extends AbstractController
                 'allocation_annuel' => $item['allocation_conge'],
                 'status' => $item['en_conge'] === true ? 'OUI' : 'NON',
                 'jour_restant' => $item['remainingVacation'],
-                'modifier' => $this->generateUrl('conge_edit', ['uuid' => $item['uuid']])
+                'modifier' => $modifier
             ];
         }
         return new JsonResponse($congeSalaried);
@@ -71,8 +72,7 @@ class CongeController extends AbstractController
     }
 
     /**
-     * @throws NonUniqueResultException
-     * @throws NoResultException
+     * @throws Exception
      */
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(
@@ -86,15 +86,19 @@ class CongeController extends AbstractController
         $form = $this->createForm(CongeType::class, $conge);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $lastConge = $congeRepository->getLastCongeByID($conge->getPersonal()->getId());
-            if (!$lastConge) {
-                $lastDateReturn = $conge->getDateRetour();
-            } else {
-                $lastDateReturn = $lastConge->getDateDernierRetour();
+            $personal = $conge->getPersonal();
+            $lastConge = $congeRepository->getLastCongeByID($personal->getId(), false);
+            $lastDateReturn = !$lastConge ? $conge->getDateRetour() : $lastConge->getDateDernierRetour();
+            /** Verifier si le salarié sélectionner est déjà en congés */
+            $congeActive = $congeRepository->getLastCongeByID($personal->getId(), true);
+            if ($congeActive) {
+                flash()->addInfo('Mr/Mdm' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' 
+                est actuellement en congés n\'est donc pas éligible pour une acquisition de congés.');
+                return $this->redirectToRoute('conge_index');
             }
-            $conge->setDateDernierRetour($lastDateReturn);
             $congeService->calculate($conge);
             $conge
+                ->setDateDernierRetour($lastDateReturn)
                 ->setTypeConge(Status::CONGE_GLOBAL)
                 ->setIsConge(true);
             $entityManager->persist($conge);

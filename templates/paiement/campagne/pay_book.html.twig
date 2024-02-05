@@ -407,9 +407,29 @@
                                 },
                             },
                             {
-                                dataField: 'employer_cnps',
+                                dataField: 'employer_ta',
                                 dataType: 'number',
-                                caption: 'Retenue CNPS',
+                                caption: 'Taux d\'apprentissage',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                                },
+                            },
+                            {
+                                dataField: 'employer_fpc',
+                                dataType: 'number',
+                                caption: 'FPC',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                                },
+                            },
+                            {
+                                dataField: 'employer_fpc_annuel',
+                                dataType: 'number',
+                                caption: 'FPC annuel',
                                 alignment: 'right',
                                 width: 120,
                                 customizeText: function (data) {

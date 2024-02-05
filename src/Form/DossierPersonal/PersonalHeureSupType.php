@@ -24,7 +24,8 @@ class PersonalHeureSupType extends AbstractType
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('p')
                         ->join('p.contract', 'ct')
-                        ->where('ct.id is not null');
+                        ->leftJoin('p.departures', 'departures')
+                        ->where('departures.id IS NULL');
                 },
                 'placeholder' => 'Sélectionner un matricule',
                 'attr' => [

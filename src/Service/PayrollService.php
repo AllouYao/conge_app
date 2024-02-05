@@ -45,65 +45,89 @@ class PayrollService
         $numeroCnps = $personal->getRefCNPS();
 
         /** Prime de transport non imposable */
-        $primeTransportLegal = $this->utimePaiementService->getPrimeTransportLegal();
+        $primeTransportLegal = round($this->utimePaiementService->getPrimeTransportLegal(), 2);
 
 
         /** Récupération des éléménts de salaire imposable */
         $salary = $personal->getSalary();
         $salaire = $this->utimePaiementService->getAmountSalaireBrutAndImposable($personal);
-        $baseSalaire = (int)$salaire['salaire_categoriel'];
-        $sursalaire = $salary->getSursalaire();
-        $majorationHeursSupp = $this->utimePaiementService->getAmountMajorationHeureSupp($personal);
-        $primeAnciennete = $this->utimePaiementService->getAmountAnciennete($personal);
+        $baseSalaire = round((double)$salaire['salaire_categoriel'], 2);
+        $sursalaire = round((double)$salary->getSursalaire(), 2);
+        $majorationHeursSupp = round($this->utimePaiementService->getAmountMajorationHeureSupp($personal), 2);
+        $primeAnciennete = round($this->utimePaiementService->getAmountAnciennete($personal), 2);
+        /** enregistrer la prime d'ancienneté dans la table salary */
         $salary->setPrimeAciennete((int)$primeAnciennete);
-        $congesPayes = $this->utimePaiementService->getAmountCongesPayes($personal);
-        $primeFonctions = $this->utimePaiementService->getPrimeFonction($personal);
-        $primeLogements = $this->utimePaiementService->getPrimeLogement($personal);
-        $indemniteFonctions = $this->utimePaiementService->getIndemniteFonction($personal);
-        $indemniteLogements = $this->utimePaiementService->getIndemniteLogement($personal);
-        $primeTransportImposable = (int)$salary->getPrimeTransport() - $primeTransportLegal;
+        $congesPayes = round($this->utimePaiementService->getAmountCongesPayes($personal), 2);
+        $primeFonctions = round($this->utimePaiementService->getPrimeFonction($personal), 2);
+        $primeLogements = round($this->utimePaiementService->getPrimeLogement($personal), 2);
+        $indemniteFonctions = round($this->utimePaiementService->getIndemniteFonction($personal), 2);
+        $indemniteLogements = round($this->utimePaiementService->getIndemniteLogement($personal), 2);
+        $primeTransportImposable = round(((double)$salary->getPrimeTransport() - $primeTransportLegal), 2);
 
         /** Avantage en nature non imposable */
-        $avantageNonImposable = (int)$salary->getAvantage()?->getTotalAvantage();
-        $avantageNatureImposable = (int)$salary?->getAmountAventage() - $avantageNonImposable;
-
+        $avantageNonImposable = round((double)$salary->getAvantage()?->getTotalAvantage(), 2);
+        $avantageNatureImposable = round(((double)$salary?->getAmountAventage() - $avantageNonImposable), 2);
 
         /** charge du personnel et retenue fixcal */
         $chargePersonal = $this->chargePersonalsRepository->findOneBy(['personal' => $personal]);
-        $nombrePart = $chargePersonal?->getNumPart();
-        $salaryIts = $chargePersonal?->getAmountIts();
-        $salaryCnps = $chargePersonal?->getAmountCNPS();
-        $salaryCmu = $chargePersonal?->getAmountCMU();
-        $chargeSalarie = $chargePersonal?->getAmountTotalChargePersonal();
+        $nombrePart = round($chargePersonal?->getNumPart(), 2);
+        $salaryIts = round($chargePersonal?->getAmountIts(), 2);
+        $salaryCnps = round($chargePersonal?->getAmountCNPS(), 2);
+        $salaryCmu = round($chargePersonal?->getAmountCMU(), 2);
+        $chargeSalarie = round($chargePersonal?->getAmountTotalChargePersonal(), 2);
 
         /** charge de l'employeur et retenue fixcal */
         $chargeEmployeur = $this->chargeEmployeurRepository->findOneBy(['personal' => $personal]);
-        $employeurIS = $chargeEmployeur?->getAmountIS();
-        $employeurFPC = $chargeEmployeur?->getAmountFPC();
-        $employeurFPCAnnuel = $chargeEmployeur?->getAmountAnnuelFPC();
-        $employeurTA = $chargeEmployeur?->getAmountTA();
-        $employeurCMU = $chargeEmployeur?->getAmountCMU();
-        $employeurCR = $chargeEmployeur?->getAmountCR();
-        $employeurPF = $chargeEmployeur?->getAmountPF();
-        $employeurAT = $chargeEmployeur?->getAmountAT();
-        $employeurCNPS = $chargeEmployeur?->getTotalRetenuCNPS();
-        $chargePatronal = $chargeEmployeur?->getTotalChargeEmployeur();
+        $employeurIS = round($chargeEmployeur?->getAmountIS(), 2);
+        $employeurFPC = round($chargeEmployeur?->getAmountFPC(), 2);
+        $employeurFPCAnnuel = round($chargeEmployeur?->getAmountAnnuelFPC(), 2);
+        $employeurTA = round($chargeEmployeur?->getAmountTA(), 2);
+        $employeurCMU = round($chargeEmployeur?->getAmountCMU(), 2);
+        $employeurCR = round($chargeEmployeur?->getAmountCR(), 2);
+        $employeurPF = round($chargeEmployeur?->getAmountPF(), 2);
+        $employeurAT = round($chargeEmployeur?->getAmountAT(), 2);
+        $employeurCNPS = round($chargeEmployeur?->getTotalRetenuCNPS(), 2);
+        $chargePatronal = round($chargeEmployeur?->getTotalChargeEmployeur(), 2);
 
         /** Récupération des éléménts de salaire non imposable */
-        $primePaniers = $this->utimePaiementService->getPrimePanier($personal);
-        $primeSalissures = $this->utimePaiementService->getPrimeSalissure($personal);
-        $primeTenueTravails = $this->utimePaiementService->getPrimeTT($personal);
-        $primeOutillages = $this->utimePaiementService->getPrimeOutil($personal);
-        $primeRendement = $this->utimePaiementService->getPrimeRendement($personal);
+        $primePaniers = round($this->utimePaiementService->getPrimePanier($personal), 2);
+        $primeSalissures = round($this->utimePaiementService->getPrimeSalissure($personal), 2);
+        $primeTenueTravails = round($this->utimePaiementService->getPrimeTT($personal), 2);
+        $primeOutillages = round($this->utimePaiementService->getPrimeOutil($personal), 2);
+        $primeRendement = round($this->utimePaiementService->getPrimeRendement($personal),2);
 
-        /** Salaire brut et le net imposable */
-        $salaireBrut = $baseSalaire + $sursalaire + $majorationHeursSupp + $congesPayes + $primeAnciennete
-            + $primeFonctions + $primeLogements + $indemniteFonctions + $indemniteLogements
-            + $primeTransportImposable + $avantageNatureImposable + $primeTransportLegal + $avantageNonImposable;
+        /** l'indemnité de licenciement imposable */
+        $indemniteLicenciementImposable = round($this->utimePaiementService->getIndemniteLicenciementImposable($personal), 2);
+        /** l'indemnite de préavis */
+        $indemnitePreavis = round($this->utimePaiementService->getIndemnitePreavis($personal), 2);
+        /** Gratification pour départs */
+        $gratificationD = round($this->utimePaiementService->getGratifDepart($personal), 2);
+        /** Allocation de congés pour depart */
+        $allocationAmountD = round($this->utimePaiementService->getAllocationDepart($personal), 2);
 
-        $netImposable = $baseSalaire + $sursalaire + $majorationHeursSupp + $congesPayes + $primeAnciennete
-            + $primeFonctions + $primeLogements + $indemniteFonctions + $indemniteLogements + $primeTransportImposable
-            + $avantageNatureImposable;
+        $indemniteLicenciementNonImposable = null;
+        if ($personal->getDepartures()) {
+            $indemniteLicenciementNonImposable = round(($personal->getDepartures()->getDissmissalAmount() - $indemniteLicenciementImposable), 2);
+            /** Salaire brut et le net imposable */
+            $salaireBrut = $baseSalaire + $sursalaire + $majorationHeursSupp + $congesPayes + $primeAnciennete
+                + $primeFonctions + $primeLogements + $indemniteFonctions + $indemniteLogements
+                + $primeTransportImposable + $avantageNatureImposable + $primeTransportLegal + $avantageNonImposable
+                + $indemnitePreavis + $indemniteLicenciementImposable + $gratificationD + $allocationAmountD;
+
+            $netImposable = $baseSalaire + $sursalaire + $majorationHeursSupp + $congesPayes + $primeAnciennete
+                + $primeFonctions + $primeLogements + $indemniteFonctions + $indemniteLogements + $primeTransportImposable
+                + $avantageNatureImposable + $indemnitePreavis + $indemniteLicenciementImposable + $gratificationD
+                + $allocationAmountD;
+        } else {
+            /** Salaire brut et le net imposable */
+            $salaireBrut = $baseSalaire + $sursalaire + $majorationHeursSupp + $congesPayes + $primeAnciennete
+                + $primeFonctions + $primeLogements + $indemniteFonctions + $indemniteLogements
+                + $primeTransportImposable + $avantageNatureImposable + $primeTransportLegal + $avantageNonImposable;
+
+            $netImposable = $baseSalaire + $sursalaire + $majorationHeursSupp + $congesPayes + $primeAnciennete
+                + $primeFonctions + $primeLogements + $indemniteFonctions + $indemniteLogements + $primeTransportImposable
+                + $avantageNatureImposable;
+        }
 
         /** net à payer, total retenue, indemnité de transport et assurance santé du personnel */
         $netPayer = $salaireBrut + $primeRendement + $primeOutillages + $primePaniers + $primeSalissures + $primeTenueTravails
@@ -157,31 +181,15 @@ class PayrollService
             ->setAmountPrimeOutillage($primeOutillages)
             ->setAmountPrimeTenueTrav($primeTenueTravails)
             ->setAmountPrimeRendement($primeRendement)
-            ->setNetPayer($netPayer);
-
+            ->setNetPayer($netPayer)
+            ->setPreavisAmount($indemnitePreavis)
+            ->setLicemciementImposable($indemniteLicenciementImposable)
+            ->setLicenciementNoImpo($indemniteLicenciementNonImposable)
+            ->setGratificationD($gratificationD)
+            ->setAllocationCongeD($allocationAmountD);
 
         $this->manager->persist($payroll);
         $this->manager->persist($salary);
     }
 
-    public function setPayrollDeparture(Personal $personal, Campagne $campagne): void
-    {
-        /** l'indemnité de licenciement imposable */
-        $indemniteLicenciementImposable = $this->utimePaiementService->getIndemniteLicenciementImposable($personal);
-        /** l'indemnite de préavis */
-        $indemnitePreavis = $this->utimePaiementService->getIndemnitePreavis($personal);
-        /** Gratification pour départs */
-        $gratificationD = $this->utimePaiementService->getGratifDepart($personal);
-        /** Allocation de congés pour depart */
-        $allocationAmount = $this->utimePaiementService->getAllocationDepart($personal);
-
-        /** Récupération des élements personnel du salarié */
-        $matricule = $personal->getMatricule();
-        $service = $personal->getService();
-        $categorie = '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ') -' . $personal->getCategorie()->getIntitule();
-        $departement = $personal->getFonction();
-        $dateEmbauche = $personal->getContract()->getDateEmbauche();
-        $numeroCnps = $personal->getRefCNPS();
-
-    }
 }

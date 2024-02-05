@@ -6,6 +6,7 @@ use App\Repository\DossierPersonal\CongeRepository;
 use App\Repository\DossierPersonal\DetailPrimeSalaryRepository;
 use App\Repository\DossierPersonal\DetailSalaryRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
+use App\Repository\ElementVariable\VariablePaieRepository;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Repository\Paiement\PayrollRepository;
 use App\Repository\Settings\PrimesRepository;
@@ -31,6 +32,7 @@ class ApiReportingController extends AbstractController
     private DetailSalaryRepository $detailSalaryRepository;
     private PersonalRepository $personalRepository;
     private DetailPrimeSalaryRepository $detailPrimeSalaryRepository;
+    private VariablePaieRepository $paieRepository;
 
     public function __construct(
         PayrollRepository           $payrollRepository,
@@ -41,7 +43,8 @@ class ApiReportingController extends AbstractController
         PrimesRepository            $primesRepository,
         DetailSalaryRepository      $detailSalaryRepository,
         PersonalRepository          $personalRepository,
-        DetailPrimeSalaryRepository $detailPrimeSalaryRepository
+        DetailPrimeSalaryRepository $detailPrimeSalaryRepository,
+        VariablePaieRepository      $paieRepository
     )
     {
         $this->payrollRepository = $payrollRepository;
@@ -53,6 +56,7 @@ class ApiReportingController extends AbstractController
         $this->detailSalaryRepository = $detailSalaryRepository;
         $this->personalRepository = $personalRepository;
         $this->detailPrimeSalaryRepository = $detailPrimeSalaryRepository;
+        $this->paieRepository = $paieRepository;
     }
 
     #[Route('/prime_indemnite', name: 'prime_indemnite', methods: ['GET'])]
@@ -127,7 +131,7 @@ class ApiReportingController extends AbstractController
             $primeAnciennete = $this->etatService->getPrimeAnciennete($salary['personal_id']);
             $amountHeureSupp = $this->heureSupService->getAmountHeursSuppByID($salary['personal_id']);
             $gratification = $this->etatService->getGratification($salary['personal_id']);
-            $conges = $this->congeRepository->getLastCongeByID($salary['personal_id']);
+            $conges = $this->congeRepository->getLastCongeByID($salary['personal_id'], false);
             $allocationConger = $conges?->getAllocationConge();
             $categoryRateFDFP_TA = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_TA'])->getValue();
             $categoryRateFDFP_FPC = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC'])->getValue();
@@ -201,7 +205,7 @@ class ApiReportingController extends AbstractController
             $primeAnciennete = $this->etatService->getPrimeAnciennete($declaration['personal_id'], $declaration['startedAt']);
             $amountHeureSupp = $this->heureSupService->getAmountHeursSuppByID($declaration['personal_id']);
             $gratification = $this->etatService->getGratification($declaration['personal_id']);
-            $conges = $this->congeRepository->getLastCongeByID($declaration['personal_id']);
+            $conges = $this->congeRepository->getLastCongeByID($declaration['personal_id'], false);
             $allocationConger = $conges?->getAllocationConge();
             $itsSalarialBrut = $this->etatService->calculerImpotBrut($declaration['personal_id']);
             $creditImpot = $this->etatService->calculateCreditImpot((float)$declaration['numberPart']);
@@ -250,7 +254,7 @@ class ApiReportingController extends AbstractController
             $primeAnciennete = $this->etatService->getPrimeAnciennete($declaration['personal_id'], $declaration['startedAt']);
             $amountHeureSupp = $this->heureSupService->getAmountHeursSuppByID($declaration['personal_id']);
             $gratification = $this->etatService->getGratification($declaration['personal_id']);
-            $conges = $this->congeRepository->getLastCongeByID($declaration['personal_id']);
+            $conges = $this->congeRepository->getLastCongeByID($declaration['personal_id'], false);
             $allocationConger = $conges?->getAllocationConge();
             $revenusNetImposable = (int)$declaration['imposableAmount'] + (int)$primeAnciennete + (int)$amountHeureSupp + (int)$gratification + (int)$allocationConger;
             $data[] = [
@@ -290,7 +294,7 @@ class ApiReportingController extends AbstractController
             $primeAnciennete = $this->etatService->getPrimeAnciennete($declaration['personal_id'], $declaration['startedAt']);
             $amountHeureSupp = $this->heureSupService->getAmountHeursSuppByID($declaration['personal_id']);
             $gratification = $this->etatService->getGratification($declaration['personal_id']);
-            $conges = $this->congeRepository->getLastCongeByID($declaration['personal_id']);
+            $conges = $this->congeRepository->getLastCongeByID($declaration['personal_id'], false);
             $allocationConger = $conges?->getAllocationConge();
             $categoryRateFDFP_TA = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_TA'])->getValue();
             $categoryRateFDFP_FPC = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC'])->getValue();
@@ -446,6 +450,12 @@ class ApiReportingController extends AbstractController
             ];
         }
         return new JsonResponse($data);
+    }
+
+    #[Route('/element_variable', name: 'element_variable', methods: ['GET'])]
+    public function etatElementVariable()
+    {
+        $requestElementVariables = $this->paieRepository->findOneByStatus(true);
     }
 
 }

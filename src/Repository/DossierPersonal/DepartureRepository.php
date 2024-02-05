@@ -3,6 +3,7 @@
 namespace App\Repository\DossierPersonal;
 
 use App\Entity\DossierPersonal\Departure;
+use App\Entity\DossierPersonal\Personal;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -48,4 +49,45 @@ class DepartureRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /** Obtenir le depart qui est entre les 15 jours qui suivent la date de retour en congé */
+    public function get15DaysAfterDate(\DateTime $date): ?Departure
+    {
+        $startDate = clone $date;
+
+        $endDate = clone $date;
+        $endDate->modify('+15 days');
+
+        return $this->createQueryBuilder('d')
+            ->where('c.dateDernierRetour > :startDate')
+            ->andWhere('c.dateDernierRetour <= :endDate')
+            ->andWhere('d.date BETWEEN :')
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function get15DaysAftersDate(mixed $date, Personal $personal): ?Departure
+    {
+        $startDate = $date;
+        $nextFifteenDays = [];
+        for ($i = 1; $i <= 15; $i++) {
+            $date = clone $startDate;
+            $date->modify("+$i days");
+            $nextFifteenDays[] = $date;
+        }
+        return $this->createQueryBuilder('d')
+            ->join('d.personal', 'personal')
+            ->join('personal.conges', 'c')
+            ->where('d.personal = :d_personal')
+            ->andWhere('d.date BETWEEN :start AND :end')
+            ->setParameter('d_personal', $personal)
+            ->setParameter('start', $nextFifteenDays[14])
+            ->setParameter('end', $nextFifteenDays[0])
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
 }

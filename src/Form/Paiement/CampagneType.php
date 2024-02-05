@@ -78,10 +78,17 @@ class CampagneType extends AbstractType
             FormEvents::POST_SUBMIT,
             function (FormEvent $event) use ($formModifier) {
                 $checkedAll = $event->getForm()->get('checkedAll')->getData();
+                $personals = $event->getForm()->get('personal')->getData();
+                $campagne = $event->getForm()->getData();
                 if ($checkedAll === true) {
-                    $campagne = $event->getForm()->getData();
                     $personal = $this->repositoryPer->findAllPersonal();
                     foreach ($personal as $individual) {
+                        $campagne->addPersonal($individual);
+                        $this->salaryInterface->chargePersonal($individual);
+                        $this->salaryInterface->chargeEmployeur($individual);
+                    }
+                } else {
+                    foreach ($personals as $individual) {
                         $campagne->addPersonal($individual);
                         $this->salaryInterface->chargePersonal($individual);
                         $this->salaryInterface->chargeEmployeur($individual);
@@ -90,6 +97,7 @@ class CampagneType extends AbstractType
 
             }
         );
+
     }
 
     public function configureOptions(OptionsResolver $resolver): void

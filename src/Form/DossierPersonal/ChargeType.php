@@ -3,6 +3,7 @@
 namespace App\Form\DossierPersonal;
 
 use App\Entity\DossierPersonal\Personal;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -17,6 +18,12 @@ class ChargeType extends AbstractType
         $builder
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('p')
+                        ->join('p.contract', 'contract')
+                        ->leftJoin('p.departures', 'departures')
+                        ->where('departures.id IS NULL');
+                },
                 'choice_label' => 'matricule',
                 'placeholder' => 'Sélectionner un matricule',
                 'attr' => [

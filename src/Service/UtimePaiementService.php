@@ -18,7 +18,6 @@ class UtimePaiementService
     private PrimesRepository $primesRepository;
     private DetailSalaryRepository $detailSalaryRepository;
     private DetailPrimeSalaryRepository $detailPrimeSalaryRepository;
-    private DepartureRepository $departureRepository;
 
     public function __construct(
         AbsenceService              $absenceService,
@@ -26,7 +25,6 @@ class UtimePaiementService
         PrimesRepository            $primesRepository,
         DetailSalaryRepository      $detailSalaryRepository,
         DetailPrimeSalaryRepository $detailPrimeSalaryRepository,
-        DepartureRepository         $departureRepository
     )
     {
         $this->absenceService = $absenceService;
@@ -34,7 +32,6 @@ class UtimePaiementService
         $this->primesRepository = $primesRepository;
         $this->detailSalaryRepository = $detailSalaryRepository;
         $this->detailPrimeSalaryRepository = $detailPrimeSalaryRepository;
-        $this->departureRepository = $departureRepository;
     }
 
     /** Montant de la majoration des heures supplémentaire */
@@ -153,11 +150,11 @@ class UtimePaiementService
     /** Determiner le montant de l'impôts brut sur le salaire, charge salarial */
     public function calculerAmountImpotBrut(Personal $personal): float|int
     {
+        $salaireBrut = $this->getAmountSalaireBrutAndImposable($personal);
         $majorationHeursSupp = $this->getAmountMajorationHeureSupp($personal);
         $primeAnciennete = $this->getAmountAnciennete($personal);
         $congesPayes = $this->getAmountCongesPayes($personal);
-        $salaire = $this->getAmountSalaireBrutAndImposable($personal);
-        $netImposable = (int)$salaire['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
+        $netImposable = $salaireBrut['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
         $tranchesImposition = [
             ['min' => 0, 'limite' => 75000, 'taux' => 0],
             ['min' => 75001, 'limite' => 240000, 'taux' => 0.16],
@@ -174,7 +171,7 @@ class UtimePaiementService
             $limiteMax = $tranche['limite'];
             $taux = $tranche['taux'];
 
-            if ($netImposable > $limiteMin && $salaire >= $limiteMax) {
+            if ($netImposable > $limiteMin && $netImposable >= $limiteMax) {
                 $montantImposable = ($limiteMax - $limiteMin) * $taux;
                 $impotBrut += $montantImposable;
             } else if ($netImposable > $limiteMin) {
@@ -227,11 +224,14 @@ class UtimePaiementService
     /** Determiner le montant de la retraite générale du salarie, charge salarial */
     public function calculateAmountCNPS(Personal $personal): float
     {
+        $salaireBrut = $this->getAmountSalaireBrutAndImposable($personal);
         $majorationHeursSupp = $this->getAmountMajorationHeureSupp($personal);
         $primeAnciennete = $this->getAmountAnciennete($personal);
         $congesPayes = $this->getAmountCongesPayes($personal);
-        $salaire = $this->getAmountSalaireBrutAndImposable($personal);
-        $netImposable = (int)$salaire['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
+        $netImposable = $salaireBrut['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
+        if ($netImposable > 1647314) {
+            $netImposable = 1647314;
+        }
         $categoryRate = $this->categoryChargeRepository->findOneBy(['codification' => 'CNPS']);
         return $netImposable * $categoryRate->getValue() / 100;
     }
@@ -251,7 +251,10 @@ class UtimePaiementService
     public function calculateAmountIS(Personal $personal): float|int
     {
         $salaireBrut = $this->getAmountSalaireBrutAndImposable($personal);
-        $amountBrut = $salaireBrut['brut_amount'];
+        $majorationHeursSupp = $this->getAmountMajorationHeureSupp($personal);
+        $primeAnciennete = $this->getAmountAnciennete($personal);
+        $congesPayes = $this->getAmountCongesPayes($personal);
+        $amountBrut = $salaireBrut['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
         $categoryRate = $this->categoryChargeRepository->findOneBy(['codification' => 'IS']);
         return $amountBrut * $categoryRate?->getValue() / 100;
     }
@@ -260,7 +263,10 @@ class UtimePaiementService
     public function calculateAmountTA(Personal $personal): float|int
     {
         $salaireBrut = $this->getAmountSalaireBrutAndImposable($personal);
-        $amountBrut = $salaireBrut['brut_amount'];
+        $majorationHeursSupp = $this->getAmountMajorationHeureSupp($personal);
+        $primeAnciennete = $this->getAmountAnciennete($personal);
+        $congesPayes = $this->getAmountCongesPayes($personal);
+        $amountBrut = $salaireBrut['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
         $categoryRateFDFP_TA = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_TA']);
         return $amountBrut * $categoryRateFDFP_TA->getValue() / 100;
     }
@@ -269,7 +275,10 @@ class UtimePaiementService
     public function calculateAmountFPC(Personal $personal): float|int
     {
         $salaireBrut = $this->getAmountSalaireBrutAndImposable($personal);
-        $amountBrut = $salaireBrut['brut_amount'];
+        $majorationHeursSupp = $this->getAmountMajorationHeureSupp($personal);
+        $primeAnciennete = $this->getAmountAnciennete($personal);
+        $congesPayes = $this->getAmountCongesPayes($personal);
+        $amountBrut = $salaireBrut['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
         $categoryRateFDFP_FPC = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC']);
         return $amountBrut * $categoryRateFDFP_FPC->getValue() / 100;
     }
@@ -278,7 +287,10 @@ class UtimePaiementService
     public function calculateAmountFPCAnnuel(Personal $personal): float|int
     {
         $salaireBrut = $this->getAmountSalaireBrutAndImposable($personal);
-        $amountBrut = $salaireBrut['brut_amount'];
+        $majorationHeursSupp = $this->getAmountMajorationHeureSupp($personal);
+        $primeAnciennete = $this->getAmountAnciennete($personal);
+        $congesPayes = $this->getAmountCongesPayes($personal);
+        $amountBrut = $salaireBrut['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
         $categoryRateFDFP_FPC_VER = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC_VER']);
         return $amountBrut * $categoryRateFDFP_FPC_VER->getValue() / 100;
     }
@@ -287,7 +299,10 @@ class UtimePaiementService
     public function calculateAmountRCNPS_CR(Personal $personal): float|int
     {
         $salaireBrut = $this->getAmountSalaireBrutAndImposable($personal);
-        $amountBrut = $salaireBrut['brut_amount'];
+        $majorationHeursSupp = $this->getAmountMajorationHeureSupp($personal);
+        $primeAnciennete = $this->getAmountAnciennete($personal);
+        $congesPayes = $this->getAmountCongesPayes($personal);
+        $amountBrut = $salaireBrut['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
         $categoryRateRCNPS_CR = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_CR']);
         return $amountBrut * $categoryRateRCNPS_CR->getValue() / 100;
     }
@@ -295,18 +310,17 @@ class UtimePaiementService
     /** Determiner le montant de la prestation familliale du salarie, charge patronal */
     public function calculateAmountRCNPS_PF(Personal $personal): float|int
     {
-
-        $amountBrut = $personal->getSalary()->getSmig();
+        $smig = $personal->getSalary()->getSmig();
         $categoryRateRCNPS_PF = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_PF']);
-        return $amountBrut * $categoryRateRCNPS_PF->getValue() / 100;
+        return $smig * $categoryRateRCNPS_PF->getValue() / 100;
     }
 
     /** Determiner le montant de l'accident de travail du salarie, charge patronal */
     public function calculateAmountRCNPS_AT(Personal $personal): float|int
     {
-        $amountBrut = $personal->getSalary()->getSmig();
+        $smig = $personal->getSalary()->getSmig();
         $categoryRateRCNPS_AT = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_AT']);
-        return $amountBrut * $categoryRateRCNPS_AT->getValue() / 100;
+        return $smig * $categoryRateRCNPS_AT->getValue() / 100;
     }
 
     /** Determiner la prime de panier non imposable */
@@ -387,43 +401,4 @@ class UtimePaiementService
         $primeTransport = $this->primesRepository->findOneBy(['code' => Status::PRIME_TRANSPORT]);
         return (int)$primeTransport->getTaux();
     }
-
-    // Obtention des éléments du Départ de personal
-
-    /** Determiner l'indemnite de licenciement imposable */
-    public function getIndemniteLicenciementImposable(Personal $personal): float|int
-    {
-        $departure = $this->departureRepository->findDeparturesByPersonal($personal);
-        $indemniteLicenciement = $departure?->getDissmissalAmount();
-        if ($indemniteLicenciement <= 50000) {
-            $indemniteImposable = 0;
-        } else {
-            $indemniteImposable = ($indemniteLicenciement * 50) / 100;
-        }
-
-        return $indemniteImposable;
-    }
-
-    /** Determiner l'indemnité de préavis */
-    public function getIndemnitePreavis(Personal $personal): float|int
-    {
-        $departure = $this->departureRepository->findDeparturesByPersonal($personal);
-        return $departure->getNoticeAmount();
-    }
-
-    /** Determiner la gratification */
-    public function getGratifDepart(Personal $personal): float|int
-    {
-        $departure = $this->departureRepository->findDeparturesByPersonal($personal);
-        return $departure->getGratification();
-    }
-
-    /** Determiner l'allocation congés */
-    public function getAllocationDepart(Personal $personal): float|int
-    {
-        $departure = $this->departureRepository->findDeparturesByPersonal($personal);
-        return $departure->getCongeAmount();
-    }
-
-
 }

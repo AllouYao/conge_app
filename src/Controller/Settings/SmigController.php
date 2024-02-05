@@ -2,6 +2,7 @@
 
 namespace App\Controller\Settings;
 
+use App\Entity\ElementVariable\VariablePaie;
 use App\Entity\Settings\Smig;
 use App\Form\Settings\SmigType;
 use App\Repository\Settings\SmigRepository;
@@ -77,5 +78,4 @@ class SmigController extends AbstractController
             'form' => $form,
         ]);
     }
-
 }

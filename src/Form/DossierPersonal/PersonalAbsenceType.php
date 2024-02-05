@@ -7,8 +7,8 @@ use App\Entity\DossierPersonal\Personal;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -23,7 +23,8 @@ class PersonalAbsenceType extends AbstractType
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('p')
                         ->join('p.contract', 'ct')
-                        ->where('ct.id is not null');
+                        ->leftJoin('p.departures', 'departures')
+                        ->where('departures.id IS NULL');
                 },
                 'placeholder' => 'Sélectionner un matricule',
                 'attr' => [

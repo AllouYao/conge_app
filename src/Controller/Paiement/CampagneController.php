@@ -108,7 +108,9 @@ class CampagneController extends AbstractController
                 'employer_cmu' => $item->getEmployeurCmu(),
                 'employer_pr' => $item->getEmployeurPf(),
                 'employer_at' => $item->getEmployeurAt(),
-                'employer_cnps' => $item->getEmployeurCnps(),
+                'employer_ta' => $item->getAmountTA(),
+                'employer_fpc' => $item->getAmountFPC(),
+                'employer_fpc_annuel' => $item->getAmountAnnuelFPC(),
                 'charge_patronal' => $item->getFixcalAmountEmployeur(),
                 /**
                  * Masse de salaire global du salarié
@@ -280,9 +282,32 @@ class CampagneController extends AbstractController
             $carbon = new Carbon();
             $nbHeureSupp = $this->heureSupRepository->getNbHeursSupp($personal, $carbon->month, $carbon->year);
             $nbHeure = 0;
+            $JourNormalOrFerie = null;
+            $jourOrNuit = null;
+            $amountHeureSup15 = $amountHeureSup50 = $amountHeureSup75A = $amountHeureSup75B = $amountHeureSup100 = null;
             foreach ($nbHeureSupp as $item) {
                 $nbHeure += $item?->getTotalHorraire();
+                $jourOrNuit = $item->getTypeJourOrNuit();
+                $JourNormalOrFerie = $item->getTypeDay();
             }
+
+            if ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $nbHeure <= 6) {
+                // 15% jour normal ~ 115%
+                $amountHeureSup15 = $payroll->getMajorationAmount();
+            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $nbHeure > 6) {
+                // 50% jour normal ~ 150%
+                $amountHeureSup50 = $payroll->getMajorationAmount();
+            } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
+                // 75% jour ferié or dimanche jour ~ 175%
+                $amountHeureSup75A = $payroll->getMajorationAmount();
+            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::NUIT) {
+                // 75% jour normal or dimanche nuit ~ 175%
+                $amountHeureSup75B = $payroll->getMajorationAmount();
+            } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::NUIT) {
+                // 100% jour ferié et dimanche nuit ~ 200%
+                $amountHeureSup100 = $payroll->getMajorationAmount();
+            }
+
             $accountNumber = null;
             $accountBanque = $payroll->getPersonal()->getAccountBanks();
             foreach ($accountBanque as $value) {
@@ -300,55 +325,66 @@ class CampagneController extends AbstractController
                 'date_edition' => date_format($payroll->getCampagne()->getStartedAt(), 'd/m/Y'),
                 'fullName_salaried' => $payroll->getPersonal()->getFirstName() . ' ' . $payroll->getPersonal()->getLastName(),
                 'departement' => $payroll->getDepartement(),
-                'salaire_base' => number_format($payroll->getBaseAmount(), 2, ',', ' '),
-                'sursalaire' => number_format($payroll->getSursalaire(), 2, ',', ' '),
-                'majoration_heure_sup' => number_format($payroll->getMajorationAmount(), 2, ',', ' '),
-                'transport_imposable' => number_format($payroll->getAmountTransImposable(), 2, ',', ' '),
-                'avantage_imposable' => number_format($payroll->getAmountAvantageImposable(), 2, ',', ' '),
-                'prime_fonction' => number_format($payroll->getPrimeFonctionAmount(), 2, ',', ' '),
-                'prime_logement' => number_format($payroll->getPrimeLogementAmount(), 2, ',', ' '),
-                'indemnite_fonction' => number_format($payroll->getIndemniteFonctionAmount(), 2, ',', ' '),
-                'indemnite_logement' => number_format($payroll->getIndemniteLogementAmount(), 2, ',', ' '),
-                'total_brut' => number_format($payroll->getImposableAmount(), 2, ',', ' '),
-                'amount_its_salarial' => number_format($payroll->getSalaryIts(), 2, ',', ' '),
-                'taux_cnps_salarial' => number_format($tauxCnpsSalarial, 2, ',', ' '),
-                'amount_cnps_salarial' => number_format($payroll->getSalaryCnps(), 2, ',', ' '),
-                'taux_cr_employeur' => number_format($tauxCrEmployeur, 2, ',', ' '),
-                'amount_cr_employeur' => number_format($payroll->getEmployeurCr(), 2, ',', ' '),
-                'taux_pf_employeur' => number_format($tauxPfEmployeur, 2, ',', ' '),
-                'amount_pf_employeur' => number_format($payroll->getEmployeurPf(), 2, ',', ' '),
-                'taux_at_employeur' => number_format($tauxAtEmployeur, 2, ',', ' '),
-                'amount_at_employeur' => number_format($payroll->getEmployeurAt(), 2, ',', ' '),
-                'taux_is_employeur' => number_format($tauxIsEmployeur, 2, ',', ' '),
-                'amount_is_employeur' => number_format($payroll->getEmployeurIs(), 2, ',', ' '),
-                'taux_ta_employeur' => number_format($tauxTaEmployeur, 2, ',', ' '),
-                'amount_ta_employeur' => number_format($payroll->getAmountTA(), 2, ',', ' '),
-                'taux_fpc_employeur' => number_format($tauxFPCEmployeur, 2, ',', ' '),
-                'amount_fpc_employeur' => number_format($payroll->getAmountFPC(), 2, ',', ' '),
-                'taux_fpc_annuel_employeur' => number_format($tauxFPCAnnuelEmployeur, 2, ',', ' '),
-                'amount_fpc_annuel_employeur' => number_format($payroll->getAmountAnnuelFPC(), 2, ',', ' '),
-                'amount_cmu_salarial' => number_format($payroll->getSalaryCmu(), 2, ',', ' '),
-                'amount_cmu_patronal' => number_format($payroll->getEmployeurCmu(), 2, ',', ' '),
-                'charge_salarial' => number_format($payroll->getFixcalAmount(), 2, ',', ' '),
-                'charge_patronal' => number_format($payroll->getFixcalAmountEmployeur(), 2, ',', ' '),
-                'prime_transport' => number_format($payroll->getSalaryTransport(), 2, ',', ' '),
-                'amount_prime_panier' => number_format($payroll->getAmountPrimePanier(), 2, ',', ' '),
-                'amount_prime_salissure' => number_format($payroll->getAmountPrimeSalissure(), 2, ',', ' '),
-                'amount_prime_tt' => number_format($payroll->getAmountPrimeTenueTrav(), 2, ',', ' '),
-                'amount_prime_outi' => number_format($payroll->getAmountPrimeOutillage(), 2, ',', ' '),
-                'amount_prime_rendement' => number_format($payroll->getAmountPrimeRendement(), 2, ',', ' '),
-                'salaire_brut' => number_format($payroll->getBrutAmount(), 2, ',', ' '),
-                'amount_avantage' => number_format($payroll->getAventageNonImposable(), 2, ',', ' '),
-                'net_imposable' => number_format($payroll->getImposableAmount(), 2, ',', ' '),
-                'heure_travailler' => number_format(Status::TAUX_HEURE, 0, ',', ' '),
-                'nb_heure_supp' => number_format($nbHeure, 0, ',', ' '),
-                'net_payes' => number_format($payroll->getNetPayer(), 2, ',', ' '),
+                'salaire_base' => $payroll->getBaseAmount(),
+                'sursalaire' => $payroll->getSursalaire(),
+                'majoration_heure_sup_15' => $amountHeureSup15,
+                'majoration_heure_sup_50' => $amountHeureSup50,
+                'majoration_heure_sup_75_A' => $amountHeureSup75A,
+                'majoration_heure_sup_75_B' => $amountHeureSup75B,
+                'majoration_heure_sup_100' => $amountHeureSup100,
+                'transport_imposable' => (double)$payroll->getAmountTransImposable(),
+                'avantage_imposable' => (double)$payroll->getAmountAvantageImposable(),
+                'prime_fonction' => (double)$payroll->getPrimeFonctionAmount(),
+                'prime_logement' => (double)$payroll->getPrimeLogementAmount(),
+                'indemnite_fonction' => (double)$payroll->getIndemniteFonctionAmount(),
+                'indemnite_logement' => (double)$payroll->getIndemniteLogementAmount(),
+                'total_brut' => (double)$payroll->getImposableAmount(),
+                'amount_its_salarial' => (double)$payroll->getSalaryIts(),
+                'taux_cnps_salarial' => (double)$tauxCnpsSalarial,
+                'amount_cnps_salarial' => (double)$payroll->getSalaryCnps(),
+                'taux_cr_employeur' => (double)$tauxCrEmployeur,
+                'amount_cr_employeur' => (double)$payroll->getEmployeurCr(),
+                'taux_pf_employeur' => (double)$tauxPfEmployeur,
+                'amount_pf_employeur' => (double)$payroll->getEmployeurPf(),
+                'taux_at_employeur' => (double)$tauxAtEmployeur,
+                'amount_at_employeur' => (double)$payroll->getEmployeurAt(),
+                'taux_is_employeur' => (double)$tauxIsEmployeur,
+                'amount_is_employeur' => (double)$payroll->getEmployeurIs(),
+                'taux_ta_employeur' => (double)$tauxTaEmployeur,
+                'amount_ta_employeur' => (double)$payroll->getAmountTA(),
+                'taux_fpc_employeur' => (double)$tauxFPCEmployeur,
+                'amount_fpc_employeur' => (double)$payroll->getAmountFPC(),
+                'taux_fpc_annuel_employeur' => (double)$tauxFPCAnnuelEmployeur,
+                'amount_fpc_annuel_employeur' => (double)$payroll->getAmountAnnuelFPC(),
+                'amount_cmu_salarial' => (double)$payroll->getSalaryCmu(),
+                'amount_cmu_patronal' => (double)$payroll->getEmployeurCmu(),
+                'charge_salarial' => (double)$payroll->getFixcalAmount(),
+                'charge_patronal' => (double)$payroll->getFixcalAmountEmployeur(),
+                'prime_transport' => (double)$payroll->getSalaryTransport(),
+                'amount_prime_panier' => (double)$payroll->getAmountPrimePanier(),
+                'amount_prime_salissure' => (double)$payroll->getAmountPrimeSalissure(),
+                'amount_prime_tt' => (double)$payroll->getAmountPrimeTenueTrav(),
+                'amount_prime_outi' => (double)$payroll->getAmountPrimeOutillage(),
+                'amount_prime_rendement' => (double)$payroll->getAmountPrimeRendement(),
+                'salaire_brut' => (double)$payroll->getBrutAmount(),
+                'amount_avantage' => (double)$payroll->getAventageNonImposable(),
+                'net_imposable' => (double)$payroll->getImposableAmount(),
+                'heure_travailler' => Status::TAUX_HEURE,
+                'nb_heure_supp' => (double)$nbHeure,
+                'net_payes' => (double)$payroll->getNetPayer(),
                 'mode_paiement' => $payroll->getPersonal()->getModePaiement(),
-                'num_compte' => $accountNumber
+                'num_compte' => $accountNumber,
+                'smig' => (double)$payroll->getPersonal()->getSalary()->getSmig(),
+                'preavis_amount' => (double)$payroll->getPreavisAmount(),
+                'licenciement_imposable' => (double)$payroll->getLicemciementImposable(),
+                'licenciement_ni' => (double)$payroll->getPersonal()->getDepartures()?->getDissmissalAmount() - (double)$payroll->getLicemciementImposable(),
+                'gratification_depart' => (double)$payroll->getGratificationD(),
+                'allocation_depart' => (double)$payroll->getAllocationCongeD(),
+                'prime_anciennete' => (double)$payroll->getAncienneteAmount()
             ];
         }
         return $this->render('test/test/index.html.twig', [
-            'payrolls' => $dataPayroll
+            'payrolls' => $dataPayroll,
         ]);
     }
 

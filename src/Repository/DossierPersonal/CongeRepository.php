@@ -52,27 +52,19 @@ class CongeRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function getCongeInDepart(Personal $personal): ?Conge
-    {
-        return $this->createQueryBuilder('co')
-            ->where('co.personal = :personal')
-            ->setMaxResults(1)
-            ->setParameter('personal', $personal)
-            ->orderBy('co.id', 'DESC')
-            ->getQuery()->getOneOrNullResult();
-    }
-
-    public function getLastCongeByID(int $personal): ?Conge
+    public function getLastCongeByID(int $personal, bool $active): ?Conge
     {
         return $this->createQueryBuilder('co')
             ->join('co.personal', 'personal')
             ->where('personal.id = :personal')
-            ->andWhere('co.isConge = false')
+            ->andWhere('co.isConge = :value')
             ->setMaxResults(1)
             ->setParameter('personal', $personal)
+            ->setParameter('value', $active)
             ->orderBy('co.id', 'DESC')
             ->getQuery()->getOneOrNullResult();
     }
+
     /**
      * @throws NonUniqueResultException
      */
@@ -98,5 +90,37 @@ class CongeRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /** Obtenir les 15 jours qui précède la date de depart en congé */
+    public function get15DaysBeforeDate(\DateTime $date)
+    {
+        $startDate = clone $date;
+        $startDate->modify('-15 days');
 
+        $endDate = clone $date;
+
+        return $this->createQueryBuilder('c')
+            ->where('c.dateDepart >= :startDate')
+            ->andWhere('c.dateDepart < :endDate')
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** Obtenir les 15 jours qui suivent la date de retour en congé */
+    public function get15DaysAfterDate(\DateTime $date)
+    {
+        $startDate = clone $date;
+
+        $endDate = clone $date;
+        $endDate->modify('+15 days');
+
+        return $this->createQueryBuilder('c')
+            ->where('c.dateDernierRetour > :startDate')
+            ->andWhere('c.dateDernierRetour <= :endDate')
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->getQuery()
+            ->getResult();
+    }
 }

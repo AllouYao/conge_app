@@ -5,8 +5,10 @@ namespace App\Service;
 
 use App\Contract\SalaryInterface;
 use App\Entity\DossierPersonal\Personal;
+use App\Entity\ElementVariable\VariablePaie;
 use App\Entity\Impots\ChargeEmployeur;
 use App\Entity\Impots\ChargePersonals;
+use App\Repository\ElementVariable\VariablePaieRepository;
 use App\Repository\Impots\ChargeEmployeurRepository;
 use App\Repository\Impots\ChargePersonalsRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,18 +20,21 @@ class SalaryImpotsService implements SalaryInterface
     private ChargePersonalsRepository $chargePersonalRt;
     private ChargeEmployeurRepository $chargeEmployeurRt;
     private UtimePaiementService $utimePaiementService;
+    private VariablePaieRepository $paieRepository;
 
     public function __construct(
         EntityManagerInterface    $manager,
         ChargePersonalsRepository $chargePersonalsRepository,
         ChargeEmployeurRepository $chargeEmployeurRepository,
-        UtimePaiementService      $utimePaiementService
+        UtimePaiementService      $utimePaiementService,
+        VariablePaieRepository    $paieRepository
     )
     {
         $this->manager = $manager;
         $this->chargePersonalRt = $chargePersonalsRepository;
         $this->chargeEmployeurRt = $chargeEmployeurRepository;
         $this->utimePaiementService = $utimePaiementService;
+        $this->paieRepository = $paieRepository;
     }
 
     public function chargePersonal(Personal $personal): void
@@ -103,5 +108,27 @@ class SalaryImpotsService implements SalaryInterface
 
         $this->manager->persist($chargeEmpl);
         $this->manager->flush();
+    }
+
+    public function variableElement(Personal $personal): void
+    {
+        $contract = $personal->getContract();
+        $embauche = $contract->getDateEmbauche();
+        $salary = $personal->getSalary();
+        $smig = $salary->getSmig();
+        $variablePaie = $this->paieRepository->findOneBy(['personal' => $personal]);
+        if (!$variablePaie) {
+            $variablePaie = (new VariablePaie())
+                ->setPersonal($personal)
+                ->setEmbauche($embauche)
+                ->setEtatCivil($personal->getEtatCivil())
+                ->setSmig($smig);
+        }
+        $variablePaie
+            ->setPersonal($personal)
+            ->setEmbauche($embauche)
+            ->setEtatCivil($personal->getEtatCivil())
+            ->setSmig($smig);
+        $this->manager->persist($variablePaie);
     }
 }
