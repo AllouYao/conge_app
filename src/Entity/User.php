@@ -2,11 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
 use App\Utils\Horodatage;
+use App\Entity\Admin\Role;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use App\Repository\UserRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -22,14 +25,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     private ?string $username = null;
 
-    #[ORM\Column]
-    private array $roles = [];
+    #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: 'users')]
+    private Collection $roles;
+
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
     private ?string $password = null;
+    public function __construct()
+    {
+        $this->roles = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -63,19 +71,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getRoles(): array
     {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        $roles = $this->roles->map(function (Role $role) {
+            return $role->getCode();
+        })->toArray();
 
         return array_unique($roles);
     }
-
-    public function setRoles(array $roles): static
+    /**
+     * @return Collection<int, Role>
+     */
+    public function getRole(): Collection
     {
-        $this->roles = $roles;
+        return $this->roles;
+    }
+
+    public function addRole(Role $role): self
+    {
+        if (!$this->roles->contains($role)) {
+            $this->roles->add($role);
+        }
 
         return $this;
     }
+
+    public function removeRole(Role $role): self
+    {
+        $this->roles->removeElement($role);
+
+        return $this;
+    }
+
 
     /**
      * @see PasswordAuthenticatedUserInterface
