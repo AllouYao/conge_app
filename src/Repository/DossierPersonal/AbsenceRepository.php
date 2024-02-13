@@ -49,12 +49,12 @@ class AbsenceRepository extends ServiceEntityRepository
     //    }
 
     /**
-     * @param Personal $personal
+     * @param Personal|null $personal
      * @param int $month
      * @param int $year
      * @return Absence[]|null Returns an array of Absence objects
      */
-    public function getAbsenceByMonth(Personal $personal, int $month, int $year): ?array
+    public function getAbsenceByMonth(?Personal $personal, int $month, int $year): ?array
     {
         return $this->createQueryBuilder('abs')
             ->andWhere('abs.personal = :personal')

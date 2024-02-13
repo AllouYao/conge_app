@@ -8,6 +8,7 @@ use App\Form\CustomType\DateCustomType;
 use App\Repository\DossierPersonal\CongeRepository;
 use App\Service\CongeService;
 use Carbon\Carbon;
+use DateTime;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -41,9 +42,9 @@ class CongeType extends AbstractType
                         ->join('p.contract', 'ct')
                         ->leftJoin('p.conges', 'c')
                         ->leftJoin('p.departures', 'departure')
-                        ->where('c.id IS NULL OR c.dateDernierRetour < :today')
+                        ->where('c.id IS NULL OR c.dateDernierRetour < :today AND c.isConge = false ')
                         ->andWhere('departure.id IS NULL')
-                        ->setParameter('today', new \DateTime())
+                        ->setParameter('today', new DateTime())
                         ->orderBy('p.matricule', 'ASC');
                 },
                 'placeholder' => 'Sélectionner un matricule',
@@ -104,7 +105,11 @@ class CongeType extends AbstractType
                 function (FormEvent $event) {
                     /** @var Conge $data */
                     $data = $event->getData();
-                    $this->congeService->calculate($data);
+                    $personal = $data->getPersonal();
+                    $lastConges = $this->congeRepository->getLastCongeByID($personal->getId(), false);
+                    if ($lastConges)
+                        $this->congeService->congesPayerByLast($data);
+                    $this->congeService->congesPayerByFirst($data);
                 }
             );
 
@@ -114,9 +119,9 @@ class CongeType extends AbstractType
                 function (FormEvent $event) {
                     /** @var Conge $data */
                     $data = $event->getData();
-                    $totalDay = $data->getTotalDays();
-                    $vacationDay = $data->getRemainingVacation();
-                    $remainingVacation = $vacationDay - $totalDay;
+                    $totalDay = (int)$data->getTotalDays();
+                    $vacationDay = (int)$data->getDays();
+                    $remainingVacation = $totalDay - $vacationDay;
                     $data->setRemainingVacation($remainingVacation);
                 }
             );

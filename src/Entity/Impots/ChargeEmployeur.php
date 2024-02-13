@@ -2,6 +2,7 @@
 
 namespace App\Entity\Impots;
 
+use App\Entity\DossierPersonal\Departure;
 use App\Entity\DossierPersonal\Personal;
 use App\Repository\Impots\ChargeEmployeurRepository;
 use App\Utils\Horodatage;
@@ -52,6 +53,9 @@ class ChargeEmployeur
 
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $amountAnnuelFPC = null;
+
+    #[ORM\ManyToOne(inversedBy: 'chargeEmployeurs')]
+    private ?Departure $departure = null;
 
     public function getId(): ?int
     {
@@ -186,6 +190,18 @@ class ChargeEmployeur
     public function setAmountAnnuelFPC(?string $amountAnnuelFPC): static
     {
         $this->amountAnnuelFPC = $amountAnnuelFPC;
+
+        return $this;
+    }
+
+    public function getDeparture(): ?Departure
+    {
+        return $this->departure;
+    }
+
+    public function setDeparture(?Departure $departure): static
+    {
+        $this->departure = $departure;
 
         return $this;
     }

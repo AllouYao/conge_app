@@ -44,7 +44,6 @@ class AbsenceController extends AbstractController
         }
         $apiAbsences = [];
         $absencesRequests = $this->absenceRepository->getAbsenceByMonth($personal, $now->month, $now->year);
-        //$absencesRequests = $this->absenceRepository->findAll();
         foreach ($absencesRequests as $absences) {
             $newBaseAmount = $this->absenceService->getAmountByMonth($personal, $now->month, $now->year);
             $apiAbsences[] = [
@@ -62,7 +61,7 @@ class AbsenceController extends AbstractController
                 'description' => $absences->getDescription(),
                 'duree_jour' => $absences->getTotalDay(),
                 'nouveau_salaire_base' => $newBaseAmount,
-                'date_creation' => date_format($absences->getPersonal()->getCreatedAt(), 'd/m/Y'),
+                'date_creation' => date_format($absences->getCreatedAt(), 'd/m/Y'),
                 'modifier' => $this->generateUrl('personal_absence_edit', ['uuid' => $absences->getPersonal()->getUuid()])
             ];
         }
@@ -74,13 +73,14 @@ class AbsenceController extends AbstractController
     public function index(): Response
     {
         $absence = $this->absenceRepository->findAll();
+        $formatter = new \IntlDateFormatter('fr_FR', \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'MMMM Y');
         $today = Carbon::now();
-        $years = $today->year;
-        $month = $today->month;
+        $date = $formatter->format($today);
+
+
         return $this->render('dossier_personal/absence/index.html.twig', [
             'absences' => $absence,
-            'mois' => $month,
-            'annee' => $years
+            'date' => $date
         ]);
     }
 

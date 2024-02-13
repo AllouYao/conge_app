@@ -40,7 +40,6 @@ class DepartureRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-
     public function findDeparturesByPersonal($personal): ?Departure
     {
         return $this->createQueryBuilder('d')
@@ -88,6 +87,12 @@ class DepartureRepository extends ServiceEntityRepository
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    public function findDeparture(): ?Departure
+    {
+        return $this->createQueryBuilder('departure')
+            ->getQuery()->getOneOrNullResult();
     }
 
 }

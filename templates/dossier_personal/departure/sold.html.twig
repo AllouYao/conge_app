@@ -1,0 +1,58 @@
+{% extends 'imprimerLivrePaie.html.twig' %}
+
+{% block title 'Fiche solde de tout compte' %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 col-lg-offset-2">
+            <div class="widget">
+                <div class="widget-content">
+                    <div class="row">
+                        <div class="col-md-12 mb-3 mt-5"
+                             style="border: 2px double silver; padding: 10px; border-radius: 5px"
+                             id="header">
+                            <h4 class="text-center"><strong>SOLDE DE TOUT COMPTE </strong></h4>
+                        </div>
+                        <br><br>
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <table class="table table-bordered table-responsive table-sm">
+                                    <tr>
+                                        <td>QUOTE PART DE LA PRIME DE FIN D'ANNEE</td>
+                                        <td class="text-end">{{ gratification|number_format(2, ',', ' ') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>INDEMNITE COMPENSATRICE DE CONGE</td>
+                                        <td class="text-end">{{ conge_amount|number_format(2, ',', ' ') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>INDEMNITE DE LICENCIEMENT</td>
+                                        <td class="text-end">{{ licenciement_amount|number_format(2, ',', ' ') }}</td>
+                                    </tr>
+                                    <tr>
+                                        {% set amountTT = gratification + conge_amount + licenciement_amount %}
+                                        <th style="font-size: larger;">SOLDE DE TOUT COMPTE</th>
+                                        <td class="text-end" style="font-size: larger;">{{ amountTT|number_format(2, ',', ' ') }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="">
+            <a class="btn btn-dark btn-print pull-right" style="color: white" href="javascript:window.print()">
+                <i class="icon-print"></i>
+                Imprimer</a>
+            <a class="btn btn-info btn-back pull-right" style="margin-right: 5px" onclick="window.close()"
+               href="{{ path('app_home') }}">
+                retour</a>
+        </div>
+    </div>
+{% endblock %}
+
+
+
+

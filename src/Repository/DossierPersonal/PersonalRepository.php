@@ -22,6 +22,19 @@ class PersonalRepository extends ServiceEntityRepository
         parent::__construct($registry, Personal::class);
     }
 
+    /**
+     * @return Personal[] Returns an array of Personal objects
+     */
+    public function findAllPersonalOnCampain(): array
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->getQuery()
+            ->getResult();
+        return array_map(function ($result) {
+            return $result;
+        }, $qb);
+    }
+
 
     /**
      * @return Personal[] Returns an array of Personal objects
@@ -120,6 +133,8 @@ class PersonalRepository extends ServiceEntityRepository
             ->leftJoin('p.accountBanks', 'account_banks')
             ->join('category.categorySalarie', 'categorie_salary')
             ->leftJoin('salary.avantage', 'avantage')
+            ->leftJoin('p.departures', 'departures')
+            ->where('departures.id IS NULL')
             ->getQuery()
             ->getResult();
     }

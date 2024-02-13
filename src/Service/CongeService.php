@@ -34,104 +34,141 @@ class CongeService
         $this->primesRepository = $primesRepository;
     }
 
-    /**
-     * @param Conge $conge
-     * @throws Exception|Exception
-     */
-    public function calculate(Conge $conge): void
-    {
-        $personal = $conge->getPersonal();
-        $dateEmbauche = $personal->getContract()->getDateEmbauche();
-        $lastConge = $this->congeRepository->getLastCongeByID($personal->getId(), false); // Dernier conger pris
-        $lastDateReturn = $lastConge?->getDateDernierRetour(); // Data de retour de congés
-        $dayConge = (new Carbon($conge->getDateRetour()))->diff($conge->getDateDepart())->days; // Jour de congés pris par le salarié
 
-        /** Process de determination des jour supplémentaire de congés  */
+    /**
+     * @throws Exception
+     */
+    public function congesPayerByFirst(Conge $conge): void
+    {
+        /** Information du salarié sujet au congés */
+        $personal = $conge->getPersonal();
+        $contract = $personal->getContract();
+        $embauche = $contract->getDateEmbauche();
         $anciennete = $personal->getOlder(); // anciennete en années
-        $startDate = $conge->getDateDepart();
         $genre = $personal->getGenre();
         $chargePeaple = $personal->getChargePeople();
 
+        /** Information du congés */
+        $dateDepartCgs = $conge->getDateDepart();
+        $dateRetourCgs = $conge->getDateRetour();
+
         /** Jour de congé supplémentaire en fonction du sex et des enfant à charge */
-        $drCongeSupp1 = round($this->suppConger($genre, $chargePeaple, $startDate), 2);
+        $drCongeSupp1 = round($this->suppConger($genre, $chargePeaple, $dateDepartCgs), 2);
         /** Jour supplémentaire de congé en fonction de l'ancienneté du salarié */
         $drCongeSupp2 = round($this->echelonConge($anciennete), 2);
 
 
-        /** Salaire brut de la période */
-        if ($lastConge) {
-            /** Determination de la période de reference ou le nombre de mois de travail */
-            $periodeReference = round($this->getWorkMonth($lastDateReturn, $startDate), 2);
-            if ($periodeReference >= 11) {
-                /** Determination de la gratification */
-                $basePeriode = round($this->utimePaiementService->getAmountSalaireBrutAndImposable($personal)['salaire_categoriel'], 2);
-                $tauxGratif = (int)$this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux() / 100;
-                if ($periodeReference < 12) {
-                    $gratification = round(($basePeriode * $tauxGratif * ($periodeReference * 30) / 360), 2);
-                } else {
-                    $gratification = round(($basePeriode * $tauxGratif), 2);
-                }
-                /** Determiner la duree du congé en jour calandaire*/
-                $drConge = ceil($periodeReference * self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE);
-                /** Avec 11 mois */
-                $brutPeriode = round($this->payrollRepository->getPeriodiqueSalary1($personal, $lastDateReturn), 2);
-                /** Determiner le salaire moyen */
-                $salaireMoyen = round((($brutPeriode + $gratification) / 11), 2);
-                /** indemnite partiel de congés */
-                $indemniteConge = round(($salaireMoyen / 30) * $drConge, 2);
-                /** Determiner indemnite de conger pour chaque jours supplementaire  */
-                $indemniteCongeSupp = round(($indemniteConge / ceil($periodeReference * self::JOUR_CONGE_OUVRABLE)) * ($drCongeSupp1 + $drCongeSupp2), 2);
-                /** allocation de conge du salarié */
-                $allocationConge = round($indemniteConge + $indemniteCongeSupp, 2);
-                /** s'il décide de prendre un certains nombre de jours alors nous determinons le nombre de jours restant */
-                $lastRemaining = $lastConge->getRemainingVacation();
-                $remainingVacation = round($lastRemaining - $dayConge, 2);
-            } else {
-                throw new \Exception('Mr/Mdm ' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' 
-                 n\'est pas éligible pour une acquisition de congés, nombre de mois travailler depuis le retour de congés insufisant '
-                    . ceil($periodeReference) . ' mois');
-            }
-        } else {
-            /** Determination de la période de reference ou le nombre de mois de travail */
-            $periodeReference = round($this->getWorkMonths($dateEmbauche, $startDate, $genre, $drCongeSupp2, $drCongeSupp1), 2);
-            if ($periodeReference >= 12) {
-                /** Determination de la gratification */
-                $basePeriode = round($this->utimePaiementService->getAmountSalaireBrutAndImposable($personal)['salaire_categoriel'], 2);
-                $tauxGratif = (int)$this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux() / 100;
-                $gratification = round(($basePeriode * $tauxGratif), 2);
-                /** Determiner la duree du congé en jour calandaire*/
-                $drConge = ceil($periodeReference * self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE);
-                /** avec 12 mois */
-                $brutPeriode = round($this->payrollRepository->getPeriodiqueSalary2($personal, $startDate), 2);
-                /** Determiner le salaire moyen */
-                $salaireMoyen = round((($brutPeriode + $gratification) / 12), 2);
-                /** indemnite partiel de congés */
-                $indemniteConge = round(($salaireMoyen / 30) * $drConge, 2);
-                /** Determiner indemnite de conger pour chaque jours supplementaire  */
-                $indemniteCongeSupp = round(($indemniteConge / ceil($periodeReference * self::JOUR_CONGE_OUVRABLE)) * ($drCongeSupp1 + $drCongeSupp2), 2);
-                /** allocation de conge du salarié */
-                $allocationConge = round($indemniteConge + $indemniteCongeSupp, 2);
-                /** s'il décide de prendre un certains nombre de jours alors nous determinons le nombre de jours restant */
-                $remainingVacation = round($drConge - $dayConge, 2);
-            } else {
-                throw new \Exception('Mr/Mdm ' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' 
-                 n\'est pas éligible pour une acquisition de congés, nombre de mois travailler depuis la date de debut d\'exercice insufisant '
-                    . ceil($periodeReference) . ' mois');
-            }
+        /** Determiner le salaire brut de la periode */
+        $salreBrutPeriode = $this->payrollRepository->getPeriodiqueSalary1($personal, $dateDepartCgs);
 
+        /** Determiner le nombre de mois travail depuis la date d'embauche jusqu'à la date de depart en congés */
+        $worksMonths = round($this->getWorkMonth($embauche, $dateDepartCgs));
+
+
+        /** Determiner nombre de jour ouvrable de congés */
+        $dayOuvrableCgs = ceil($worksMonths * self::JOUR_CONGE_OUVRABLE);
+
+        /** Determiner nombre de jour calandaire de congés */
+        $dayCalandaireCgs = ceil($dayOuvrableCgs * self::JOUR_CONGE_CALANDAIRE);
+
+        /** Determiner le salaire moyen mensuel (SMM) des 12 dernier mois travailler par le salarie */
+        $smm = round($salreBrutPeriode / 12, 2);
+
+        /** Determiner l'allocation de congé du salarié */
+        $allocationCgs = round(($smm * self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE * $worksMonths) / 30, 2);
+
+        /** Dureé total de jour de congés à prendre */
+        $totalDayCgs = $dayCalandaireCgs + $drCongeSupp1 + $drCongeSupp2;
+
+        /** Durée total de congés pris par le salarié */
+        $dayCgsExploiter = $dateRetourCgs->diff($dateDepartCgs)->days;
+
+        /** Determiner le nombre de jours restant après expiration des jours de congés exploités */
+        $remainingVacation = round($totalDayCgs - $dayCgsExploiter, 2);
+
+        if ($worksMonths >= 12) {
+            $conge
+                ->setWorkMonths($worksMonths)
+                ->setSalaireMoyen($smm)
+                ->setDaysPlus($drCongeSupp1 + $drCongeSupp2)
+                ->setTotalDays($totalDayCgs)
+                ->setDays($dayCgsExploiter)
+                ->setAllocationConge($allocationCgs)
+                ->setRemainingVacation($remainingVacation);
+        } else {
+            throw new \Exception('Mr/Mdm ' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' 
+                 n\'est pas éligible pour une acquisition de congés, nombre de mois travailler depuis la date de debut d\'exercice insufisant: '
+                . ceil($worksMonths) . ' mois');
         }
-        $conge
-            ->setAllocationConge($allocationConge)
-            ->setGratification($gratification)
-            ->setSalaireMoyen($salaireMoyen)
-            ->setWorkMonths($periodeReference)
-            ->setSalaryDue(round($brutPeriode / 12, 2))
-            ->setDaysPlus($drCongeSupp1)
-            ->setTotalDays($drConge)
-            ->setDays($dayConge)
-            ->setOlderDays($drCongeSupp2)
-            ->setRemainingVacation($remainingVacation);
     }
+
+    /**
+     * @throws Exception
+     */
+    public function congesPayerByLast(Conge $conge): void
+    {
+        /** Information du salarié sujet au congés */
+        $personal = $conge->getPersonal();
+        $contract = $personal->getContract();
+        $embauche = $contract->getDateEmbauche();
+        $anciennete = $personal->getOlder(); // anciennete en années
+        $genre = $personal->getGenre();
+        $chargePeaple = $personal->getChargePeople();
+
+        /** Information du conges */
+        $dateDepartCgs = $conge->getDateDepart();
+        $dateRetourCgs = $conge->getDateRetour();
+        $lastConges = $this->congeRepository->getLastCongeByID($personal->getId(), false);
+        $dateDernierRetourCgs = $lastConges?->getDateDernierRetour();
+
+        /** Jour de congé supplémentaire en fonction du sex et des enfant à charge */
+        $drCongeSupp1 = round($this->suppConger($genre, $chargePeaple, $dateDepartCgs), 2);
+        /** Jour supplémentaire de congé en fonction de l'ancienneté du salarié */
+        $drCongeSupp2 = round($this->echelonConge($anciennete), 2);
+
+        /** Determiner le salaire brut de la periode */
+        $salreBrutPeriode = $this->payrollRepository->getPeriodiqueSalary2($personal, $dateDernierRetourCgs);
+
+        /** Determiner le nombre de mois travail depuis la date du dernier retour de congés jusqu'à la date de depart en congés actuel */
+        $worksMonths = round($this->getWorkMonth($dateDernierRetourCgs, $dateDepartCgs));
+
+        /** Determiner nombre de jour ouvrable de congés */
+        $dayOuvrableCgs = ceil($worksMonths * self::JOUR_CONGE_OUVRABLE);
+
+        /** Determiner nombre de jour calandaire de congés */
+        $dayCalandaireCgs = ceil($dayOuvrableCgs * self::JOUR_CONGE_CALANDAIRE);
+
+        /** Determiner le salaire moyen mensuel (SMM) des 12 dernier mois travailler par le salarie */
+        $smm = round($salreBrutPeriode / 12, 2);
+
+        /** Determiner l'allocation de congé du salarié */
+        $allocationCgs = round(($smm * self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE * $worksMonths) / 30, 2);
+
+        /** Dureé total de jour de congés à prendre */
+        $totalDayCgs = $dayCalandaireCgs + $drCongeSupp1 + $drCongeSupp2;
+
+        /** Durée total de congés pris par le salarié */
+        $dayCgsExploiter = $dateRetourCgs->diff($dateDepartCgs)->days;
+
+        /** Determiner le nombre de jours restant après expiration des jours de congés exploités */
+        $remainingVacation = round($totalDayCgs - $dayCgsExploiter, 2);
+
+        if ($worksMonths >= 11) {
+            $conge
+                ->setWorkMonths($worksMonths)
+                ->setSalaireMoyen($smm)
+                ->setDaysPlus($drCongeSupp1 + $drCongeSupp2)
+                ->setTotalDays($totalDayCgs)
+                ->setDays($dayCgsExploiter)
+                ->setAllocationConge($allocationCgs)
+                ->setRemainingVacation($remainingVacation);
+        }else {
+            throw new \Exception('Mr/Mdm ' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' 
+                 n\'est pas éligible pour une acquisition de congés, nombre de mois travailler depuis le retour de congés insufisant: '
+                . ceil($worksMonths) . ' mois');
+        }
+    }
+
 
     /**
      * Conges supplémentaires
@@ -179,22 +216,6 @@ class CongeService
                 break;
         }
         return $echelon;
-    }
-
-    public function getWorkMonths(
-        ?DateTime $dateEmbauche,
-        ?DateTime $dateDepart,
-        string    $genre,
-        mixed     $echelonConge,
-        mixed     $suppConger
-    ): int|float
-    {
-        $workDays = $dateDepart->diff($dateEmbauche)->days;
-        $workDays = $workDays + $echelonConge;
-        if ($genre === Status::FEMININ) {
-            $workDays = ($workDays + $suppConger);
-        }
-        return $workDays / 30;
     }
 
     public function getWorkMonth(?DateTime $dateEmbauche, ?DateTime $dateDepart,): int|float

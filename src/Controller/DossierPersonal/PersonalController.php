@@ -55,10 +55,11 @@ class PersonalController extends AbstractController
 
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
         $dateFin = $personal->getContract()->getDateFin();
+        $typeContrat = $personal->getContract()->getTypeContrat();
         $today = new DateTime();
         $anciennete = (int)$personal->getOlder();
         $age = $personal->getBirthday()->diff($today)->y;
-        $dureeContrat = ($dateFin->diff($dateEmbauche)->y) * 12;
+        $dureeContrat = $typeContrat === Status::CDD ? round(($dateFin->diff($dateEmbauche)->days) / 30) : round(($today->diff($dateEmbauche)->days) / 30);
 
         $numberEnfant = $personal->getChargePeople()->count();
 

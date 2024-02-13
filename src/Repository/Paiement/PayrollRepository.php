@@ -5,8 +5,6 @@ namespace App\Repository\Paiement;
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Payroll;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -26,17 +24,19 @@ class PayrollRepository extends ServiceEntityRepository
 
     /**
      * @param bool $campagne
+     * @param bool $type
      * @param Personal $personal
      * @return Payroll[]|null
      */
-    public function findBulletinByCampaign(bool $campagne, Personal $personal): ?array
+    public function findBulletinByCampaign(bool $campagne, bool $type, Personal $personal): ?array
     {
         return $this->createQueryBuilder('pr')
             ->join('pr.personal', 'p')
             ->join('pr.campagne', 'c')
+            ->where('c.ordinary = :status')
             ->andWhere('c.active = :active')
             ->andWhere('p.id = :personal')
-            ->setParameters(['active' => $campagne, 'personal' => $personal->getId()])
+            ->setParameters(['active' => $campagne, 'status' => $type, 'personal' => $personal->getId()])
             ->getQuery()->getResult();
     }
 
@@ -66,30 +66,6 @@ class PayrollRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    public function getTotalSalarieBaseAndSursalaire(Personal $personal, mixed $start): float|int|null
-    {
-        $dateDepart = $start;
-        $lastTwelveMonths = [];
-        for ($i = 1; $i <= 12; $i++) {
-            $date = clone $dateDepart;
-            $date->modify("-$i months");
-            $lastTwelveMonths[] = $date;
-        }
-        return $this->createQueryBuilder('pr')
-            ->select('SUM(pr.brutAmount + pr.AncienneteAmount + pr.majorationAmount - pr.salaryTransport) as amount_moyen')
-            ->join('pr.personal', 'personal')
-            ->join('pr.campagne', 'campagnes')
-            ->leftJoin('personal.departures', 'departures')
-            ->leftJoin('personal.salary', 'salary')
-            ->where('pr.personal = :pr_personal')
-            ->andWhere('campagnes.startedAt BETWEEN :start AND :end')
-            ->setParameter('pr_personal', $personal)
-            ->setParameter('start', $lastTwelveMonths[11])
-            ->setParameter('end', $lastTwelveMonths[0])
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getSingleScalarResult();
-    }
 
     public function findEtatSalaire(mixed $mouth1, mixed $mouth2, ?int $personalId): array
     {
@@ -207,8 +183,8 @@ class PayrollRepository extends ServiceEntityRepository
         return $result['cumulSalaries'];
     }
 
-    /** Obtenir le cumul des salaire de la periode des 12 mois qui précède la date de depart */
-    public function getPeriodiqueSalary2(Personal $personal, mixed $start): float|int|null
+    /** Obtenir le cumul des salaire de la periode des 12 mois partant du premier mois de l'annee précédente jusqu'à la date de depart en conges */
+    public function getPeriodiqueSalary1(Personal $personal, mixed $start): float|int|null
     {
         $dateDepart = $start;
         $lastTwelveMonths = [];
@@ -232,12 +208,12 @@ class PayrollRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
-    /** Obtenir le cumul des salaire de la periode des 12 mois qui suivent la date de depart */
-    public function getPeriodiqueSalary1(Personal $personal, mixed $start): float|int|null
+    /** Obtenir le cumul des salaire de la periode des 12 mois partant de la date du mois précédent de congés jusqu'à la date de depart de congés */
+    public function getPeriodiqueSalary2(Personal $personal, mixed $start): float|int|null
     {
         $dateDepart = $start;
         $lastTwelveMonths = [];
-        for ($i = 1; $i <= 12; $i++) {
+        for ($i = 1; $i <= 11; $i++) {
             $date = clone $dateDepart;
             $date->modify("+$i months");
             $lastTwelveMonths[] = $date;
@@ -251,12 +227,71 @@ class PayrollRepository extends ServiceEntityRepository
             ->andWhere('campagnes.startedAt BETWEEN :start AND :end')
             ->setParameter('pr_personal', $personal)
             ->setParameter('start', $lastTwelveMonths[0])
-            ->setParameter('end', $lastTwelveMonths[11])
+            ->setParameter('end', $lastTwelveMonths[10])
             ->setMaxResults(1)
             ->getQuery()
             ->getSingleScalarResult();
     }
 
+    /** Determiner le dernier salaire payer au salarie */
+    public function getLastAmountMensuel(Personal $personal): float|int|null
+    {
+        $query = $this->createQueryBuilder('pr')
+            ->select('(pr.brutAmount + pr.AncienneteAmount + pr.majorationAmount - pr.salaryTransport) as cumulSalaries')
+            ->join('pr.personal', 'personal')
+            ->join('pr.campagne', 'campagnes')
+            ->where('pr.personal = :personal')
+            ->andWhere('campagnes.ordinary = true')
+            ->orderBy('campagnes.startedAt', 'DESC')
+            ->setMaxResults(1)
+            ->setParameter('personal', $personal)
+            ->getQuery();
+        $result = $query->getSingleResult();
+        return $result['cumulSalaries'];
+    }
 
+    /** Determiner le salaire global des 12 dernier mois  */
+    public function getSalaireGlobal(Personal $personal, mixed $start): float|int|null
+    {
+        $dateDepart = $start;
+        $lastTwelveMonths = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $date = clone $dateDepart;
+            $date->modify("-$i months");
+            $lastTwelveMonths[] = $date;
+        }
+        return $this->createQueryBuilder('pr')
+            ->select('SUM(pr.brutAmount + pr.AncienneteAmount + pr.majorationAmount - pr.salaryTransport) as amount_moyen')
+            ->join('pr.personal', 'personal')
+            ->join('pr.campagne', 'campagnes')
+            ->leftJoin('personal.departures', 'departures')
+            ->leftJoin('personal.salary', 'salary')
+            ->where('pr.personal = :pr_personal')
+            ->andWhere('campagnes.startedAt BETWEEN :start AND :end')
+            ->setParameter('pr_personal', $personal)
+            ->setParameter('start', $lastTwelveMonths[11])
+            ->setParameter('end', $lastTwelveMonths[0])
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /** Determiner le salaire net du salarié */
+    public function getAmountNetPayer(Personal $personal): float|int|null
+    {
+        $query = $this->createQueryBuilder('pr')
+            ->select('(pr.netPayer) as netPayer')
+            ->join('pr.personal', 'personal')
+            ->join('pr.campagne', 'campagnes')
+            ->where('pr.personal = :personal')
+            ->andWhere('campagnes.ordinary = true')
+            ->andWhere('campagnes.active = true')
+            ->orderBy('campagnes.startedAt', 'DESC')
+            ->setMaxResults(1)
+            ->setParameter('personal', $personal)
+            ->getQuery();
+        $result = $query->getSingleResult();
+        return $result['netPayer'];
+    }
 
 }

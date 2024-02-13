@@ -68,6 +68,9 @@ class Salary
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $totalAutrePrimes = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $gratification = null;
+
     public function __construct()
     {
         $this->detailSalaries = new ArrayCollection();
@@ -291,6 +294,18 @@ class Salary
     public function setTotalAutrePrimes(?string $totalAutrePrimes): static
     {
         $this->totalAutrePrimes = $totalAutrePrimes;
+
+        return $this;
+    }
+
+    public function getGratification(): ?string
+    {
+        return $this->gratification;
+    }
+
+    public function setGratification(?string $gratification): static
+    {
+        $this->gratification = $gratification;
 
         return $this;
     }

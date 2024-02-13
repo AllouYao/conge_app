@@ -2,6 +2,7 @@
 
 namespace App\Entity\Impots;
 
+use App\Entity\DossierPersonal\Departure;
 use App\Entity\DossierPersonal\Personal;
 use App\Repository\Impots\ChargePersonalsRepository;
 use App\Utils\Horodatage;
@@ -39,6 +40,15 @@ class ChargePersonals
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private ?string $numPart = null;
+
+    #[ORM\ManyToOne(inversedBy: 'chargePersonals')]
+    private ?Departure $departure = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountImpotBrut = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountCreditImpot = null;
 
     public function getId(): ?int
     {
@@ -113,6 +123,42 @@ class ChargePersonals
     public function setNumPart(string $numPart): static
     {
         $this->numPart = $numPart;
+
+        return $this;
+    }
+
+    public function getDeparture(): ?Departure
+    {
+        return $this->departure;
+    }
+
+    public function setDeparture(?Departure $departure): static
+    {
+        $this->departure = $departure;
+
+        return $this;
+    }
+
+    public function getAmountImpotBrut(): ?string
+    {
+        return $this->amountImpotBrut;
+    }
+
+    public function setAmountImpotBrut(?string $amountImpotBrut): static
+    {
+        $this->amountImpotBrut = $amountImpotBrut;
+
+        return $this;
+    }
+
+    public function getAmountCreditImpot(): ?string
+    {
+        return $this->amountCreditImpot;
+    }
+
+    public function setAmountCreditImpot(?string $amountCreditImpot): static
+    {
+        $this->amountCreditImpot = $amountCreditImpot;
 
         return $this;
     }

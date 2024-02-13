@@ -283,7 +283,90 @@
                             return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
                         },
                     },
-
+                    {
+                      caption: 'Partie des céssations de contrat',
+                      alignment: 'center',
+                      columns: [
+                          {
+                              caption: 'Date cessation',
+                              alignment: 'center',
+                              dataType: 'string',
+                              dataField: 'date_cessation',
+                          },
+                          {
+                              caption: 'Solde presence',
+                              alignment: 'right',
+                              dataType: 'number',
+                              dataField: 'solde_presence',
+                              customizeText: function (data) {
+                                  return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                              },
+                          },
+                          {
+                              caption: 'Gratification prorata',
+                              alignment: 'right',
+                              dataType: 'number',
+                              dataField: 'solde_gratification',
+                              customizeText: function (data) {
+                                  return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                              },
+                          },
+                          {
+                              caption: 'Solde congés',
+                              alignment: 'right',
+                              dataType: 'number',
+                              dataField: 'solde_conges',
+                              customizeText: function (data) {
+                                  return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                              },
+                          },
+                          {
+                              caption: 'Solde préavis',
+                              alignment: 'right',
+                              dataType: 'number',
+                              dataField: 'solde_preavis',
+                              customizeText: function (data) {
+                                  return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                              },
+                          },
+                          {
+                              caption: 'Indemnite licenciement',
+                              alignment: 'right',
+                              dataType: 'number',
+                              dataField: 'solde_indemnite_licenciement',
+                              customizeText: function (data) {
+                                  return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                              },
+                          },
+                          {
+                              caption: 'Indemnite retraite',
+                              alignment: 'right',
+                              dataType: 'number',
+                              dataField: 'solde_retraite',
+                              customizeText: function (data) {
+                                  return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                              },
+                          },
+                          {
+                              caption: 'Indemnite déces',
+                              alignment: 'right',
+                              dataType: 'number',
+                              dataField: 'solde_indemnite_deces',
+                              customizeText: function (data) {
+                                  return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                              },
+                          },
+                          {
+                              caption: 'Frais funéraire',
+                              alignment: 'right',
+                              dataType: 'number',
+                              dataField: 'frais_funeraire',
+                              customizeText: function (data) {
+                                  return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                              },
+                          },
+                      ]
+                    },
                     {
                       caption: "Charge salariale",
                       alignment: 'center',

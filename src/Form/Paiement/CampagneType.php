@@ -6,6 +6,7 @@ use App\Contract\SalaryInterface;
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Campagne;
 use App\Repository\DossierPersonal\PersonalRepository;
+use Carbon\Carbon;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -49,9 +50,19 @@ class CampagneType extends AbstractType
                         'data-plugin' => 'customselect'
                     ],
                     'query_builder' => function (EntityRepository $er) {
+                        // obtenir le premier et le dernier jour du mois
+                        $carbon = Carbon::today();
+                        $month = $carbon->month;
+                        $years = $carbon->year;
+                        $firstDay = new \DateTime("$years-$month-1");
+                        $lastDay = new \DateTime("$years-$month-" . $firstDay->format("t"));
                         return $er->createQueryBuilder('p')
                             ->join('p.contract', 'contract')
-                            ->where('contract.id is not null');
+                            ->leftJoin('p.departures', 'departures')
+                            ->where('contract.id is not null')
+                            ->orWhere('departures.date BETWEEN :start AND :end')
+                            ->setParameter('start', $firstDay)
+                            ->setParameter('end', $lastDay);
                     },
                     'multiple' => true,
                     'help' => 'La campagne est fonction des salarié'
@@ -81,7 +92,7 @@ class CampagneType extends AbstractType
                 $personals = $event->getForm()->get('personal')->getData();
                 $campagne = $event->getForm()->getData();
                 if ($checkedAll === true) {
-                    $personal = $this->repositoryPer->findAllPersonal();
+                    $personal = $this->repositoryPer->findAllPersonalOnCampain();
                     foreach ($personal as $individual) {
                         $campagne->addPersonal($individual);
                         $this->salaryInterface->chargePersonal($individual);

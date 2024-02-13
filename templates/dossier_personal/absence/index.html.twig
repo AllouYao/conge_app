@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des absences{% endblock %}
+{% block title %}ABSENCE{% endblock %}
 {% block stylesheets %}
     <style>
         #dataGridAbsence {
@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        LISTE DES ABSENCES DU {{ mois }} MOIS DE L'ANNEE {{ annee }}
+                        LISTE DES ABSENCES DE LA PERIODE DE {{ date|upper }}
                     </h5>
                 </div>
                 <div class="card-body">

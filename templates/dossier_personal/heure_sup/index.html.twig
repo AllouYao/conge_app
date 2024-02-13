@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste du personnel salarié{% endblock %}
+{% block title %}Liste des heures supp de lq periode | {{ date|capitalize }}{% endblock %}
 {% block stylesheets %}
     <style>
         #dataGridHeureSupplementaire {
@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        LISTE DES HEURES SUPPLEMENTAIRES
+                        LISTE DES HEURES SUPPLEMENTAIRES DE LA PERIODE DE {{ date|upper }}
                     </h5>
                 </div>
                 <div class="card-body">

@@ -27,6 +27,7 @@ class CampagneExcepType extends AbstractType
         $this->repositoryPer = $repository;
         $this->salaryInterface = $salaryInterface;
     }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -80,16 +81,22 @@ class CampagneExcepType extends AbstractType
             FormEvents::POST_SUBMIT,
             function (FormEvent $event) use ($formModifier) {
                 $checkedAll = $event->getForm()->get('checkedAll')->getData();
+                $personal = $event->getForm()->get('personal')->getData();
+                $campagne = $event->getForm()->getData();
                 if ($checkedAll === true) {
-                    $campagne = $event->getForm()->getData();
                     $personal = $this->repositoryPer->findAllPersonalDepart();
                     foreach ($personal as $individual) {
                         $campagne->addPersonal($individual);
-                        $this->salaryInterface->chargePersonal($individual);
-                        $this->salaryInterface->chargeEmployeur($individual);
+                        $this->salaryInterface->chargePersonalByDeparture($individual);
+                        $this->salaryInterface->chargeEmployeurByDeparture($individual);
+                    }
+                } else {
+                    foreach ($personal as $individual) {
+                        $campagne->addPersonal($individual);
+                        $this->salaryInterface->chargePersonalByDeparture($individual);
+                        $this->salaryInterface->chargeEmployeurByDeparture($individual);
                     }
                 }
-
             }
         );
     }

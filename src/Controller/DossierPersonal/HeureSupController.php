@@ -7,9 +7,11 @@ use App\Form\DossierPersonal\PersonalHeureSupType;
 use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Service\HeureSupService;
+use App\Service\UtimePaiementService;
 use App\Utils\Status;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
+use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,17 +25,20 @@ class HeureSupController extends AbstractController
     private EntityManagerInterface $entityManager;
     private PersonalRepository $personalRepository;
     private HeureSupRepository $heureSupRepository;
+    private UtimePaiementService $utimePaiementService;
 
 
     public function __construct(
         EntityManagerInterface $entityManager,
         PersonalRepository     $personalRepository,
         HeureSupRepository     $heureSupRepository,
+        UtimePaiementService   $utimePaiementService
     )
     {
         $this->entityManager = $entityManager;
         $this->personalRepository = $personalRepository;
         $this->heureSupRepository = $heureSupRepository;
+        $this->utimePaiementService = $utimePaiementService;
     }
 
     #[Route('/api/heure_supp_super_book', name: 'api_heure_supp_super_book', methods: ['GET'])]
@@ -49,12 +54,13 @@ class HeureSupController extends AbstractController
         $personals = $this->personalRepository->findAllPersonal();
         $apiHeureSupp = [];
         $salaireHoraire = 0;
+
         foreach ($personals as $personal) {
             $heureSupp = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
             //$heureSupp = $this->heureSupRepository->findAll();
             $statut = $personal->getContract()->getTempsContractuel() === Status::TEMPS_PLEIN ? 'PERMANENT' : 'VACATAIRES';
             $fullnamePersonal = $personal->getFirstName() . ' ' . $personal->getLastName();
-            $personalSalaireBase = $personal->getCategorie()->getAmount();
+            $personalSalaireBase = $this->utimePaiementService->getAmountSalaireBrutAndImposable($personal)['salaire_categoriel'];
             $amountHoraire = 0;
             $heure_15 = 0;
             $heure_50 = 0;
@@ -116,7 +122,6 @@ class HeureSupController extends AbstractController
             $personal = $supp->getPersonal();
         }
         $requestHeursSupp = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
-        //$requestHeursSupp = $this->heureSupRepository->findAll();
         $apiRequestHeureSupp = [];
         foreach ($requestHeursSupp as $heureSup) {
             $apiRequestHeureSupp[] = [
@@ -131,7 +136,7 @@ class HeureSupController extends AbstractController
                 'date_fin' => date_format($heureSup->getEndedDate(), 'd/m/Y'),
                 'heure_fin' => date_format($heureSup->getEndedHour(), 'H:m'),
                 'total_horaire' => $heureSup->getTotalHorraire(),
-                'date_creation' => date_format($heureSup->getPersonal()->getCreatedAt(), 'd/m/Y'),
+                'date_creation' => date_format($heureSup->getCreatedAt(), 'd/m/Y'),
                 'modifier' => $this->generateUrl('personal_heure_sup_edit', ['uuid' => $heureSup->getPersonal()->getUuid()])
             ];
         }
@@ -142,20 +147,25 @@ class HeureSupController extends AbstractController
     #[Route('/supp_book', name: 'supp_book', methods: ['GET'])]
     public function heureSuppBook(): Response
     {
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
         $today = Carbon::now();
-        $years = $today->year;
-        $month = $today->month;
+        $date = $formatter->format($today);
+
         return $this->render('dossier_personal/heure_sup/sup_book.html.twig', [
             'heureSups' => $this->heureSupRepository->findAll(),
-            'mois' => $month,
-            'annee' => $years
+            'date' => $date
         ]);
     }
 
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(): Response
     {
-        return $this->render('dossier_personal/heure_sup/index.html.twig');
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+        $today = Carbon::now();
+        $date = $formatter->format($today);
+        return $this->render('dossier_personal/heure_sup/index.html.twig', [
+            'date' => $date
+        ]);
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
@@ -198,7 +208,7 @@ class HeureSupController extends AbstractController
         }
         return $this->render('dossier_personal/heure_sup/edit.html.twig', [
             'personals' => $personal,
-            'form' => $form,
+            'form' => $form->createView(),
             'editing' => true
         ]);
     }

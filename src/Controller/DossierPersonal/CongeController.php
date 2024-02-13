@@ -10,6 +10,7 @@ use App\Utils\Status;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -61,13 +62,12 @@ class CongeController extends AbstractController
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(CongeRepository $congeRepository): Response
     {
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
         $today = Carbon::now();
-        $years = $today->year;
-        $month = $today->month;
+        $date = $formatter->format($today);
         return $this->render('dossier_personal/conge/index.html.twig', [
             'conges' => $congeRepository->findAll(),
-            'mois' => $month,
-            'annee' => $years
+            'date' => $date
         ]);
     }
 
@@ -96,7 +96,9 @@ class CongeController extends AbstractController
                 est actuellement en congés n\'est donc pas éligible pour une acquisition de congés.');
                 return $this->redirectToRoute('conge_index');
             }
-            $congeService->calculate($conge);
+            if ($lastConge)
+                $congeService->congesPayerByLast($conge);
+            $congeService->congesPayerByFirst($conge);
             $conge
                 ->setDateDernierRetour($lastDateReturn)
                 ->setTypeConge(Status::CONGE_GLOBAL)
@@ -115,17 +117,27 @@ class CongeController extends AbstractController
     }
 
 
+    /**
+     * @throws Exception
+     */
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(
         Request                $request,
         Conge                  $conge,
         EntityManagerInterface $entityManager,
+        CongeService           $congeService,
+        CongeRepository        $congeRepository
     ): Response
     {
         $form = $this->createForm(CongeType::class, $conge);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $personal = $conge->getPersonal();
+            $lastConge = $congeRepository->getLastCongeByID($personal->getId(), false);
+            if ($lastConge)
+                $congeService->congesPayerByLast($conge);
+            $congeService->congesPayerByFirst($conge);
             $entityManager->persist($conge);
             $entityManager->flush();
             flash()->addSuccess('Congé planifié modifier avec succès.');

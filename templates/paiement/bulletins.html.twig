@@ -1,0 +1,615 @@
+{% extends 'imprimer.html.twig' %}
+
+{% block title %}Bulletin de paie{% endblock %}
+
+{% block stylesheets %}
+
+    <style>
+        .table-sans-bordure {
+            border-collapse: collapse;
+        }
+
+        .table-sans-bordure td, .table-sans-bordure th {
+            border-bottom: none;
+            padding: 4px; /* Ajoutez un espacement entre les cellules si nécessaire */
+        }
+
+        .sans-bordure th, .sans-bordure td {
+            border-bottom: none;
+            padding: 4px; /* Ajoutez un espacement entre les cellules si nécessaire */
+        }
+
+        .small-text {
+            font-size: 9px;
+        }
+
+        .no-border-button {
+            border-bottom: none;
+        }
+
+        .no-border-top {
+            border-top: none;
+        }
+
+    </style>
+
+{% endblock %}
+
+{% block content %}
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <div class="widget">
+                <div class="widget-content">
+                    <div class="row mb-3">
+                        <div class="col-md-12 mb-3" style="border: 2px double silver; padding: 10px; border-radius: 5px"
+                             id="header">
+                            <h4 class="text-center"><strong>BULLETIN DE PAIE </strong></h4>
+                        </div>
+                        <div class="col-md-12" style="display: flex">
+                            <div class="col-md-2">
+                                <table class="table table-bordered" style="border: #0b0b0f solid 1px">
+                                    <tbody>
+                                    <tr class="small-text sans-bordure">
+                                        <td class="text-center">
+                                            <span style="font-size: 45px">LOGO</span> <br><br><br>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-5">
+                                <table class="table table-bordered" style="border: #0b0b0f solid 1px">
+                                    <tbody>
+                                    <tr class="small-text sans-bordure">
+                                        <td>
+                                            <span>Matricule</span> <span
+                                                    style="margin-left: 48px; font-weight: bolder">{{ payrolls.matricule }}</span>
+                                            <br>
+                                            <span>Service</span> <span
+                                                    style="margin-left: 54px;">{{ payrolls.service }}</span>
+                                            <br>
+                                            <span>Catégorie</span> <span
+                                                    style="margin-left: 44px;">{{ payrolls.categorie }}</span>
+                                            <br>
+                                            <span>Salaire catégoriel</span> <span
+                                                    style="margin-left: 14px;">{{ payrolls.Salaire_categoriel }}</span>
+                                            <br>
+                                            <span>Nbre de part</span> <span
+                                                    style="margin-left: 33px;">{{ payrolls.nombre_part }}</span>
+                                            <br>
+                                            <span>Date d'entrée</span> <span
+                                                    style="margin-left: 29px;">{{ payrolls.date_embauche }}</span>
+                                            <br>
+                                            <span>N° CNPS</span> <span
+                                                    style="margin-left: 45px;">{{ payrolls.numero_cnps }}</span>
+                                            <br>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-5">
+                                <table class="table table-bordered" style="border: #0b0b0f solid 1px">
+                                    <tbody>
+                                    <tr class="small-text sans-bordure">
+                                        <td>
+                                            <span>PERIODE DE PAIE</span> <span
+                                                    style="margin-left: 21px; font-weight: bolder">{{ payrolls.periode_paie|capitalize }}</span>
+                                            <br><br>
+                                            <span>DATE D'EDITION</span> <span
+                                                    style="margin-left: 29px; font-weight: bolder">{{ payrolls.date_edition }}</span>
+                                            <br><br>
+                                            <span>NOM ET PRENOMS</span> <span
+                                                    style="margin-left: 17px; font-weight: bolder">{{ payrolls.nom_prenoms|upper }}</span>
+                                            <br><br>
+                                            <span>EMPLOIS</span> <span
+                                                    style="margin-left: 60px; font-weight: bolder">{{ payrolls.departement|upper }}</span>
+                                            <br>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <table class="table table-bordered" style="border: #0b0b0f solid 1px">
+                                <thead class="table-secondary" style="border: #0b0b0f solid 1px">
+                                <tr class="small-text text-center sans-bordure">
+                                    <th rowspan="2">Rubrique</th>
+                                    <th rowspan="2">Libelle</th>
+                                    <th rowspan="2">Base</th>
+                                    <th colspan="3">Part salariale</th>
+                                    <th colspan="2">Part patronale</th>
+                                </tr>
+                                <tr class="sans-bordure small-text text-center">
+                                    <th>Taux</th>
+                                    <th>Gain</th>
+                                    <th>Retenue</th>
+                                    <th>Taux</th>
+                                    <th>Retenue</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% if payrolls.salaire_base %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>OO1</td>
+                                        <td>Salaire de base</td>
+                                        <td class="text-end">{{ payrolls.salaire_base|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.salaire_base|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.sursalaire %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>OO2</td>
+                                        <td>Sursalaire</td>
+                                        <td class="text-end">{{ payrolls.sursalaire|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.sursalaire|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.majoration_heure_sup_15 %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>OO3</td>
+                                        <td>Majoration H.S à 15%</td>
+                                        <td class="text-end">{{ payrolls.majoration_heure_sup_15|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.majoration_heure_sup_15|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.majoration_heure_sup_50 %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>OO4</td>
+                                        <td>Majoration H.S à 50%</td>
+                                        <td class="text-end">{{ payrolls.majoration_heure_sup_50|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.majoration_heure_sup_50|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.majoration_heure_sup_75_A %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>OO5</td>
+                                        <td>Majoration H.S à 75% (ferié/dimanche jrs)</td>
+                                        <td class="text-end">{{ payrolls.majoration_heure_sup_75_A|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.majoration_heure_sup_75_A|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.majoration_heure_sup_75_B %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>OO6</td>
+                                        <td>Majoration H.S à 75% (normal/dimanche nuit)</td>
+                                        <td class="text-end">{{ payrolls.majoration_heure_sup_75_B|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.majoration_heure_sup_75_B|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.majoration_heure_sup_100 %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>OO7</td>
+                                        <td>Majoration H.S à 75% (normal/dimanche jrs)</td>
+                                        <td class="text-end">{{ payrolls.majoration_heure_sup_100|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.majoration_heure_sup_100|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.transport_imposable %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>OO8</td>
+                                        <td>Prime transport Imp</td>
+                                        <td class="text-end">{{ payrolls.transport_imposable|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.transport_imposable|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.avantage_imposable %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>OO9</td>
+                                        <td>Aventage nature Imp</td>
+                                        <td class="text-end">{{ payrolls.avantage_imposable|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.avantage_imposable|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.prime_fonction %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>O10</td>
+                                        <td>Prime fonction</td>
+                                        <td class="text-end">{{ payrolls.prime_fonction|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.prime_fonction|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.prime_logement %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>O11</td>
+                                        <td>Prime logement</td>
+                                        <td class="text-end">{{ payrolls.prime_logement|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.prime_logement|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.indemnite_fonction %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>O12</td>
+                                        <td>Indemnite fonction</td>
+                                        <td class="text-end">{{ payrolls.indemnite_fonction|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.indemnite_fonction|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.indemnite_logement %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>O13</td>
+                                        <td>Indemnite logement</td>
+                                        <td class="text-end">{{ payrolls.indemnite_logement|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.indemnite_logement|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.prime_anciennete %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>O14</td>
+                                        <td>Prime d'ancienneté</td>
+                                        <td class="text-end">{{ payrolls.prime_anciennete|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.prime_anciennete|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.total_brut %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td></td>
+                                        <td class="text-center">Total brut imposable</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end"
+                                            style="border-top: solid 1px">{{ payrolls.total_brut|number_format(0, ',', ' ') }}</td>
+                                        <td style="border-top: solid 1px"></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.amount_its_salarial %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>015</td>
+                                        <td>ITS</td>
+                                        <td class="text-end">{{ payrolls.total_brut|number_format(0, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payrolls.taux_its }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.amount_its_salarial|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.amount_cnps_salarial %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>016</td>
+                                        <td>Retenue CNPS</td>
+                                        <td class="text-end">{{ payrolls.total_brut|number_format(0, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payrolls.taux_cnps_salarial|number_format(2, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.amount_cnps_salarial|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.amount_cr_employeur %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>017</td>
+                                        <td>Retenue Générale CNPS</td>
+                                        <td class="text-end">{{ payrolls.total_brut|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.taux_cr_employeur|number_format(2, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payrolls.amount_cr_employeur|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.amount_pf_employeur %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>018</td>
+                                        <td>Prestations Familiales</td>
+                                        <td class="text-end">{{ payrolls.smig|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.taux_pf_employeur|number_format(2, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payrolls.amount_pf_employeur|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.amount_at_employeur %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>019</td>
+                                        <td>Accident du travail</td>
+                                        <td class="text-end">{{ payrolls.smig|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.taux_at_employeur|number_format(2, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payrolls.amount_at_employeur|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.amount_is_employeur %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>020</td>
+                                        <td>Part patronale I.S local</td>
+                                        <td class="text-end">{{ payrolls.total_brut|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.taux_is_employeur|number_format(2, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payrolls.amount_is_employeur|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.amount_ta_employeur %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>021</td>
+                                        <td>Taux D'apprentissage</td>
+                                        <td class="text-end">{{ payrolls.total_brut|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.taux_ta_employeur|number_format(2, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payrolls.amount_ta_employeur|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.amount_fpc_employeur %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>022</td>
+                                        <td>FPC</td>
+                                        <td class="text-end">{{ payrolls.total_brut|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.taux_fpc_employeur|number_format(2, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payrolls.amount_fpc_employeur|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.amount_fpc_annuel_employeur %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>023</td>
+                                        <td>FPC REGUL</td>
+                                        <td class="text-end">{{ payrolls.total_brut|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.taux_fpc_annuel_employeur|number_format(2, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payrolls.amount_fpc_annuel_employeur|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.amount_cmu_salarial and payrolls.amount_cmu_patronal %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>024</td>
+                                        <td>Retenue CMU</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.amount_cmu_salarial|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.amount_cmu_patronal|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.charge_salarial and payrolls.charge_patronal %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td></td>
+                                        <td class="text-center">Total Cotisations</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td style="border-top: solid 1px"></td>
+                                        <td class="text-end"
+                                            style="border-top: solid 1px">{{ payrolls.charge_salarial|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end"
+                                            style="border-top: solid 1px">{{ payrolls.charge_patronal|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.prime_transport %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>025</td>
+                                        <td>Prime transport NI</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.prime_transport|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.amount_prime_panier %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>026</td>
+                                        <td>Prime panier</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.amount_prime_panier|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.amount_prime_salissure %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>027</td>
+                                        <td>Prime salissure</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.amount_prime_salissure|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.amount_prime_tt %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>028</td>
+                                        <td>Prime tenue travail</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.amount_prime_tt|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.amount_prime_outi %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>029</td>
+                                        <td>Prime outillage</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.amount_prime_outi|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.amount_prime_rendement %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>030</td>
+                                        <td>Prime rendement</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.amount_prime_rendement|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                <tr class="small-text sans-bordure no-border-button no-border-top">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr class="small-text sans-bordure no-border-button no-border-top">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr class="small-text sans-bordure no-border-button no-border-top">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr class="small-text sans-bordure no-border-button no-border-top">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <table class="table table-bordered" style="border: #0b0b0f solid 1px">
+                                <thead class="table-secondary" style="border: #0b0b0f solid 1px">
+                                <tr class="small-text text-center sans-bordure">
+                                    <th>Cumuls</th>
+                                    <th>Salaire Brut</th>
+                                    <th>Charges Salariales</th>
+                                    <th>Charges patronales</th>
+                                    <th>Aventage en nature</th>
+                                    <th>Net imposable</th>
+                                    <th>Heures travaillées</th>
+                                    <th>Heures Supplémentaires</th>
+                                    <th style="border: #0b0b0f 2px inset">NET A PAYER</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr class="small-text sans-bordure">
+                                    <td class="text-center">Periode</td>
+                                    <td class="text-end">{{ payrolls.salaire_brut|number_format(0, ',', ' ') }}</td>
+                                    <td class="text-end">{{ payrolls.charge_salarial|number_format(0, ',', ' ') }}</td>
+                                    <td class="text-end">{{ payrolls.charge_patronal|number_format(0, ',', ' ') }}</td>
+                                    <td class="text-end">{{ payrolls.amount_avantage|number_format(0, ',', ' ') }}</td>
+                                    <td class="text-end">{{ payrolls.net_imposable|number_format(0, ',', ' ') }}</td>
+                                    <td class="text-end">{{ payrolls.heure_travailler|number_format(0, ',', ' ') }}</td>
+                                    <td class="text-end">{{ payrolls.nb_heure_supp|number_format(0, ',', ' ') }}</td>
+                                    <td class="text-end"
+                                        style="border: #0b0b0f 2px inset">{{ payrolls.net_payes|number_format(0, ',', ' ') }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <table class="table table-bordered" style="border: #0b0b0f solid 1px">
+                                <tbody class="small-text sans-bordure">
+                                <tr>
+                                    <td class="h6">Mode de paiement {{ payrolls.mode_paiement|capitalize }}
+                                        sur {{ 'BIAO' }}
+                                        : {{ payrolls.account_number }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="">
+        <a class="btn btn-dark btn-print pull-right" style="color: white" href="javascript:window.print()">
+            <i class="icon-print"></i>
+            Imprimer</a>
+        <a class="btn btn-info btn-back pull-right" style="margin-right: 5px" onclick="window.close()"
+           href="{{ path('app_home') }}">
+            retour</a>
+    </div>
+{% endblock %}
+

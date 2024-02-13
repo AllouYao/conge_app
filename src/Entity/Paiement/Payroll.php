@@ -182,6 +182,12 @@ class Payroll
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $allocationCongeD = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $totalIndemniteBrut = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $totalIndemniteImposable = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -819,6 +825,30 @@ class Payroll
     public function setAllocationCongeD(?string $allocationCongeD): static
     {
         $this->allocationCongeD = $allocationCongeD;
+
+        return $this;
+    }
+
+    public function getTotalIndemniteBrut(): ?string
+    {
+        return $this->totalIndemniteBrut;
+    }
+
+    public function setTotalIndemniteBrut(?string $totalIndemniteBrut): static
+    {
+        $this->totalIndemniteBrut = $totalIndemniteBrut;
+
+        return $this;
+    }
+
+    public function getTotalIndemniteImposable(): ?string
+    {
+        return $this->totalIndemniteImposable;
+    }
+
+    public function setTotalIndemniteImposable(?string $totalIndemniteImposable): static
+    {
+        $this->totalIndemniteImposable = $totalIndemniteImposable;
 
         return $this;
     }

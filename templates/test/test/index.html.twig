@@ -326,54 +326,10 @@
                         <td></td>
                     </tr>
                 {% endif %}
-                {% if payrolls.preavis_amount %}
-                    <tr style="font-size: xx-small">
-                        <td>013</td>
-                        <td>INDEMNITE DE PREAVIS</td>
-                        <td class="text-end">{{ payrolls.preavis_amount|number_format(2,',',' ') }}</td>
-                        <td></td>
-                        <td class="text-end">{{ payrolls.preavis_amount|number_format(2,',',' ') }}</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                {% endif %}
-                {% if payrolls.licenciement_imposable %}
-                    <tr style="font-size: xx-small">
-                        <td>014</td>
-                        <td>INDEMNITE DE LICENCIEMENT IMPOSABLE</td>
-                        <td class="text-end">{{ payrolls.licenciement_imposable|number_format(2,',',' ') }}</td>
-                        <td></td>
-                        <td class="text-end">{{ payrolls.licenciement_imposable|number_format(2,',',' ') }}</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                {% endif %}
-                {% if payrolls.gratification_depart %}
-                    <tr style="font-size: xx-small">
-                        <td>015</td>
-                        <td>GRATIFICATION RUPTURE</td>
-                        <td class="text-end">{{ payrolls.gratification_depart|number_format(2,',',' ') }}</td>
-                        <td></td>
-                        <td class="text-end">{{ payrolls.gratification_depart|number_format(2,',',' ') }}</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                {% endif %}
-                {% if payrolls.allocation_depart %}
-                    <tr style="font-size: xx-small">
-                        <td>015</td>
-                        <td>ALLOCATION CONGE</td>
-                        <td class="text-end">{{ payrolls.allocation_depart|number_format(2,',',' ') }}</td>
-                        <td></td>
-                        <td class="text-end">{{ payrolls.allocation_depart|number_format(2,',',' ') }}</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                {% endif %}
+
+
+
+
                 {% if payrolls.prime_anciennete %}
                     <tr style="font-size: xx-small">
                         <td>016</td>
@@ -593,18 +549,6 @@
                         <td class="text-end"></td>
                         <td class="text-end"></td>
                         <td class="text-end">{{ payrolls.amount_prime_rendement|number_format(2,',',' ') }}</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                {% endif %}
-                {% if payrolls.licenciement_ni %}
-                    <tr style="font-size: xx-small">
-                        <td>033</td>
-                        <td>INDEMNITE LICENCIEMENT NI</td>
-                        <td class="text-end"></td>
-                        <td class="text-end"></td>
-                        <td class="text-end">{{ payrolls.licenciement_ni|number_format(2,',',' ') }}</td>
                         <td></td>
                         <td></td>
                         <td></td>

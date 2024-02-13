@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}LIVRE DE MAJORATION DES HEURS SUP SUR PAR TRANCHE {% endblock %}
+{% block title %}Récapitulatif des majoration heure supp de la periode | {{ date|capitalize }} {% endblock %}
 {% block stylesheets %}
     <style>
         #dataGridSupp {
@@ -17,7 +17,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        LIVRE DE MAJORATIONS DES HEURES SUP DU {{ mois }} MOIS DE L'ANNEE {{ annee }}
+                        RECAPITULATIF DE MAJORATIONS DES HEURES SUPP PAR TRANCHE DE LA PERIODE DE {{ date|upper }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -40,8 +40,8 @@
         }
 
         $(document).ready(function () {
-            let debut;
-            let fin;
+            let debut = null;
+            let fin = null;
             $("#dataGridSupp").dxDataGrid({
                 dataSource: `{{ url('personal_heure_sup_api_heure_supp_super_book') }}`,
                 showBorders: true,
@@ -66,7 +66,6 @@
                             component: e.component,
                             worksheet,
                             autoFilterEnabled: true,
-                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
                             customizeCell: function (options) {
                                 const {gridCell, excelCell} = options;
                                 if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
@@ -117,14 +116,14 @@
                         fixed: true
                     },
                     {
-                        caption: 'Heures Normales',
+                        caption: 'Heures normales',
                         dataType: 'number',
                         dataField: 'heure_normal',
                         alignment: 'center',
                         width: 120,
                     },
                     {
-                        caption: 'Total Des Heures',
+                        caption: 'Total heures',
                         dataType: 'number',
                         dataField: 'total_heure',
                         alignment: 'center',
@@ -166,7 +165,7 @@
                         width: 120,
                     },
                     {
-                        caption: 'Salaire Horaire',
+                        caption: 'Salaire horaire',
                         dataType: 'number',
                         dataField: 'taux_horaire',
                         alignment: 'right',

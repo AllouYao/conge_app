@@ -9,8 +9,6 @@ use App\Service\DepartServices;
 use App\Utils\Status;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -26,7 +24,7 @@ class DepartureController extends AbstractController
 
     public function __construct(
         DepartureRepository $departureRepository,
-        DepartServices      $departServices
+        DepartServices      $departServices,
     )
     {
         $this->departureRepository = $departureRepository;
@@ -44,19 +42,32 @@ class DepartureController extends AbstractController
         $departures = $this->departureRepository->getDepartureByDate($month, $years);
         foreach ($departures as $departure) {
             $personal = $departure->getPersonal();
-            $salaireBase = $personal->getCategorie()->getAmount();
+            $smm = $this->departServices->indemniteCompensatriceCgs($departure)['salaire_moyen_mensuel'];
             $categorySalarie = $personal->getCategorie()->getCategorySalarie()->getName();
             $reason = $departure->getReason();
             $anciennete = $this->departServices->getAncienneteByDepart($departure);
-            $globalElement = $this->departServices->getElements($departure);
-            $dernierRetourConger = $globalElement['last_day_conges'] ?? ' ';
+            $dernierRetourConger = $this->departServices->indemniteCompensatriceCgs($departure)['date_dernier_conge'] ?? '';
             $dureePreavis = null;
             if (
                 $reason === Status::LICENCIEMENT_COLLECTIF ||
                 $reason === Status::MALADIE ||
-                $reason === Status::LICENCIEMENT_FAIT_EMPLOYEUR
+                $reason === Status::LICENCIEMENT_FAIT_EMPLOYEUR ||
+                $reason === Status::RETRAITE
             ) {
                 $dureePreavis = $this->departServices->getDrPreavisInMonth($anciennete['anciennity_in_year'], $categorySalarie);
+            }
+
+            $deces = null;
+            $fraisFuneraire = null;
+            $retraite = null;
+            $licenciement = null;
+            if ($reason === Status::RETRAITE) {
+                $retraite = $departure->getDissmissalAmount();
+            } elseif ($reason === Status::DECES) {
+                $deces = $departure->getDissmissalAmount();
+                $fraisFuneraire = $this->departServices->getFraisFuneraire($departure);
+            } else {
+                $licenciement = $departure->getDissmissalAmount();
             }
 
             $apiDeparture[] = [
@@ -64,16 +75,21 @@ class DepartureController extends AbstractController
                 'full_name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
                 'dateCessation' => date_format($departure->getDate(), 'd/m/Y'),
                 'motifCessation' => $departure->getReason(),
-                'salaire_base' => $salaireBase,
-                'salaireMoyen' => $departure->getSalaryDue(),
+                'solde_presence' => $departure->getSalaryDue(),
+                'salaireMoyen' => $smm,
+                'dateRetourDrnConges' => $dernierRetourConger,
                 'gratification' => $departure->getGratification(),
-                'dateRetourDrnConges' => date_format($dernierRetourConger, 'd/m/Y'),
                 'indemniteConges' => $departure->getCongeAmount(),
                 'preavis' => $dureePreavis ?? 0, // le préavis ici est determiné en mois
                 'indemnitePreavis' => $departure->getNoticeAmount(),
                 'anciennete' => $anciennete['anciennity_in_month'],
-                'indemniteCessation' => $departure->getDissmissalAmount(),
-                'modifier' => $this->generateUrl('departure_edit', ['uuid' => $departure->getUuid()])
+                'indemnite_licenciement' => $licenciement,
+                'indemnite_retraite' => $retraite,
+                'indemnite_deces' => $deces,
+                'frais_funeraire' => $fraisFuneraire,
+                'modifier' => $this->generateUrl('departure_edit', ['uuid' => $departure->getUuid()]),
+                'sold_tout_compte' => $this->generateUrl('departure_sold_of_all_compte', ['uuid' => $departure->getUuid()]),
+                'certificat' => $this->generateUrl('departure_certificat_travail', ['uuid' => $departure->getUuid()])
             ];
         }
 
@@ -104,14 +120,6 @@ class DepartureController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            //$p1 = $this->departServices->salaireGlobalMoyen($departure);
-            //$p2 = $this->departServices->getIndemniteLicenciement($departure);
-            //$p3 = $this->departServices->getPresenceSolde($departure);
-            //$p4 = $this->departServices->getRemunerationMoyen($departure);
-            //$p5 = $this->departServices->getTotalAmountImposable($departure);
-            //$p6 = $this->departServices->getEtalementIndemnite($departure);
-            //$p7 = $this->departServices->getRegularisations($departure);
-
             $this->departServices->calculeDroitsAndIndemnity($departure);
             $manager->persist($departure);
             $manager->flush();
@@ -146,5 +154,28 @@ class DepartureController extends AbstractController
             'departure' => $departure,
             'form' => $form->createView(),
         ]);
+    }
+
+    #[Route('/uuid/sold_of_all_compte', name: 'sold_of_all_compte', methods: ['GET'])]
+    public function soldOfAllCompte(): Response
+    {
+        $departures = $this->departureRepository->findDeparture();
+        $departureService = $this->departServices;
+        $indemniteCompensConge = $departureService->indemniteCompensatriceCgs($departures);
+        $quotePartGratification = $indemniteCompensConge['gratification_prorata'];
+        $indemniteCongeAmount = $indemniteCompensConge['indemnite_conge'];
+        $indemniteLicenciement = $departureService->getIndemniteLicenciement($departures);
+
+        return $this->render('dossier_personal/departure/sold.html.twig', [
+            'gratification' => $quotePartGratification,
+            'conge_amount' => $indemniteCongeAmount,
+            'licenciement_amount' => $indemniteLicenciement
+        ]);
+    }
+
+    #[Route('/uuid/certificat_travail', name: 'certificat_travail', methods: ['GET'])]
+    public function certificateTravail(): Response
+    {
+        return $this->render('dossier_personal/departure/certificate.html.twig');
     }
 }

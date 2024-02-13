@@ -38,31 +38,22 @@ class GratificationAnnuelCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-
-        $today = new \DateTime();
-        if ($today->format("m-d") === "12-31") {
-            $personal = $this->personalRepository->findAll();
-            $olderMonth = null;
-            $salaireCategoriel = null;
-            $tauxGratification = (int)$this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux();
-
-            foreach ($personal as $item) {
-                $olderMonth = $item->getOlder() * 12;
-                $service = $this->utimePaiementService->getAmountSalaireBrutAndImposable($item);
-                $salaireCategoriel = $service['salaire_categoriel'];
-            }
+        $personal = $this->personalRepository->findAll();
+        $tauxGratification = (int)$this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux();
+        foreach ($personal as $item) {
+            $olderMonth = $item->getOlder() * 12;
+            $service = $this->utimePaiementService->getAmountSalaireBrutAndImposable($item);
+            $salaireCategoriel = $service['salaire_categoriel'];
             if ($olderMonth < 12) {
                 $gratification = ((($salaireCategoriel * $tauxGratification) / 100) * ($olderMonth * 30)) / 360;
             } else {
                 $gratification = ($salaireCategoriel * $tauxGratification) / 100;
             }
-            return $gratification;
-        } else {
-            return "Pas de gratification aujourd'hui";
+            $item->getSalary()->setGratification($gratification);
+            $this->entityManager->persist($item);
         }
-
+        $this->entityManager->flush();
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
-
         return Command::SUCCESS;
     }
 }

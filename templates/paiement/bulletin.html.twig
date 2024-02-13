@@ -1,0 +1,436 @@
+{% extends 'imprimer.html.twig' %}
+
+{% block title %}Bulletin de paie{% endblock %}
+
+{% block stylesheets %}
+
+    <style>
+        .table-sans-bordure {
+            border-collapse: collapse;
+        }
+
+        .table-sans-bordure td, .table-sans-bordure th {
+            border-bottom: none;
+            padding: 4px; /* Ajoutez un espacement entre les cellules si nécessaire */
+        }
+
+        .sans-bordure th, .sans-bordure td {
+            border-bottom: none;
+            padding: 4px; /* Ajoutez un espacement entre les cellules si nécessaire */
+        }
+
+        .small-text {
+            font-size: 9px;
+        }
+
+        .no-border-button {
+            border-bottom: none;
+        }
+
+        .no-border-top {
+            border-top: none;
+        }
+
+    </style>
+
+{% endblock %}
+
+{% block content %}
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <div class="widget">
+                <div class="widget-content">
+                    <div class="row mb-3">
+                        <div class="col-md-12 mb-3" style="border: 2px double silver; padding: 10px; border-radius: 5px"
+                             id="header">
+                            <h4 class="text-center"><strong>BULLETIN DE PAIE </strong></h4>
+                        </div>
+                        <div class="col-md-12" style="display: flex">
+                            <div class="col-md-2">
+                                <table class="table table-bordered" style="border: #0b0b0f solid 1px">
+                                    <tbody>
+                                    <tr class="small-text sans-bordure">
+                                        <td class="text-center">
+                                            <span style="font-size: 45px">LOGO</span> <br><br><br>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-5">
+                                <table class="table table-bordered" style="border: #0b0b0f solid 1px">
+                                    <tbody>
+                                    <tr class="small-text sans-bordure">
+                                        <td>
+                                            <span>Matricule</span> <span
+                                                    style="margin-left: 48px; font-weight: bolder">{{ payroll_departure.matricule }}</span>
+                                            <br>
+                                            <span>Service</span> <span
+                                                    style="margin-left: 54px;">{{ payroll_departure.service }}</span>
+                                            <br>
+                                            <span>Catégorie</span> <span
+                                                    style="margin-left: 44px;">{{ payroll_departure.categorie }}</span>
+                                            <br>
+                                            <span>Salaire catégoriel</span> <span
+                                                    style="margin-left: 14px;">{{ payroll_departure.Salaire_categoriel }}</span>
+                                            <br>
+                                            <span>Nbre de part</span> <span
+                                                    style="margin-left: 33px;">{{ payroll_departure.nombre_part }}</span>
+                                            <br>
+                                            <span>Date d'entrée</span> <span
+                                                    style="margin-left: 29px;">{{ payroll_departure.date_embauche }}</span>
+                                            <br>
+                                            <span>N° CNPS</span> <span
+                                                    style="margin-left: 45px;">{{ payroll_departure.numero_cnps }}</span>
+                                            <br>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-5">
+                                <table class="table table-bordered" style="border: #0b0b0f solid 1px">
+                                    <tbody>
+                                    <tr class="small-text sans-bordure">
+                                        <td>
+                                            <span>PERIODE DE PAIE</span> <span
+                                                    style="margin-left: 21px; font-weight: bolder">{{ payroll_departure.periode_paie|capitalize }}</span>
+                                            <br><br>
+                                            <span>DATE D'EDITION</span> <span
+                                                    style="margin-left: 29px; font-weight: bolder">{{ payroll_departure.date_edition }}</span>
+                                            <br><br>
+                                            <span>NOM ET PRENOMS</span> <span
+                                                    style="margin-left: 17px; font-weight: bolder">{{ payroll_departure.nom_prenoms|upper }}</span>
+                                            <br><br>
+                                            <span>EMPLOIS</span> <span
+                                                    style="margin-left: 60px; font-weight: bolder">{{ payroll_departure.departement|upper }}</span>
+                                            <br>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <table class="table table-bordered" style="height: 200px; border: #0b0b0f solid 1px">
+                                <thead class="table-secondary" style="border: #0b0b0f solid 1px">
+                                <tr class="small-text text-center sans-bordure">
+                                    <th rowspan="2">Rubrique</th>
+                                    <th rowspan="2">Libelle</th>
+                                    <th rowspan="2">Base</th>
+                                    <th colspan="3">Part salariale</th>
+                                    <th colspan="2">Part patronale</th>
+                                </tr>
+                                <tr class="sans-bordure small-text text-center">
+                                    <th>Taux</th>
+                                    <th>Gain</th>
+                                    <th>Retenue</th>
+                                    <th>Taux</th>
+                                    <th>Retenue</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% if payroll_departure.indemnite_preavis %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>001</td>
+                                        <td>Indemnité de préavis</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payroll_departure.indemnite_preavis|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payroll_departure.indemnite_licenciement_imp %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>002</td>
+                                        {% if reason == retraite %}
+                                            <td>Indemnité de retraite</td>
+                                        {% elseif reason == deces %}
+                                            <td>Indemnité de décès</td>
+                                        {% else %}
+                                            <td>Indemnité Licenciement Imp</td>
+                                        {% endif %}
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payroll_departure.indemnite_licenciement_imp|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payroll_departure.gratification %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>003</td>
+                                        <td>Gratification</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payroll_departure.gratification|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payroll_departure.allocation_conges %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>004</td>
+                                        <td>Allocation congé</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payroll_departure.allocation_conges|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payroll_departure.total_brut %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td></td>
+                                        <td class="text-center">Total brut</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end"
+                                            style="border-top: solid 1px">{{ payroll_departure.indemnite_licenciement_imp|number_format(0, ',', ' ') }}</td>
+                                        <td style="border-top: solid 1px"></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payroll_departure.amount_its %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>005</td>
+                                        <td>ITS</td>
+                                        <td class="text-end">{{ payroll_departure.indemnite_licenciement_imp|number_format(0, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payroll_departure.taux_its }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payroll_departure.amount_its|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payroll_departure.retenu_cnps %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>006</td>
+                                        <td>Retenue CNPS</td>
+                                        <td class="text-end">{{ payroll_departure.total_brut_cnps|number_format(0, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payroll_departure.taux_retenu_cnps|number_format(2, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end">{{ payroll_departure.retenu_cnps|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                {% if payroll_departure.retenue_general_cnps %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>007</td>
+                                        <td>Retenue Générale CNPS</td>
+                                        <td class="text-end">{{ payroll_departure.total_brut_cnps|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payroll_departure.taux_retenue_general_cnps|number_format(2, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payroll_departure.retenue_general_cnps|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payroll_departure.prestation_familliale %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>008</td>
+                                        <td>Prestations Familiales</td>
+                                        <td class="text-end">{{ payroll_departure.smig|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payroll_departure.taux_prest_familliale|number_format(2, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payroll_departure.prestation_familliale|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payroll_departure.accident_travail %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>009</td>
+                                        <td>Accident du travail</td>
+                                        <td class="text-end">{{ payroll_departure.smig|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payroll_departure.taux_accid_travail|number_format(2, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payroll_departure.accident_travail|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payroll_departure.amount_taux_apprentissage %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>010</td>
+                                        <td>Taux D'apprentissage</td>
+                                        <td class="text-end">{{ payroll_departure.indemnite_licenciement_imp|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payroll_departure.taux_apprentissage|number_format(2, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payroll_departure.amount_taux_apprentissage|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payroll_departure.amount_fpc %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>011</td>
+                                        <td>FPC</td>
+                                        <td class="text-end">{{ payroll_departure.indemnite_licenciement_imp|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payroll_departure.taux_fpc|number_format(2, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payroll_departure.amount_fpc|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payroll_departure.amount_fpc_annuel %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>012</td>
+                                        <td>FPC REGUL</td>
+                                        <td class="text-end">{{ payroll_departure.indemnite_licenciement_imp|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payroll_departure.taux_fpc_annuel|number_format(2, ',', ' ') }}</td>
+                                        <td class="text-end">{{ payroll_departure.amount_fpc_annuel|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payroll_departure.total_cotisation_salary and payroll_departure.total_cotisation_employeur %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td></td>
+                                        <td class="text-center">Total Cotisations</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td style="border-top: solid 1px"></td>
+                                        <td class="text-end"
+                                            style="border-top: solid 1px">{{ payroll_departure.total_cotisation_salary|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td class="text-end"
+                                            style="border-top: solid 1px">{{ payroll_departure.total_cotisation_employeur|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payroll_departure.indemnite_licenciement_no_imp %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>013</td>
+                                        <td>Indemnité Licenciement NI</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payroll_departure.indemnite_licenciement_no_imp|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
+                                <tr class="small-text sans-bordure no-border-button no-border-top">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr class="small-text sans-bordure no-border-button no-border-top">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr class="small-text sans-bordure no-border-button no-border-top">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr class="small-text sans-bordure no-border-button no-border-top">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr class="small-text sans-bordure no-border-button no-border-top">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr class="small-text sans-bordure no-border-top">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <table class="table table-bordered" style="border: #0b0b0f solid 1px">
+                                <thead class="table-secondary" style="border: #0b0b0f solid 1px">
+                                <tr class="small-text text-center sans-bordure">
+                                    <th>Cumuls</th>
+                                    <th>Salaire Brut</th>
+                                    <th>Charges Salariales</th>
+                                    <th>Charges patronales</th>
+                                    <th>Aventage en nature</th>
+                                    <th>Net imposable</th>
+                                    <th>Heures travaillées</th>
+                                    <th>Heures Supplémentaires</th>
+                                    <th style="border: #0b0b0f 2px inset">NET A PAYER</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr class="small-text sans-bordure">
+                                    <td class="text-center">Periode</td>
+                                    <td class="text-end">{{ payroll_departure.total_brut|number_format(0, ',', ' ') }}</td>
+                                    <td class="text-end">{{ payroll_departure.total_cotisation_salary|number_format(0, ',', ' ') }}</td>
+                                    <td class="text-end">{{ payroll_departure.total_cotisation_employeur|number_format(0, ',', ' ') }}</td>
+                                    <td class="text-end">{{ payroll_departure.avantage_en_nature|number_format(0, ',', ' ') }}</td>
+                                    <td class="text-end">{{ payroll_departure.indemnite_licenciement_imp|number_format(0, ',', ' ') }}</td>
+                                    <td class="text-end">{{ payroll_departure.heure_travailler|number_format(2, ',', ' ') }}</td>
+                                    <td class="text-end">{{ payroll_departure.heure_supplementaire|number_format(0, ',', ' ') }}</td>
+                                    <td class="text-end"
+                                        style="border: #0b0b0f 2px inset">{{ payroll_departure.net_payer|number_format(0, ',', ' ') }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <table class="table table-bordered" style="border: #0b0b0f solid 1px">
+                                <tbody class="small-text sans-bordure">
+                                <tr>
+                                    <td class="h6">Mode de paiement {{ payroll_departure.mode_paiement|capitalize }}
+                                        sur {{ 'BIAO' }}
+                                        : {{ payroll_departure.account_number }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="">
+        <a class="btn btn-dark btn-print pull-right" style="color: white" href="javascript:window.print()">
+            <i class="icon-print"></i>
+            Imprimer</a>
+        <a class="btn btn-info btn-back pull-right" style="margin-right: 5px" onclick="window.close()"
+           href="{{ path('app_home') }}">
+            retour</a>
+    </div>
+{% endblock %}

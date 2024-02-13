@@ -21,13 +21,15 @@ class SalaryImpotsService implements SalaryInterface
     private ChargeEmployeurRepository $chargeEmployeurRt;
     private UtimePaiementService $utimePaiementService;
     private VariablePaieRepository $paieRepository;
+    private DepartServices $departServices;
 
     public function __construct(
         EntityManagerInterface    $manager,
         ChargePersonalsRepository $chargePersonalsRepository,
         ChargeEmployeurRepository $chargeEmployeurRepository,
         UtimePaiementService      $utimePaiementService,
-        VariablePaieRepository    $paieRepository
+        VariablePaieRepository    $paieRepository,
+        DepartServices            $departServices
     )
     {
         $this->manager = $manager;
@@ -35,6 +37,7 @@ class SalaryImpotsService implements SalaryInterface
         $this->chargeEmployeurRt = $chargeEmployeurRepository;
         $this->utimePaiementService = $utimePaiementService;
         $this->paieRepository = $paieRepository;
+        $this->departServices = $departServices;
     }
 
     public function chargePersonal(Personal $personal): void
@@ -50,6 +53,8 @@ class SalaryImpotsService implements SalaryInterface
             $charge = (new ChargePersonals())
                 ->setPersonal($personal)
                 ->setNumPart($part)
+                ->setAmountImpotBrut($impotBrut)
+                ->setAmountCreditImpot($creditImpot)
                 ->setAmountIts($impotNet)
                 ->setAmountCMU($amountCMU)
                 ->setAmountCNPS($amountCNPS)
@@ -58,6 +63,43 @@ class SalaryImpotsService implements SalaryInterface
         $charge
             ->setPersonal($personal)
             ->setNumPart($part)
+            ->setAmountImpotBrut($impotBrut)
+            ->setAmountCreditImpot($creditImpot)
+            ->setAmountIts($impotNet)
+            ->setAmountCMU($amountCMU)
+            ->setAmountCNPS($amountCNPS)
+            ->setAmountTotalChargePersonal($impotNet + $amountCMU + $amountCNPS);
+        $this->manager->persist($charge);
+        $this->manager->flush();
+    }
+
+    public function chargePersonalByDeparture(Personal $personal): void
+    {
+        $part = $this->utimePaiementService->getNumberParts($personal);
+        $impotBrut = $this->departServices->calculerImpotBrutDeparture($personal->getDepartures());
+        $creditImpot = $this->departServices->calculateCreditImpotDeparture($personal->getDepartures());
+        $impotNet = $this->departServices->getAmountITS($personal->getDepartures());
+        $amountCNPS = $this->departServices->getAmountCNPS($personal->getDepartures());
+        $amountCMU = $this->departServices->getAmountCMU($personal->getDepartures());
+        $charge = $this->chargePersonalRt->findOneBy(['personal' => $personal, 'departure' => $personal->getDepartures()]);
+        if (!$charge) {
+            $charge = (new ChargePersonals())
+                ->setPersonal($personal)
+                ->setDeparture($personal->getDepartures())
+                ->setNumPart($part)
+                ->setAmountImpotBrut($impotBrut)
+                ->setAmountCreditImpot($creditImpot)
+                ->setAmountIts($impotNet)
+                ->setAmountCMU($amountCMU)
+                ->setAmountCNPS($amountCNPS)
+                ->setAmountTotalChargePersonal($impotNet + $amountCMU + $amountCNPS);
+        }
+        $charge
+            ->setPersonal($personal)
+            ->setDeparture($personal->getDepartures())
+            ->setNumPart($part)
+            ->setAmountImpotBrut($impotBrut)
+            ->setAmountCreditImpot($creditImpot)
             ->setAmountIts($impotNet)
             ->setAmountCMU($amountCMU)
             ->setAmountCNPS($amountCNPS)
@@ -106,6 +148,51 @@ class SalaryImpotsService implements SalaryInterface
             ->setTotalRetenuCNPS($montantRetenuCNPS)
             ->setTotalChargeEmployeur($totalChargeEmployeur);
 
+        $this->manager->persist($chargeEmpl);
+        $this->manager->flush();
+    }
+
+    public function chargeEmployeurByDeparture(Personal $personal): void
+    {
+        $montantIs = $this->departServices->getAmountIS($personal->getDepartures());
+        $montantCR = $this->departServices->getAmountRCNPS_CR($personal->getDepartures());
+        $montantPF = $this->departServices->getAmountRCNPS_PF($personal->getDepartures());
+        $montantAT = $this->departServices->getAmountRCNPS_AT($personal->getDepartures());
+        $montantTA = $this->departServices->getAmountTA($personal->getDepartures());
+        $montantFPC = $this->departServices->getAmountFPC($personal->getDepartures());
+        $montantFPCAnnuel = $this->departServices->getAmountFPCAnnuel($personal->getDepartures());
+        $montantCMU = $this->departServices->getAmountCMU($personal->getDepartures());
+        $montantRetenuCNPS = $montantCR + $montantPF + $montantAT;
+        $totalChargeEmployeur = $montantIs + $montantFPC + $montantFPCAnnuel + $montantTA + $montantRetenuCNPS + $montantCMU;
+        $chargeEmpl = $this->chargeEmployeurRt->findOneBy(['personal' => $personal, 'departure' => $personal->getDepartures()]);
+        if (!$chargeEmpl) {
+            $chargeEmpl = (new ChargeEmployeur())
+                ->setPersonal($personal)
+                ->setDeparture($personal->getDepartures())
+                ->setAmountIS($montantIs)
+                ->setAmountCR($montantCR)
+                ->setAmountPF($montantPF)
+                ->setAmountAT($montantAT)
+                ->setAmountCMU($montantCMU)
+                ->setAmountTA($montantTA)
+                ->setAmountFPC($montantFPC)
+                ->setAmountAnnuelFPC($montantFPCAnnuel)
+                ->setTotalRetenuCNPS($montantRetenuCNPS)
+                ->setTotalChargeEmployeur($totalChargeEmployeur);
+        }
+        $chargeEmpl
+            ->setPersonal($personal)
+            ->setDeparture($personal->getDepartures())
+            ->setAmountIS($montantIs)
+            ->setAmountCR($montantCR)
+            ->setAmountPF($montantPF)
+            ->setAmountAT($montantAT)
+            ->setAmountCMU($montantCMU)
+            ->setAmountTA($montantTA)
+            ->setAmountFPC($montantFPC)
+            ->setAmountAnnuelFPC($montantFPCAnnuel)
+            ->setTotalRetenuCNPS($montantRetenuCNPS)
+            ->setTotalChargeEmployeur($totalChargeEmployeur);
         $this->manager->persist($chargeEmpl);
         $this->manager->flush();
     }
