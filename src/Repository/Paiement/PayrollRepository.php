@@ -23,49 +23,38 @@ class PayrollRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param bool $campagne
+     * @param bool $active
      * @param bool $type
      * @param Personal $personal
      * @return Payroll[]|null
+     * Retourne le dictionnaire des salaire de la campagne en fonction du type et du status de la campagne pour les bulletins
      */
-    public function findBulletinByCampaign(bool $campagne, bool $type, Personal $personal): ?array
+    public function findBulletinByCampaign(bool $active, bool $type, Personal $personal): ?array
     {
         return $this->createQueryBuilder('pr')
             ->join('pr.personal', 'p')
             ->join('pr.campagne', 'c')
-            ->where('c.ordinary = :status')
+            ->where('c.ordinary = :type')
             ->andWhere('c.active = :active')
             ->andWhere('p.id = :personal')
-            ->setParameters(['active' => $campagne, 'status' => $type, 'personal' => $personal->getId()])
+            ->setParameters(['active' => $active, 'type' => $type, 'personal' => $personal->getId()])
             ->getQuery()->getResult();
     }
 
     /**
-     * @param bool $campagne
+     * @param bool $active
      * @return Payroll[]|null
+     * Retourne le dictionnaire des salaire de la campagne en fonction du status de la campagne pour le livre de paie
      */
-    public function findPayrollByCampaign(bool $campagne): ?array
+    public function findPayrollByCampaign(bool $active): ?array
     {
         return $this->createQueryBuilder('pr')
             ->join('pr.personal', 'p')
             ->join('pr.campagne', 'c')
             ->andWhere('c.active = :active')
-            ->setParameter('active', $campagne)
+            ->setParameter('active', $active)
             ->getQuery()->getResult();
     }
-
-    public function findLastPayroll(bool $value): ?Payroll
-    {
-        return $this->createQueryBuilder('pr')
-            ->join('pr.campagne', 'campagnes')
-            ->where('campagnes.ordinary = :value')
-            ->setMaxResults(1)
-            ->setParameter('value', $value)
-            ->orderBy('pr.id', 'DESC')
-            ->getQuery()
-            ->getOneOrNullResult();
-    }
-
 
     public function findEtatSalaire(mixed $mouth1, mixed $mouth2, ?int $personalId): array
     {
@@ -98,7 +87,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->leftJoin('personal.salary', 'salary')
             ->leftJoin('personal.contract', 'contract')
             ->where('campagnes.active = false')
-            ->andWhere('payroll.createdAt BETWEEN ?1 and ?2');
+            ->andWhere('payroll.dateCreated BETWEEN ?1 and ?2');
         $qb->setParameters(['1' => $mouth1, '2' => $mouth2]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
@@ -155,8 +144,8 @@ class PayrollRepository extends ServiceEntityRepository
             ->join('payroll.campagne', 'campagnes')
             ->join('payroll.personal', 'personal')
             ->where('campagnes.active = :active')
-            ->andWhere('YEAR(payroll.createdAt) = :year')
-            ->andWhere('MONTH(payroll.createdAt) = :month');
+            ->andWhere('YEAR(payroll.dateCreated) = :year')
+            ->andWhere('MONTH(payroll.dateCreated) = :month');
         $qb
             ->setParameter('active', $campagne)
             ->setParameter('year', $years)
@@ -174,7 +163,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->join('pr.personal', 'personal')
             ->join('pr.campagne', 'campagnes')
             ->where('pr.personal = :personal')
-            ->andWhere('campagnes.startedAt BETWEEN :dateDebut AND :dateFin')
+            ->andWhere('pr.dateCreated BETWEEN :dateDebut AND :dateFin')
             ->setParameter('personal', $personal)
             ->setParameter('dateDebut', $dateDebut)
             ->setParameter('dateFin', $dateFin)
@@ -199,7 +188,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->join('pr.campagne', 'campagnes')
             ->leftJoin('personal.departures', 'departures')
             ->where('pr.personal = :pr_personal')
-            ->andWhere('campagnes.startedAt BETWEEN :start AND :end')
+            ->andWhere('pr.dateCreated BETWEEN :start AND :end')
             ->setParameter('pr_personal', $personal)
             ->setParameter('start', $lastTwelveMonths[11])
             ->setParameter('end', $lastTwelveMonths[0])
@@ -224,7 +213,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->join('pr.campagne', 'campagnes')
             ->leftJoin('personal.departures', 'departures')
             ->where('pr.personal = :pr_personal')
-            ->andWhere('campagnes.startedAt BETWEEN :start AND :end')
+            ->andWhere('pr.dateCreated BETWEEN :start AND :end')
             ->setParameter('pr_personal', $personal)
             ->setParameter('start', $lastTwelveMonths[0])
             ->setParameter('end', $lastTwelveMonths[10])
@@ -242,7 +231,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->join('pr.campagne', 'campagnes')
             ->where('pr.personal = :personal')
             ->andWhere('campagnes.ordinary = true')
-            ->orderBy('campagnes.startedAt', 'DESC')
+            ->orderBy('pr.dateCreated', 'DESC')
             ->setMaxResults(1)
             ->setParameter('personal', $personal)
             ->getQuery();
@@ -267,7 +256,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->leftJoin('personal.departures', 'departures')
             ->leftJoin('personal.salary', 'salary')
             ->where('pr.personal = :pr_personal')
-            ->andWhere('campagnes.startedAt BETWEEN :start AND :end')
+            ->andWhere('pr.dateCreated BETWEEN :start AND :end')
             ->setParameter('pr_personal', $personal)
             ->setParameter('start', $lastTwelveMonths[11])
             ->setParameter('end', $lastTwelveMonths[0])
@@ -286,12 +275,26 @@ class PayrollRepository extends ServiceEntityRepository
             ->where('pr.personal = :personal')
             ->andWhere('campagnes.ordinary = true')
             ->andWhere('campagnes.active = true')
-            ->orderBy('campagnes.startedAt', 'DESC')
+            ->orderBy('pr.dateCreated', 'DESC')
             ->setMaxResults(1)
             ->setParameter('personal', $personal)
             ->getQuery();
         $result = $query->getSingleResult();
         return $result['netPayer'];
+    }
+
+    /** Retourne le dictionnaire  de salaire en fonction de l'id de la campagne */
+    public function findPayrollByCampainId(int $campainId): array
+    {
+        return $this->createQueryBuilder('pr')
+            ->join('pr.personal', 'p')
+            ->join('pr.campagne', 'c')
+            ->where('c.ordinary = true')
+            ->andWhere('c.active = false')
+            ->andWhere('c.id = :campain_id')
+            ->setParameter('campain_id', $campainId)
+            ->orderBy('pr.id', 'ASC')
+            ->getQuery()->getResult();
     }
 
 }

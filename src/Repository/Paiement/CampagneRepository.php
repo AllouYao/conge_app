@@ -35,6 +35,7 @@ class CampagneRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
     /**
      * @throws NonUniqueResultException
      */
@@ -62,7 +63,7 @@ class CampagneRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
-    
+
     public function getCampagneActives(): ?array
     {
         return $this->createQueryBuilder('c')
@@ -72,12 +73,14 @@ class CampagneRepository extends ServiceEntityRepository
     }
 
 
-    public function lastCampagne(): ?Campagne
+    public function lastCampagne(bool $isOrdinaire): ?Campagne
     {
         return $this->createQueryBuilder('c')
             ->join('c.personal', 'p')
             ->leftJoin('p.chargePersonals', 'ch')
             ->where("c.active = false")
+            ->andWhere("c.ordinary = :value")
+            ->setParameter('value', $isOrdinaire)
             ->orderBy("c.id", "DESC")
             ->setMaxResults(1)
             ->getQuery()
@@ -95,18 +98,6 @@ class CampagneRepository extends ServiceEntityRepository
         return count($qb->getQuery()->getResult());
     }
 
-    /**
-     * @throws NonUniqueResultException
-     */
-    public function findLastCampaign()
-    {
-        return $this->createQueryBuilder('c')
-            ->orderBy("c.id", "DESC")
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
-    }
-
     public function checkPersonalInCampagne(Personal $personal): array
     {
         return $this->createQueryBuilder('c')
@@ -116,5 +107,26 @@ class CampagneRepository extends ServiceEntityRepository
             ->getQuery()->getScalarResult();
     }
 
+    /** Retourne l'avant dernière campagne ordinaire*/
+    public function findBeforeLast()
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.ordinary = true')
+            ->orderBy('c.id', 'DESC')
+            ->setMaxResults(2)
+            ->getQuery()
+            ->getResult()[1];
+    }
+
+    /** Retourne la dernière campagne ordinaire */
+    public function findLast()
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.ordinary = true')
+            ->orderBy('c.id', 'DESC')
+            ->setMaxResults(2)
+            ->getQuery()
+            ->getResult()[0];
+    }
 
 }

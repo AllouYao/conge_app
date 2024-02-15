@@ -109,12 +109,13 @@ class PayrollService
             - $chargeSalarie;
 
         /** la masse salariale */
-
+        $masseSalaried = $netImposable + $chargePatronal;
 
         /** Enregistrement du livre de paie */
         $payroll = (new Payroll())
             ->setPersonal($personal)
             ->setCampagne($campagne)
+            ->setDateCreated($campagne->getStartedAt())
             ->setMatricule($matricule)
             ->setService($service)
             ->setCategories($categorie)
@@ -156,7 +157,8 @@ class PayrollService
             ->setAmountPrimeOutillage($primeOutillages)
             ->setAmountPrimeTenueTrav($primeTenueTravails)
             ->setAmountPrimeRendement($primeRendement)
-            ->setNetPayer($netPayer);
+            ->setNetPayer($netPayer)
+            ->setMasseSalary($masseSalaried);
 
         $this->manager->persist($payroll);
         $this->manager->persist($salary);
@@ -213,6 +215,7 @@ class PayrollService
         $payroll = (new Payroll())
             ->setPersonal($personal)
             ->setCampagne($campagne)
+            ->setDateCreated($campagne->getStartedAt())
             ->setMatricule($matricule)
             ->setService($service)
             ->setCategories($categorie)
@@ -245,5 +248,4 @@ class PayrollService
 
         $this->manager->persist($payroll);
     }
-
 }

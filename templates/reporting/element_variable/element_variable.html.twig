@@ -1,0 +1,251 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Relever comparatif des salaires {% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridReleveComparSalaire {
+            height: 400px;
+            border-width: 50px;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        RELEVE COMPARATIF DES SALAIRES DU MOIS DE {{ date|upper }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="dataGridReleveComparSalaire"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        $(document).ready(function () {
+            let debut;
+            let fin;
+            $("#dataGridReleveComparSalaire").dxDataGrid({
+                dataSource: `{{ url('api_reporting_element_variable') }}`,
+                showBorders: true,
+                scrolling: {
+                    columnRenderingMode: 'virtual',
+                    height: 400,
+                    mode: "virtual"
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('RELEVE COMPARATIF DES SALAIRES');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                            customizeCell: function (options) {
+                                const {gridCell, excelCell} = options;
+                                if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
+                                    excelCell.text = formatNumber(gridCell.value)
+                                    excelCell.font = {size: 9};
+                                    excelCell.alignment = {horizontal: 'left'};
+                                }
+                            }
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then(function (buffer) {
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `PRIMES ET INDEMNITES ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                columns: [
+                    {
+                        caption: 'MATRICULE',
+                        alignment: 'center',
+                        dataType: 'number',
+                        dataField: 'matricule',
+                        fixed: true
+                    },
+                    {
+                        caption: 'NOMS & PRENOMS',
+                        alignment: 'center',
+                        columns: [
+                            {
+                                alignment: 'left',
+                                dataType: 'string',
+                                dataField: 'nom'
+                            },
+                            {
+                                alignment: 'left',
+                                dataType: 'string',
+                                dataField: 'prenoms'
+                            }
+                        ]
+                    },
+
+                    {
+                        caption: 'TOTAL SALAIRES BRUTS PAYES',
+                        alignment: 'center',
+                        columns: [
+                            {
+                                caption: 'Mois -1',
+                                dataType: 'number',
+                                dataField: 'before_brut_amount',
+                                alignment: 'right',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Mois en cours',
+                                dataType: 'number',
+                                dataField: 'last_brut_amount',
+                                alignment: 'right',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Ecarts',
+                                dataType: 'number',
+                                dataField: 'ecart_brut_amount',
+                                alignment: 'right',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                        ],
+                    },
+
+                    {
+                        caption: 'TOTAL SALAIRES NETS PAYES',
+                        alignment: 'center',
+                        columns: [
+                            {
+                                caption: 'Mois -1',
+                                dataType: 'number',
+                                dataField: 'before_net_amount',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Mois en cours',
+                                dataType: 'number',
+                                dataField: 'last_net_amount',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: 'Ecarts',
+                                dataType: 'number',
+                                dataField: 'ecart_net_amount',
+                                alignment: 'right',
+                                width: 120,
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                        ]
+                    },
+
+                ],
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'matricule',
+                            summaryType: 'count',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            }
+                        },
+                        {
+                            column: 'nom',
+                            summaryType: 'count',
+                            customizeText() {
+                                return 'Total:'
+                            }
+                        },
+                        {
+                            column: 'before_brut_amount', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'last_brut_amount', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'ecart_brut_amount', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'before_net_amount', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'last_net_amount', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'ecart_net_amount', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                    ],
+                }
+            })
+        })
+    </script>
+
+{% endblock %}

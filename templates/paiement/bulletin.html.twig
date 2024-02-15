@@ -31,6 +31,83 @@
             border-top: none;
         }
 
+        .stronger {
+            font-weight: bold;
+            font-size: x-large;
+            color: #0b0b0f;
+        }
+
+        .strong {
+            font-size: x-small;
+            color: #0b0b0f;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .barre-verticale {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 65%;
+            width: 0.3%; /* Largeur de la barre verticale */
+            background-color: black; /* Couleur de la barre verticale */
+            margin-left: 1px; /* Ajustement pour centrer la barre */
+            transform: translateX(-50%);
+        }
+
+        .height-rectangle {
+            height: 45px;
+            width: auto;
+            border: solid;
+            position: relative;
+        }
+
+        .rectangle {
+            height: 50px;
+            width: auto;
+            border: solid;
+            position: relative;
+        }
+
+        .small-rectangle {
+            height: 50px;
+            width: 30%;
+            border: solid;
+            position: relative;
+            margin-right: 10px;
+        }
+
+        .medium-rectangle {
+            height: 50px;
+            width: 70%;
+            border: solid;
+            position: relative;
+        }
+        .table-rectangle {
+
+            border: solid;
+            position: relative;
+        }
+
+        .info-rectangle {
+            height: 213px;
+            width: auto;
+            border: solid;
+            position: relative;
+        }
+
+        .paiement-rectangle {
+            height: 20px;
+            width: auto;
+            border: solid;
+            position: relative;
+            margin-top: 1px;
+        }
+
+        span {
+            margin-bottom: 4px;
+        }
+
     </style>
 
 {% endblock %}
@@ -45,70 +122,59 @@
                              id="header">
                             <h4 class="text-center"><strong>BULLETIN DE PAIE </strong></h4>
                         </div>
-                        <div class="col-md-12" style="display: flex">
-                            <div class="col-md-2">
-                                <table class="table table-bordered" style="border: #0b0b0f solid 1px">
-                                    <tbody>
-                                    <tr class="small-text sans-bordure">
-                                        <td class="text-center">
-                                            <span style="font-size: 45px">LOGO</span> <br><br><br>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
+                        <div class="col-md-12 mb-2" style="display: flex">
+                            <div class="col-md-1">
+                                <div style="border: #0b0b0f solid 1px">
+                                    <h1 class="text-center mt-4 mb-4">LOGO</h1>
+                                </div>
                             </div>
                             <div class="col-md-5">
-                                <table class="table table-bordered" style="border: #0b0b0f solid 1px">
-                                    <tbody>
-                                    <tr class="small-text sans-bordure">
-                                        <td>
-                                            <span>Matricule</span> <span
-                                                    style="margin-left: 48px; font-weight: bolder">{{ payroll_departure.matricule }}</span>
-                                            <br>
-                                            <span>Service</span> <span
-                                                    style="margin-left: 54px;">{{ payroll_departure.service }}</span>
-                                            <br>
-                                            <span>Catégorie</span> <span
-                                                    style="margin-left: 44px;">{{ payroll_departure.categorie }}</span>
-                                            <br>
-                                            <span>Salaire catégoriel</span> <span
-                                                    style="margin-left: 14px;">{{ payroll_departure.Salaire_categoriel }}</span>
-                                            <br>
-                                            <span>Nbre de part</span> <span
-                                                    style="margin-left: 33px;">{{ payroll_departure.nombre_part }}</span>
-                                            <br>
-                                            <span>Date d'entrée</span> <span
-                                                    style="margin-left: 29px;">{{ payroll_departure.date_embauche }}</span>
-                                            <br>
-                                            <span>N° CNPS</span> <span
-                                                    style="margin-left: 45px;">{{ payroll_departure.numero_cnps }}</span>
-                                            <br>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
+                                <div style="display: flex; border: #0b0b0f solid 1px">
+                                    <div style="margin-left: 30px" class="small-text">
+                                        <span>Matricule</span><br>
+                                        <span>Service</span><br>
+                                        <span>Catégorie</span><br>
+                                        <span>Salaire catégoriel</span><br>
+                                        <span>Nbre de part</span><br>
+                                        <span>Nationalité</span><br>
+                                        <span>Date d'entrée</span><br>
+                                        <span>N° CNPS</span><br>
+                                    </div>
+                                    <div style="margin-left: 30px; font-weight: bold" class="small-text">
+                                        <span>{{ payroll_departure.matricule }}</span><br>
+                                        <span>{{ payroll_departure.service }}</span><br>
+                                        <span>{{ payroll_departure.categorie }}</span><br>
+                                        <span>{{ payroll_departure.Salaire_categoriel }}</span><br>
+                                        <span>{{ payroll_departure.nombre_part }}</span><br>
+                                        <span>Ivoirienne</span><br>
+                                        <span>{{ payroll_departure.date_embauche }}</span><br>
+                                        <span>{{ payroll_departure.numero_cnps }}</span><br>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-5">
-                                <table class="table table-bordered" style="border: #0b0b0f solid 1px">
-                                    <tbody>
-                                    <tr class="small-text sans-bordure">
-                                        <td>
-                                            <span>PERIODE DE PAIE</span> <span
-                                                    style="margin-left: 21px; font-weight: bolder">{{ payroll_departure.periode_paie|capitalize }}</span>
-                                            <br><br>
-                                            <span>DATE D'EDITION</span> <span
-                                                    style="margin-left: 29px; font-weight: bolder">{{ payroll_departure.date_edition }}</span>
-                                            <br><br>
-                                            <span>NOM ET PRENOMS</span> <span
-                                                    style="margin-left: 17px; font-weight: bolder">{{ payroll_departure.nom_prenoms|upper }}</span>
-                                            <br><br>
-                                            <span>EMPLOIS</span> <span
-                                                    style="margin-left: 60px; font-weight: bolder">{{ payroll_departure.departement|upper }}</span>
-                                            <br>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
+                            <div class="col-md-6">
+                                <div style="display: flex; border: #0b0b0f solid 1px" class="mt-0">
+                                    <div class="small-text" style="margin-left: 10px">
+                                        <span>PERIODE PAIE</span><br>
+                                        <span></span><br>
+                                        <span>DATE EDITION</span><br>
+                                        <span></span><br>
+                                        <span>NOM & PRENOMS</span><br>
+                                        <span></span><br>
+                                        <span>EMPLOIS</span><br>
+                                        <span></span><br>
+                                    </div>
+                                    <div style="margin-left: 5px; font-weight: bold" class="small-text">
+                                        <span>{{ payroll_departure.periode_paie|capitalize }}</span><br>
+                                        <span></span><br>
+                                        <span>{{ payroll_departure.date_edition }}</span><br>
+                                        <span></span><br>
+                                        <span>{{ payroll_departure.nom_prenoms|upper }}</span><br>
+                                        <span></span><br>
+                                        <span>{{ payroll_departure.departement|upper }}</span><br>
+                                        <span></span><br>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-12">

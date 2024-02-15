@@ -194,7 +194,7 @@ class PersonalController extends AbstractController
 
         return $this->render('dossier_personal/personal/new.html.twig', [
             'personal' => $personal,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 

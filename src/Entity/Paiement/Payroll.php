@@ -188,6 +188,9 @@ class Payroll
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $totalIndemniteImposable = null;
 
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateCreated = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -849,6 +852,18 @@ class Payroll
     public function setTotalIndemniteImposable(?string $totalIndemniteImposable): static
     {
         $this->totalIndemniteImposable = $totalIndemniteImposable;
+
+        return $this;
+    }
+
+    public function getDateCreated(): ?\DateTimeInterface
+    {
+        return $this->dateCreated;
+    }
+
+    public function setDateCreated(?\DateTimeInterface $dateCreated): static
+    {
+        $this->dateCreated = $dateCreated;
 
         return $this;
     }

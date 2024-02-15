@@ -6,8 +6,8 @@ use App\Repository\DossierPersonal\CongeRepository;
 use App\Repository\DossierPersonal\DetailPrimeSalaryRepository;
 use App\Repository\DossierPersonal\DetailSalaryRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
-use App\Repository\ElementVariable\VariablePaieRepository;
 use App\Repository\Impots\CategoryChargeRepository;
+use App\Repository\Paiement\CampagneRepository;
 use App\Repository\Paiement\PayrollRepository;
 use App\Repository\Settings\PrimesRepository;
 use App\Service\EtatService;
@@ -32,7 +32,7 @@ class ApiReportingController extends AbstractController
     private DetailSalaryRepository $detailSalaryRepository;
     private PersonalRepository $personalRepository;
     private DetailPrimeSalaryRepository $detailPrimeSalaryRepository;
-    private VariablePaieRepository $paieRepository;
+    private CampagneRepository $campagneRepository;
 
     public function __construct(
         PayrollRepository           $payrollRepository,
@@ -44,7 +44,7 @@ class ApiReportingController extends AbstractController
         DetailSalaryRepository      $detailSalaryRepository,
         PersonalRepository          $personalRepository,
         DetailPrimeSalaryRepository $detailPrimeSalaryRepository,
-        VariablePaieRepository      $paieRepository
+        CampagneRepository          $campagneRepository
     )
     {
         $this->payrollRepository = $payrollRepository;
@@ -56,7 +56,7 @@ class ApiReportingController extends AbstractController
         $this->detailSalaryRepository = $detailSalaryRepository;
         $this->personalRepository = $personalRepository;
         $this->detailPrimeSalaryRepository = $detailPrimeSalaryRepository;
-        $this->paieRepository = $paieRepository;
+        $this->campagneRepository = $campagneRepository;
     }
 
     #[Route('/prime_indemnite', name: 'prime_indemnite', methods: ['GET'])]
@@ -425,7 +425,6 @@ class ApiReportingController extends AbstractController
     }
 
     /**
-     * @throws NonUniqueResultException
      */
     #[Route('/declaration_fdfp/current/month', name: 'declaration_fdfp_current_month', methods: ['GET'])]
     public function declarationMonthFdfp(): JsonResponse
@@ -453,9 +452,38 @@ class ApiReportingController extends AbstractController
     }
 
     #[Route('/element_variable', name: 'element_variable', methods: ['GET'])]
-    public function etatElementVariable()
+    public function etatElementVariable(): JsonResponse
     {
-        $requestElementVariables = $this->paieRepository->findOneByStatus(true);
+        $campainBefore = $this->campagneRepository->findBeforeLast();
+        $payrollBefore = $this->payrollRepository->findPayrollByCampainId($campainBefore->getId());
+        $campainLast = $this->campagneRepository->findLast();
+        $payrollLast = $this->payrollRepository->findPayrollByCampainId($campainLast->getId());
+
+        $dataElementVariable = [];
+
+        foreach ($payrollLast as $x => $last) {
+            $personal = $last->getPersonal();
+
+            $dataElementVariable[$x] = [
+                'matricule' => $last->getMatricule(),
+                'nom' => $personal->getFirstName(),
+                'prenoms' => $personal->getLastName(),
+                'last_brut_amount' => $last->getBrutAmount(),
+                'last_net_amount' => $last->getNetPayer(),
+                'before_brut_amount' => 0,
+                'before_net_amount' => 0,
+                'ecart_brut_amount' => $last->getBrutAmount(),
+                'ecart_net_amount' => $last->getNetPayer()
+            ];
+        }
+
+        foreach ($payrollBefore as $y => $before) {
+            $dataElementVariable[$y]['before_brut_amount'] = $before->getBrutAmount();
+            $dataElementVariable[$y]['before_net_amount'] = $before->getNetPayer();
+            $dataElementVariable[$y]['ecart_brut_amount'] = $before->getBrutAmount() - $dataElementVariable[$y]['ecart_brut_amount'];
+            $dataElementVariable[$y]['ecart_net_amount'] = $before->getNetPayer() - $dataElementVariable[$y]['ecart_net_amount'];
+        }
+        return new  JsonResponse($dataElementVariable);
     }
 
 }
