@@ -2,16 +2,17 @@
 
 namespace App\Entity;
 
+use App\Entity\Auth\Role;
 use App\Utils\Horodatage;
-use App\Entity\Admin\Role;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
 
@@ -25,18 +26,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     private ?string $username = null;
 
-    #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: 'users')]
-    private Collection $roles;
-
-
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
     private ?string $password = null;
+
+    #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: 'users')]
+    private Collection $customRoles;
+
+    #[ORM\Column(length: 255)]
+    private ?string $email = null;
     public function __construct()
     {
-        $this->roles = new ArrayCollection();
+        $this->customRoles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -71,35 +74,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getRoles(): array
     {
-        $roles = $this->roles->map(function (Role $role) {
+        $roles = $this->customRoles->map(function (Role $role) {
             return $role->getCode();
         })->toArray();
 
         return array_unique($roles);
     }
-    /**
-     * @return Collection<int, Role>
-     */
-    public function getRole(): Collection
-    {
-        return $this->roles;
-    }
+    
 
-    public function addRole(Role $role): self
-    {
-        if (!$this->roles->contains($role)) {
-            $this->roles->add($role);
-        }
-
-        return $this;
-    }
-
-    public function removeRole(Role $role): self
-    {
-        $this->roles->removeElement($role);
-
-        return $this;
-    }
 
 
     /**
@@ -124,5 +106,41 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    /**
+     * @return Collection<int, Role>
+     */
+    public function getCustomRoles(): Collection
+    {
+        return $this->customRoles;
+    }
+
+    public function addCustomRole(Role $customRole): static
+    {
+        if (!$this->customRoles->contains($customRole)) {
+            $this->customRoles->add($customRole);
+        }
+
+        return $this;
+    }
+
+    public function removeCustomRole(Role $customRole): static
+    {
+        $this->customRoles->removeElement($customRole);
+
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
+
+        return $this;
     }
 }

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Entity\Admin;
+namespace App\Entity\Auth;
 
 use App\Entity\User;
-use Doctrine\ORM\Mapping as ORM;
-use App\Repository\Admin\RoleRepository;
-use Doctrine\Common\Collections\Collection;
+use App\Repository\Auth\RoleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: RoleRepository::class)]
 class Role
@@ -21,14 +21,18 @@ class Role
 
     #[ORM\Column(length: 255)]
     private ?string $code = null;
-    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'role')]
+
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'customRoles')]
     private Collection $users;
 
     public function __construct()
     {
         $this->users = new ArrayCollection();
     }
-
+    public function __toString(): string
+    {
+        return (string) $this->name;
+    }
 
     public function getId(): ?int
     {
@@ -58,7 +62,8 @@ class Role
 
         return $this;
     }
-     /**
+
+    /**
      * @return Collection<int, User>
      */
     public function getUsers(): Collection
@@ -66,23 +71,22 @@ class Role
         return $this->users;
     }
 
-    public function addUser(User $user): self
+    public function addUser(User $user): static
     {
         if (!$this->users->contains($user)) {
             $this->users->add($user);
-            $user->addRole($this);
+            $user->addCustomRole($this);
         }
 
         return $this;
     }
 
-    public function removeUser(User $user): self
+    public function removeUser(User $user): static
     {
         if ($this->users->removeElement($user)) {
-            $user->removeRole($this);
+            $user->removeCustomRole($this);
         }
 
         return $this;
     }
-
 }

@@ -11,6 +11,19 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i data-feather="settings"></i>UTILISATEURS
+                            <div class="arrow-down"></div>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="topnav-components">
+                            <a href="{{ path('auth_user_new') }}"
+                               class="dropdown-item">Créer</a>
+                            <a href="{{ path('auth_user_index') }}"
+                               class="dropdown-item">Liste</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i data-feather="settings"></i>PARAMETRAGE
                             <div class="arrow-down"></div>
                         </a>

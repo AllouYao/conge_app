@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20240214082913 extends AbstractMigration
+final class Version20240214161855 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -25,7 +25,7 @@ final class Version20240214082913 extends AbstractMigration
         $this->addSql('ALTER TABLE user_role ADD CONSTRAINT FK_2DE8C6A3A76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE user_role ADD CONSTRAINT FK_2DE8C6A3D60322AC FOREIGN KEY (role_id) REFERENCES role (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE payroll DROP date_created');
-        $this->addSql('ALTER TABLE user DROP roles');
+        $this->addSql('ALTER TABLE user ADD email VARCHAR(255) NOT NULL, DROP roles');
     }
 
     public function down(Schema $schema): void
@@ -36,6 +36,6 @@ final class Version20240214082913 extends AbstractMigration
         $this->addSql('DROP TABLE role');
         $this->addSql('DROP TABLE user_role');
         $this->addSql('ALTER TABLE payroll ADD date_created DATE DEFAULT NULL');
-        $this->addSql('ALTER TABLE user ADD roles LONGTEXT NOT NULL COLLATE `utf8mb4_bin`');
+        $this->addSql('ALTER TABLE user ADD roles LONGTEXT NOT NULL COLLATE `utf8mb4_bin`, DROP email');
     }
 }
