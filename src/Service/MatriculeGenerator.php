@@ -30,6 +30,14 @@ class MatriculeGenerator
         $date = date('Y');
         return "CNPS$date$suffix";
     }
+    public function generateNumContract(): string
+    {
+        $count = (int)$this->personalRepository->findLastId() ?? 0;
+        ++$count;
+        $suffix = $this->count($count);
+        $date = date('Y');
+        return "CT$date$suffix";
+    }
 
     private function count($val): string
     {

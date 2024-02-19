@@ -3,9 +3,10 @@
 namespace App\Service;
 
 use App\Entity\DossierPersonal\Personal;
-use App\Repository\DossierPersonal\DepartureRepository;
 use App\Repository\DossierPersonal\DetailPrimeSalaryRepository;
+use App\Repository\DossierPersonal\DetailRetenueForfetaireRepository;
 use App\Repository\DossierPersonal\DetailSalaryRepository;
+use App\Repository\DossierPersonal\RetenueForfetaireRepository;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Repository\Settings\PrimesRepository;
 use App\Utils\Status;
@@ -18,13 +19,17 @@ class UtimePaiementService
     private PrimesRepository $primesRepository;
     private DetailSalaryRepository $detailSalaryRepository;
     private DetailPrimeSalaryRepository $detailPrimeSalaryRepository;
+    private RetenueForfetaireRepository $forfetaireRepository;
+    private DetailRetenueForfetaireRepository $detailRetenueForfetaireRepository;
 
     public function __construct(
-        AbsenceService              $absenceService,
-        CategoryChargeRepository    $categoryChargeRepository,
-        PrimesRepository            $primesRepository,
-        DetailSalaryRepository      $detailSalaryRepository,
-        DetailPrimeSalaryRepository $detailPrimeSalaryRepository,
+        AbsenceService                    $absenceService,
+        CategoryChargeRepository          $categoryChargeRepository,
+        PrimesRepository                  $primesRepository,
+        DetailSalaryRepository            $detailSalaryRepository,
+        DetailPrimeSalaryRepository       $detailPrimeSalaryRepository,
+        RetenueForfetaireRepository       $forfetaireRepository,
+        DetailRetenueForfetaireRepository $detailRetenueForfetaireRepository
     )
     {
         $this->absenceService = $absenceService;
@@ -32,6 +37,8 @@ class UtimePaiementService
         $this->primesRepository = $primesRepository;
         $this->detailSalaryRepository = $detailSalaryRepository;
         $this->detailPrimeSalaryRepository = $detailPrimeSalaryRepository;
+        $this->forfetaireRepository = $forfetaireRepository;
+        $this->detailRetenueForfetaireRepository = $detailRetenueForfetaireRepository;
     }
 
     /** Montant de la majoration des heures supplémentaire */
@@ -400,5 +407,25 @@ class UtimePaiementService
     {
         $primeTransport = $this->primesRepository->findOneBy(['code' => Status::PRIME_TRANSPORT]);
         return (int)$primeTransport->getTaux();
+    }
+
+    public function getAssuranceSante(Personal $personal): array
+    {
+        $retenueForfetaireSalariale = $this->forfetaireRepository->findOneBy(['code' => Status::ASSURANCE_SANTE_SALARIALE]);
+        $retenueForfetairePatronale = $this->forfetaireRepository->findOneBy(['code' => Status::ASSURANCE_SANTE_PATRONALE]);
+        $amountForfetaire = $this->detailRetenueForfetaireRepository->findRetenueForfetaire($personal, $retenueForfetaireSalariale);
+
+        if ($retenueForfetaireSalariale != null) {
+            $amountRfSalariale = $amountForfetaire?->getAmount();
+            $amountRfPatronale = $retenueForfetairePatronale?->getValue();
+        } else {
+            $amountRfSalariale = 0;
+            $amountRfPatronale = 0;
+        }
+
+        return [
+            'assurance_salariale' => $amountRfSalariale,
+            'assurance_patronale' => $amountRfPatronale
+        ];
     }
 }

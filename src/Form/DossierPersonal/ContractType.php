@@ -22,8 +22,8 @@ class ContractType extends AbstractType
                 'choices' => [
                     'CDD' => Status::CDD,
                     'CDI' => Status::CDI,
-                    'Stage' => Status::STAGE,
-                    'Occasionnel' => Status::OCCASIONNEL,
+                    //'Stage' => Status::STAGE,
+                    //'Occasionnel' => Status::OCCASIONNEL,
                 ],
                 'placeholder' => 'Sélectionner votre type de contrat',
                 'required' => true
@@ -41,7 +41,8 @@ class ContractType extends AbstractType
                 ],
                 'placeholder' => 'Sélectionner votre temps contractuel',
                 'required' => true
-            ]);
+            ])
+            ->add('refContract');
     }
 
     public function configureOptions(OptionsResolver $resolver): void

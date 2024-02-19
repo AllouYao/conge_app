@@ -1,5 +1,9 @@
-{% form_theme form with 'dossier_personal/personal/_collection.prime.html.twig' %}
-{% form_theme form.salary 'dossier_personal/personal/_collection_autre_prime.html.twig' %}
+{% form_theme form.salary with [
+    'dossier_personal/personal/_collection.prime.html.twig',
+    'dossier_personal/personal/_collection_autre_prime.html.twig',
+    'dossier_personal/personal/_collection_retenue_forfaitaire.html.twig'
+] %}
+
 <fieldset>
     <legend>Information du salarié</legend>
     <div class="mb-2 row">
@@ -68,7 +72,7 @@
     <li class="nav-item">
         <a href="#contrat" data-bs-toggle="tab" aria-expanded="true" class="nav-link">
             <span class="d-block d-sm-none"><i class="uil-user"></i></span>
-            <span class="d-none d-sm-block">Contrat</span>
+            <span class="d-none d-sm-block">Contrat de travail</span>
         </a>
     </li>
     <li class="nav-item">
@@ -81,6 +85,12 @@
         <a href="#primes" data-bs-toggle="tab" aria-expanded="true" class="nav-link">
             <span class="d-block d-sm-none"><i class="uil-user"></i></span>
             <span class="d-none d-sm-block">Primes</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#forfaitaire" data-bs-toggle="tab" aria-expanded="true" class="nav-link">
+            <span class="d-block d-sm-none"><i class="uil-user"></i></span>
+            <span class="d-none d-sm-block">Retenue forfaitaire</span>
         </a>
     </li>
     <li class="nav-item">
@@ -97,7 +107,6 @@
     <div class="tab-pane show" id="situation_familiale">
         {% include 'dossier_personal/personal/_situation.familiale_form.html.twig' %}
     </div>
-
     <div class="tab-pane" id="categories_socio_professionnel">
         {% include 'dossier_personal/personal/_catégorie.social_form.html.twig' %}
     </div>
@@ -114,6 +123,12 @@
         <fieldset>
             <legend>Primes à nature non juridique de salaire</legend>
             {% include 'dossier_personal/personal/_prime.html.twig' %}
+        </fieldset>
+    </div>
+    <div class="tab-pane" id="forfaitaire">
+        <fieldset>
+            <legend>Primes à nature non juridique de salaire</legend>
+            {% include 'dossier_personal/personal/_retenue_forfaitaire.html.twig' %}
         </fieldset>
     </div>
     <div class="tab-pane" id="salaire">

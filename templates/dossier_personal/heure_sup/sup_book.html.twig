@@ -4,9 +4,7 @@
 {% block stylesheets %}
     <style>
         #dataGridSupp {
-            height: 400px;
             border-width: 50px;
-
         }
     </style>
 {% endblock %}
@@ -17,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        RECAPITULATIF DE MAJORATIONS DES HEURES SUPP PAR TRANCHE DE LA PERIODE DE {{ date|upper }}
+                        RECAPITULATIF DE MAJORATIONS DES HEURES SUPP PAR TRANCHE SUR LA PERIODE DE {{ date|upper }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -45,9 +43,9 @@
             $("#dataGridSupp").dxDataGrid({
                 dataSource: `{{ url('personal_heure_sup_api_heure_supp_super_book') }}`,
                 showBorders: true,
+                height: 300,
                 scrolling: {
                     columnRenderingMode: 'virtual',
-                    height: 400,
                     mode: "virtual"
                 },
                 groupPanel: {
@@ -61,7 +59,7 @@
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('Livre des heures supplémentaire');
+                        const worksheet = workbook.addWorksheet('RECAPITULATIF DE MAJORATION DES HEURES SUPP');
                         DevExpress.excelExporter.exportDataGrid({
                             component: e.component,
                             worksheet,
@@ -76,7 +74,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Livre des heures supplémentaire ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `RECAPITULATIF DE MAJORATION DES HEURES SUPP ${debut ?? " "} - ${fin ?? " "}.xlsx`);
                             });
                         });
                         e.cancel = true;

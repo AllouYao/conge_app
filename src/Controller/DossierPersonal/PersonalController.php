@@ -85,6 +85,7 @@ class PersonalController extends AbstractController
         $amountIndemLogement = $detailPrimeSalaryRepository->findPrimeBySalaries($personal, $indemniteLogement);
 
         $salaireBase = $personal->getSalary()->getBaseAmount();
+        $sursalaire = $personal->getSalary()->getSursalaire();
         $salarieTransport = $personal->getSalary()->getPrimeTransport();
         $avantageAmount = $personal->getSalary()->getAvantage()?->getTotalAvantage();
         return $this->render('dossier_personal/personal/print.html.twig', [
@@ -96,6 +97,7 @@ class PersonalController extends AbstractController
             'dureeContrat' => $dureeContrat,
             'nombreEnfant' => $numberEnfant,
             'salaireBase' => $salaireBase ?? 0,
+            'sursalaire' => $sursalaire ?? 0,
             'primePanier' => $amountPanier !== null ? (int)$amountPanier['amountPrime'] : 0,
             'primeSalissure' => $amountSalissure !== null ? (int)$amountSalissure['amountPrime'] : 0,
             'primeTT' => $amountTT !== null ? (int)$amountTT['amountPrime'] : 0,
@@ -165,9 +167,10 @@ class PersonalController extends AbstractController
     {
         $matricule = $matriculeGenerator->generateMatricule();
         $numCNPS = $matriculeGenerator->generateNumCnps();
+        $numContract = $matriculeGenerator->generateNumContract();
         $personal = (new Personal())->setMatricule($matricule)->setRefCNPS($numCNPS);
         $salaire = (new Salary());
-        $contract = (new Contract());
+        $contract = (new Contract())->setRefContract($numContract);
         $personal
             ->setSalary($salaire)
             ->setContract($contract);
@@ -186,7 +189,10 @@ class PersonalController extends AbstractController
                 $detailPrimeSalary->setSalary($personal->getSalary());
                 $entityManager->persist($detailPrimeSalary);
             }
-            $this->service->variableElement($personal);
+            foreach ($personal->getSalary()->getDetailRetenueForfetaires() as $detailRetenueForfetaire) {
+                $detailRetenueForfetaire->setSalary($personal->getSalary());
+                $entityManager->persist($detailRetenueForfetaire);
+            }
             $entityManager->flush();
             flash()->addSuccess('Salarié enregistré avec succès.');
             return $this->redirectToRoute('personal_show', ['uuid' => $personal->getUuid()]);
@@ -194,7 +200,7 @@ class PersonalController extends AbstractController
 
         return $this->render('dossier_personal/personal/new.html.twig', [
             'personal' => $personal,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 

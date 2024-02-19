@@ -412,7 +412,6 @@ class DepartServices
         $reason = $departure->getReason();
         $indemniteLicenciement = $this->getIndemniteLicenciement($departure);
         $quotiteNonImposable = $indemniteLicenciement <= 50000.00 ? $indemniteLicenciement : round($indemniteLicenciement * (50 / 100), 2);
-        //$quotiteImposable = $indemniteLicenciement > 50000.00 ? round($indemniteLicenciement * (50 / 100), 2) : 0;
         $quotiteImposable = $indemniteLicenciement - $quotiteNonImposable;
         if ($reason === Status::RETRAITE || $reason === Status::DECES) {
             $quotiteImposable = $indemniteLicenciement;
@@ -548,7 +547,8 @@ class DepartServices
     public function calculerImpotBrutDeparture(Departure $departure): float|int
     {
 
-        $netImposable = $this->getTotalIndemniteImposable($departure);
+        //$netImposable = $this->getTotalIndemniteImposable($departure);
+        $netImposable = (double)$departure->getTotalIndemniteImposable();
         $tranchesImposition = [
             ['min' => 0, 'limite' => 75000, 'taux' => 0],
             ['min' => 75001, 'limite' => 240000, 'taux' => 0.16],
@@ -630,7 +630,8 @@ class DepartServices
     public function getAmountCNPS(Departure $departure): float
     {
 
-        $netImposable = $this->getTotalIndemniteImposable($departure);
+        //$netImposable = $this->getTotalIndemniteImposable($departure);
+        $netImposable = (double)$departure->getTotalIndemniteImposable();
         if ($netImposable > 1647314) {
             $netImposable = 1647314;
         }
@@ -643,7 +644,8 @@ class DepartServices
     /** Determiner le montant de la part patronal I.S locaux, de 1,20 % */
     public function getAmountIS(Departure $departure): float|int
     {
-        $netImposable = $this->getTotalIndemniteImposable($departure);
+        //$netImposable = $this->getTotalIndemniteImposable($departure);
+        $netImposable = (double)$departure->getTotalIndemniteImposable();
         $categoryRate = $this->categoryChargeRepository->findOneBy(['codification' => 'IS']);
         return round($netImposable * $categoryRate?->getValue() / 100, 2);
     }
@@ -667,7 +669,8 @@ class DepartServices
     /** Determiner le montant de la caisse de retraite du salarie, de 7,70 % */
     public function getAmountRCNPS_CR(Departure $departure): float|int
     {
-        $netImposable = $this->getTotalIndemniteImposable($departure);
+        //$netImposable = $this->getTotalIndemniteImposable($departure);
+        $netImposable = (double)$departure->getTotalIndemniteImposable();
         $categoryRateRCNPS_CR = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_CR']);
         return round($netImposable * $categoryRateRCNPS_CR->getValue() / 100, 2);
     }
@@ -675,7 +678,8 @@ class DepartServices
     /** Determiner le montant du taux d'apprentissage, charge patronal */
     public function getAmountTA(Departure $departure): float|int
     {
-        $netImposable = $this->getTotalIndemniteImposable($departure);
+        //$netImposable = $this->getTotalIndemniteImposable($departure);
+        $netImposable = (double)$departure->getTotalIndemniteImposable();
         $categoryRateFDFP_TA = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_TA']);
         return round($netImposable * $categoryRateFDFP_TA->getValue() / 100, 2);
     }
@@ -683,7 +687,8 @@ class DepartServices
     /** Determiner le montant de la FPC, charge patronal */
     public function getAmountFPC(Departure $departure): float|int
     {
-        $netImposable = $this->getTotalIndemniteImposable($departure);
+        //$netImposable = $this->getTotalIndemniteImposable($departure);
+        $netImposable = (double)$departure->getTotalIndemniteImposable();
         $categoryRateFDFP_FPC = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC']);
         return round($netImposable * $categoryRateFDFP_FPC->getValue() / 100, 2);
     }
@@ -691,7 +696,8 @@ class DepartServices
     /** Determiner le montant de la FPC complement annuel */
     public function getAmountFPCAnnuel(Departure $departure): float|int
     {
-        $netImposable = $this->getTotalIndemniteImposable($departure);
+        //$netImposable = $this->getTotalIndemniteImposable($departure);
+        $netImposable = (double)$departure->getTotalIndemniteImposable();
         $categoryRateFDFP_FPC_VER = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC_VER']);
         return round($netImposable * $categoryRateFDFP_FPC_VER->getValue() / 100, 2);
     }

@@ -71,10 +71,14 @@ class Salary
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $gratification = null;
 
+    #[ORM\OneToMany(mappedBy: 'salary', targetEntity: DetailRetenueForfetaire::class)]
+    private Collection $detailRetenueForfetaires;
+
     public function __construct()
     {
         $this->detailSalaries = new ArrayCollection();
         $this->detailPrimeSalaries = new ArrayCollection();
+        $this->detailRetenueForfetaires = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -306,6 +310,36 @@ class Salary
     public function setGratification(?string $gratification): static
     {
         $this->gratification = $gratification;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DetailRetenueForfetaire>
+     */
+    public function getDetailRetenueForfetaires(): Collection
+    {
+        return $this->detailRetenueForfetaires;
+    }
+
+    public function addDetailRetenueForfetaire(DetailRetenueForfetaire $detailRetenueForfetaire): static
+    {
+        if (!$this->detailRetenueForfetaires->contains($detailRetenueForfetaire)) {
+            $this->detailRetenueForfetaires->add($detailRetenueForfetaire);
+            $detailRetenueForfetaire->setSalary($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDetailRetenueForfetaire(DetailRetenueForfetaire $detailRetenueForfetaire): static
+    {
+        if ($this->detailRetenueForfetaires->removeElement($detailRetenueForfetaire)) {
+            // set the owning side to null (unless already changed)
+            if ($detailRetenueForfetaire->getSalary() === $this) {
+                $detailRetenueForfetaire->setSalary(null);
+            }
+        }
 
         return $this;
     }

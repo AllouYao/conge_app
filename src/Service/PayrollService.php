@@ -74,7 +74,8 @@ class PayrollService
         $salaryIts = round($chargePersonal?->getAmountIts(), 2);
         $salaryCnps = round($chargePersonal?->getAmountCNPS(), 2);
         $salaryCmu = round($chargePersonal?->getAmountCMU(), 2);
-        $chargeSalarie = round($chargePersonal?->getAmountTotalChargePersonal(), 2);
+        $assuranceSanteSalariale = $this->utimePaiementService->getAssuranceSante($personal)['assurance_salariale'];
+        $chargeSalarie = round($chargePersonal?->getAmountTotalChargePersonal() + $assuranceSanteSalariale, 2);
 
         /** charge de l'employeur et retenue fixcal */
         $chargeEmployeur = $this->chargeEmployeurRepository->findOneBy(['personal' => $personal]);
@@ -87,7 +88,8 @@ class PayrollService
         $employeurPF = round($chargeEmployeur?->getAmountPF(), 2);
         $employeurAT = round($chargeEmployeur?->getAmountAT(), 2);
         $employeurCNPS = round($chargeEmployeur?->getTotalRetenuCNPS(), 2);
-        $chargePatronal = round($chargeEmployeur?->getTotalChargeEmployeur(), 2);
+        $assuranceSantePatronale = $this->utimePaiementService->getAssuranceSante($personal)['assurance_patronale'];
+        $chargePatronal = round($chargeEmployeur?->getTotalChargeEmployeur() + $assuranceSantePatronale, 2);
 
         /** Récupération des éléménts de salaire non imposable */
         $primePaniers = round($this->utimePaiementService->getPrimePanier($personal), 2);
@@ -105,16 +107,17 @@ class PayrollService
             + $primeFonctions + $primeLogements + $indemniteFonctions + $indemniteLogements + $primeTransportImposable
             + $avantageNatureImposable;
         /** net à payer, total retenue, indemnité de transport et assurance santé du personnel */
-        $netPayer = $salaireBrut + $primeRendement + $primeOutillages + $primePaniers + $primeSalissures + $primeTenueTravails
-            - $chargeSalarie;
+        $netPayer = $netImposable + $primeTransportLegal + $avantageNonImposable + $primeRendement + $primeOutillages
+            + $primePaniers + $primeSalissures + $primeTenueTravails - $chargeSalarie;
 
         /** la masse salariale */
-
+        $masseSalaried = $netPayer + $chargePatronal;
 
         /** Enregistrement du livre de paie */
         $payroll = (new Payroll())
             ->setPersonal($personal)
             ->setCampagne($campagne)
+            ->setDateCreated($campagne->getStartedAt())
             ->setMatricule($matricule)
             ->setService($service)
             ->setCategories($categorie)
@@ -140,6 +143,7 @@ class PayrollService
             ->setSalaryIts($salaryIts)
             ->setSalaryCnps($salaryCnps)
             ->setSalaryCmu($salaryCmu)
+            ->setSalarySante($assuranceSanteSalariale)
             ->setEmployeurPf($employeurPF)
             ->setEmployeurAt($employeurAT)
             ->setEmployeurIs($employeurIS)
@@ -149,14 +153,20 @@ class PayrollService
             ->setAmountTA($employeurTA)
             ->setAmountFPC($employeurFPC)
             ->setAmountAnnuelFPC($employeurFPCAnnuel)
-            ->setFixcalAmount($chargeSalarie)
-            ->setFixcalAmountEmployeur($chargePatronal)
+            ->setEmployeurSante($assuranceSantePatronale)
+            ->setFixcalAmount($salaryIts)
+            ->setSocialAmount($salaryCnps + $salaryCmu)
+            ->setTotalRetenueSalarie($chargeSalarie)
+            ->setFixcalAmountEmployeur($employeurTA + $employeurFPC + $employeurFPCAnnuel + $employeurIS)
+            ->setSocialAmountEmployeur($employeurPF + $employeurAT + $employeurCMU + $employeurCNPS)
+            ->setTotalRetenuePatronal($chargePatronal)
             ->setAmountPrimePanier($primePaniers)
             ->setAmountPrimeSalissure($primeSalissures)
             ->setAmountPrimeOutillage($primeOutillages)
             ->setAmountPrimeTenueTrav($primeTenueTravails)
             ->setAmountPrimeRendement($primeRendement)
-            ->setNetPayer($netPayer);
+            ->setNetPayer($netPayer)
+            ->setMasseSalary($masseSalaried);
 
         $this->manager->persist($payroll);
         $this->manager->persist($salary);
@@ -213,6 +223,7 @@ class PayrollService
         $payroll = (new Payroll())
             ->setPersonal($personal)
             ->setCampagne($campagne)
+            ->setDateCreated($campagne->getStartedAt())
             ->setMatricule($matricule)
             ->setService($service)
             ->setCategories($categorie)
@@ -245,5 +256,4 @@ class PayrollService
 
         $this->manager->persist($payroll);
     }
-
 }

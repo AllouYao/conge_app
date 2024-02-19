@@ -19,6 +19,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -69,7 +70,7 @@ class CampagneController extends AbstractController
     {
         $payroll = $this->payrollRepository->findPayrollByCampaign(true);
         $payBookData = [];
-        foreach ($payroll as $item) {
+        foreach ($payroll as $index => $item) {
 
             $indemniteDeces = null;
             $fraisFuneraire = null;
@@ -90,6 +91,7 @@ class CampagneController extends AbstractController
                 $indemniteLicenciement = $reason != Status::DECES && $reason != Status::RETRAITE ? $item->getTotalIndemniteImposable() : 0;
             }
             $payBookData[] = [
+                'index' => ++$index,
                 'type_campagne' => $item->getCampagne()->isOrdinary() ? 'Ordinaire' : 'Exceptionnelle',
                 /**
                  * element en rapport avec le salarié
@@ -106,6 +108,10 @@ class CampagneController extends AbstractController
                 'majoration_heurs_supp' => $item->getMajorationAmount(),
                 'conge_payes' => $item->getCongesPayesAmount(),
                 'prime_anciennete' => $item->getAncienneteAmount(),
+                'prime_de_tenue' => $item->getAmountPrimeTenueTrav(),
+                'prime_de_salissure' => $item->getAmountPrimeSalissure(),
+                'prime_outillage' => $item->getAmountPrimeOutillage(),
+                'prime_panier' => $item->getAmountPrimePanier(),
                 'prime_transport_imposable' => $item->getAmountTransImposable(),
                 'avantage_imposable' => $item->getAmountAvantageImposable(),
                 'prime_fonction' => $item->getPrimeFonctionAmount(),
@@ -115,9 +121,11 @@ class CampagneController extends AbstractController
                 'salaire_brut_salaried' => $item->getBrutAmount(),
                 'salaire_imposable_salaried' => $item->getImposableAmount(),
                 'its_salaried' => $item->getSalaryIts(),
+                'fixcale_salariale' => $item->getFixcalAmount(),
                 'cnps_salaried' => $item->getSalaryCnps(),
                 'cmu_salaried' => $item->getSalaryCmu(),
-                'charge_salarial' => $item->getFixcalAmount(),
+                'assurance_salariale' => $item->getSalarySante(),
+                'charge_salarial' => $item->getTotalRetenueSalarie(),
                 'prime_transport_legal' => $item->getSalaryTransport(),
                 'net_payer_salaried' => $item->getNetPayer(),
                 /**
@@ -128,10 +136,9 @@ class CampagneController extends AbstractController
                 'employer_cmu' => $item->getEmployeurCmu(),
                 'employer_pr' => $item->getEmployeurPf(),
                 'employer_at' => $item->getEmployeurAt(),
-                'employer_ta' => $item->getAmountTA(),
-                'employer_fpc' => $item->getAmountFPC(),
-                'employer_fpc_annuel' => $item->getAmountAnnuelFPC(),
-                'charge_patronal' => $item->getFixcalAmountEmployeur(),
+                'amount_fdfp' => $item->getAmountTA() + $item->getAmountFPC() + $item->getAmountAnnuelFPC(),
+                'assurance_patronales' => $item->getEmployeurSante(),
+                'charge_patronal' => $item->getTotalRetenuePatronal(),
                 /** element en rapport avec les départs */
                 'date_cessation' => $dateCessation,
                 'solde_presence' => $soldePresence,
@@ -166,7 +173,7 @@ class CampagneController extends AbstractController
         }
 
         $campagne = new Campagne();
-        $lastCampagne = $this->getDetailOfLastCampagne($campagne);
+        $lastCampagne = $this->getDetailOfLastCampagne($campagne, true);
 
         $form = $this->createForm(CampagneType::class, $campagne);
         $form->handleRequest($request);
@@ -206,7 +213,7 @@ class CampagneController extends AbstractController
         }
 
         $campagne = new Campagne();
-        $lastCampagne = $this->getDetailOfLastCampagne($campagne);
+        $lastCampagne = $this->getDetailOfLastCampagne($campagne, false);
 
         $form = $this->createForm(CampagneExcepType::class, $campagne);
         $form->handleRequest($request);
@@ -231,13 +238,13 @@ class CampagneController extends AbstractController
         ]);
     }
 
-    public function getDetailOfLastCampagne(Campagne $campagne): array
+    public function getDetailOfLastCampagne(Campagne $campagne, bool $isOrdinaire): array
     {
         $nbPersonal = 0;
         $salaireTotal = 0;
         $totalChargePersonal = 0;
         $totalChargeEmployeur = 0;
-        $lastCampagne = $this->campagneRepository->lastCampagne();
+        $lastCampagne = $this->campagneRepository->lastCampagne($isOrdinaire);
         if ($lastCampagne) {
             $campagne->setLastCampagne($lastCampagne);
             $nbPersonal = $lastCampagne->getPersonal()->count();
@@ -290,132 +297,10 @@ class CampagneController extends AbstractController
     }
 
     #[Route('/alert/campagne/progess', name: 'alert_progess', methods: ['GET'])]
-    public function campagneProgess()
+    public function campagneProgess(): RedirectResponse
     {
-        $this->addFlash('error', 'Une camapagne est en cours');
+        $this->addFlash('error', 'Une campagne est en cours');
         return $this->redirectToRoute('app_home');
-    }
-
-    /**
-     * @param Personal $personal
-     * @return Response
-     */
-    #[Route('/bulletin/{uuid}', name: 'make_bulletin', methods: ['GET'])]
-    public function makeBulletin(Personal $personal): Response
-    {
-        $payrolls = $this->payrollRepository->findBulletinByCampaign(true, true, $personal);
-        $dataPayroll = null;
-        foreach ($payrolls as $index => $payroll) {
-            $tauxCnpsSalarial = $this->categoryChargeRepository->findOneBy(['codification' => 'CNPS'])->getValue();
-            $tauxCrEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_CR'])->getValue();
-            $tauxPfEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_PF'])->getValue();
-            $tauxAtEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_AT'])->getValue();
-            $tauxIsEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'IS'])->getValue();
-            $tauxTaEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_TA'])->getValue();
-            $tauxFPCEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC'])->getValue();
-            $tauxFPCAnnuelEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC_VER'])->getValue();
-            $carbon = new Carbon();
-            $nbHeureSupp = $this->heureSupRepository->getNbHeursSupp($personal, $carbon->month, $carbon->year);
-            $nbHeure = 0;
-            $JourNormalOrFerie = null;
-            $jourOrNuit = null;
-            $amountHeureSup15 = $amountHeureSup50 = $amountHeureSup75A = $amountHeureSup75B = $amountHeureSup100 = null;
-            foreach ($nbHeureSupp as $item) {
-                $nbHeure += $item?->getTotalHorraire();
-                $jourOrNuit = $item->getTypeJourOrNuit();
-                $JourNormalOrFerie = $item->getTypeDay();
-            }
-
-            if ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $nbHeure <= 6) {
-                // 15% jour normal ~ 115%
-                $amountHeureSup15 = $payroll->getMajorationAmount();
-            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $nbHeure > 6) {
-                // 50% jour normal ~ 150%
-                $amountHeureSup50 = $payroll->getMajorationAmount();
-            } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
-                // 75% jour ferié or dimanche jour ~ 175%
-                $amountHeureSup75A = $payroll->getMajorationAmount();
-            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::NUIT) {
-                // 75% jour normal or dimanche nuit ~ 175%
-                $amountHeureSup75B = $payroll->getMajorationAmount();
-            } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::NUIT) {
-                // 100% jour ferié et dimanche nuit ~ 200%
-                $amountHeureSup100 = $payroll->getMajorationAmount();
-            }
-
-            $accountNumber = null;
-            $accountBanque = $payroll->getPersonal()->getAccountBanks();
-            foreach ($accountBanque as $value) {
-                $accountNumber = $value->getCode() . ' ' . $value->getNumCompte() . ' ' . $value->getRib();
-            }
-            $dataPayroll = [
-                'index' => ++$index,
-                'matricule' => $payroll->getMatricule(),
-                'service' => $payroll->getService(),
-                'grade_categoriel' => $payroll->getCategories(),
-                'embauche' => date_format($payroll->getDateEmbauche(), 'd/m/Y'),
-                'number_part' => number_format($payroll->getNumberPart(), 1, ',', ' '),
-                'numeroCnps' => $payroll->getNumCnps(),
-                'periode' => $carbon->monthName . ' ' . $carbon->year,
-                'date_edition' => date_format($payroll->getCampagne()->getStartedAt(), 'd/m/Y'),
-                'fullName_salaried' => $payroll->getPersonal()->getFirstName() . ' ' . $payroll->getPersonal()->getLastName(),
-                'departement' => $payroll->getDepartement(),
-                'salaire_base' => $payroll->getBaseAmount(),
-                'sursalaire' => $payroll->getSursalaire(),
-                'majoration_heure_sup_15' => $amountHeureSup15,
-                'majoration_heure_sup_50' => $amountHeureSup50,
-                'majoration_heure_sup_75_A' => $amountHeureSup75A,
-                'majoration_heure_sup_75_B' => $amountHeureSup75B,
-                'majoration_heure_sup_100' => $amountHeureSup100,
-                'transport_imposable' => (double)$payroll->getAmountTransImposable(),
-                'avantage_imposable' => (double)$payroll->getAmountAvantageImposable(),
-                'prime_fonction' => (double)$payroll->getPrimeFonctionAmount(),
-                'prime_logement' => (double)$payroll->getPrimeLogementAmount(),
-                'indemnite_fonction' => (double)$payroll->getIndemniteFonctionAmount(),
-                'indemnite_logement' => (double)$payroll->getIndemniteLogementAmount(),
-                'total_brut' => (double)$payroll->getImposableAmount(),
-                'amount_its_salarial' => (double)$payroll->getSalaryIts(),
-                'taux_cnps_salarial' => (double)$tauxCnpsSalarial,
-                'amount_cnps_salarial' => (double)$payroll->getSalaryCnps(),
-                'taux_cr_employeur' => (double)$tauxCrEmployeur,
-                'amount_cr_employeur' => (double)$payroll->getEmployeurCr(),
-                'taux_pf_employeur' => (double)$tauxPfEmployeur,
-                'amount_pf_employeur' => (double)$payroll->getEmployeurPf(),
-                'taux_at_employeur' => (double)$tauxAtEmployeur,
-                'amount_at_employeur' => (double)$payroll->getEmployeurAt(),
-                'taux_is_employeur' => (double)$tauxIsEmployeur,
-                'amount_is_employeur' => (double)$payroll->getEmployeurIs(),
-                'taux_ta_employeur' => (double)$tauxTaEmployeur,
-                'amount_ta_employeur' => (double)$payroll->getAmountTA(),
-                'taux_fpc_employeur' => (double)$tauxFPCEmployeur,
-                'amount_fpc_employeur' => (double)$payroll->getAmountFPC(),
-                'taux_fpc_annuel_employeur' => (double)$tauxFPCAnnuelEmployeur,
-                'amount_fpc_annuel_employeur' => (double)$payroll->getAmountAnnuelFPC(),
-                'amount_cmu_salarial' => (double)$payroll->getSalaryCmu(),
-                'amount_cmu_patronal' => (double)$payroll->getEmployeurCmu(),
-                'charge_salarial' => (double)$payroll->getFixcalAmount(),
-                'charge_patronal' => (double)$payroll->getFixcalAmountEmployeur(),
-                'prime_transport' => (double)$payroll->getSalaryTransport(),
-                'amount_prime_panier' => (double)$payroll->getAmountPrimePanier(),
-                'amount_prime_salissure' => (double)$payroll->getAmountPrimeSalissure(),
-                'amount_prime_tt' => (double)$payroll->getAmountPrimeTenueTrav(),
-                'amount_prime_outi' => (double)$payroll->getAmountPrimeOutillage(),
-                'amount_prime_rendement' => (double)$payroll->getAmountPrimeRendement(),
-                'salaire_brut' => (double)$payroll->getBrutAmount(),
-                'amount_avantage' => (double)$payroll->getAventageNonImposable(),
-                'net_imposable' => (double)$payroll->getImposableAmount(),
-                'heure_travailler' => Status::TAUX_HEURE,
-                'nb_heure_supp' => (double)$nbHeure,
-                'net_payes' => (double)$payroll->getNetPayer(),
-                'mode_paiement' => $payroll->getPersonal()->getModePaiement(),
-                'num_compte' => $accountNumber,
-                'smig' => (double)$payroll->getPersonal()->getSalary()->getSmig(),
-                'prime_anciennete' => (double)$payroll->getAncienneteAmount()
-            ];
-        }
-        return $this->render('test/test/index.html.twig', [
-            'payrolls' => $dataPayroll,
-        ]);
     }
 
     /** Bulletin de paie pour les campagnes de paie exceptionnelles */
@@ -428,7 +313,7 @@ class CampagneController extends AbstractController
         $payrolls = $this->payrollRepository->findBulletinByCampaign(true, false, $personal);
         $reason = null;
         $departurePayroll = null;
-        foreach ($payrolls as $index => $payroll) {
+        foreach ($payrolls as $payroll) {
             $reason = $payroll->getPersonal()->getDepartures()->getReason();
             $totalImposableCnps = $payroll->getTotalIndemniteImposable() ?? 0;
             if ($totalImposableCnps > 1647314) {
@@ -443,7 +328,7 @@ class CampagneController extends AbstractController
             $tauxCrEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_CR'])->getValue();
             $tauxPfEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_PF'])->getValue();
             $tauxAtEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_AT'])->getValue();
-            $tauxIsEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'IS'])->getValue();
+            //$tauxIsEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'IS'])->getValue();
             $tauxTaEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_TA'])->getValue();
             $tauxFPCEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC'])->getValue();
             $tauxFPCAnnuelEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC_VER'])->getValue();
@@ -511,7 +396,7 @@ class CampagneController extends AbstractController
         $date = $formatter->format($today);
         $payrolls = $this->payrollRepository->findBulletinByCampaign(true, true, $personal);
         $dataPayroll = null;
-        foreach ($payrolls as $index => $payroll) {
+        foreach ($payrolls as $payroll) {
             $accountNumber = null;
             $accountBanque = $payroll->getPersonal()->getAccountBanks();
             foreach ($accountBanque as $value) {
@@ -574,8 +459,8 @@ class CampagneController extends AbstractController
                 'account_number' => $accountNumber,
                 /** Element lieu au cumul des salaire */
                 'salaire_brut' => (double)$payroll->getBrutAmount(),
-                'charge_salarial' => (double)$payroll->getFixcalAmount(),
-                'charge_patronal' => (double)$payroll->getFixcalAmountEmployeur(),
+                'charge_salarial' => (double)$payroll->getTotalRetenueSalarie(),
+                'charge_patronal' => (double)$payroll->getTotalRetenuePatronal(),
                 'amount_avantage' => (double)$payroll->getAventageNonImposable(),
                 'net_imposable' => (double)$payroll->getImposableAmount(),
                 'heure_travailler' => Status::TAUX_HEURE,
@@ -618,6 +503,8 @@ class CampagneController extends AbstractController
                 'amount_fpc_annuel_employeur' => (double)$payroll->getAmountAnnuelFPC(),
                 'amount_cmu_salarial' => (double)$payroll->getSalaryCmu(),
                 'amount_cmu_patronal' => (double)$payroll->getEmployeurCmu(),
+                'assurance_salariale' => (double)$payroll->getSalarySante(),
+                'assurance_patronales' => (double)$payroll->getEmployeurSante(),
                 'prime_transport' => (double)$payroll->getSalaryTransport(),
                 'amount_prime_panier' => (double)$payroll->getAmountPrimePanier(),
                 'amount_prime_salissure' => (double)$payroll->getAmountPrimeSalissure(),

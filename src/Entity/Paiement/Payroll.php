@@ -188,6 +188,21 @@ class Payroll
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $totalIndemniteImposable = null;
 
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateCreated = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $socialAmount = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $socialAmountEmployeur = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $totalRetenueSalarie = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $totalRetenuePatronal = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -849,6 +864,66 @@ class Payroll
     public function setTotalIndemniteImposable(?string $totalIndemniteImposable): static
     {
         $this->totalIndemniteImposable = $totalIndemniteImposable;
+
+        return $this;
+    }
+
+    public function getDateCreated(): ?\DateTimeInterface
+    {
+        return $this->dateCreated;
+    }
+
+    public function setDateCreated(?\DateTimeInterface $dateCreated): static
+    {
+        $this->dateCreated = $dateCreated;
+
+        return $this;
+    }
+
+    public function getSocialAmount(): ?string
+    {
+        return $this->socialAmount;
+    }
+
+    public function setSocialAmount(?string $socialAmount): static
+    {
+        $this->socialAmount = $socialAmount;
+
+        return $this;
+    }
+
+    public function getSocialAmountEmployeur(): ?string
+    {
+        return $this->socialAmountEmployeur;
+    }
+
+    public function setSocialAmountEmployeur(?string $socialAmountEmployeur): static
+    {
+        $this->socialAmountEmployeur = $socialAmountEmployeur;
+
+        return $this;
+    }
+
+    public function getTotalRetenueSalarie(): ?string
+    {
+        return $this->totalRetenueSalarie;
+    }
+
+    public function setTotalRetenueSalarie(?string $totalRetenueSalarie): static
+    {
+        $this->totalRetenueSalarie = $totalRetenueSalarie;
+
+        return $this;
+    }
+
+    public function getTotalRetenuePatronal(): ?string
+    {
+        return $this->totalRetenuePatronal;
+    }
+
+    public function setTotalRetenuePatronal(?string $totalRetenuePatronal): static
+    {
+        $this->totalRetenuePatronal = $totalRetenuePatronal;
 
         return $this;
     }

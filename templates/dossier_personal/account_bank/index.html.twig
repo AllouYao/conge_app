@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des comptes en banque{% endblock %}
+{% block title %}Liste des banques des salariés{% endblock %}
 {% block stylesheets %}
     <style>
         #dataGridAccountBank {
@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        LISTE DES COMPTES POUR SALARIE
+                        BANQUE DES SALARIES
                     </h5>
                 </div>
                 <div class="card-body">
@@ -43,7 +43,7 @@
             $("#dataGridAccountBank").dxDataGrid({
                 dataSource: `{{ url('personal_account_bank_api_account_bank') }}`,
                 showBorders: true,
-                height: 400,
+                height: 300,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual"
@@ -59,7 +59,7 @@
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('CHARGE PEOPLE');
+                        const worksheet = workbook.addWorksheet('BANQUE SALARIE');
                         DevExpress.excelExporter.exportDataGrid({
                             component: e.component,
                             worksheet,
@@ -74,7 +74,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Charge people ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `BANQUE SALARIE ${debut ?? " "} - ${fin ?? " "}.xlsx`);
                             });
                         });
                         e.cancel = true;

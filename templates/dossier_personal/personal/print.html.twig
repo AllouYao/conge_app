@@ -83,6 +83,10 @@
                                         <td class="text-end">{{ salaireBase|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                     <tr>
+                                        <td>Sursalaire</td>
+                                        <td class="text-end">{{ sursalaire|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                    <tr>
                                         <td>Prime de panier</td>
                                         <td class="text-end">{{ primePanier|number_format(0, ',', ' ') }}</td>
                                     </tr>
@@ -127,7 +131,7 @@
                                         <td class="text-end">{{ avantageAmount|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                     <tr>
-                                        {% set amountTT = salaireBase + primePanier + primeSalissure + primeTT
+                                        {% set amountTT = salaireBase + sursalaire + primePanier + primeSalissure + primeTT
                                             + primeOutil + primeTransport + primeFonction + primeLogement +
                                             primeRendement + indemniteFonction + indemniteLogement + avantageAmount %}
                                         <th>TOTAL</th>

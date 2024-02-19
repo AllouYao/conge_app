@@ -155,4 +155,10 @@ final class Status
      */
     public const PERSONAL_CHARGE = 'CHARGE SALARIALE';
     public const EMPLOYER_CHARGE = 'CHARGE PATRONNALE';
+
+    /**
+     * Retenue forfetaire
+     */
+    public const ASSURANCE_SANTE_SALARIALE = 'ASSURANCE SANTE PART SALARIALE';
+    public const ASSURANCE_SANTE_PATRONALE = 'ASSURANCE SANTE PART PATRONALE';
 }

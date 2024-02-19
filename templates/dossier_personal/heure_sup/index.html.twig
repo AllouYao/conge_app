@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des heures supp de lq periode | {{ date|capitalize }}{% endblock %}
+{% block title %}Liste des heures supp de la periode | {{ date|capitalize }}{% endblock %}
 {% block stylesheets %}
     <style>
         #dataGridHeureSupplementaire {
@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        LISTE DES HEURES SUPPLEMENTAIRES DE LA PERIODE DE {{ date|upper }}
+                        HEURES SUPPLEMENTAIRES DE LA PERIODE DE {{ date|upper }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -43,7 +43,7 @@
             $("#dataGridHeureSupplementaire").dxDataGrid({
                 dataSource: `{{ url('personal_heure_sup_api_heure_supplementaire') }}`,
                 showBorders: true,
-                height: 400,
+                height: 300,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual"
@@ -59,7 +59,7 @@
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('CHARGE PEOPLE');
+                        const worksheet = workbook.addWorksheet('HEURES SUPPLEMENTAIRES');
                         DevExpress.excelExporter.exportDataGrid({
                             component: e.component,
                             worksheet,
@@ -74,7 +74,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Charge people ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `HEURES SUPPLEMENTAIRE ${debut ?? " "} - ${fin ?? " "}.xlsx`);
                             });
                         });
                         e.cancel = true;

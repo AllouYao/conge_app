@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        LISTE DES SALARIES A PERSONNE A CHARGE
+                        SALARIES A PERSONNE A CHARGE
                     </h5>
                 </div>
                 <div class="card-body">
@@ -42,7 +42,7 @@
             $("#dataGridChargePeople").dxDataGrid({
                 dataSource: `{{ url('charge_people_api_charge_people') }}`,
                 showBorders: true,
-                height: 400,
+                height: 300,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual"
@@ -58,7 +58,7 @@
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('CHARGE PEOPLE');
+                        const worksheet = workbook.addWorksheet('PERSONNE A CHARGE');
                         DevExpress.excelExporter.exportDataGrid({
                             component: e.component,
                             worksheet,
@@ -73,7 +73,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Charge people ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `PERSONNE A CHARGE ${debut ?? " "} - ${fin ?? " "}.xlsx`);
                             });
                         });
                         e.cancel = true;

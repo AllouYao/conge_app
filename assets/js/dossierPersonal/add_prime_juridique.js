@@ -230,7 +230,6 @@ $(`#personal_salary_avantage`).each(function () {
     calculateSalaireNet()
 });
 
-
 prime();
 calculateTotalAutrePrime()
 addTagFormDeleteLinkAutrePrime()

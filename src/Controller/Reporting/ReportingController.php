@@ -4,6 +4,7 @@ namespace App\Controller\Reporting;
 
 use App\Repository\DossierPersonal\PersonalRepository;
 use Carbon\Carbon;
+use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -43,9 +44,6 @@ class ReportingController extends AbstractController
             'personals' => $personalRepository->findPersonalWithContract()
         ]);
     }
-
-
-
 
 
     #[Route('/salariale_etat_mensuel', name: 'salaires', methods: ['GET', 'POST'])]
@@ -93,6 +91,18 @@ class ReportingController extends AbstractController
         return $this->render('reporting/prime_indemnite/prime_indemnite.html.twig', [
             'mois' => $month,
             'annee' => $years
+        ]);
+    }
+
+
+    #[Route('/element_variable', name: 'element_variable', methods: ['GET', 'POST'])]
+    public function viewElementVariable(): Response
+    {
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+        $today = Carbon::now();
+        $date = $formatter->format($today);
+        return $this->render('reporting/element_variable/element_variable.html.twig', [
+            'date' => $date
         ]);
     }
 
