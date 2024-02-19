@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        LISTE DES ABSENCES DE LA PERIODE DE {{ date|upper }}
+                        ABSENCES PLANIFIEES SUR LA PERIODE DE {{ date|upper }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -42,7 +42,7 @@
             $("#dataGridAbsence").dxDataGrid({
                 dataSource: `{{ url('personal_absence_api_absence') }}`,
                 showBorders: true,
-                height: 400,
+                height: 300,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual"
@@ -58,7 +58,7 @@
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('ABSENCE');
+                        const worksheet = workbook.addWorksheet('ABSENCES PLANIFIEES');
                         DevExpress.excelExporter.exportDataGrid({
                             component: e.component,
                             worksheet,
@@ -73,7 +73,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Absence ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `ABSENCES PLANIFIEES ${debut ?? " "} au ${fin ?? " "}.xlsx`);
                             });
                         });
                         e.cancel = true;
@@ -155,7 +155,7 @@
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'status',
-                        cellTemplate: function(container, options) {
+                        cellTemplate: function (container, options) {
                             var status = options.data.status;
                             var statusText = status === 'OUI' ? 'Apporter' : 'Non apporter';
                             var labelClass = status === 'OUI' ? 'bg-success' : 'bg-danger';

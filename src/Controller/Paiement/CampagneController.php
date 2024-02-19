@@ -70,7 +70,7 @@ class CampagneController extends AbstractController
     {
         $payroll = $this->payrollRepository->findPayrollByCampaign(true);
         $payBookData = [];
-        foreach ($payroll as $item) {
+        foreach ($payroll as $index => $item) {
 
             $indemniteDeces = null;
             $fraisFuneraire = null;
@@ -91,6 +91,7 @@ class CampagneController extends AbstractController
                 $indemniteLicenciement = $reason != Status::DECES && $reason != Status::RETRAITE ? $item->getTotalIndemniteImposable() : 0;
             }
             $payBookData[] = [
+                'index' => ++$index,
                 'type_campagne' => $item->getCampagne()->isOrdinary() ? 'Ordinaire' : 'Exceptionnelle',
                 /**
                  * element en rapport avec le salarié
@@ -107,6 +108,10 @@ class CampagneController extends AbstractController
                 'majoration_heurs_supp' => $item->getMajorationAmount(),
                 'conge_payes' => $item->getCongesPayesAmount(),
                 'prime_anciennete' => $item->getAncienneteAmount(),
+                'prime_de_tenue' => $item->getAmountPrimeTenueTrav(),
+                'prime_de_salissure' => $item->getAmountPrimeSalissure(),
+                'prime_outillage' => $item->getAmountPrimeOutillage(),
+                'prime_panier' => $item->getAmountPrimePanier(),
                 'prime_transport_imposable' => $item->getAmountTransImposable(),
                 'avantage_imposable' => $item->getAmountAvantageImposable(),
                 'prime_fonction' => $item->getPrimeFonctionAmount(),
@@ -116,9 +121,11 @@ class CampagneController extends AbstractController
                 'salaire_brut_salaried' => $item->getBrutAmount(),
                 'salaire_imposable_salaried' => $item->getImposableAmount(),
                 'its_salaried' => $item->getSalaryIts(),
+                'fixcale_salariale' => $item->getFixcalAmount(),
                 'cnps_salaried' => $item->getSalaryCnps(),
                 'cmu_salaried' => $item->getSalaryCmu(),
-                'charge_salarial' => $item->getFixcalAmount(),
+                'assurance_salariale' => $item->getSalarySante(),
+                'charge_salarial' => $item->getTotalRetenueSalarie(),
                 'prime_transport_legal' => $item->getSalaryTransport(),
                 'net_payer_salaried' => $item->getNetPayer(),
                 /**
@@ -129,10 +136,9 @@ class CampagneController extends AbstractController
                 'employer_cmu' => $item->getEmployeurCmu(),
                 'employer_pr' => $item->getEmployeurPf(),
                 'employer_at' => $item->getEmployeurAt(),
-                'employer_ta' => $item->getAmountTA(),
-                'employer_fpc' => $item->getAmountFPC(),
-                'employer_fpc_annuel' => $item->getAmountAnnuelFPC(),
-                'charge_patronal' => $item->getFixcalAmountEmployeur(),
+                'amount_fdfp' => $item->getAmountTA() + $item->getAmountFPC() + $item->getAmountAnnuelFPC(),
+                'assurance_patronales' => $item->getEmployeurSante(),
+                'charge_patronal' => $item->getTotalRetenuePatronal(),
                 /** element en rapport avec les départs */
                 'date_cessation' => $dateCessation,
                 'solde_presence' => $soldePresence,
@@ -453,8 +459,8 @@ class CampagneController extends AbstractController
                 'account_number' => $accountNumber,
                 /** Element lieu au cumul des salaire */
                 'salaire_brut' => (double)$payroll->getBrutAmount(),
-                'charge_salarial' => (double)$payroll->getFixcalAmount(),
-                'charge_patronal' => (double)$payroll->getFixcalAmountEmployeur(),
+                'charge_salarial' => (double)$payroll->getTotalRetenueSalarie(),
+                'charge_patronal' => (double)$payroll->getTotalRetenuePatronal(),
                 'amount_avantage' => (double)$payroll->getAventageNonImposable(),
                 'net_imposable' => (double)$payroll->getImposableAmount(),
                 'heure_travailler' => Status::TAUX_HEURE,
@@ -497,6 +503,8 @@ class CampagneController extends AbstractController
                 'amount_fpc_annuel_employeur' => (double)$payroll->getAmountAnnuelFPC(),
                 'amount_cmu_salarial' => (double)$payroll->getSalaryCmu(),
                 'amount_cmu_patronal' => (double)$payroll->getEmployeurCmu(),
+                'assurance_salariale' => (double)$payroll->getSalarySante(),
+                'assurance_patronales' => (double)$payroll->getEmployeurSante(),
                 'prime_transport' => (double)$payroll->getSalaryTransport(),
                 'amount_prime_panier' => (double)$payroll->getAmountPrimePanier(),
                 'amount_prime_salissure' => (double)$payroll->getAmountPrimeSalissure(),

@@ -4,9 +4,7 @@
 {% block stylesheets %}
     <style>
         #dataGridConge {
-            height: 400px;
             border-width: 50px;
-
         }
     </style>
 {% endblock %}
@@ -17,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        LISTE DES CONGES PLANIFIES DE {{ date|upper }}
+                        CONGES PLANIFIES SUR LA PERIODE DE {{ date|upper }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -45,9 +43,9 @@
             $("#dataGridConge").dxDataGrid({
                 dataSource: `{{ url('conge_api_book') }}`,
                 showBorders: true,
+                height: 300,
                 scrolling: {
                     columnRenderingMode: 'virtual',
-                    height: 400,
                     mode: "virtual"
                 },
                 groupPanel: {
@@ -61,12 +59,11 @@
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('Livre des congés planifiés');
+                        const worksheet = workbook.addWorksheet('CONGES PLANIFIES');
                         DevExpress.excelExporter.exportDataGrid({
                             component: e.component,
                             worksheet,
                             autoFilterEnabled: true,
-                            columnWidths: [55, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
                             customizeCell: function (options) {
                                 const {gridCell, excelCell} = options;
                                 if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
@@ -77,7 +74,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Livre des congés planifiés ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `CONGES PLANIFIES ${debut ?? " "} - ${fin ?? " "}.xlsx`);
                             });
                         });
                         e.cancel = true;

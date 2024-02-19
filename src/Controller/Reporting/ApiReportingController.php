@@ -454,12 +454,18 @@ class ApiReportingController extends AbstractController
     #[Route('/element_variable', name: 'element_variable', methods: ['GET'])]
     public function etatElementVariable(): JsonResponse
     {
-        $campainBefore = $this->campagneRepository->findBeforeLast();
-        $payrollBefore = $this->payrollRepository->findPayrollByCampainId($campainBefore->getId());
-        $campainLast = $this->campagneRepository->findLast();
-        $payrollLast = $this->payrollRepository->findPayrollByCampainId($campainLast->getId());
-
         $dataElementVariable = [];
+        $campainBefore = $this->campagneRepository->findBeforeLast();
+        $campainLast = $this->campagneRepository->findLast();
+
+
+        if ($campainBefore->getId() && $campainLast->getId()) {
+            $payrollBefore = $this->payrollRepository->findPayrollByCampainId($campainBefore->getId());
+            $payrollLast = $this->payrollRepository->findPayrollByCampainId($campainLast->getId());
+        } else {
+            return $this->json(['data' => []]);
+        }
+
 
         foreach ($payrollLast as $x => $last) {
             $personal = $last->getPersonal();

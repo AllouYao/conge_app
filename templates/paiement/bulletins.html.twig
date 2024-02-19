@@ -335,6 +335,18 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
+                                {% if payrolls.assurance_salariale %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>031</td>
+                                        <td>Assurance</td>
+                                        <td class="text-end"></td>
+                                        <td class="text-end"></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.assurance_salariale|number_format(0, ',', ' ') }}</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
                                 {% if payrolls.amount_cr_employeur %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>017</td>
@@ -429,6 +441,18 @@
                                         <td class="text-end">{{ payrolls.amount_cmu_salarial|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.amount_cmu_patronal|number_format(0, ',', ' ') }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if payrolls.assurance_patronales %}
+                                    <tr class="small-text sans-bordure no-border-button no-border-top">
+                                        <td>031</td>
+                                        <td>Assurance part patronale</td>
+                                        <td class="text-end"></td>
+                                        <td class="text-end"></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-end">{{ payrolls.assurance_patronales|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                 {% endif %}
                                 {% if payrolls.charge_salarial and payrolls.charge_patronal %}

@@ -10,6 +10,7 @@ use App\Utils\Status;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -99,13 +100,12 @@ class DepartureController extends AbstractController
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(DepartureRepository $departureRepository): Response
     {
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
         $today = Carbon::now();
-        $years = $today->year;
-        $month = $today->month;
+        $date = $formatter->format($today);
         return $this->render('dossier_personal/departure/index.html.twig', [
             'departures' => $departureRepository->findAll(),
-            'mois' => $month,
-            'annee' => $years
+            'date' => $date,
         ]);
     }
 

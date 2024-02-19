@@ -76,8 +76,6 @@ class AbsenceController extends AbstractController
         $formatter = new \IntlDateFormatter('fr_FR', \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'MMMM Y');
         $today = Carbon::now();
         $date = $formatter->format($today);
-
-
         return $this->render('dossier_personal/absence/index.html.twig', [
             'absences' => $absence,
             'date' => $date

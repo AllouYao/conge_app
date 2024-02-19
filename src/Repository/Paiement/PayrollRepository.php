@@ -284,7 +284,7 @@ class PayrollRepository extends ServiceEntityRepository
     }
 
     /** Retourne le dictionnaire  de salaire en fonction de l'id de la campagne */
-    public function findPayrollByCampainId(int $campainId): array
+    public function findPayrollByCampainId(int $campainId): ?array
     {
         return $this->createQueryBuilder('pr')
             ->join('pr.personal', 'p')

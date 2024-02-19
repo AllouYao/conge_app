@@ -1,10 +1,9 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}LISTE DU PERSONNEL{% endblock %}
+{% block title %}LISTE DES SALARIES{% endblock %}
 {% block stylesheets %}
     <style>
         #dataGridPersonal {
-            height: 400px;
             border-width: 50px;
         }
     </style>
@@ -16,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        LISTE DU PERSONNEL
+                        LISTE DES SALARIES
                     </h5>
                 </div>
                 <div class="card-body">
@@ -44,9 +43,9 @@
             $("#dataGridPersonal").dxDataGrid({
                 dataSource: `{{ url('personal_salaried_book') }}`,
                 showBorders: true,
+                height: 300,
                 scrolling: {
                     columnRenderingMode: 'virtual',
-                    height: 400,
                     mode: "virtual"
                 },
                 groupPanel: {
@@ -75,7 +74,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Livre des salariés ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `FICHES DU PERSONNEL ${debut ?? " "} - ${fin ?? " "}.xlsx`);
                             });
                         });
                         e.cancel = true;

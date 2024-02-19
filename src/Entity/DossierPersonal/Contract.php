@@ -38,6 +38,9 @@ class Contract
     #[ORM\JoinColumn(nullable: false)]
     private ?Personal $personal = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $refContract = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -111,6 +114,18 @@ class Contract
     public function setPersonal(?Personal $personal): static
     {
         $this->personal = $personal;
+
+        return $this;
+    }
+
+    public function getRefContract(): ?string
+    {
+        return $this->refContract;
+    }
+
+    public function setRefContract(string $refContract): static
+    {
+        $this->refContract = $refContract;
 
         return $this;
     }

@@ -98,6 +98,15 @@ class SalaryType extends AbstractType
                 ],
                 'by_reference' => false,
             ])
+            ->add('detailRetenueForfetaires', CollectionType::class, [
+                "entry_type" => DetailRetenueForfetaireType::class,
+                "allow_add" => true,
+                "allow_delete" => true,
+                "entry_options" => [
+                    "label" => false
+                ],
+                'by_reference' => false,
+            ])
             ->add('smig', HiddenType::class, [
                 'label' => false,
                 'required' => false,

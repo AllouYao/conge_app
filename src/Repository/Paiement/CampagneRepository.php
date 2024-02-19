@@ -119,7 +119,7 @@ class CampagneRepository extends ServiceEntityRepository
     }
 
     /** Retourne la dernière campagne ordinaire */
-    public function findLast()
+    public function findLast(): ?Campagne
     {
         return $this->createQueryBuilder('c')
             ->where('c.ordinary = true')
