@@ -25,6 +25,9 @@ class Role
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'customRoles')]
     private Collection $users;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $description = null;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -89,4 +92,17 @@ class Role
 
         return $this;
     }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $comment): static
+    {
+        $this->description = $comment;
+
+        return $this;
+    }
 }
+

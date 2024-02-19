@@ -33,6 +33,17 @@
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Activé  compte </label>
+                <div class="col-md-8">
+                    {{ form_widget(form.active) }}
+                    {{ form_errors(form.active) }}
+                </div>
+            </div>
+        </div>
+    </div>
 </fieldset>
 
 
