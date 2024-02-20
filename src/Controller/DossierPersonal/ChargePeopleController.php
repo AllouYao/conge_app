@@ -2,16 +2,17 @@
 
 namespace App\Controller\DossierPersonal;
 
+use App\Entity\User;
+use App\Service\SalaryImpotsService;
 use App\Entity\DossierPersonal\Personal;
 use App\Form\DossierPersonal\ChargeType;
-use App\Repository\DossierPersonal\PersonalRepository;
-use App\Service\SalaryImpotsService;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Repository\DossierPersonal\PersonalRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/dossier/personal/charge_people', name: 'charge_people_')]
 class ChargePeopleController extends AbstractController
@@ -52,6 +53,11 @@ class ChargePeopleController extends AbstractController
         SalaryImpotsService    $salary
     ): Response
     {
+          /**
+         * @var User $currentUser
+         */
+        $currentUser = $this->getUser();
+
         $form = $this->createForm(ChargeType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -59,6 +65,7 @@ class ChargePeopleController extends AbstractController
             $personal = $form->get('personal')->getData();
             foreach ($chargePeople as $chargePerson) {
                 $chargePerson->setPersonal($personal);
+                $chargePerson->setUser($currentUser);
                 $manager->persist($chargePerson);
             }
             $manager->persist($personal);
@@ -83,6 +90,11 @@ class ChargePeopleController extends AbstractController
         SalaryImpotsService    $salary
     ): Response
     {
+          /**
+         * @var User $currentUser
+         */
+        $currentUser = $this->getUser();
+
         $form = $this->createForm(ChargeType::class, [
             'personal' => $personal,
             'chargePeople' => $personal->getChargePeople()
@@ -92,6 +104,7 @@ class ChargePeopleController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             foreach ($personal->getChargePeople() as $chargePerson) {
                 $chargePerson->setPersonal($personal);
+                $chargePerson->setUser($currentUser);
                 $manager->persist($chargePerson);
             }
 

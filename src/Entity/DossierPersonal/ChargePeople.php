@@ -2,6 +2,7 @@
 
 namespace App\Entity\DossierPersonal;
 
+use App\Entity\User;
 use App\Repository\DossierPersonal\ChargePeopleRepository;
 use App\Utils\Horodatage;
 use DateTimeInterface;
@@ -40,6 +41,9 @@ class ChargePeople
     #[ORM\ManyToOne(inversedBy: 'chargePeople')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Personal $personal = null;
+
+    #[ORM\ManyToOne(inversedBy: 'chargepeople')]
+    private ?User $user = null;
 
     public function getId(): ?int
     {
@@ -129,4 +133,18 @@ class ChargePeople
 
         return $this;
     }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+   
 }

@@ -59,16 +59,40 @@ class CampagneController extends AbstractController
     #[Route('/index', name: 'livre', methods: ['GET'])]
     public function index(): Response
     {
-        $payBooks = $this->payrollRepository->findPayrollByCampaign(true);
-        return $this->render('paiement/campagne/pay_book.html.twig', [
-            'payBooks' => $payBooks
+        if ($this->isGranted('ROLE_RH'))
+        {
+            $payBooks = $this->payrollRepository->findPayrollByCampaign(true);
+            return $this->render('paiement/campagne/pay_book.html.twig', [
+                'payBooks' => $payBooks
+            ]);
+
+        }else{
+
+            $payBooks = $this->payrollRepository->findPayrollByCampaignEmploye(true);
+             return $this->render('paiement/campagne/pay_book.html.twig', [
+                'payBooks' => $payBooks
         ]);
+
+        }
+
+        
+
+        
     }
 
     #[Route('/api/pay_book/', name: 'pay_book', methods: ['GET'])]
     public function getPayBook(): JsonResponse
     {
-        $payroll = $this->payrollRepository->findPayrollByCampaign(true);
+        if ($this->isGranted('ROLE_RH')){
+
+            $payroll = $this->payrollRepository->findPayrollByCampaign(true);
+
+        }else{
+
+            $payroll = $this->payrollRepository->findPayrollByCampaignEmploye(true);
+
+        }
+
         $payBookData = [];
         foreach ($payroll as $index => $item) {
 
@@ -78,9 +102,13 @@ class CampagneController extends AbstractController
             $indemniteLicenciement = null;
             $soldePresence = null;
             $dateCessation = null;
+
             if ($item->getCampagne()->isOrdinary()) {
+
                 $url = $this->generateUrl('campagne_bulletin_ordinaire', ['uuid' => $item->getPersonal()->getUuid()]);
+            
             } else {
+
                 $url = $this->generateUrl('campagne_bulletin', ['uuid' => $item->getPersonal()->getUuid()]);
                 $dateCessation = date_format($item->getPersonal()->getDepartures()?->getDate(), 'd/m/Y');
                 $reason = $item->getPersonal()->getDepartures()->getReason();
@@ -90,7 +118,9 @@ class CampagneController extends AbstractController
                 $indemniteRetraite = $reason === Status::RETRAITE ? $item->getTotalIndemniteImposable() : 0;
                 $indemniteLicenciement = $reason != Status::DECES && $reason != Status::RETRAITE ? $item->getTotalIndemniteImposable() : 0;
             }
+
             $payBookData[] = [
+                
                 'index' => ++$index,
                 'type_campagne' => $item->getCampagne()->isOrdinary() ? 'Ordinaire' : 'Exceptionnelle',
                 /**

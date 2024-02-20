@@ -2,20 +2,21 @@
 
 namespace App\Controller\DossierPersonal;
 
+use Exception;
+use Carbon\Carbon;
+use App\Entity\User;
+use App\Utils\Status;
+use IntlDateFormatter;
+use App\Service\DepartServices;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\DossierPersonal\Departure;
 use App\Form\DossierPersonal\DepartureType;
-use App\Repository\DossierPersonal\DepartureRepository;
-use App\Service\DepartServices;
-use App\Utils\Status;
-use Carbon\Carbon;
-use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use IntlDateFormatter;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Repository\DossierPersonal\DepartureRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/dossier/personal/departure', name: 'departure_')]
 class DepartureController extends AbstractController
@@ -100,6 +101,7 @@ class DepartureController extends AbstractController
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(DepartureRepository $departureRepository): Response
     {
+
         $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
         $today = Carbon::now();
         $date = $formatter->format($today);
@@ -115,12 +117,18 @@ class DepartureController extends AbstractController
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $manager): Response
     {
+        /**
+         * @var User $currentUser
+         */
+        $currentUser = $this->getUser();
+
         $departure = new Departure();
         $form = $this->createForm(DepartureType::class, $departure);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->departServices->calculeDroitsAndIndemnity($departure);
+            $departure->setUser($currentUser);
             $manager->persist($departure);
             $manager->flush();
 

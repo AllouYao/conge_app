@@ -55,7 +55,21 @@ class PayrollRepository extends ServiceEntityRepository
             ->setParameter('active', $active)
             ->getQuery()->getResult();
     }
+    public function findPayrollByCampaignEmploye(bool $active): ?array
+    {
+        return $this->createQueryBuilder('pr')
+        ->join('pr.personal', 'p') 
+        ->join('p.categorie', 'category') 
+        ->join('category.categorySalarie', 'categorySalarie') 
+        ->join('pr.campagne', 'c') 
+        ->andWhere('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
+        ->andWhere('c.active = :active') 
+        ->setParameter('active', $active) 
+        ->setParameter('code_employe', 'OE') 
+        ->setParameter('code_chauffeur', 'CH') 
+        ->getQuery()->getResult();
 
+    }
     public function findEtatSalaire(mixed $mouth1, mixed $mouth2, ?int $personalId): array
     {
         $qb = $this->createQueryBuilder('payroll');

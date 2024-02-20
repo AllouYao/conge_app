@@ -141,7 +141,7 @@ class Salary
 
     public function setPersonal(Personal $personal): static
     {
-        $this->personal = $personal;
+        $this->personal = $personal; 
 
         return $this;
     }
@@ -208,7 +208,6 @@ class Salary
     public function setAvantage(?Avantage $avantage): static
     {
         $this->avantage = $avantage;
-
         return $this;
     }
 

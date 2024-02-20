@@ -8,6 +8,21 @@
                             <i data-feather="home"></i> ACCUEIL
                         </a>
                     </li>
+                    {% if is_granted('ROLE_RH') %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i data-feather="settings"></i>UTILISATEURS
+                                <div class="arrow-down"></div>
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="topnav-components">
+                                <a href="{{ path('auth_user_new') }}"
+                                class="dropdown-item">Créer</a>
+                                <a href="{{ path('auth_user_index') }}"
+                                class="dropdown-item">Liste</a>
+                            </div>
+                        </li>
+                    {% endif %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -248,24 +263,31 @@
                                     <div class="arrow-down"></div>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                    <div class="dropdown">
-                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                           aria-expanded="false">
-                                            Ouverture campagne
-                                            <div class="arrow-down"></div>
-                                        </a>
-                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                            <a href="{{ path('campagne_open_campagne') }}"
-                                               class="dropdown-item"> Campagne ordinaire</a>
-                                            <a href="{{ path('campagne_open_campagne_exceptional') }}"
-                                               class="dropdown-item">Campagne exceptionnelle</a>
+                                    {% if is_granted('ROLE_RH') %}
+
+                                        <div class="dropdown">
+                                            <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                            role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false">
+                                                Ouverture campagne
+                                                <div class="arrow-down"></div>
+                                            </a>
+                                            <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                                <a href="{{ path('campagne_open_campagne') }}"
+                                                class="dropdown-item"> Campagne ordinaire</a>
+                                                <a href="{{ path('campagne_open_campagne_exceptional') }}"
+                                                class="dropdown-item">Campagne exceptionnelle</a>
+                                            </div>
                                         </div>
-                                    </div>
+                                    {% endif %}
+                                    
                                     <a href="{{ path('campagne_livre') }}"
                                        class="dropdown-item">Livre de paie de la periode</a>
-                                    <a href="{{ path('campagne_close') }}"
-                                       class="dropdown-item">Fermeture campagnes</a>
+                                    {% if is_granted('ROLE_RH') %}
+                                        <a href="{{ path('campagne_close') }}"
+                                        class="dropdown-item">Fermeture campagnes</a>
+                                    {% endif %}
+                                    
                                 </div>
                             </div>
                             <a href="{{ path('reporting_element_variable') }}"

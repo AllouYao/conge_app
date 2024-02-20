@@ -2,6 +2,7 @@
 
 namespace App\Entity\DossierPersonal;
 
+use App\Entity\User;
 use App\Repository\DossierPersonal\CongeRepository;
 use App\Utils\Horodatage;
 use DateTimeInterface;
@@ -68,6 +69,10 @@ class Conge
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     private ?string $remainingVacation = null;
+
+    #[ORM\ManyToOne(inversedBy: 'conges')]
+    private ?User $user = null;
+
 
     public function getId(): ?int
     {
@@ -266,4 +271,17 @@ class Conge
 
         return $this;
     }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
 }

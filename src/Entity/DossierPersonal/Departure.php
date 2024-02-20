@@ -4,6 +4,7 @@ namespace App\Entity\DossierPersonal;
 
 use App\Entity\Impots\ChargeEmployeur;
 use App\Entity\Impots\ChargePersonals;
+use App\Entity\User;
 use App\Repository\DossierPersonal\DepartureRepository;
 use App\Utils\Horodatage;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -67,6 +68,9 @@ class Departure
 
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $totalIndemniteImposable = null;
+
+    #[ORM\ManyToOne(inversedBy: 'user')]
+    private ?User $user = null;
 
     public function __construct()
     {
@@ -291,6 +295,18 @@ class Departure
     public function setTotalIndemniteImposable(?string $totalIndemniteImposable): static
     {
         $this->totalIndemniteImposable = $totalIndemniteImposable;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }

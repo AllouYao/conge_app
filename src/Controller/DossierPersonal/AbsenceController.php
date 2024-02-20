@@ -2,17 +2,18 @@
 
 namespace App\Controller\DossierPersonal;
 
-use App\Entity\DossierPersonal\Personal;
-use App\Form\DossierPersonal\PersonalAbsenceType;
-use App\Repository\DossierPersonal\AbsenceRepository;
-use App\Service\AbsenceService;
 use Carbon\Carbon;
+use App\Entity\User;
+use App\Service\AbsenceService;
+use App\Entity\DossierPersonal\Personal;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Form\DossierPersonal\PersonalAbsenceType;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Repository\DossierPersonal\AbsenceRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
 #[Route('/dossier/personal/absence', name: 'personal_absence_')]
@@ -85,6 +86,12 @@ class AbsenceController extends AbstractController
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
     {
+         /**
+         * @var User $currentUser
+         */
+        $currentUser = $this->getUser();
+
+
 
         $form = $this->createForm(PersonalAbsenceType::class);
         $form->handleRequest($request);
@@ -94,8 +101,10 @@ class AbsenceController extends AbstractController
 
             foreach ($PersonalAbsence as $absence) {
                 $absence->setPersonal($personal);
+                $absence->setUser($currentUser);
                 $this->entityManager->persist($absence);
             }
+
             $this->entityManager->persist($personal);
 
             $this->entityManager->flush();
@@ -112,6 +121,11 @@ class AbsenceController extends AbstractController
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Personal $personal, Request $request): Response
     {
+        /**
+         * @var User $currentUser
+         */
+        $currentUser = $this->getUser();
+
         $form = $this->createForm(PersonalAbsenceType::class, [
             'personal' => $personal,
             'absence' => $personal->getAbsences(),
@@ -122,6 +136,7 @@ class AbsenceController extends AbstractController
             foreach ($personal->getAbsences() as $absence) {
                 $absence->setPersonal($personal);
                 $this->entityManager->persist($absence);
+                $absence->setUser($currentUser);
             }
 
             $this->entityManager->flush();

@@ -3,6 +3,12 @@
 namespace App\Entity;
 
 use App\Entity\Auth\Role;
+use App\Entity\DossierPersonal\Absence;
+use App\Entity\DossierPersonal\AccountBank;
+use App\Entity\DossierPersonal\ChargePeople;
+use App\Entity\DossierPersonal\Conge;
+use App\Entity\DossierPersonal\Departure;
+use App\Entity\DossierPersonal\HeureSup;
 use App\Utils\Horodatage;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -40,9 +46,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private ?bool $active = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Absence::class)]
+    private Collection $absences;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: AccountBank::class)]
+    private Collection $accountBanks;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Conge::class)]
+    private Collection $conges;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: HeureSup::class)]
+    private Collection $heureSups;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Departure::class)]
+    private Collection $user;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: ChargePeople::class)]
+    private Collection $chargepeople;
     public function __construct()
     {
         $this->customRoles = new ArrayCollection();
+        $this->absences = new ArrayCollection();
+        $this->accountBanks = new ArrayCollection();
+        $this->conges = new ArrayCollection();
+        $this->heureSups = new ArrayCollection();
+        $this->user = new ArrayCollection();
+        $this->chargepeople = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -83,9 +113,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return array_unique($roles);
     }
-    
-
-
 
     /**
      * @see PasswordAuthenticatedUserInterface
@@ -154,6 +181,186 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setActive(bool $active): static
     {
         $this->active = $active;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Absence>
+     */
+    public function getAbsences(): Collection
+    {
+        return $this->absences;
+    }
+
+    public function addAbsence(Absence $absence): static
+    {
+        if (!$this->absences->contains($absence)) {
+            $this->absences->add($absence);
+            $absence->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAbsence(Absence $absence): static
+    {
+        if ($this->absences->removeElement($absence)) {
+            // set the owning side to null (unless already changed)
+            if ($absence->getUser() === $this) {
+                $absence->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AccountBank>
+     */
+    public function getAccountBanks(): Collection
+    {
+        return $this->accountBanks;
+    }
+
+    public function addAccountBank(AccountBank $accountBank): static
+    {
+        if (!$this->accountBanks->contains($accountBank)) {
+            $this->accountBanks->add($accountBank);
+            $accountBank->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAccountBank(AccountBank $accountBank): static
+    {
+        if ($this->accountBanks->removeElement($accountBank)) {
+            // set the owning side to null (unless already changed)
+            if ($accountBank->getUser() === $this) {
+                $accountBank->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Conge>
+     */
+    public function getConges(): Collection
+    {
+        return $this->conges;
+    }
+
+    public function addConge(Conge $conge): static
+    {
+        if (!$this->conges->contains($conge)) {
+            $this->conges->add($conge);
+            $conge->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConge(Conge $conge): static
+    {
+        if ($this->conges->removeElement($conge)) {
+            // set the owning side to null (unless already changed)
+            if ($conge->getUser() === $this) {
+                $conge->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HeureSup>
+     */
+    public function getHeureSups(): Collection
+    {
+        return $this->heureSups;
+    }
+
+    public function addHeureSup(HeureSup $heureSup): static
+    {
+        if (!$this->heureSups->contains($heureSup)) {
+            $this->heureSups->add($heureSup);
+            $heureSup->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHeureSup(HeureSup $heureSup): static
+    {
+        if ($this->heureSups->removeElement($heureSup)) {
+            // set the owning side to null (unless already changed)
+            if ($heureSup->getUser() === $this) {
+                $heureSup->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Departure>
+     */
+    public function getUser(): Collection
+    {
+        return $this->user;
+    }
+
+    public function addUser(Departure $user): static
+    {
+        if (!$this->user->contains($user)) {
+            $this->user->add($user);
+            $user->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(Departure $user): static
+    {
+        if ($this->user->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getUser() === $this) {
+                $user->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ChargePeople>
+     */
+    public function getChargepeople(): Collection
+    {
+        return $this->chargepeople;
+    }
+
+    public function addChargeperson(ChargePeople $chargeperson): static
+    {
+        if (!$this->chargepeople->contains($chargeperson)) {
+            $this->chargepeople->add($chargeperson);
+            $chargeperson->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChargeperson(ChargePeople $chargeperson): static
+    {
+        if ($this->chargepeople->removeElement($chargeperson)) {
+            // set the owning side to null (unless already changed)
+            if ($chargeperson->getUser() === $this) {
+                $chargeperson->setUser(null);
+            }
+        }
 
         return $this;
     }
