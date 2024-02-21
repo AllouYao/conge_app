@@ -1,0 +1,50 @@
+<fieldset>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Nom utilisateur<span
+                            class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    {{ form_widget(form.username) }}
+                    {{ form_errors(form.username) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Email <span class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    {{ form_widget(form.email) }}
+                    {{ form_errors(form.email) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Roles </label>
+                <div class="col-md-8">
+                    {{ form_widget(form.customRoles) }}
+                    {{ form_errors(form.customRoles) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Activé  compte </label>
+                <div class="col-md-8">
+                    {{ form_widget(form.active) }}
+                    {{ form_errors(form.active) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+
+

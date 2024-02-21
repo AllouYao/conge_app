@@ -420,8 +420,8 @@ class UtimePaiementService
         $retenueForfetairePatronale = $this->forfetaireRepository->findOneBy(['code' => Status::ASSURANCE_SANTE_PATRONALE]);
         $amountForfetaire = $this->detailRetenueForfetaireRepository->findRetenueForfetaire($personal, $retenueForfetaireSalariale);
 
-        if ($amountForfetaire != null) {
-            $amountRfSalariale = $amountForfetaire->getAmount();
+        if ($retenueForfetaireSalariale != null) {
+            $amountRfSalariale = $amountForfetaire?->getAmount();
             $amountRfPatronale = $retenueForfetairePatronale?->getValue();
         } else {
             $amountRfSalariale = 0;

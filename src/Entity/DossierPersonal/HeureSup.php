@@ -2,6 +2,7 @@
 
 namespace App\Entity\DossierPersonal;
 
+use App\Entity\User;
 use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Utils\Horodatage;
 use DateTimeInterface;
@@ -45,6 +46,9 @@ class HeureSup
 
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2)]
     private ?string $tauxHoraire = null;
+
+    #[ORM\ManyToOne(inversedBy: 'heureSups')]
+    private ?User $user = null;
 
     public function getId(): ?int
     {
@@ -163,5 +167,17 @@ class HeureSup
     {
         $diff = $this->startedHour->diff($this->endedHour);
         return $diff->format('%h');
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+
+        return $this;
     }
 }

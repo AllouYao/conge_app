@@ -53,6 +53,11 @@ class AccountBankController extends AbstractController
         EntityManagerInterface $manager
     ): Response
     {
+        /**
+         * @var User $currentUser
+         */
+        $currentUser = $this->getUser();
+        
         $form = $this->createForm(AccountType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -60,6 +65,7 @@ class AccountBankController extends AbstractController
             $personal = $form->get('personal')->getData();
             foreach ($accountBanks as $accountBank) {
                 $accountBank->setPersonal($personal);
+                $accountBank->setUser($currentUser);
                 $manager->persist($accountBank);
             }
             $manager->flush();

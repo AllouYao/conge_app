@@ -2,20 +2,21 @@
 
 namespace App\Controller\DossierPersonal;
 
+use Exception;
+use Carbon\Carbon;
+use App\Entity\User;
+use App\Utils\Status;
+use IntlDateFormatter;
+use App\Service\CongeService;
 use App\Entity\DossierPersonal\Conge;
 use App\Form\DossierPersonal\CongeType;
-use App\Repository\DossierPersonal\CongeRepository;
-use App\Service\CongeService;
-use App\Utils\Status;
-use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use IntlDateFormatter;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Repository\DossierPersonal\CongeRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/dossier/personal/conge', name: 'conge_')]
 class CongeController extends AbstractController
@@ -82,6 +83,11 @@ class CongeController extends AbstractController
         CongeRepository        $congeRepository
     ): Response
     {
+        /**
+         * @var User $currentUser
+         */
+        $currentUser = $this->getUser();
+
         $conge = new Conge();
         $form = $this->createForm(CongeType::class, $conge);
         $form->handleRequest($request);
@@ -102,7 +108,9 @@ class CongeController extends AbstractController
             $conge
                 ->setDateDernierRetour($lastDateReturn)
                 ->setTypeConge(Status::CONGE_GLOBAL)
-                ->setIsConge(true);
+                ->setIsConge(true)
+                ->setUser($currentUser);
+
             $entityManager->persist($conge);
             $entityManager->flush();
 
@@ -129,6 +137,11 @@ class CongeController extends AbstractController
         CongeRepository        $congeRepository
     ): Response
     {
+         /**
+         * @var User $currentUser
+         */
+        $currentUser = $this->getUser();
+
         $form = $this->createForm(CongeType::class, $conge);
         $form->handleRequest($request);
 
@@ -138,6 +151,7 @@ class CongeController extends AbstractController
             if ($lastConge)
                 $congeService->congesPayerByLast($conge);
             $congeService->congesPayerByFirst($conge);
+            $conge->setUser($currentUser);
             $entityManager->persist($conge);
             $entityManager->flush();
             flash()->addSuccess('Congé planifié modifier avec succès.');

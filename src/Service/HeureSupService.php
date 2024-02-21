@@ -11,6 +11,8 @@ use App\Utils\Status;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class HeureSupService
 {
@@ -18,18 +20,23 @@ class HeureSupService
     private PersonalRepository $personalRepository;
     private TauxHoraireRepository $horaireRepository;
     private EntityManagerInterface $manager;
+    private  $tokenStorage;
+
 
     public function __construct(
         HeureSupRepository     $heureSupRepository,
         PersonalRepository     $personalRepository,
         TauxHoraireRepository  $horaireRepository,
-        EntityManagerInterface $manager
+        EntityManagerInterface $manager,
+        TokenStorageInterface $tokenStorage
     )
     {
         $this->heureSupRepository = $heureSupRepository;
         $this->personalRepository = $personalRepository;
         $this->horaireRepository = $horaireRepository;
         $this->manager = $manager;
+        $this->tokenStorage = $tokenStorage;
+
     }
 
     /**
@@ -83,9 +90,10 @@ class HeureSupService
 
     public function heureSupp(array $data, Personal $personal): void
     {
+        
         $heureSupps = $data['heureSup'];
         /** @var HeureSup $heureSupps */
-        foreach ($heureSupps as $heureSupp) {
+        foreach ($heureSupps as $heureSupp) { 
             $tauxHoraire = (double)$heureSupp->getTauxHoraire();
             $salaireBase = (int)$personal->getCategorie()->getAmount();
             $salaireHoraire = $salaireBase / $tauxHoraire;
@@ -131,7 +139,8 @@ class HeureSupService
             }
             $heureSupp
                 ->setPersonal($personal)
-                ->setAmount((int)$amountHeureSup);
+                ->setAmount((int)$amountHeureSup)
+                ->setUser($this->tokenStorage->getToken()->getUser());
             $this->manager->persist($heureSupp);
         }
 
