@@ -47,6 +47,9 @@ class Campagne
     #[ORM\OneToMany(mappedBy: 'campagne', targetEntity: Payroll::class)]
     private Collection $payrolls;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $status = null;
+
     public function __construct()
     {
         $this->personal = new ArrayCollection();
@@ -184,6 +187,18 @@ class Campagne
         }
 
         $this->campagne = $campagne;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?string $status): static
+    {
+        $this->status = $status;
 
         return $this;
     }

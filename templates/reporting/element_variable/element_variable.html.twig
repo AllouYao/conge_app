@@ -4,7 +4,6 @@
 {% block stylesheets %}
     <style>
         #dataGridReleveComparSalaire {
-            height: 400px;
             border-width: 50px;
         }
     </style>
@@ -40,9 +39,9 @@
             $("#dataGridReleveComparSalaire").dxDataGrid({
                 dataSource: `{{ url('api_reporting_element_variable') }}`,
                 showBorders: true,
+                height: 400,
                 scrolling: {
                     columnRenderingMode: 'virtual',
-                    height: 400,
                     mode: "virtual"
                 },
                 groupPanel: {
@@ -71,7 +70,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `PRIMES ET INDEMNITES ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `RELEVE COMPARATIF DES SALAIRES ${debut ?? " "} au ${fin ?? " "}.xlsx`);
                             });
                         });
                         e.cancel = true;

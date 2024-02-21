@@ -458,11 +458,10 @@ class ApiReportingController extends AbstractController
         $campainBefore = $this->campagneRepository->findBeforeLast();
         $campainLast = $this->campagneRepository->findLast();
 
+        $payrollBefore = $this->payrollRepository->findPayrollByCampainId($campainBefore?->getId());
+        $payrollLast = $this->payrollRepository->findPayrollByCampainId($campainLast?->getId());
 
-        if ($campainBefore->getId() && $campainLast->getId()) {
-            $payrollBefore = $this->payrollRepository->findPayrollByCampainId($campainBefore->getId());
-            $payrollLast = $this->payrollRepository->findPayrollByCampainId($campainLast->getId());
-        } else {
+        if (!$payrollBefore && !$payrollLast) {
             return $this->json(['data' => []]);
         }
 
@@ -490,6 +489,30 @@ class ApiReportingController extends AbstractController
             $dataElementVariable[$y]['ecart_net_amount'] = $before->getNetPayer() - $dataElementVariable[$y]['ecart_net_amount'];
         }
         return new  JsonResponse($dataElementVariable);
+    }
+
+    #[Route('/etat_virements', name: 'etat_virements', methods: ['GET'])]
+    public function etatVersement(): JsonResponse
+    {
+        $dataVirement = [];
+        $requestVirements = $this->payrollRepository->getPayrollVirement(Status::VIREMENT);
+        if (!$requestVirements) {
+            return $this->json(['data' => []]);
+        }
+
+        foreach ($requestVirements as $virement) {
+            $dataVirement[] = [
+                'name_salaried' => $virement['nom_salaried'],
+                'second_name_salaried' => $virement['prenoms_salaried'],
+                'banques' => $virement['banque'],
+                'guichets' => $virement['code_compte'],
+                'comptes' => $virement['num_compte'],
+                'cles' => $virement['rib_compte'],
+                'salaire_net' => (double)$virement['net_payes'],
+                'versement_mode' => $virement['mode_paiement']
+            ];
+        }
+        return new JsonResponse($dataVirement);
     }
 
 }

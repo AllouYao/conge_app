@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\DossierPersonal\Personal;
+use App\Repository\DossierPersonal\CongeRepository;
 use App\Repository\DossierPersonal\DetailPrimeSalaryRepository;
 use App\Repository\DossierPersonal\DetailRetenueForfetaireRepository;
 use App\Repository\DossierPersonal\DetailSalaryRepository;
@@ -21,6 +22,7 @@ class UtimePaiementService
     private DetailPrimeSalaryRepository $detailPrimeSalaryRepository;
     private RetenueForfetaireRepository $forfetaireRepository;
     private DetailRetenueForfetaireRepository $detailRetenueForfetaireRepository;
+    private CongeRepository $congeRepository;
 
     public function __construct(
         AbsenceService                    $absenceService,
@@ -29,7 +31,8 @@ class UtimePaiementService
         DetailSalaryRepository            $detailSalaryRepository,
         DetailPrimeSalaryRepository       $detailPrimeSalaryRepository,
         RetenueForfetaireRepository       $forfetaireRepository,
-        DetailRetenueForfetaireRepository $detailRetenueForfetaireRepository
+        DetailRetenueForfetaireRepository $detailRetenueForfetaireRepository,
+        CongeRepository                   $congeRepository
     )
     {
         $this->absenceService = $absenceService;
@@ -39,6 +42,7 @@ class UtimePaiementService
         $this->detailPrimeSalaryRepository = $detailPrimeSalaryRepository;
         $this->forfetaireRepository = $forfetaireRepository;
         $this->detailRetenueForfetaireRepository = $detailRetenueForfetaireRepository;
+        $this->congeRepository = $congeRepository;
     }
 
     /** Montant de la majoration des heures supplémentaire */
@@ -409,14 +413,15 @@ class UtimePaiementService
         return (int)$primeTransport->getTaux();
     }
 
+    /** Determiner le montant de l'assurance sante part salariale et patronale */
     public function getAssuranceSante(Personal $personal): array
     {
         $retenueForfetaireSalariale = $this->forfetaireRepository->findOneBy(['code' => Status::ASSURANCE_SANTE_SALARIALE]);
         $retenueForfetairePatronale = $this->forfetaireRepository->findOneBy(['code' => Status::ASSURANCE_SANTE_PATRONALE]);
         $amountForfetaire = $this->detailRetenueForfetaireRepository->findRetenueForfetaire($personal, $retenueForfetaireSalariale);
 
-        if ($retenueForfetaireSalariale != null) {
-            $amountRfSalariale = $amountForfetaire?->getAmount();
+        if ($amountForfetaire != null) {
+            $amountRfSalariale = $amountForfetaire->getAmount();
             $amountRfPatronale = $retenueForfetairePatronale?->getValue();
         } else {
             $amountRfSalariale = 0;
@@ -427,5 +432,20 @@ class UtimePaiementService
             'assurance_salariale' => $amountRfSalariale,
             'assurance_patronale' => $amountRfPatronale
         ];
+    }
+
+    public function getJourCongesAcquis(Personal $personal): int|float|null
+    {
+        $lastCongesOfpersonal = $this->congeRepository->getLastCongeByID($personal->getId(), false);
+        $dateEmbauche = $personal->getContract()->getDateEmbauche();
+        $today = Carbon::today();
+
+        if ($lastCongesOfpersonal) {
+            $dateDernierRetourCgs = $lastCongesOfpersonal->getDateDernierRetour();
+            $workMonth = ($today->diff($dateDernierRetourCgs)->days) / 30;
+        } else {
+            $workMonth = ($today->diff($dateEmbauche)->days) / 30;
+        }
+        return $workMonth * 2.2;
     }
 }

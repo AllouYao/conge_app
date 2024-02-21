@@ -18,20 +18,14 @@ class CongeService
 
     private CongeRepository $congeRepository;
     private PayrollRepository $payrollRepository;
-    private UtimePaiementService $utimePaiementService;
-    private PrimesRepository $primesRepository;
 
     public function __construct(
         CongeRepository      $congeRepository,
         PayrollRepository    $payrollRepository,
-        UtimePaiementService $utimePaiementService,
-        PrimesRepository     $primesRepository
     )
     {
         $this->congeRepository = $congeRepository;
         $this->payrollRepository = $payrollRepository;
-        $this->utimePaiementService = $utimePaiementService;
-        $this->primesRepository = $primesRepository;
     }
 
 

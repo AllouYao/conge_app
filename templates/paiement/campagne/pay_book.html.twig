@@ -5,8 +5,16 @@
     <style>
         #dataGridPayBook {
             border-width: 50px;
-
         }
+
+        #normal-contained > div {
+            width: 150px;
+            height: 40px;
+            text-align: center;
+            color: white;
+            background-color: #0b0b0f;
+        }
+
     </style>
 {% endblock %}
 {% block body %}
@@ -21,6 +29,9 @@
                 </div>
                 <div class="card-body">
                     <div id="dataGridPayBook"></div>
+                </div>
+                <div class="card-footer">
+                    <div id="normal-contained" class="float-end"></div>
                 </div>
             </div>
         </div>
@@ -41,7 +52,10 @@
                 // Configuration goes here
                 dataSource: `{{ url('campagne_pay_book') }}`,
                 showBorders: true,
-                height: 500,
+                showColumnLines: true,
+                showRowLines: true,
+                rowAlternationEnabled: true,
+                height: 430,
                 scrolling: {
                     columnRenderingMode: 'virtual'
                 },
@@ -85,8 +99,6 @@
                     width: 240,
                     placeholder: 'Rechercher...',
                 },
-                showColumnLines: true,
-                showRowLines: true,
                 paging: {
                     pageSize: 10,
                 },
@@ -157,6 +169,15 @@
                     {
                         caption: 'MAJORATION HEURE SUPP.',
                         dataField: 'majoration_heurs_supp',
+                        dataType: 'number',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
+                        },
+                    },
+                    {
+                        caption: 'NBR JOUR CONGES ACQUIS',
+                        dataField: 'nb_jour_conges_acquis',
                         dataType: 'number',
                         alignment: 'right',
                         customizeText: function (data) {
@@ -364,8 +385,6 @@
                             },
                         ]
                     },
-
-
                     {
                         caption: "CHARGES SALARIALES",
                         alignment: 'center',
@@ -556,10 +575,316 @@
                     },
 
                 ],
-
-
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'index',
+                            summaryType: 'count',
+                            displayFormat: 'Participant : {0}'
+                        },
+                        {
+                            column: 'number_part_salaried',
+                            displayFormat: 'Total :'
+                        },
+                        {
+                            column: 'salaire_base_salaried',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'sursalaire_salaried',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'majoration_heurs_supp',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'conge_payes',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'prime_anciennete',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'prime_de_tenue',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'prime_de_salissure',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'prime_outillage',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'prime_panier',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'prime_transport_imposable',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'avantage_imposable',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'prime_fonction',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'prime_logement',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'indemnite_fonction',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'indemnite_logement',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'salaire_imposable_salaried',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'solde_presence',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'solde_preavis',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'solde_conges',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'solde_gratification',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'solde_indemnite_deces',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'frais_funeraire',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'solde_retraite',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'solde_indemnite_licenciement',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'its_salaried',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'fixcale_salariale',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'cnps_salaried',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'cmu_salaried',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'assurance_salariale',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'charge_salarial',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'prime_transport_legal',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'net_payer_salaried',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'employer_is',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'employer_cr',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'employer_cmu',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'employer_pr',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'employer_at',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'amount_fdfp',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'assurance_patronales',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'charge_patronal',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'masse_salariale',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                    ]
+                }
+            })
+            $("#normal-contained").dxButton({
+                stylingMode: 'contained',
+                text: 'Imprimer bulletins',
+                type: 'default',
+                width: 120,
+                onClick() {
+                    window.location.href = '/campagne/bulletin/all_print';
+                }
             })
         });
     </script>
-
 {% endblock %}

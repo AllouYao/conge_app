@@ -113,9 +113,10 @@ class CampagneRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('c')
             ->where('c.ordinary = true')
             ->orderBy('c.id', 'DESC')
-            ->setMaxResults(2)
+            ->setFirstResult(1)
+            ->setMaxResults(1)
             ->getQuery()
-            ->getResult()[1];
+            ->getOneOrNullResult();
     }
 
     /** Retourne la dernière campagne ordinaire */
@@ -124,9 +125,9 @@ class CampagneRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('c')
             ->where('c.ordinary = true')
             ->orderBy('c.id', 'DESC')
-            ->setMaxResults(2)
+            ->setMaxResults(1)
             ->getQuery()
-            ->getResult()[0];
+            ->getOneOrNullResult();
     }
 
 }

@@ -284,7 +284,7 @@ class PayrollRepository extends ServiceEntityRepository
     }
 
     /** Retourne le dictionnaire  de salaire en fonction de l'id de la campagne */
-    public function findPayrollByCampainId(int $campainId): ?array
+    public function findPayrollByCampainId(?int $campainId): ?array
     {
         return $this->createQueryBuilder('pr')
             ->join('pr.personal', 'p')
@@ -295,6 +295,31 @@ class PayrollRepository extends ServiceEntityRepository
             ->setParameter('campain_id', $campainId)
             ->orderBy('pr.id', 'ASC')
             ->getQuery()->getResult();
+    }
+
+    /** Retourner les elements pour l'état des virement */
+    public function getPayrollVirement(?string $typeVersement): ?array
+    {
+        return $this->createQueryBuilder('pr')
+            ->select([
+                'p.firstName as nom_salaried',
+                'p.lastName as prenoms_salaried',
+                'ac.bankId as banque',
+                'ac.code as code_compte',
+                'ac.numCompte as num_compte',
+                'ac.rib as rib_compte',
+                'pr.netPayer as net_payes',
+                'p.modePaiement as mode_paiement'
+            ])
+            ->join('pr.personal', 'p')
+            ->join('pr.campagne', 'c')
+            ->leftJoin('p.accountBanks', 'ac')
+            ->where('c.ordinary = true')
+            ->andWhere('c.active = true')
+            ->andWhere('p.modePaiement = :type_versement')
+            ->setParameter('type_versement', $typeVersement)
+            ->getQuery()
+            ->getResult();
     }
 
 }

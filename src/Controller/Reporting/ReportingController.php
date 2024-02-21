@@ -106,4 +106,15 @@ class ReportingController extends AbstractController
         ]);
     }
 
+    #[Route('/etat_versement', name: 'etat_versement', methods: ['GET', 'POST'])]
+    public function viewEtatVersement(): Response
+    {
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+        $today = Carbon::now();
+        $date = $formatter->format($today);
+        return $this->render('reporting/etat_versement/versement.html.twig', [
+            'date' => $date
+        ]);
+    }
+
 }
