@@ -1,6 +1,9 @@
 twig:
     default_path: '%kernel.project_dir%/templates'
     form_theme: 'form/custom_form.html.twig'
+    globals:
+        society_info: '@App\Service\SocietyService'
+        campagne_info: '@App\Service\CampagneService'
 
 when@test:
     twig:

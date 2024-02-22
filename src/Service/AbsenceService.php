@@ -48,4 +48,19 @@ class AbsenceService
         // 8 heure par jour de travail
         return $totalAbsenceDay * 8;
     }
+    public function getAmountByAbsence(Absence $absence): float|int
+    {
+        $salaireCategoriel = $absence->getPersonal()->getSalary()->getBaseAmount();
+        $workHours = Status::TAUX_HEURE;
+        $salaireHorraire = $salaireCategoriel / $workHours;
+
+        if($absence->isJustified()){
+            return $workHours * $salaireHorraire;
+        }
+
+        $totalHours = $this->getHours($absence);
+        $workHours -= $totalHours; // TAUX_HORRAIRE - NBRE HEURE ABSENEC
+
+        return $workHours * $salaireHorraire;
+    }
 }

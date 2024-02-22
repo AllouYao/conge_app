@@ -40,6 +40,24 @@ class DepartureRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function getDepartureByDateByEmployeRole(int $month, int $year): array
+    {
+        return $this->createQueryBuilder('departure')
+            ->join('departure.personal', 'personal')
+            ->join('personal.categorie', 'category') 
+            ->join('category.categorySalarie', 'categorySalarie') 
+            ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
+            ->andWhere('YEAR(departure.date) = :year')
+            ->andWhere('MONTH(departure.date) = :month')
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
+            ->setParameter('code_employe', 'OE') 
+            ->setParameter('code_chauffeur', 'CH')
+            ->orderBy('departure.date', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findDeparturesByPersonal($personal): ?Departure
     {
         return $this->createQueryBuilder('d')

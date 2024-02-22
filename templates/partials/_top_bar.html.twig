@@ -22,7 +22,6 @@
                                 class="dropdown-item">Liste</a>
                             </div>
                         </li>
-                    {% endif %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -121,8 +120,23 @@
                                        class="dropdown-item">Liste retenue forf.</a>
                                 </div>
                             </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Société
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('admin_society_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('admin_society_show') }}"
+                                       class="dropdown-item">Afficher</a>
+                                </div>
+                            </div>
                         </div>
                     </li>
+                    {% endif %}
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
