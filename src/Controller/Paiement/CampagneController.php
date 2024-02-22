@@ -74,23 +74,20 @@ class CampagneController extends AbstractController
     #[Route('/index', name: 'livre', methods: ['GET'])]
     public function index(): Response
     {
-        if ($this->isGranted('ROLE_RH'))
-        {
+        if ($this->isGranted('ROLE_RH')) {
             $payBooks = $this->payrollRepository->findPayrollByCampaign(true);
             return $this->render('paiement/campagne/pay_book.html.twig', [
                 'payBooks' => $payBooks
             ]);
 
-        }else{
+        } else {
 
             $payBooks = $this->payrollRepository->findPayrollByCampaignEmploye(true);
-             return $this->render('paiement/campagne/pay_book.html.twig', [
+            return $this->render('paiement/campagne/pay_book.html.twig', [
                 'payBooks' => $payBooks
-        ]);
+            ]);
 
         }
-
-
 
 
     }
@@ -98,11 +95,11 @@ class CampagneController extends AbstractController
     #[Route('/api/pay_book/', name: 'pay_book', methods: ['GET'])]
     public function getPayBook(): JsonResponse
     {
-        if ($this->isGranted('ROLE_RH')){
+        if ($this->isGranted('ROLE_RH')) {
 
             $payroll = $this->payrollRepository->findPayrollByCampaign(true);
 
-        }else{
+        } else {
 
             $payroll = $this->payrollRepository->findPayrollByCampaignEmploye(true);
 
@@ -287,9 +284,13 @@ class CampagneController extends AbstractController
     public function getDetailOfLastCampagne(Campagne $campagne, bool $isOrdinaire): array
     {
         $nbPersonal = 0;
-        $salaireTotal = 0;
+        $masseSalarie = 0;
         $totalChargePersonal = 0;
         $totalChargeEmployeur = 0;
+        $totalChargeFiscalP = 0;
+        $totalChargeSocialeP = 0;
+        $totalChargeFiscalE = 0;
+        $totalChargeSocialeE = 0;
         $lastCampagne = $this->campagneRepository->lastCampagne($isOrdinaire);
         if ($lastCampagne) {
             $campagne->setLastCampagne($lastCampagne);
@@ -300,21 +301,33 @@ class CampagneController extends AbstractController
             foreach ($personnalFromLastCampagne as $item) {
                 $chargePersonals = $item->getChargePersonals();
                 $chargeEmployeurs = $item->getChargeEmployeurs();
-                $salaireTotal += $item->getSalary()->getBrutAmount();
+                $salaireTotal = $item->getPayrolls();
+                foreach ($salaireTotal as $value) {
+                    $masseSalarie += $value->getMasseSalary();
+                }
                 foreach ($chargePersonals as $chargePersonal) {
                     $totalChargePersonal += $chargePersonal->getAmountTotalChargePersonal();
+                    $totalChargeFiscalP += $chargePersonal->getAmountIts();
+                    $totalChargeSocialeP += $chargePersonal->getAmountCMU() + $chargePersonal->getAmountCNPS();
                 }
                 foreach ($chargeEmployeurs as $chargeEmployeur) {
                     $totalChargeEmployeur += $chargeEmployeur->getTotalChargeEmployeur();
+                    $totalChargeFiscalE += $chargeEmployeur->getAmountIS() + $chargeEmployeur->getAmountTA() +
+                        $chargeEmployeur->getAmountFPC() + $chargeEmployeur->getAmountAnnuelFPC();
+                    $totalChargeSocialeE += $chargeEmployeur->getAmountCR() + $chargeEmployeur->getAmountPF() + $chargeEmployeur->getAmountAT();
                 }
             }
 
         }
         return [
             "nombre_personal" => $nbPersonal,
-            "global_salaire_brut" => $salaireTotal,
+            "global_salaire_brut" => $masseSalarie,
             "global_charge_personal" => $totalChargePersonal,
-            "global_charge_employeur" => $totalChargeEmployeur
+            "global_charge_employeur" => $totalChargeEmployeur,
+            "fiscale_salariale" => $totalChargeFiscalP,
+            "fiscale_patronale" => $totalChargeFiscalE,
+            "sociale_salariale" => $totalChargeSocialeP,
+            "sociale_patronale" => $totalChargeSocialeE
         ];
     }
 
@@ -726,7 +739,7 @@ class CampagneController extends AbstractController
             ];
         }
         return $this->render('paiement/last.bulletin.html.twig', [
-           'payroll_data' => $payBookData
+            'payroll_data' => $payBookData
         ]);
     }
 }

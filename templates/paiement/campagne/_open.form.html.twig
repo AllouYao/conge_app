@@ -1,30 +1,28 @@
 {% if campagne.lastCampagne %}
     <fieldset>
-        <legend>Situation de la campagne précédente</legend>
+        <legend>Situation de l'exercice précédente</legend>
         <table class="table table-bordered table-responsive table-sm">
             <thead class="table-light">
             <tr>
                 <th class="text-center" colspan="2">Ouverture</th>
                 <th class="text-center" colspan="2">Fermeture</th>
-                <th class="text-center" style="vertical-align: middle !important;" rowspan="2">Nbre salarié ayant
-                    participé
-                </th>
-                <th class="text-center" style="vertical-align: middle !important;" rowspan="2">Charge global des
-                    salariés (F
-                    cfa)
-                </th>
-                <th class="text-center" style="vertical-align: middle !important;" rowspan="2">Charge global de
-                    l'employeur
-                    (F cfa)
-                </th>
-                <th class="text-center" style="vertical-align: middle !important;" rowspan="2">Salaire global (F cfa)
-                </th>
+                <th class="text-center" style="vertical-align: middle !important;" rowspan="2">Salariés</th>
+                <th class="text-center" style="vertical-align: middle !important;" colspan="3">Charge global des salariés (Fcfa)</th>
+                <th class="text-center" style="vertical-align: middle !important;" colspan="3">Charge global de l'employeur (F cfa)</th>
+                <th class="text-center" style="vertical-align: middle !important;" rowspan="2">Masse salariales (F cfa)</th>
             </tr>
             <tr>
                 <th class="text-center">Date</th>
                 <th class="text-center">Heure</th>
                 <th class="text-center">Date</th>
                 <th class="text-center">Heure</th>
+                <th class="text-center">Total charges fiscales</th>
+                <th class="text-center">Total charges sociales</th>
+                <th class="text-center">Total charges </th>
+                <th class="text-center">Total charges fiscales</th>
+                <th class="text-center">Total charges sociales</th>
+                <th class="text-center">Total charges </th>
+
             </tr>
             </thead>
             <tbody>
@@ -34,7 +32,12 @@
                 <td class="text-center">{{ campagne.lastCampagne.updatedAt | date("d/m/Y") }}</td>
                 <td class="text-center">{{ campagne.lastCampagne.updatedAt | date("H:i") }}</td>
                 <td class="text-center">{{ lastCampagne.nombre_personal | number_format(0, ",", " ") }}</td>
+
+                <td class="text-end">{{ lastCampagne.fiscale_salariale | number_format(0, ",", " ") }}</td>
+                <td class="text-end">{{ lastCampagne.sociale_salariale | number_format(0, ",", " ") }}</td>
                 <td class="text-end">{{ lastCampagne.global_charge_personal | number_format(0, ",", " ") }}</td>
+                <td class="text-end">{{ lastCampagne.fiscale_patronale | number_format(0, ",", " ") }}</td>
+                <td class="text-end">{{ lastCampagne.sociale_patronale | number_format(0, ",", " ") }}</td>
                 <td class="text-end">{{ lastCampagne.global_charge_employeur | number_format(0, ",", " ") }}</td>
                 <td class="text-end">{{ lastCampagne.global_salaire_brut | number_format(0, ",", " ") }}</td>
             </tr>
