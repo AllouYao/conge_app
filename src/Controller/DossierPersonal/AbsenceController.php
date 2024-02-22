@@ -13,6 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Form\DossierPersonal\PersonalAbsenceType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Repository\DossierPersonal\AbsenceRepository;
+use App\Repository\DossierPersonal\PersonalRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
@@ -21,16 +22,21 @@ class AbsenceController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
     private AbsenceRepository $absenceRepository;
+    private PersonalRepository $personalRepository;
+
     private AbsenceService $absenceService;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         AbsenceRepository      $absenceRepository,
-        AbsenceService         $absenceService
+        AbsenceService         $absenceService,
+        PersonalRepository $personalRepository
+
     )
     {
         $this->entityManager = $entityManager;
         $this->absenceRepository = $absenceRepository;
+        $this->personalRepository = $personalRepository;
         $this->absenceService = $absenceService;
     }
 
@@ -38,34 +44,41 @@ class AbsenceController extends AbstractController
     public function apiAbsence(): JsonResponse
     {
         $now = Carbon::today();
-        $absence = $this->absenceRepository->findAll();
-        $personal = null;
-        foreach ($absence as $item) {
-            $personal = $item->getPersonal();
+        
+        if ($this->isGranted('ROLE_RH')){
+
+            $absences = $this->absenceRepository->getAbsenceByMonths($now->month, $now->year);
+
+        }else{
+
+            $absences = $this->absenceRepository->getAbsenceByMonthsByEmployeRole($now->month, $now->year);
+
         }
-        $apiAbsences = [];
-        $absencesRequests = $this->absenceRepository->getAbsenceByMonth($personal, $now->month, $now->year);
-        foreach ($absencesRequests as $absences) {
-            $newBaseAmount = $this->absenceService->getAmountByMonth($personal, $now->month, $now->year);
+
+        foreach ($absences as $absence) {
+
+            $newBaseAmount = $this->absenceService->getAmountByAbsence($absence);
             $apiAbsences[] = [
-                'matricule' => $absences->getPersonal()->getMatricule(),
-                'name' => $absences->getPersonal()->getFirstName(),
-                'last_name' => $absences->getPersonal()->getLastName(),
-                'date_naissance' => date_format($absences->getPersonal()->getBirthday(), 'd/m/Y'),
-                'categorie_salarie' => '(' . $absences->getPersonal()->getCategorie()->getCategorySalarie()->getName() . ')' .
-                    '-' . $absences->getPersonal()->getCategorie()->getIntitule(),
-                'date_embauche' => date_format($absences->getPersonal()->getContract()->getDateEmbauche(), 'd/m/Y'),
-                'type_absence' => $absences->getType(),
-                'date_depart' => date_format($absences->getStartedDate(), 'd/m/Y'),
-                'date_retour' => date_format($absences->getEndedDate(), 'd/m/Y'),
-                'status' => $absences->isJustified() ? 'OUI' : 'NON',
-                'description' => $absences->getDescription(),
-                'duree_jour' => $absences->getTotalDay(),
+
+                'matricule' => $absence->getPersonal()->getMatricule(),
+                'name' => $absence->getPersonal()->getFirstName(),
+                'last_name' => $absence->getPersonal()->getLastName(),
+                'date_naissance' => date_format($absence->getPersonal()->getBirthday(), 'd/m/Y'),
+                'categorie_salarie' => '(' . $absence->getPersonal()->getCategorie()->getCategorySalarie()->getName() . ')' .
+                    '-' . $absence->getPersonal()->getCategorie()->getIntitule(),
+                'date_embauche' => date_format($absence->getPersonal()->getContract()->getDateEmbauche(), 'd/m/Y'),
+                'type_absence' => $absence->getType(),
+                'date_depart' => date_format($absence->getStartedDate(), 'd/m/Y'),
+                'date_retour' => date_format($absence->getEndedDate(), 'd/m/Y'),
+                'status' => $absence->isJustified() ? 'OUI' : 'NON',
+                'description' => $absence->getDescription(),
+                'duree_jour' => $absence->getTotalDay(),
                 'nouveau_salaire_base' => $newBaseAmount,
-                'date_creation' => date_format($absences->getCreatedAt(), 'd/m/Y'),
-                'modifier' => $this->generateUrl('personal_absence_edit', ['uuid' => $absences->getPersonal()->getUuid()])
+                'date_creation' => date_format($absence->getCreatedAt(), 'd/m/Y'),
+                'modifier' => $this->generateUrl('personal_absence_edit', ['uuid' => $absence->getPersonal()->getUuid()])
             ];
         }
+
 
         return new JsonResponse($apiAbsences);
     }

@@ -41,7 +41,16 @@ class DepartureController extends AbstractController
         $years = $today->year;
         $month = $today->month;
         $apiDeparture = [];
-        $departures = $this->departureRepository->getDepartureByDate($month, $years);
+
+        if ($this->isGranted('ROLE_RH')){
+
+            $departures = $this->departureRepository->getDepartureByDate($month, $years);
+
+        }else{
+
+            $departures = $this->departureRepository->getDepartureByDateByEmployeRole($month, $years);
+
+        }
         foreach ($departures as $departure) {
             $personal = $departure->getPersonal();
             $smm = $this->departServices->indemniteCompensatriceCgs($departure)['salaire_moyen_mensuel'];

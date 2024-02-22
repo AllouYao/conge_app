@@ -60,5 +60,35 @@ class HeureSupRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findHeureSupByEmployeRole(int $month, int $year): ?array
+    {
+        return $this->createQueryBuilder('h')
+        ->join('h.personal', 'p') 
+        ->join('p.categorie', 'category') 
+        ->join('category.categorySalarie', 'categorySalarie') 
+        ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
+        ->andWhere('YEAR(h.startedDate) = :year')
+        ->andWhere('MONTH(h.startedDate) = :month')
+        ->setParameter('year', $year)
+        ->setParameter('month', $month)
+        ->setParameter('code_employe', 'OE') 
+        ->setParameter('code_chauffeur', 'CH') 
+        ->orderBy('h.startedDate', 'ASC')
+        ->getQuery()->getResult();
+
+    }
+
+    public function getAllByDate(int $month, int $year): array
+    {
+        return $this->createQueryBuilder('h')
+            ->Where('YEAR(h.startedDate) = :year')
+            ->andWhere('MONTH(h.startedDate) = :month')
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
+            ->orderBy('h.startedDate', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
 
 }

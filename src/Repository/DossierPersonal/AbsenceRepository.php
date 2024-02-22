@@ -69,4 +69,57 @@ class AbsenceRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    public function getAbsenceByMonths(int $month, int $year): ?array
+    {
+        return $this->createQueryBuilder('abs')
+            ->andWhere('YEAR(abs.startedDate) = :year')
+            ->andWhere('MONTH(abs.startedDate) = :month')
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
+            ->orderBy('abs.startedDate', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getAbsenceByMonthsByEmployeRole(int $month, int $year): ?array
+    {
+        return $this->createQueryBuilder('abs')
+            ->join('abs.personal', 'personal') 
+            ->join('personal.categorie', 'category') 
+            ->join('category.categorySalarie', 'categorySalarie') 
+            ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
+            ->andWhere('YEAR(abs.startedDate) = :year')
+            ->andWhere('MONTH(abs.startedDate) = :month')
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
+            ->setParameter('code_employe', 'OE') 
+            ->setParameter('code_chauffeur', 'CH') 
+            ->orderBy('abs.startedDate', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getAbsenceByMonthByEmployeRole(?Personal $personal, int $month, int $year): ?array
+    {
+        return $this->createQueryBuilder('abs')
+
+            ->join('abs.personal', 'personal') 
+            ->join('personal.categorie', 'category') 
+            ->join('category.categorySalarie', 'categorySalarie') 
+            ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
+            ->andWhere('YEAR(abs.startedDate) = :year')
+            ->andWhere('MONTH(abs.startedDate) = :month')
+            ->andWhere('abs.justified = :justified')
+            ->andWhere('abs.personal = :personal')
+            ->setParameter('code_employe', 'OE') 
+            ->setParameter('code_chauffeur', 'CH') 
+            ->setParameter('personal', $personal)
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
+            ->setParameter('justified', false)
+            ->orderBy('abs.startedDate', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+    
 }

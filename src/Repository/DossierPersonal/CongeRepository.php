@@ -50,6 +50,40 @@ class CongeRepository extends ServiceEntityRepository
             ->orderBy('co.dateDernierRetour', 'DESC')
             ->getQuery()
             ->getResult();
+
+            
+    }
+
+    public function findCongeByEmployeRole(string $typeConges): array
+    {
+        return $this->createQueryBuilder('co')
+            ->select([
+                'p.firstName as nom',
+                'p.lastName as prenoms',
+                'co.dateRetour as retour',
+                'co.dateDepart as depart',
+                'co.salaireMoyen as salaire_moyen',
+                'co.allocationConge as allocation_conge',
+                'co.isConge as en_conge',
+                'co.dateDernierRetour as dernier_retour',
+                'co.uuid',
+                'co.totalDays',
+                'co.days',
+                'co.remainingVacation',
+            ])
+            ->join('co.personal', 'p')
+            ->join('p.categorie', 'category') 
+            ->join('category.categorySalarie', 'categorySalarie') 
+            ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
+            ->andWhere('co.personal is not null')
+            ->andWhere('co.typeConge = :type_conge')
+            ->setParameter('code_employe', 'OE') 
+            ->setParameter('code_chauffeur', 'CH') 
+            ->setParameter('type_conge', $typeConges)
+            ->orderBy('co.dateDernierRetour', 'DESC')
+            ->getQuery()
+            ->getResult();
+        
     }
 
     public function getLastCongeByID(int $personal, bool $active): ?Conge

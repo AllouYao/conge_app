@@ -45,4 +45,18 @@ class AccountBankRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+public function findByEmployeRole(): ?array
+{
+    return $this->createQueryBuilder('acc')
+    ->join('acc.personal', 'p') 
+    ->join('p.categorie', 'category') 
+    ->join('category.categorySalarie', 'categorySalarie') 
+    ->andWhere('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
+    ->setParameter('code_employe', 'OE') 
+    ->setParameter('code_chauffeur', 'CH') 
+    ->getQuery()->getResult();
+
+}
+
 }

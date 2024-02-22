@@ -1,0 +1,69 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Societe{% endblock %}
+
+{% block body %}
+     <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        DETAIL SOCIETE
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="card-body">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th>RaisonSocial</th>
+                                    <td>{{ society.raisonSocial }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Forme</th>
+                                    <td>{{ society.forme }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Activity</th>
+                                    <td>{{ society.activity }}</td>
+                                </tr>
+                                <tr>
+                                    <th>NumeroCC</th>
+                                    <td>{{ society.numeroCC }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Siege</th>
+                                    <td>{{ society.siege }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Telephone</th>
+                                    <td>{{ society.telephone }}</td>
+                                </tr>
+                                <tr>
+                                    <th>CreatedAt</th>
+                                    <td>{{ society.createdAt ? society.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>UpdatedAt</th>
+                                    <td>{{ society.updatedAt ? society.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('admin_society_edit', {'uuid': society.uuid}) }}" class="btn btn-warning float-end" style="color:white">Modifier</a>
+                    <a href="{{ path('app_home') }}"
+                       class="btn btn-info float-end me-2" style="color: white">Retour</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+    
+{% endblock %}
+
+

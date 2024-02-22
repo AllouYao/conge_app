@@ -19,7 +19,14 @@ class AccountBankController extends AbstractController
     #[Route('/api_account_bank', name: 'api_account_bank', methods: ['GET'])]
     public function apiAccountBank(AccountBankRepository $accountBankRepository): JsonResponse
     {
-        $accountBanks = $accountBankRepository->findAll();
+        if ($this->isGranted('ROLE_RH')){
+
+            $accountBanks = $accountBankRepository->findAll();
+
+        }else{
+
+            $accountBanks = $accountBankRepository->findByEmployeRole();
+        }
         $apiAccountBank = [];
 
         foreach ($accountBanks as $accountBank) {

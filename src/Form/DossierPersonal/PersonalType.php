@@ -2,19 +2,23 @@
 
 namespace App\Form\DossierPersonal;
 
-use App\Entity\DossierPersonal\Personal;
+use App\Utils\Status;
+use Doctrine\ORM\QueryBuilder;
 use App\Entity\Settings\Category;
 use App\Form\CustomType\DateCustomType;
-use App\Utils\Status;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use App\Entity\DossierPersonal\Personal;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use App\Repository\Settings\CategoryRepository;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class PersonalType extends AbstractType
 {
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -68,7 +72,10 @@ class PersonalType extends AbstractType
                     ];
                 },
                 'required' => true,
-                'group_by' => 'categorySalarie'
+                'group_by' => 'categorySalarie',
+                'query_builder' => function (CategoryRepository $categoryRepository):QueryBuilder { 
+                    return $categoryRepository->findCategorieByEmploye();
+                }
             ])
             ->add('conjoint', TextType::class, [
                 'required' => false

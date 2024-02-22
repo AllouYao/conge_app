@@ -52,9 +52,19 @@ class HeureSupController extends AbstractController
         $today = Carbon::now();
         $years = $today->year;
         $month = $today->month;
-        $personals = $this->personalRepository->findAllPersonal();
         $apiHeureSupp = [];
         $salaireHoraire = 0;
+
+        if ($this->isGranted('ROLE_RH')){
+
+            $personals = $this->personalRepository->findAllPersonal();
+
+        }else{
+
+            $personals = $this->personalRepository->findAllPersonalByEmployeRole();
+        }
+
+
 
         foreach ($personals as $personal) {
             $heureSupp = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
@@ -118,19 +128,30 @@ class HeureSupController extends AbstractController
         $years = $today->year;
         $month = $today->month;
         $personal = null;
-        $heursSupps = $this->heureSupRepository->findAll();
-        foreach ($heursSupps as $supp) {
-            $personal = $supp->getPersonal();
+        if ($this->isGranted('ROLE_RH')){
+            
+            $heursSupps = $this->heureSupRepository->getAllByDate($month, $years);
+
+        }else{
+
+            $heursSupps = $this->heureSupRepository->findHeureSupByEmployeRole($month, $years);
         }
-        $requestHeursSupp = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
+        /*
+        foreach ($heursSupps as $supp) {  
+            //$personal = $supp->getPersonal();
+            $requestHeursSupp = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
+        }
+*/
+        //dd($heursSupps);
         $apiRequestHeureSupp = [];
-        foreach ($requestHeursSupp as $heureSup) {
+        foreach ($heursSupps as $heureSup) {
             $apiRequestHeureSupp[] = [
+                
                 'matricule' => $heureSup->getPersonal()->getMatricule(),
                 'name' => $heureSup->getPersonal()->getFirstName(),
                 'last_name' => $heureSup->getPersonal()->getLastName(),
                 'date_naissance' => date_format($heureSup->getPersonal()->getBirthday(), 'd/m/Y'),
-                'categorie_salarie' => '(' . $heureSup->getPersonal()->getCategorie()->getCategorySalarie()->getName() . ')' . '-' . $personal->getCategorie()->getIntitule(),
+                'categorie_salarie' => '(' . $heureSup->getPersonal()->getCategorie()->getCategorySalarie()->getName() . ')' . '-' . $heureSup->getPersonal()->getCategorie()->getIntitule(),
                 'date_embauche' => date_format($heureSup->getPersonal()->getContract()->getDateEmbauche(), 'd/m/Y'),
                 'date_debut' => date_format($heureSup->getStartedDate(), 'd/m/Y'),
                 'heure_debut' => date_format($heureSup->getStartedHour(), 'H:m'),

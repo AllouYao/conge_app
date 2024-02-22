@@ -20,7 +20,14 @@ class ChargePeopleController extends AbstractController
     #[Route('/api_charge_peaple', name: 'api_charge_people', methods: ['GET'])]
     public function apiChargePeople(PersonalRepository $personalRepository): JsonResponse
     {
-        $personals = $personalRepository->findPersonalWithChargePeaple();
+        if ($this->isGranted('ROLE_RH')){
+            $personals = $personalRepository->findPersonalWithChargePeaple();
+
+        }else{
+
+            $personals = $personalRepository->findPersonalWithChargePeapleByEmployeRole();
+        }
+        
         $apiChargePeaple = [];
 
         foreach ($personals as $personal) {
@@ -41,7 +48,7 @@ class ChargePeopleController extends AbstractController
     }
 
     #[Route('/', name: 'index')]
-    public function index(): Response
+    public function index(PersonalRepository $personalRepository): Response
     {
         return $this->render('dossier_personal/charge_people/index.html.twig');
     }

@@ -3,8 +3,9 @@
     <div class="container-fluid">
         <ul class="list-unstyled topnav-menu float-end mb-0">
             <li class="dropdown d-none d-lg-inline-block">
-                <a class="nav-link dropdown-toggle arrow-none" data-toggle="fullscreen" href="#">
-                    <span>Campagne : Ouverte </span>
+                <a class="nav-link dropdown-toggle arrow-none" href="#">
+                    {% set campagne_info = campagne_info.getCampagne()%}
+                    <span>Campagne : {% if campagne_info %} Ouverte {% else %} Fermée {% endif %}</span>
                 </a>
             </li>
             <li class="dropdown d-none d-lg-inline-block">
@@ -106,9 +107,26 @@
                 <span class="logo-lg">
 {#                    <img src="assets/images/logo-dark.png" alt="" height="24"> #}
                     <span class="logo-lg-text-light">Orbis Paie</span>
+
+                    {% set society_info = society_info.getSociety()%}
+
+                    <span class="logo-sm-text text-white mx-5">
+                        {% if society_info %}
+                        <i class="bi bi-buildings-fill logo-lg-text-light"></i>
+                        {{society_info.raisonSocial}} 
+                        {% endif %}
+                    </span>
+
+                    <span class="logo-sm-text text-white">
+                        {% if society_info %}
+                        <i class="bi bi-geo-alt-fill logo-lg-text-light" ></i>
+                        {{society_info.siege}} 
+                        {% endif %}
+                    </span>
+
                 </span>
             </a>
-
+            
             <a href="{{ path('app_home') }}" class="logo logo-light">
                 <span class="logo-sm">
 {#                    <img src="assets/images/logo-sm.png" alt="" height="24"> #}

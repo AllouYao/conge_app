@@ -115,7 +115,16 @@ class PersonalController extends AbstractController
     #[Route('/api/salaried_book/', name: 'salaried_book', methods: ['GET'])]
     public function getPersonalSalaried(): JsonResponse
     {
-        $personal = $this->personalRepository->findPersonalSalaried();
+        if ($this->isGranted('ROLE_RH')){
+
+            $personal = $this->personalRepository->findPersonalSalaried();
+
+        }else{
+
+            $personal = $this->personalRepository->findPersonalSalariedByEmployeRole();
+
+        }
+       
         $personalSalaried = [];
         foreach ($personal as $value => $item) {
             $anciennete = $item['older'];
@@ -152,6 +161,16 @@ class PersonalController extends AbstractController
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(): Response
     {
+        if ($this->isGranted('ROLE_RH')){
+
+            $personal = $this->personalRepository->findPersonalSalaried();
+
+        }else{
+
+            $personal = $this->personalRepository->findPersonalSalariedByEmployeRole();
+
+        }
+
         $personal = $this->personalRepository->findPersonalSalaried();
         return $this->render('dossier_personal/personal/index.html.twig', [
             'personals' => $personal
@@ -178,7 +197,7 @@ class PersonalController extends AbstractController
         $form = $this->createForm(PersonalType::class, $personal);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) { 
 
             $entityManager->persist($personal);
             foreach ($personal->getSalary()->getDetailSalaries() as $detailSalary) {

@@ -1,0 +1,72 @@
+<fieldset>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Raison sociale<span
+                            class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    {{ form_widget(form.raisonSocial) }}
+                    {{ form_errors(form.raisonSocial) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Forme <span class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    {{ form_widget(form.forme) }}
+                    {{ form_errors(form.forme) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Activité <span class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    {{ form_widget(form.activity) }}
+                    {{ form_errors(form.activity) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Numéro CC <span class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    {{ form_widget(form.numeroCC) }}
+                    {{ form_errors(form.numeroCC) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Siège </label>
+                <div class="col-md-8">
+                    {{ form_widget(form.siege) }}
+                    {{ form_errors(form.siege) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Téléphone </label>
+                <div class="col-md-8">
+                    {{ form_widget(form.telephone) }}
+                    {{ form_errors(form.telephone) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+
+
