@@ -29,10 +29,15 @@ class PersonalType extends AbstractType
                     'Masculin' => Status::MASCULIN,
                     'Féminin' => Status::FEMININ
                 ],
-                'placeholder' => 'Sélectionner un genre'
+                'placeholder' => 'Sélectionner un genre',
+                'required' => false
             ])
-            ->add('birthday', DateCustomType::class)
-            ->add('lieuNaissance')
+            ->add('birthday', DateCustomType::class, [
+                'required' => false
+            ])
+            ->add('lieuNaissance', TextType::class, [
+                'required' => false
+            ])
             ->add('refCNPS')
             ->add('piece', ChoiceType::class, [
                 'attr' => [
@@ -44,9 +49,12 @@ class PersonalType extends AbstractType
                     'Carte consulaire' => Status::CARTE_CONSULAIRE,
                     'Attestation' => Status::ATTESTATION
                 ],
-                'placeholder' => 'Sélectionner la nature de votre pièce'
+                'placeholder' => 'Sélectionner la nature de votre pièce',
+                'required' => false
             ])
-            ->add('refPiece')
+            ->add('refPiece', TextType::class, [
+                'required' => false
+            ])
             ->add('address', TextType::class, [
                 'required' => false
             ])
@@ -123,8 +131,21 @@ class PersonalType extends AbstractType
                 ],
                 'placeholder' => 'Sélectionner le mode de paiement'
             ])
-            ->add('fonction')
-            ->add('service')
+            ->add('fonction', TextType::class, [
+                'required' => false
+            ])
+            ->add('service', ChoiceType::class, [
+                'required' => false,
+                'attr' => [
+                    'data-plugin' => 'customselect',
+                ],
+                'choices' => [
+                    'STATION AP MAGIC' => Status::STATION_AP_MAGIC,
+                    'STATION SHELL TREICHVILLE HABITAT' => Status::STATION_SHELL_TREICH_HABITAT,
+                    'DIRECTION' => Status::DIRECTION
+                ],
+                'placeholder' => 'Sélectionner le site de travail'
+            ])
         ;
     }
 

@@ -131,7 +131,7 @@ class PersonalController extends AbstractController
                 'fonction' => $item['personal_fonction'],
                 'departement' => $item['personal_service'],
                 'category' => $item['categorie_name'],
-                'date_naissance' => date_format($item['personal_birthday'], 'd/m/Y'),
+                'date_naissance' => $item['personal_birthday'] ? date_format($item['personal_birthday'], 'd/m/Y') : '',
                 'adresse' => $item['personal_adresse'],
                 'niveau_etude' => $item['personal_niveau_formation'],
                 'compte_banque' => $item['code_banque'] . ' ' . $item['numero_compte'] . ' ' . $item['rib'],

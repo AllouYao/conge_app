@@ -5,6 +5,7 @@ namespace App\Controller\Impots;
 use App\Entity\Impots\CategoryCharge;
 use App\Form\Impots\CategoryChargeType;
 use App\Repository\Impots\CategoryChargeRepository;
+use App\Utils\Status;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -15,14 +16,15 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/impots/category/charge', name: 'impot_category_charge_')]
 class CategoryChargeController extends AbstractController
 {
-    #[Route('/api_categorie_charge', name: 'api_categorie_charge', methods: ['GET'])]
-    public function apiCategorieCharge(CategoryChargeRepository $categoryChargeRepository): JsonResponse
+    #[Route('/api_categorie_charge_fiscal', name: 'api_categorie_charge_fiscal', methods: ['GET'])]
+    public function apiCategorieChargeFiscale(CategoryChargeRepository $categoryChargeRepository): JsonResponse
     {
-        $categoryCharge = $categoryChargeRepository->findAll();
+        $categoryCharge = $categoryChargeRepository->findBy(['typeCharge' => Status::FISCALE_CHARGE]);
         $charge = [];
         foreach ($categoryCharge as $index => $item) {
             $charge[] = [
                 'type_charge' => $item->getTypeCharge(),
+                'categorie' => $item->getCategory(),
                 'intitule' => $item->getIntitule(),
                 'codification' => $item->getCodification(),
                 'taux' => $item->getValue(),
@@ -34,10 +36,35 @@ class CategoryChargeController extends AbstractController
         return new JsonResponse($charge);
     }
 
-    #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(): Response
+    #[Route('/api_categorie_charge_sociale', name: 'api_categorie_charge_sociale', methods: ['GET'])]
+    public function apiCategorieChargeSociale(CategoryChargeRepository $categoryChargeRepository): JsonResponse
     {
-        return $this->render('impots/category_charge/index.html.twig');
+        $categoryCharge = $categoryChargeRepository->findBy(['typeCharge' => Status::SOCIALE_CHARGE]);
+        $charge = [];
+        foreach ($categoryCharge as $index => $item) {
+            $charge[] = [
+                'type_charge' => $item->getTypeCharge(),
+                'categorie' => $item->getCategory(),
+                'intitule' => $item->getIntitule(),
+                'codification' => $item->getCodification(),
+                'taux' => $item->getValue(),
+                'description' => $item->getDescription(),
+                'date_creation' => date_format($item->getCreatedAt(), 'd/m/Y'),
+                'modifier' => $this->generateUrl('impot_category_charge_edit', ['uuid' => $item->getUuid()])
+            ];
+        }
+        return new JsonResponse($charge);
+    }
+
+    #[Route('/fixcale', name: 'index_fixcale', methods: ['GET'])]
+    public function indexFixcale(): Response
+    {
+        return $this->render('impots/category_charge/fiscale.html.twig');
+    }
+    #[Route('/sociale', name: 'index_sociale', methods: ['GET'])]
+    public function indexSociale(): Response
+    {
+        return $this->render('impots/category_charge/sociale.html.twig');
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
@@ -51,7 +78,7 @@ class CategoryChargeController extends AbstractController
             $entityManager->persist($categoryCharge);
             $entityManager->flush();
             flash()->addSuccess('Catégorie de charge ajouter avec succès.');
-            return $this->redirectToRoute('impot_category_charge_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_home', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('impots/category_charge/new.html.twig', [
@@ -69,7 +96,7 @@ class CategoryChargeController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
             flash()->addSuccess('Catégorie de charge modifier avec succès.');
-            return $this->redirectToRoute('impot_category_charge_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_home', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('impots/category_charge/edit.html.twig', [

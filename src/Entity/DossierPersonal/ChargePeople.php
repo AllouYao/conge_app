@@ -6,6 +6,8 @@ use App\Entity\User;
 use App\Repository\DossierPersonal\ChargePeopleRepository;
 use App\Utils\Horodatage;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -44,6 +46,14 @@ class ChargePeople
 
     #[ORM\ManyToOne(inversedBy: 'chargepeople')]
     private ?User $user = null;
+
+    #[ORM\ManyToMany(targetEntity: DetailRetenueForfetaire::class, mappedBy: 'chargePeople')]
+    private Collection $detailRetenueForfetaires;
+
+    public function __construct()
+    {
+        $this->detailRetenueForfetaires = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -142,6 +152,33 @@ class ChargePeople
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DetailRetenueForfetaire>
+     */
+    public function getDetailRetenueForfetaires(): Collection
+    {
+        return $this->detailRetenueForfetaires;
+    }
+
+    public function addDetailRetenueForfetaire(DetailRetenueForfetaire $detailRetenueForfetaire): static
+    {
+        if (!$this->detailRetenueForfetaires->contains($detailRetenueForfetaire)) {
+            $this->detailRetenueForfetaires->add($detailRetenueForfetaire);
+            $detailRetenueForfetaire->addChargePerson($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDetailRetenueForfetaire(DetailRetenueForfetaire $detailRetenueForfetaire): static
+    {
+        if ($this->detailRetenueForfetaires->removeElement($detailRetenueForfetaire)) {
+            $detailRetenueForfetaire->removeChargePerson($this);
+        }
 
         return $this;
     }

@@ -2,6 +2,7 @@
 
 namespace App\Form\DossierPersonal;
 
+use App\Entity\DossierPersonal\ChargePeople;
 use App\Entity\DossierPersonal\DetailRetenueForfetaire;
 use App\Entity\DossierPersonal\RetenueForfetaire;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -24,10 +25,19 @@ class DetailRetenueForfetaireType extends AbstractType
                 'placeholder' => 'Sélectionner une retenue forfetaire',
                 'choice_attr' => function (RetenueForfetaire $retenueForfetaire) {
                     return [
-                        'data-value' => $retenueForfetaire->getValue()
+                        'data-value' => $retenueForfetaire->getValue(),
+                        'data-name' => $retenueForfetaire->getName()
                     ];
                 },
                 'required' => true,
+            ])
+            ->add('chargePeople', EntityType::class, [
+                'class' => ChargePeople::class,
+                'required' => false,
+                'attr' => [
+                    'data-plugin' => 'customselect'
+                ],
+                'multiple' => true,
             ])
             ->add('amount', TextType::class, [
                 'attr' => [

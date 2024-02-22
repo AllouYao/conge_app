@@ -8,6 +8,7 @@ use App\Entity\DossierPersonal\AccountBank;
 use App\Entity\DossierPersonal\ChargePeople;
 use App\Entity\DossierPersonal\Conge;
 use App\Entity\DossierPersonal\Departure;
+use App\Entity\DossierPersonal\DetailRetenueForfetaire;
 use App\Entity\DossierPersonal\HeureSup;
 use App\Utils\Horodatage;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -64,6 +65,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: ChargePeople::class)]
     private Collection $chargepeople;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: DetailRetenueForfetaire::class)]
+    private Collection $detailRetenueForfetaires;
     public function __construct()
     {
         $this->customRoles = new ArrayCollection();
@@ -73,6 +77,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->heureSups = new ArrayCollection();
         $this->user = new ArrayCollection();
         $this->chargepeople = new ArrayCollection();
+        $this->detailRetenueForfetaires = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -359,6 +364,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($chargeperson->getUser() === $this) {
                 $chargeperson->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DetailRetenueForfetaire>
+     */
+    public function getDetailRetenueForfetaires(): Collection
+    {
+        return $this->detailRetenueForfetaires;
+    }
+
+    public function addDetailRetenueForfetaire(DetailRetenueForfetaire $detailRetenueForfetaire): static
+    {
+        if (!$this->detailRetenueForfetaires->contains($detailRetenueForfetaire)) {
+            $this->detailRetenueForfetaires->add($detailRetenueForfetaire);
+            $detailRetenueForfetaire->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDetailRetenueForfetaire(DetailRetenueForfetaire $detailRetenueForfetaire): static
+    {
+        if ($this->detailRetenueForfetaires->removeElement($detailRetenueForfetaire)) {
+            // set the owning side to null (unless already changed)
+            if ($detailRetenueForfetaire->getUser() === $this) {
+                $detailRetenueForfetaire->setUser(null);
             }
         }
 

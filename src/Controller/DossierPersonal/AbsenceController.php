@@ -2,18 +2,18 @@
 
 namespace App\Controller\DossierPersonal;
 
-use Carbon\Carbon;
-use App\Entity\User;
-use App\Service\AbsenceService;
 use App\Entity\DossierPersonal\Personal;
+use App\Entity\User;
+use App\Form\DossierPersonal\PersonalAbsenceType;
+use App\Repository\DossierPersonal\AbsenceRepository;
+use App\Service\AbsenceService;
+use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Form\DossierPersonal\PersonalAbsenceType;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Repository\DossierPersonal\AbsenceRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
 #[Route('/dossier/personal/absence', name: 'personal_absence_')]
@@ -51,7 +51,7 @@ class AbsenceController extends AbstractController
                 'matricule' => $absences->getPersonal()->getMatricule(),
                 'name' => $absences->getPersonal()->getFirstName(),
                 'last_name' => $absences->getPersonal()->getLastName(),
-                'date_naissance' => date_format($absences->getPersonal()->getBirthday(), 'd/m/Y'),
+                'date_naissance' => $absences->getPersonal()->getBirthday() ? date_format($absences->getPersonal()->getBirthday(), 'd/m/Y') : '',
                 'categorie_salarie' => '(' . $absences->getPersonal()->getCategorie()->getCategorySalarie()->getName() . ')' .
                     '-' . $absences->getPersonal()->getCategorie()->getIntitule(),
                 'date_embauche' => date_format($absences->getPersonal()->getContract()->getDateEmbauche(), 'd/m/Y'),
@@ -86,11 +86,10 @@ class AbsenceController extends AbstractController
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
     {
-         /**
+        /**
          * @var User $currentUser
          */
         $currentUser = $this->getUser();
-
 
 
         $form = $this->createForm(PersonalAbsenceType::class);

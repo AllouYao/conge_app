@@ -34,6 +34,9 @@ class CategoryCharge
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $category = null;
+
 
     public function getId(): ?int
     {
@@ -96,6 +99,18 @@ class CategoryCharge
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getCategory(): ?string
+    {
+        return $this->category;
+    }
+
+    public function setCategory(string $category): static
+    {
+        $this->category = $category;
 
         return $this;
     }

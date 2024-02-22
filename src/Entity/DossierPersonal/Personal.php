@@ -41,7 +41,7 @@ class Personal
     #[ORM\Column(length: 255)]
     private ?string $genre = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $birthday = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -50,10 +50,10 @@ class Personal
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $refCNPS = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $piece = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $refPiece = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -123,10 +123,10 @@ class Personal
     #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Absence::class)]
     private Collection $absences;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $fonction = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $service = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
@@ -137,6 +137,9 @@ class Personal
 
     #[ORM\OneToMany(mappedBy: 'personal', targetEntity: VariablePaie::class)]
     private Collection $variablePaies;
+
+    #[ORM\OneToMany(mappedBy: 'Personal', targetEntity: DetailRetenueForfetaire::class, orphanRemoval: true)]
+    private Collection $detailRetenueForfetaires;
     public function __construct()
     {
         $this->chargePeople = new ArrayCollection();
@@ -149,6 +152,7 @@ class Personal
         $this->heureSups = new ArrayCollection();
         $this->absences = new ArrayCollection();
         $this->variablePaies = new ArrayCollection();
+        $this->detailRetenueForfetaires = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -795,6 +799,36 @@ class Personal
             // set the owning side to null (unless already changed)
             if ($variablePaie->getPersonal() === $this) {
                 $variablePaie->setPersonal(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DetailRetenueForfetaire>
+     */
+    public function getDetailRetenueForfetaires(): Collection
+    {
+        return $this->detailRetenueForfetaires;
+    }
+
+    public function addDetailRetenueForfetaire(DetailRetenueForfetaire $detailRetenueForfetaire): static
+    {
+        if (!$this->detailRetenueForfetaires->contains($detailRetenueForfetaire)) {
+            $this->detailRetenueForfetaires->add($detailRetenueForfetaire);
+            $detailRetenueForfetaire->setPersonal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDetailRetenueForfetaire(DetailRetenueForfetaire $detailRetenueForfetaire): static
+    {
+        if ($this->detailRetenueForfetaires->removeElement($detailRetenueForfetaire)) {
+            // set the owning side to null (unless already changed)
+            if ($detailRetenueForfetaire->getPersonal() === $this) {
+                $detailRetenueForfetaire->setPersonal(null);
             }
         }
 

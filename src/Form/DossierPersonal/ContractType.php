@@ -28,9 +28,15 @@ class ContractType extends AbstractType
                 'placeholder' => 'Sélectionner votre type de contrat',
                 'required' => true
             ])
-            ->add('dateEmbauche', DateCustomType::class)
-            ->add('dateEffet', DateCustomType::class)
-            ->add('dateFin', DateCustomType::class)
+            ->add('dateEmbauche', DateCustomType::class, [
+                'required' => true
+            ])
+            ->add('dateEffet', DateCustomType::class, [
+                'required' => false
+            ])
+            ->add('dateFin', DateCustomType::class, [
+                'required' => false
+            ])
             ->add('tempsContractuel', ChoiceType::class, [
                 'attr' => [
                     'data-plugin' => 'customselect',

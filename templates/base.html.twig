@@ -16,9 +16,9 @@
 
 <!-- Begin page -->
 <div id="wrapper">
-    {% if is_granted('ROLE_USER') %}
+    {% if is_granted('ROLE_USER') and is_granted('ROLE_RH') %}
         {% include 'partials/_header.html.twig' %}
-        {% include 'partials/_top_bar.html.twig' %}
+        {% include 'partials/Admin_Rh/_admin_top_bar.html.twig' %}
     {% endif %}
 
     <!-- ============================================================== -->

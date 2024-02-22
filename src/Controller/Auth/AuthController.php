@@ -14,13 +14,14 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/auth/user', name: 'auth_user_')]
 class AuthController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
     private UserRepository $userRepository;
-    private $userPasswordHasher;
+    private UserPasswordHasherInterface $userPasswordHasher;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -40,6 +41,9 @@ class AuthController extends AbstractController
         $allUsers = $this->userRepository->findAll();
         $users = [];
 
+        if (!$allUsers) {
+            return $this->json(['data' => []]);
+        }
 
         foreach ($allUsers as $user) {
             $users[] = [
@@ -49,13 +53,12 @@ class AuthController extends AbstractController
                 'modifier' => $this->generateUrl('auth_user_edit', ['uuid' => $user->getUuid()])
             ];
         }
-
-        dd($users);
-
         return new JsonResponse($users);
     }
 
 
+    #[IsGranted("ROLE_RH", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
+    #[IsGranted("ROLE_ADMIN", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/', name: 'index')]
     public function index(): Response
     {
@@ -65,6 +68,8 @@ class AuthController extends AbstractController
             'users' => $users,
         ]);
     }
+
+
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
@@ -123,8 +128,6 @@ class AuthController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $currentUser = $this->userRepository->find($user->getId());
-
             $confirmePassword = $form->get('confirmePassword')->getData();
             $holdPassword = $form->get('holdPassword')->getData();
             $newPassword = $form->get('newPassword')->getData();
@@ -159,14 +162,7 @@ class AuthController extends AbstractController
                 return $this->redirectToRoute('app_home', [], Response::HTTP_SEE_OTHER);
  
             }
-
-
             //dd($confirmePassword, $newPassword, $holdPassword, $password, $passwordHash);
-
-
-            
-            
-           
         }
 
         return $this->render('auth/user/edit_profile.html.twig', [

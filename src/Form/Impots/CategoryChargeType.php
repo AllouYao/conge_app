@@ -19,10 +19,21 @@ class CategoryChargeType extends AbstractType
                     'data-plugin' => 'customselect',
                 ],
                 'choices' => [
+                    'Charges fiscales' => Status::FISCALE_CHARGE,
+                    'Charges sociales' => Status::SOCIALE_CHARGE,
+                ],
+                'placeholder' => 'Sélectionner le type de charge',
+                'required' => true
+            ])
+            ->add('category', ChoiceType::class, [
+                'attr' => [
+                    'data-plugin' => 'customselect',
+                ],
+                'choices' => [
                     'Charge salariale' => Status::PERSONAL_CHARGE,
                     'Charge patronnale' => Status::EMPLOYER_CHARGE,
                 ],
-                'placeholder' => 'Sélectionner le type de charge',
+                'placeholder' => 'Sélectionner la catégorie de charge',
                 'required' => true
             ])
             ->add('codification')

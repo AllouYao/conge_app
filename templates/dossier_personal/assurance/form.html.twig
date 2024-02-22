@@ -1,0 +1,45 @@
+<fieldset>
+    <legend>Information du salarié</legend>
+    <div class="mb-2 row">
+        <label class="col-md-2 col-form-label">Matricule <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.personal) }}
+        </div>
+        <label class="col-md-2 col-form-label">Nom & Prénom(s) <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.name) }}
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label class="col-md-2 col-form-label">Date d'embauche <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.hireDate) }}
+        </div>
+        <label class="col-md-2 col-form-label">Catégorie salarié <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.category) }}
+        </div>
+    </div>
+</fieldset>
+<br>
+<fieldset>
+    <legend>Détail assurance</legend>
+    <div class="row">
+        <div class="col-md-12 table-responsive">
+            <table class="table table-bordered table-sm table-responsive-sm">
+                <thead class="table-secondary">
+                <tr>
+                    <th class="text-center">Intitule assurance</th>
+                    <th class="text-center">Autre bénéficiaire</th>
+                    <th class="text-center">Total assurance</th>
+                    <th class="text-center">Action</th>
+                </tr>
+                </thead>
+                {% form_theme form 'dossier_personal/assurance/_collection_assurance.html.twig' %}
+                <tbody id="detail_personal_assurance_table">
+                {{ form_widget(form.detailRetenueForfetaires) }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</fieldset>

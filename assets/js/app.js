@@ -666,7 +666,7 @@ function ($) {
     $.LayoutThemeApp = new LayoutThemeApp, $.LayoutThemeApp.Constructor = LayoutThemeApp
 }(window.jQuery);
 /*
-Template Name: Shreyu - Responsive Bootstrap 5 Admin Dashboard
+Template Name: Shreyu - Responsive Bootstrap 5 Admin_Rh Dashboard
 Author: CoderThemes
 Website: https://coderthemes.com/
 Contact: support@coderthemes.com

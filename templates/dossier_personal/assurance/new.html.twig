@@ -1,5 +1,6 @@
 {% extends 'base.html.twig' %}
-{% block title %}Modifier une charge fiscale et sociale{% endblock %}
+
+{% block title %}Ajouter assurance {% endblock %}
 
 {% block body %}
     <div class="row">
@@ -9,11 +10,11 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        MODIFIER UNE CHARGE FISCALE & SOCIALE
+                        AJOUTER ASSURANCE
                     </h5>
                 </div>
                 <div class="card-body">
-                    {{ include('impots/category_charge/_form.html.twig') }}
+                    {{ include('dossier_personal/assurance/form.html.twig') }}
                 </div>
                 <div class="card-footer">
                     <button type="submit"

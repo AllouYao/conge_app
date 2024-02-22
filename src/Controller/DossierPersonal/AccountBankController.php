@@ -3,6 +3,7 @@
 namespace App\Controller\DossierPersonal;
 
 use App\Entity\DossierPersonal\AccountBank;
+use App\Entity\User;
 use App\Form\DossierPersonal\AccountType;
 use App\Repository\DossierPersonal\AccountBankRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,7 +28,7 @@ class AccountBankController extends AbstractController
                 'matricule' => $accountBank->getPersonal()->getMatricule(),
                 'name' => $accountBank->getPersonal()->getFirstName(),
                 'last_name' => $accountBank->getPersonal()->getLastName(),
-                'date_naissance' => date_format($accountBank->getPersonal()->getBirthday(), 'd/m/Y'),
+                'date_naissance' => $accountBank->getPersonal()->getBirthday() ? date_format($accountBank->getPersonal()->getBirthday(), 'd/m/Y') : '',
                 'categorie_salarie' => '(' . $accountBank->getPersonal()->getCategorie()->getCategorySalarie()->getName() . ')'
                     . '-' . $accountBank->getPersonal()->getCategorie()->getIntitule(),
                 'date_embauche' => date_format($accountBank->getPersonal()->getContract()->getDateEmbauche(), 'd/m/Y'),
@@ -57,7 +58,7 @@ class AccountBankController extends AbstractController
          * @var User $currentUser
          */
         $currentUser = $this->getUser();
-        
+
         $form = $this->createForm(AccountType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {

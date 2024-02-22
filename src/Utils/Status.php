@@ -154,6 +154,8 @@ final class Status
      * Type de charge
      */
     public const PERSONAL_CHARGE = 'CHARGE SALARIALE';
+    public const FISCALE_CHARGE = 'CHARGES FISCALES';
+    public const SOCIALE_CHARGE = 'CHARGES SOCIALES';
     public const EMPLOYER_CHARGE = 'CHARGE PATRONNALE';
 
     /**
@@ -161,4 +163,9 @@ final class Status
      */
     public const ASSURANCE_SANTE_SALARIALE = 'ASSURANCE SANTE PART SALARIALE';
     public const ASSURANCE_SANTE_PATRONALE = 'ASSURANCE SANTE PART PATRONALE';
+
+    /** Site de travail */
+    public const STATION_AP_MAGIC = 'STATION AP MAGIC';
+    public const DIRECTION = 'DIRECTION';
+    public const STATION_SHELL_TREICH_HABITAT = 'STATION SHELL TREICHVILLE HABITAT';
 }

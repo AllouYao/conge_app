@@ -2,7 +2,6 @@
 
 namespace App\Controller\Settings;
 
-use App\Entity\ElementVariable\VariablePaie;
 use App\Entity\Settings\Smig;
 use App\Form\Settings\SmigType;
 use App\Repository\Settings\SmigRepository;
@@ -19,26 +18,30 @@ class SmigController extends AbstractController
     #[Route('/api_smig', name: 'api_smig', methods: ['GET'])]
     public function apiSmig(SmigRepository $smigRepository): JsonResponse
     {
-        $smig = $smigRepository->findBy(['id' => 1], null, 1);
-        $apiSmig = [];
-
-        foreach ($smig as $item) {
-            $apiSmig[] = [
-                'date_debut' => date_format($item->getDateDebut(), 'd/m/Y'),
-                'date_fin' => date_format($item->getDateFin(), 'd/m/Y'),
-                'amount' => $item->getAmount(),
-                'active' => $item->isIsActive() ? 'OUI' : 'NOM',
-                'modifier' => $this->generateUrl('settings_smig_edit', ['uuid' => $item->getUuid()])
-            ];
+        $smig = $smigRepository->findOneBy([], ['id' => 'DESC']);
+        if (!$smig) {
+            return $this->json(['data' => []]);
         }
-
+        $apiSmig[] = [
+            'date_debut' => date_format($smig->getDateDebut(), 'd/m/Y'),
+            'date_fin' => date_format($smig->getDateFin(), 'd/m/Y'),
+            'amount' => $smig->getAmount(),
+            'active' => $smig->isIsActive() ? 'OUI' : 'NOM',
+            'modifier' => $this->generateUrl('settings_smig_edit', ['uuid' => $smig->getUuid()])
+        ];
         return new JsonResponse($apiSmig);
     }
 
+
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(): Response
+    public function index(SmigRepository $smigRepository): Response
     {
-        return $this->render('settings/smig/index.html.twig');
+        $smigArray = $smigRepository->findOneBy([], ['id' => 'DESC']);
+        $smigId = $smigArray?->getId();
+
+        return $this->render('settings/smig/index.html.twig', [
+            'smig_id' => $smigId
+        ]);
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
