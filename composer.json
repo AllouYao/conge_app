@@ -15,6 +15,7 @@
         "doctrine/orm": "^2.16",
         "nesbot/carbon": "^2.72",
         "php-flasher/flasher-symfony": "^1.15",
+        "phpoffice/phpspreadsheet": "^2.0",
         "ramsey/collection": "^2.0",
         "ramsey/uuid": "^4.7",
         "symfony/apache-pack": "^1.0",
@@ -31,7 +32,8 @@
         "symfony/validator": "6.3.*",
         "symfony/webpack-encore-bundle": "^2.1",
         "symfony/yaml": "6.3.*",
-        "twig/extra-bundle": "^3.7",
+        "twig/extra-bundle": "^3.8",
+        "twig/intl-extra": "^3.8",
         "twig/twig": "^3.7",
         "zenstruck/schedule-bundle": "^1.8"
     },
