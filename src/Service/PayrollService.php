@@ -112,7 +112,7 @@ class PayrollService
         $netPayer = round($netImposable + $primeTransportLegal + $avantageNonImposable - $chargeSalarie);
 
         /** la masse salariale */
-        $masseSalaried = $netPayer + $chargePatronal;
+        $masseSalaried = $netPayer + $chargePatronal + $chargeSalarie;
 
         /** Enregistrement du livre de paie */
         $payroll = (new Payroll())
@@ -172,7 +172,6 @@ class PayrollService
 
         $this->manager->persist($payroll);
         $this->manager->persist($salary);
-        dd($payroll);
     }
 
     public function setPayrollOfDeparture(Personal $personal, Campagne $campagne): void

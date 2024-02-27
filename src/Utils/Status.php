@@ -175,4 +175,5 @@ final class Status
 
     /** Status de campagne */
     public const EN_COURS = 'EN COURS';
+    public const TERMINER = 'TERMINER';
 }
