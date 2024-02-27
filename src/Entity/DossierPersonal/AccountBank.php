@@ -29,7 +29,10 @@ class AccountBank
 
     #[ORM\Column(length: 255)]
     private ?string $rib = null;
-
+    #[ORM\Column(length: 255)]
+    private ?string $name = null;
+    #[ORM\Column(length: 255)]
+    private ?string $codeAgence = null;
     #[ORM\ManyToOne(inversedBy: 'accountBanks')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Personal $personal = null;
@@ -86,6 +89,28 @@ class AccountBank
     public function setRib(string $rib): static
     {
         $this->rib = $rib;
+
+        return $this;
+    }
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+    public function getCodeAgence(): ?string
+    {
+        return $this->codeAgence;
+    }
+
+    public function setCodeAgence(string $codeAgence): static
+    {
+        $this->codeAgence = $codeAgence;
 
         return $this;
     }

@@ -13,4 +13,5 @@ return [
     Symfony\Bundle\WebProfilerBundle\WebProfilerBundle::class => ['dev' => true, 'test' => true],
     Cron\CronBundle\CronCronBundle::class => ['all' => true],
     Zenstruck\ScheduleBundle\ZenstruckScheduleBundle::class => ['all' => true],
+    Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
 ];
