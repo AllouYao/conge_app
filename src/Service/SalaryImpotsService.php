@@ -8,6 +8,7 @@ use App\Entity\DossierPersonal\Personal;
 use App\Entity\ElementVariable\VariablePaie;
 use App\Entity\Impots\ChargeEmployeur;
 use App\Entity\Impots\ChargePersonals;
+use App\Entity\Paiement\Campagne;
 use App\Repository\ElementVariable\VariablePaieRepository;
 use App\Repository\Impots\ChargeEmployeurRepository;
 use App\Repository\Impots\ChargePersonalsRepository;
@@ -40,13 +41,22 @@ class SalaryImpotsService implements SalaryInterface
         $this->departServices = $departServices;
     }
 
-    public function chargePersonal(Personal $personal): void
+    public function chargePersonal(Personal $personal, Campagne $campagne): void
     {
         $part = $this->utimePaiementService->getNumberParts($personal);
-        $impotBrut = $this->utimePaiementService->calculerAmountImpotBrut($personal);
+        $impotBrut = $this->utimePaiementService->calculerAmountImpotBrut($personal, $campagne);
         $creditImpot = $this->utimePaiementService->calculateAmountCreditImpot($personal);
+        /** @var  $netImposable */
+        $salaire = $this->utimePaiementService->getAmountSalaireBrutAndImposable($personal);
+        $majorationHeursSupp = $this->utimePaiementService->getAmountMajorationHeureSupp($personal, $campagne);
+        $primeAnciennete = $this->utimePaiementService->getAmountAnciennete($personal);
+        $congesPayes = $this->utimePaiementService->getAmountCongesPayes($personal);
+        $netImposable = $salaire['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
         $impotNet = $impotBrut - $creditImpot;
-        $amountCNPS = $this->utimePaiementService->calculateAmountCNPS($personal);
+        if ($netImposable <= 75000 || $impotNet < 0) {
+            $impotNet = 0;
+        }
+        $amountCNPS = $this->utimePaiementService->calculateAmountCNPS($personal, $campagne);
         $amountCMU = $this->utimePaiementService->calculateAmountCMU($personal);
         $charge = $this->chargePersonalRt->findOneBy(['personal' => $personal]);
         if (!$charge) {
@@ -108,13 +118,13 @@ class SalaryImpotsService implements SalaryInterface
         $this->manager->flush();
     }
 
-    public function chargeEmployeur(Personal $personal): void
+    public function chargeEmployeur(Personal $personal, Campagne $campagne): void
     {
-        $montantIs = $this->utimePaiementService->calculateAmountIS($personal);
-        $montantFPC = $this->utimePaiementService->calculateAmountFPC($personal);
-        $montantFPCAnnuel = $this->utimePaiementService->calculateAmountFPCAnnuel($personal);
-        $montantTA = $this->utimePaiementService->calculateAmountTA($personal);
-        $montantCR = $this->utimePaiementService->calculateAmountRCNPS_CR($personal);
+        $montantIs = $this->utimePaiementService->calculateAmountIS($personal, $campagne);
+        $montantFPC = $this->utimePaiementService->calculateAmountFPC($personal, $campagne);
+        $montantFPCAnnuel = $this->utimePaiementService->calculateAmountFPCAnnuel($personal, $campagne);
+        $montantTA = $this->utimePaiementService->calculateAmountTA($personal, $campagne);
+        $montantCR = $this->utimePaiementService->calculateAmountRCNPS_CR($personal, $campagne);
         $montantPF = $this->utimePaiementService->calculateAmountRCNPS_PF($personal);
         $montantAT = $this->utimePaiementService->calculateAmountRCNPS_AT($personal);
         $montantRetenuCNPS = $montantCR + $montantPF + $montantAT;

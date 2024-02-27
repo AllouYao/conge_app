@@ -33,7 +33,7 @@ class DetailRetenueForfetaire
     private ?string $amount = null;
 
     #[ORM\ManyToOne(inversedBy: 'detailRetenueForfetaires')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Personal $Personal = null;
 
     #[ORM\ManyToOne(inversedBy: 'detailRetenueForfetaires')]
@@ -41,6 +41,9 @@ class DetailRetenueForfetaire
 
     #[ORM\ManyToMany(targetEntity: ChargePeople::class, inversedBy: 'detailRetenueForfetaires')]
     private Collection $chargePeople;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountEmp = null;
 
     public function __construct()
     {
@@ -132,6 +135,18 @@ class DetailRetenueForfetaire
     public function removeChargePerson(ChargePeople $chargePerson): static
     {
         $this->chargePeople->removeElement($chargePerson);
+
+        return $this;
+    }
+
+    public function getAmountEmp(): ?string
+    {
+        return $this->amountEmp;
+    }
+
+    public function setAmountEmp(?string $amountEmp): static
+    {
+        $this->amountEmp = $amountEmp;
 
         return $this;
     }

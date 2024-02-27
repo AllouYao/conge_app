@@ -1,4 +1,5 @@
-import {runInputmask} from "../inputmask";
+import {runDecimalInputmask, runInputmask} from "../inputmask";
+import {round} from "@popperjs/core/lib/utils/math";
 
 //Mais variable  globals
 let $amountPrimes = 0;
@@ -38,12 +39,14 @@ $('#add-collection-widget-personal-salary-prime').click(function () {
     //$('select.select2').select2({width: '100%', theme: 'bootstrap'});
     $('[data-plugin="customselect"]').select2();
     runInputmask()
+    runDecimalInputmask()
 });
 const addTagFormDeleteLinkPrime = () => {
     $('body').on('click', '.delete-personal-salary-prime', function () {
         const target = $(this).attr('data-target');
         $(target).remove();
         calculateTotalPrimeJuridique()
+        calculateSalaireNet()
     });
 };
 let calculatePrimeJuridique = () => {
@@ -52,11 +55,11 @@ let calculatePrimeJuridique = () => {
         const $prime = +$(`#${parentId}_prime option:selected`).attr('data-taux');
         const coefficient = $(`#${parentId}_taux`);
         const primes = $(`#${parentId}_prime`).val()
-
+        let $horaire;
         if (primes.length > 0) {
             coefficient.val($prime);
             const $smig = +$('#personal_salary_smig').val();
-            let $horaire = $smig / 173.33;
+            $horaire = $smig / 173.33;
             $(`#${parentId}_smigHoraire`).val($horaire);
         } else {
             $(`#${parentId}_smigHoraire`).val(' ');
@@ -64,10 +67,10 @@ let calculatePrimeJuridique = () => {
         }
 
         const $taux = +$(`#${parentId}_taux`).val();
-        const $smigHoraire = +$(`#${parentId}_smigHoraire`).val();
-        let $montant = $smigHoraire * $taux;
+        let $montant = $horaire * $taux;
         $(`#${parentId}_amountPrime`).val($montant)
         calculateTotalPrimeJuridique()
+        calculateSalaireNet()
     })
 }
 const calculateTotalPrimeJuridique = () => {
@@ -80,7 +83,7 @@ const calculateTotalPrimeJuridique = () => {
     } else {
         $amountPrimes = 0;
     }
-    $('#total_montant_prime_salary').html(new Intl.NumberFormat('fr-FR').format($amountPrimes || 0));
+    $('#total_montant_prime_salary').html(round($amountPrimes || 0));
 }
 // fin pour la gestion de la collection des primes juridique
 
@@ -169,7 +172,8 @@ const calculateSalaireNet = () => {
     let $transport = +$('#personal_salary_primeTransport').val();
     let $avantagesImposable = $logements > $amountAventage ? $logements - $amountAventage : 0;
     let $autrePrime = total;
-    amountBrut = $salaireBase + sursalaire + total;
+    let $primeJuridique = $amountPrimes;
+    amountBrut = $salaireBase + sursalaire + total + $amountPrimes;
 
     let $amountImposableWithAvantage = $avantagesImposable !== 0 && $amountAventage !== 0 ? amountBrut + $avantagesImposable : amountBrut;
     let $transportImposable = $transport > DEFAULT_TRANSPORT ? $transport - DEFAULT_TRANSPORT : 0;
@@ -179,6 +183,7 @@ const calculateSalaireNet = () => {
 
     $amountBrutImposable = $amountImposableWithAvantage + $amountImposableWithTransport;
     console.log('autre prime: ', $autrePrime)
+    console.log('prime juridique: ', $primeJuridique)
 
     console.log('Montant brut: ', $amountBrut)
     console.log('Montant brut imposable: ', $amountBrutImposable)
@@ -195,7 +200,7 @@ $('.prime-salary').each(function () {
     const coefficient = $(`#${parentId}_taux`);
     const primes = $(`#${parentId}_prime`).val()
 
-    if (primes.length > 0) {
+    if (primes.length) {
         coefficient.val($prime);
         const $smig = +$('#personal_salary_smig').val();
         let $horaire = $smig / 173.33;
@@ -210,6 +215,7 @@ $('.prime-salary').each(function () {
     let $montant = $smigHoraire * $taux;
     $(`#${parentId}_amountPrime`).val($montant);
     calculateTotalPrimeJuridique()
+    calculateSalaireNet()
 });
 
 $('.total-prime').each(function () {
@@ -243,5 +249,6 @@ addTagFormDeleteLinkPrime()
 calculateTotalPrimeJuridique()
 
 runInputmask()
+runDecimalInputmask()
 
 

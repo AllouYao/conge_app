@@ -7,6 +7,7 @@ use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Campagne;
 use App\Repository\DossierPersonal\PersonalRepository;
 use Carbon\Carbon;
+use DateTime;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -39,6 +40,22 @@ class CampagneType extends AbstractType
                 'html5' => true,
                 'widget' => 'single_text',
                 'required' => true
+            ])
+            ->add('dateDebut', DateTimeType::class, [
+                'attr' => [
+                    'class' => 'form-control form-control-sm'
+                ],
+                'html5' => true,
+                'widget' => 'single_text',
+                'required' => true
+            ])
+            ->add('dateFin', DateTimeType::class, [
+                'attr' => [
+                    'class' => 'form-control form-control-sm'
+                ],
+                'html5' => true,
+                'widget' => 'single_text',
+                'required' => true
             ]);
 
         $formModifier = static function (FormInterface $form) {
@@ -54,8 +71,8 @@ class CampagneType extends AbstractType
                         $carbon = Carbon::today();
                         $month = $carbon->month;
                         $years = $carbon->year;
-                        $firstDay = new \DateTime("$years-$month-1");
-                        $lastDay = new \DateTime("$years-$month-" . $firstDay->format("t"));
+                        $firstDay = new DateTime("$years-$month-1");
+                        $lastDay = new DateTime("$years-$month-" . $firstDay->format("t"));
                         return $er->createQueryBuilder('p')
                             ->join('p.contract', 'contract')
                             ->leftJoin('p.departures', 'departures')
@@ -95,14 +112,14 @@ class CampagneType extends AbstractType
                     $personal = $this->repositoryPer->findAllPersonalOnCampain();
                     foreach ($personal as $individual) {
                         $campagne->addPersonal($individual);
-                        $this->salaryInterface->chargePersonal($individual);
-                        $this->salaryInterface->chargeEmployeur($individual);
+                        $this->salaryInterface->chargePersonal($individual, $campagne);
+                        $this->salaryInterface->chargeEmployeur($individual, $campagne);
                     }
                 } else {
                     foreach ($personals as $individual) {
                         $campagne->addPersonal($individual);
-                        $this->salaryInterface->chargePersonal($individual);
-                        $this->salaryInterface->chargeEmployeur($individual);
+                        $this->salaryInterface->chargePersonal($individual, $campagne);
+                        $this->salaryInterface->chargeEmployeur($individual, $campagne);
                     }
                 }
 

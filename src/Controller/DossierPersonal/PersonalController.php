@@ -11,7 +11,6 @@ use App\Repository\DossierPersonal\DetailSalaryRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\Settings\PrimesRepository;
 use App\Service\MatriculeGenerator;
-use App\Service\SalaryImpotsService;
 use App\Utils\Status;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,12 +25,10 @@ use Symfony\Component\Routing\Annotation\Route;
 class PersonalController extends AbstractController
 {
     private PersonalRepository $personalRepository;
-    private SalaryImpotsService $service;
 
-    public function __construct(PersonalRepository $personalRepository, SalaryImpotsService $service)
+    public function __construct(PersonalRepository $personalRepository)
     {
         $this->personalRepository = $personalRepository;
-        $this->service = $service;
     }
 
     /**
@@ -58,7 +55,7 @@ class PersonalController extends AbstractController
         $typeContrat = $personal->getContract()->getTypeContrat();
         $today = new DateTime();
         $anciennete = (int)$personal->getOlder();
-        $age = $personal->getBirthday()->diff($today)->y;
+        $age = $personal->getBirthday() ? $personal->getBirthday()->diff($today)->y : '';
         $dureeContrat = $typeContrat === Status::CDD ? round(($dateFin->diff($dateEmbauche)->days) / 30) : round(($today->diff($dateEmbauche)->days) / 30);
 
         $numberEnfant = $personal->getChargePeople()->count();
@@ -115,16 +112,16 @@ class PersonalController extends AbstractController
     #[Route('/api/salaried_book/', name: 'salaried_book', methods: ['GET'])]
     public function getPersonalSalaried(): JsonResponse
     {
-        if ($this->isGranted('ROLE_RH')){
+        if ($this->isGranted('ROLE_RH')) {
 
             $personal = $this->personalRepository->findPersonalSalaried();
 
-        }else{
+        } else {
 
             $personal = $this->personalRepository->findPersonalSalariedByEmployeRole();
 
         }
-       
+
         $personalSalaried = [];
         foreach ($personal as $value => $item) {
             $anciennete = $item['older'];
@@ -161,17 +158,17 @@ class PersonalController extends AbstractController
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(): Response
     {
-        if ($this->isGranted('ROLE_RH')){
+        if ($this->isGranted('ROLE_RH')) {
 
             $personal = $this->personalRepository->findPersonalSalaried();
 
-        }else{
+        } else {
 
             $personal = $this->personalRepository->findPersonalSalariedByEmployeRole();
 
         }
 
-        $personal = $this->personalRepository->findPersonalSalaried();
+        //$personal = $this->personalRepository->findPersonalSalaried();
         return $this->render('dossier_personal/personal/index.html.twig', [
             'personals' => $personal
         ]);
@@ -197,7 +194,7 @@ class PersonalController extends AbstractController
         $form = $this->createForm(PersonalType::class, $personal);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) { 
+        if ($form->isSubmitted() && $form->isValid()) {
 
             $entityManager->persist($personal);
             foreach ($personal->getSalary()->getDetailSalaries() as $detailSalary) {
@@ -248,7 +245,10 @@ class PersonalController extends AbstractController
                 $detailPrimeSalary->setSalary($personal->getSalary());
                 $entityManager->persist($detailPrimeSalary);
             }
-            $this->service->variableElement($personal);
+            foreach ($personal->getSalary()->getDetailRetenueForfetaires() as $detailRetenueForfetaire) {
+                $detailRetenueForfetaire->setSalary($personal->getSalary());
+                $entityManager->persist($detailRetenueForfetaire);
+            }
             $entityManager->flush();
             flash()->addSuccess('Salarié modifier avec succès.');
             return $this->redirectToRoute('personal_show', ['uuid' => $personal->getUuid()]);

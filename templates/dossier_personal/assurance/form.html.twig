@@ -3,7 +3,7 @@
     <div class="mb-2 row">
         <label class="col-md-2 col-form-label">Matricule <span class="text-danger">*</span></label>
         <div class="col-md-4">
-            {{ form_widget(form.personal) }}
+            {{ form_widget(form.Personal) }}
         </div>
         <label class="col-md-2 col-form-label">Nom & Prénom(s) <span class="text-danger">*</span></label>
         <div class="col-md-4">
@@ -24,22 +24,20 @@
 <br>
 <fieldset>
     <legend>Détail assurance</legend>
-    <div class="row">
-        <div class="col-md-12 table-responsive">
-            <table class="table table-bordered table-sm table-responsive-sm">
-                <thead class="table-secondary">
-                <tr>
-                    <th class="text-center">Intitule assurance</th>
-                    <th class="text-center">Autre bénéficiaire</th>
-                    <th class="text-center">Total assurance</th>
-                    <th class="text-center">Action</th>
-                </tr>
-                </thead>
-                {% form_theme form 'dossier_personal/assurance/_collection_assurance.html.twig' %}
-                <tbody id="detail_personal_assurance_table">
-                {{ form_widget(form.detailRetenueForfetaires) }}
-                </tbody>
-            </table>
+    <div class="mb-2 row">
+        <label class="col-md-1 col-form-label">Type assurance<span class="text-danger">*</span></label>
+        <div class="col-md-3">
+            {{ form_widget(form.retenuForfetaire) }}
+        </div>
+
+        <label class="col-md-2 col-form-label">Personne à charge</label>
+        <div class="col-md-3">
+            {{ form_widget(form.chargePeople) }}
+        </div>
+
+        <label class="col-md-1 col-form-label">Solde assurance</label>
+        <div class="col-md-2">
+            {{ form_widget(form.amount) }}
         </div>
     </div>
 </fieldset>

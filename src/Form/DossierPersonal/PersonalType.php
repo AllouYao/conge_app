@@ -2,19 +2,18 @@
 
 namespace App\Form\DossierPersonal;
 
-use App\Utils\Status;
-use Doctrine\ORM\QueryBuilder;
+use App\Entity\DossierPersonal\Personal;
 use App\Entity\Settings\Category;
 use App\Form\CustomType\DateCustomType;
-use App\Entity\DossierPersonal\Personal;
-use Symfony\Component\Form\AbstractType;
 use App\Repository\Settings\CategoryRepository;
-use Symfony\Component\Form\FormBuilderInterface;
+use App\Utils\Status;
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class PersonalType extends AbstractType
 {
@@ -81,7 +80,7 @@ class PersonalType extends AbstractType
                 },
                 'required' => true,
                 'group_by' => 'categorySalarie',
-                'query_builder' => function (CategoryRepository $categoryRepository):QueryBuilder { 
+                'query_builder' => function (CategoryRepository $categoryRepository): QueryBuilder {
                     return $categoryRepository->findCategorieByEmploye();
                 }
             ])
@@ -149,11 +148,14 @@ class PersonalType extends AbstractType
                 'choices' => [
                     'STATION AP MAGIC' => Status::STATION_AP_MAGIC,
                     'STATION SHELL TREICHVILLE HABITAT' => Status::STATION_SHELL_TREICH_HABITAT,
-                    'DIRECTION' => Status::DIRECTION
+                    'DIRECTION' => Status::DIRECTION,
+                    'SHELL PARIS' => Status::SHELL_PARIS,
+                    'STATION AP BENSON' => Status::STATION_AP_BENSON,
+                    'STATION PO SONGON' => Status::STATION_PO_SONGON,
+                    'STATION SHELL RO GABON' => Status::STATION_SHELL_RO_GABON
                 ],
                 'placeholder' => 'Sélectionner le site de travail'
-            ])
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

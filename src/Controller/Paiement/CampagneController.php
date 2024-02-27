@@ -76,33 +76,21 @@ class CampagneController extends AbstractController
     {
         if ($this->isGranted('ROLE_RH')) {
             $payBooks = $this->payrollRepository->findPayrollByCampaign(true);
-            return $this->render('paiement/campagne/pay_book.html.twig', [
-                'payBooks' => $payBooks
-            ]);
-
         } else {
-
             $payBooks = $this->payrollRepository->findPayrollByCampaignEmploye(true);
-            return $this->render('paiement/campagne/pay_book.html.twig', [
-                'payBooks' => $payBooks
-            ]);
-
         }
-
-
+        return $this->render('paiement/campagne/pay_book.html.twig', [
+            'payBooks' => $payBooks
+        ]);
     }
 
     #[Route('/api/pay_book/', name: 'pay_book', methods: ['GET'])]
     public function getPayBook(): JsonResponse
     {
         if ($this->isGranted('ROLE_RH')) {
-
             $payroll = $this->payrollRepository->findPayrollByCampaign(true);
-
         } else {
-
             $payroll = $this->payrollRepository->findPayrollByCampaignEmploye(true);
-
         }
 
         $payBookData = [];
@@ -206,12 +194,12 @@ class CampagneController extends AbstractController
      * @throws NonUniqueResultException
      */
     #[Route('/paiement/campagne/open', name: 'open_campagne', methods: ['GET', 'POST'])]
-    public function open(Request $request, EntityManagerInterface $manager): Response
+    public function openNormalExercice(Request $request, EntityManagerInterface $manager): Response
     {
 
         $ordinaryCampagne = $this->campagneRepository->getOrdinaryCampagne();
         if ($ordinaryCampagne) {
-            $this->addFlash('error', 'Une campagne est déjà en cours !');
+            $this->addFlash('error', 'Un exercice de paie est déjà en cours d\'exécution. Merci de bien vouloir terminer ce procéssuce!');
             return $this->redirectToRoute('campagne_livre');
         }
 
@@ -220,6 +208,7 @@ class CampagneController extends AbstractController
 
         $form = $this->createForm(CampagneType::class, $campagne);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $personal = $form->get('personal')->getData();
             foreach ($personal as $item) {
@@ -227,6 +216,7 @@ class CampagneController extends AbstractController
             }
             $campagne
                 ->setActive(true)
+                ->setStatus(Status::EN_COURS)
                 ->setOrdinary(true);
             $manager->persist($campagne);
             $manager->flush();
@@ -246,7 +236,7 @@ class CampagneController extends AbstractController
      * @throws NonUniqueResultException
      */
     #[Route('/paiement/campagne/exceptional/open', name: 'open_campagne_exceptional', methods: ['GET', 'POST'])]
-    public function openCampagneExcept(Request $request, EntityManagerInterface $manager): Response
+    public function openSpecialExercice(Request $request, EntityManagerInterface $manager): Response
     {
 
         $exceptionalCampagne = $this->campagneRepository->getExceptionalCampagne();
@@ -271,7 +261,7 @@ class CampagneController extends AbstractController
             $manager->persist($campagne);
             $manager->flush();
             flash()->addSuccess('Campagne ouverte avec succès.');
-            return $this->redirectToRoute('campagne_livre');
+            return $this->redirectToRoute('app_home');
         }
 
         return $this->render('paiement/campagne_exceptionnelle/open.html.twig', [

@@ -2,7 +2,6 @@
 
 namespace App\Form\DossierPersonal;
 
-use App\Entity\DossierPersonal\ChargePeople;
 use App\Entity\DossierPersonal\Personal;
 use App\Utils\Status;
 use Doctrine\ORM\EntityRepository;
@@ -17,6 +16,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class AssuranceType extends AbstractType
 {
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -68,41 +68,26 @@ class AssuranceType extends AbstractType
                 ],
                 'allow_add' => true,
                 'allow_delete' => true,
+                'mapped' => false,
+                ''
             ]);
 
-        $builder->addEventListener(
-            FormEvents::PRE_SET_DATA,
-            function (FormEvent $event) {
-                $form = $event->getForm();
-                $data = $event->getData();
-                $personal = $data?->getPersonal();
-                $retenueType = $form->get('detailRetenueForfetaires')->getData();
-                dd($retenueType);
-                if ($retenueType === 'ASSURANCE_FAMILLE') {
-                    if ($personal) {
-                        $form->get('detailRetenueForfetaires')->add('chargePeople', EntityType::class, [
-                            'class' => ChargePeople::class,
-                            'query_builder' => function (EntityRepository $er) use ($personal) {
-                                return $er->createQueryBuilder('chp')
-                                    ->where('chp.personal = :personal')
-                                    ->setParameter('personal', $personal);
-                            },
-                            'required' => false,
-                            'attr' => [
-                                'data-plugin' => 'customselect'
-                            ],
-                            'multiple' => true,
-                        ]);
-                    }
-                }
-            }
-        );
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
+        $formData = $event->getData();
+        $form = $event->getForm();
+
+        if (isset($formData['personal'])) {
+            $personalId = $formData['personal'];
+
+            // Ici, vous pouvez effectuer des actions en fonction de la valeur de personal
+            // Par exemple, déclencher des requêtes AJAX pour mettre à jour dynamiquement
+            // les options d'un autre champ en fonction de la sélection de personal.
+        }
+    });
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([
-            // Configure your form options here
-        ]);
+        $resolver->setDefaults([]);
     }
 }

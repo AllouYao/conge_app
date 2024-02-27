@@ -7,9 +7,15 @@
                 <th class="text-center" colspan="2">Ouverture</th>
                 <th class="text-center" colspan="2">Fermeture</th>
                 <th class="text-center" style="vertical-align: middle !important;" rowspan="2">Salariés</th>
-                <th class="text-center" style="vertical-align: middle !important;" colspan="3">Charge global des salariés (Fcfa)</th>
-                <th class="text-center" style="vertical-align: middle !important;" colspan="3">Charge global de l'employeur (F cfa)</th>
-                <th class="text-center" style="vertical-align: middle !important;" rowspan="2">Masse salariales (F cfa)</th>
+                <th class="text-center" style="vertical-align: middle !important;" colspan="3">Charge global des
+                    salariés (Fcfa)
+                </th>
+                <th class="text-center" style="vertical-align: middle !important;" colspan="3">Charge global de
+                    l'employeur (F cfa)
+                </th>
+                <th class="text-center" style="vertical-align: middle !important;" rowspan="2">Masse salariales (F
+                    cfa)
+                </th>
             </tr>
             <tr>
                 <th class="text-center">Date</th>
@@ -18,10 +24,10 @@
                 <th class="text-center">Heure</th>
                 <th class="text-center">Total charges fiscales</th>
                 <th class="text-center">Total charges sociales</th>
-                <th class="text-center">Total charges </th>
+                <th class="text-center">Total charges</th>
                 <th class="text-center">Total charges fiscales</th>
                 <th class="text-center">Total charges sociales</th>
-                <th class="text-center">Total charges </th>
+                <th class="text-center">Total charges</th>
 
             </tr>
             </thead>
@@ -64,12 +70,22 @@
 <div class="tab-content text-muted">
     <div class="tab-pane active" id="date">
         <fieldset>
-            <legend>Date ouverture</legend>
-            <div class="mb-2 row">
-                <label class="col-md-2 col-form-label">Date <span class="text-danger">*</span></label>
-                <div class="col-md-6">
+            <legend>Date ouverture & Période d'exercice</legend>
+            <div class="mb-2" style="display: flex">
+                <label class="col-form-label" style="margin-right: 50px">Date <span class="text-danger">*</span></label>
+                <div class="col-md-3" style="margin-right: 35px">
                     {{ form_widget(form.startedAt) }}
                     {{ form_errors(form.startedAt) }}
+                </div>
+                <label class="col-md-1 col-form-label">Période du<span class="text-danger">*</span></label>
+                <div class="col-md-3" style="margin-right: 35px">
+                    {{ form_widget(form.dateDebut) }}
+                    {{ form_errors(form.dateDebut) }}
+                </div>
+                <label class="col-form-label" style="margin-right: 60px">au<span class="text-danger">*</span></label>
+                <div class="col-md-3">
+                    {{ form_widget(form.dateFin) }}
+                    {{ form_errors(form.dateFin) }}
                 </div>
             </div>
         </fieldset>

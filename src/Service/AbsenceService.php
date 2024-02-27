@@ -23,6 +23,20 @@ class AbsenceService
      * @param int $year
      * @return float
      */
+
+
+    /** Retourne le nombre total d'heures non travailler en fonction du notre de jour d'absence */
+    private function getHours(Absence $absence): float|int
+    {
+        $startedDate = $absence->getStartedDate();
+        $endedDate = $absence->getEndedDate();
+        $diff = $endedDate->diff($startedDate);
+        $totalAbsenceDay = (int)$diff->format('%d');
+        // 8 heure par jour de travail
+        return $totalAbsenceDay * 8;
+    }
+
+    /** Retourne le solde catégoriel par absence du moi */
     public function getAmountByMonth(Personal $personal, int $month, int $year): float
     {
         $salaireCategoriel = $personal->getSalary()->getBaseAmount();
@@ -38,23 +52,14 @@ class AbsenceService
         return $workHours * $salaireHorraire;
     }
 
-    private function getHours(Absence $absence): float|int
-    {
-        $startedDate = $absence->getStartedDate();
-        $endedDate = $absence->getEndedDate();
-        $diff = $endedDate->diff($startedDate);
-        $totalAbsenceDay = (int)$diff->format('%d');
-
-        // 8 heure par jour de travail
-        return $totalAbsenceDay * 8;
-    }
+    /** Retourne le solde catégoriel par absence */
     public function getAmountByAbsence(Absence $absence): float|int
     {
         $salaireCategoriel = $absence->getPersonal()->getSalary()->getBaseAmount();
         $workHours = Status::TAUX_HEURE;
         $salaireHorraire = $salaireCategoriel / $workHours;
 
-        if($absence->isJustified()){
+        if ($absence->isJustified()) {
             return $workHours * $salaireHorraire;
         }
 
@@ -62,5 +67,19 @@ class AbsenceService
         $workHours -= $totalHours; // TAUX_HORRAIRE - NBRE HEURE ABSENEC
 
         return $workHours * $salaireHorraire;
+    }
+
+
+    /** Retourne le solde catégoriel par absence */
+    public function getAmountDeduction(Absence $absence): float|int
+    {
+        $salaireCategoriel = $absence->getPersonal()->getSalary()->getBaseAmount();
+        $workHours = Status::TAUX_HEURE;
+        $salaireHorraire = $salaireCategoriel / $workHours;
+        if ($absence->isJustified()) {
+            return 0;
+        }
+        $totalHours = $this->getHours($absence);
+        return round($salaireHorraire * $totalHours, 2);
     }
 }

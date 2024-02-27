@@ -51,64 +51,65 @@ class PayrollService
         /** Récupération des éléménts de salaire imposable */
         $salary = $personal->getSalary();
         $salaire = $this->utimePaiementService->getAmountSalaireBrutAndImposable($personal);
-        $baseSalaire = round((double)$salaire['salaire_categoriel'], 2);
-        $sursalaire = round((double)$salary->getSursalaire(), 2);
-        $majorationHeursSupp = round($this->utimePaiementService->getAmountMajorationHeureSupp($personal), 2);
-        $primeAnciennete = round($this->utimePaiementService->getAmountAnciennete($personal), 2);
+        $baseSalaire = round((double)$salaire['salaire_categoriel']);
+        $sursalaire = round((double)$salary->getSursalaire());
+        $majorationHeursSupp = round($this->utimePaiementService->getAmountMajorationHeureSupp($personal, $campagne));
+        $primeAnciennete = round($this->utimePaiementService->getAmountAnciennete($personal));
         /** enregistrer la prime d'ancienneté dans la table salary */
         $salary->setPrimeAciennete((int)$primeAnciennete);
-        $congesPayes = round($this->utimePaiementService->getAmountCongesPayes($personal), 2);
-        $primeFonctions = round($this->utimePaiementService->getPrimeFonction($personal), 2);
-        $primeLogements = round($this->utimePaiementService->getPrimeLogement($personal), 2);
-        $indemniteFonctions = round($this->utimePaiementService->getIndemniteFonction($personal), 2);
-        $indemniteLogements = round($this->utimePaiementService->getIndemniteLogement($personal), 2);
-        $primeTransportImposable = round(((double)$salary->getPrimeTransport() - $primeTransportLegal), 2);
+        $congesPayes = round($this->utimePaiementService->getAmountCongesPayes($personal));
+        $primeFonctions = round($this->utimePaiementService->getPrimeFonction($personal));
+        $primeLogements = round($this->utimePaiementService->getPrimeLogement($personal));
+        $indemniteFonctions = round($this->utimePaiementService->getIndemniteFonction($personal));
+        $indemniteLogements = round($this->utimePaiementService->getIndemniteLogement($personal));
+        $primeTransportImposable = round(((double)$salary->getPrimeTransport() - $primeTransportLegal));
 
         /** Avantage en nature non imposable */
-        $avantageNonImposable = round((double)$salary->getAvantage()?->getTotalAvantage(), 2);
-        $avantageNatureImposable = round(((double)$salary?->getAmountAventage() - $avantageNonImposable), 2);
+        $avantageNonImposable = round((double)$salary->getAvantage()?->getTotalAvantage());
+        $avantageNatureImposable = round(((double)$salary?->getAmountAventage() - $avantageNonImposable));
 
         /** charge du personnel et retenue fixcal */
         $chargePersonal = $this->chargePersonalsRepository->findOneBy(['personal' => $personal]);
         $nombrePart = round($chargePersonal?->getNumPart(), 2);
-        $salaryIts = round($chargePersonal?->getAmountIts(), 2);
-        $salaryCnps = round($chargePersonal?->getAmountCNPS(), 2);
-        $salaryCmu = round($chargePersonal?->getAmountCMU(), 2);
+        $salaryIts = round($chargePersonal?->getAmountIts());
+        $salaryCnps = round($chargePersonal?->getAmountCNPS());
+        $salaryCmu = round($chargePersonal?->getAmountCMU());
         $assuranceSanteSalariale = $this->utimePaiementService->getAssuranceSante($personal)['assurance_salariale'];
-        $chargeSalarie = round($chargePersonal?->getAmountTotalChargePersonal() + $assuranceSanteSalariale, 2);
+        $chargeSalarie = round($chargePersonal?->getAmountTotalChargePersonal() + $assuranceSanteSalariale);
 
         /** charge de l'employeur et retenue fixcal */
         $chargeEmployeur = $this->chargeEmployeurRepository->findOneBy(['personal' => $personal]);
-        $employeurIS = round($chargeEmployeur?->getAmountIS(), 2);
-        $employeurFPC = round($chargeEmployeur?->getAmountFPC(), 2);
-        $employeurFPCAnnuel = round($chargeEmployeur?->getAmountAnnuelFPC(), 2);
-        $employeurTA = round($chargeEmployeur?->getAmountTA(), 2);
-        $employeurCMU = round($chargeEmployeur?->getAmountCMU(), 2);
-        $employeurCR = round($chargeEmployeur?->getAmountCR(), 2);
-        $employeurPF = round($chargeEmployeur?->getAmountPF(), 2);
-        $employeurAT = round($chargeEmployeur?->getAmountAT(), 2);
-        $employeurCNPS = round($chargeEmployeur?->getTotalRetenuCNPS(), 2);
+        $employeurIS = round($chargeEmployeur?->getAmountIS());
+        $employeurFPC = round($chargeEmployeur?->getAmountFPC());
+        $employeurFPCAnnuel = round($chargeEmployeur?->getAmountAnnuelFPC());
+        $employeurTA = round($chargeEmployeur?->getAmountTA());
+        $employeurCMU = round($chargeEmployeur?->getAmountCMU());
+        $employeurCR = round($chargeEmployeur?->getAmountCR());
+        $employeurPF = round($chargeEmployeur?->getAmountPF());
+        $employeurAT = round($chargeEmployeur?->getAmountAT());
+        $employeurCNPS = round($chargeEmployeur?->getTotalRetenuCNPS());
         $assuranceSantePatronale = $this->utimePaiementService->getAssuranceSante($personal)['assurance_patronale'];
-        $chargePatronal = round($chargeEmployeur?->getTotalChargeEmployeur() + $assuranceSantePatronale, 2);
+        $chargePatronal = round($chargeEmployeur?->getTotalChargeEmployeur() + $assuranceSantePatronale);
 
         /** Récupération des éléménts de salaire non imposable */
-        $primePaniers = round($this->utimePaiementService->getPrimePanier($personal), 2);
-        $primeSalissures = round($this->utimePaiementService->getPrimeSalissure($personal), 2);
-        $primeTenueTravails = round($this->utimePaiementService->getPrimeTT($personal), 2);
-        $primeOutillages = round($this->utimePaiementService->getPrimeOutil($personal), 2);
-        $primeRendement = round($this->utimePaiementService->getPrimeRendement($personal), 2);
+        $primePaniers = round($this->utimePaiementService->getPrimePanier($personal));
+        $primeSalissures = round($this->utimePaiementService->getPrimeSalissure($personal));
+        $primeTenueTravails = round($this->utimePaiementService->getPrimeTT($personal));
+        $primeOutillages = round($this->utimePaiementService->getPrimeOutil($personal));
+        $primeRendement = round($this->utimePaiementService->getPrimeRendement($personal));
 
         /** Salaire brut et le net imposable */
         $salaireBrut = $baseSalaire + $sursalaire + $majorationHeursSupp + $congesPayes + $primeAnciennete
             + $primeFonctions + $primeLogements + $indemniteFonctions + $indemniteLogements
-            + $primeTransportImposable + $avantageNatureImposable + $primeTransportLegal + $avantageNonImposable;
+            + $primeTransportImposable + $avantageNatureImposable + $primeTransportLegal + $avantageNonImposable
+            + $primeRendement + $primeOutillages + $primePaniers + $primeSalissures + $primeTenueTravails;
 
         $netImposable = $baseSalaire + $sursalaire + $majorationHeursSupp + $congesPayes + $primeAnciennete
             + $primeFonctions + $primeLogements + $indemniteFonctions + $indemniteLogements + $primeTransportImposable
-            + $avantageNatureImposable;
+            + $avantageNatureImposable + $primeRendement + $primeOutillages
+            + $primePaniers + $primeSalissures + $primeTenueTravails;
         /** net à payer, total retenue, indemnité de transport et assurance santé du personnel */
-        $netPayer = $netImposable + $primeTransportLegal + $avantageNonImposable + $primeRendement + $primeOutillages
-            + $primePaniers + $primeSalissures + $primeTenueTravails - $chargeSalarie;
+        $netPayer = round($netImposable + $primeTransportLegal + $avantageNonImposable - $chargeSalarie);
 
         /** la masse salariale */
         $masseSalaried = $netPayer + $chargePatronal;
@@ -153,6 +154,7 @@ class PayrollService
             ->setAmountTA($employeurTA)
             ->setAmountFPC($employeurFPC)
             ->setAmountAnnuelFPC($employeurFPCAnnuel)
+            ->setEmployeurFdfp($employeurTA + $employeurFPC + $employeurFPCAnnuel)
             ->setEmployeurSante($assuranceSantePatronale)
             ->setFixcalAmount($salaryIts)
             ->setSocialAmount($salaryCnps + $salaryCmu)
@@ -170,6 +172,7 @@ class PayrollService
 
         $this->manager->persist($payroll);
         $this->manager->persist($salary);
+        dd($payroll);
     }
 
     public function setPayrollOfDeparture(Personal $personal, Campagne $campagne): void
