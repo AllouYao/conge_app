@@ -2,22 +2,21 @@
 
 namespace App\Controller\DossierPersonal;
 
-use Carbon\Carbon;
-use App\Entity\User;
-use App\Utils\Status;
-use IntlDateFormatter;
+use App\Entity\DossierPersonal\Personal;
+use App\Form\DossierPersonal\PersonalHeureSupType;
+use App\Repository\DossierPersonal\HeureSupRepository;
+use App\Repository\DossierPersonal\PersonalRepository;
 use App\Service\HeureSupService;
 use App\Service\UtimePaiementService;
-use App\Entity\DossierPersonal\Personal;
+use App\Utils\Status;
+use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
+use IntlDateFormatter;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Form\DossierPersonal\PersonalHeureSupType;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Repository\DossierPersonal\HeureSupRepository;
-use App\Repository\DossierPersonal\PersonalRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
 #[Route('/dossier/personal/heure_sup', name: 'personal_heure_sup_')]
@@ -55,15 +54,14 @@ class HeureSupController extends AbstractController
         $apiHeureSupp = [];
         $salaireHoraire = 0;
 
-        if ($this->isGranted('ROLE_RH')){
+        if ($this->isGranted('ROLE_RH')) {
 
             $personals = $this->personalRepository->findAllPersonal();
 
-        }else{
+        } else {
 
             $personals = $this->personalRepository->findAllPersonalByEmployeRole();
         }
-
 
 
         foreach ($personals as $personal) {
@@ -74,10 +72,15 @@ class HeureSupController extends AbstractController
             $personalSalaireBase = $this->utimePaiementService->getAmountSalaireBrutAndImposable($personal)['salaire_categoriel'];
             $amountHoraire = 0;
             $heure_15 = 0;
+            $heure15 = 0;
             $heure_50 = 0;
+            $heure50 = 0;
             $heure_75_jour = 0;
+            $heure75Jour = 0;
             $heure_75_nuit = 0;
+            $heure75Nuit = 0;
             $heure_100 = 0;
+            $heure100 = 0;
             $totalHeure = 0;
             if (count($heureSupp) > 0) {
                 foreach ($heureSupp as $item) {
@@ -88,14 +91,21 @@ class HeureSupController extends AbstractController
                     $totalHeure += (int)$item->getTotalHorraire();
                     if ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure <= 6) {
                         $heure_15 += $heure;
-                    } elseif ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure > 6) {
-                        $heure_50 += $heure;
+                        $heure15 = $heure_15;
+                    } elseif ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR &&  $heure > 6) {
+                        $heure_6 = 6;
+                        $heure15 += $heure_15;
+                        $heure_50 += $heure - $heure_6;
+                        $heure50 = $heure_50;
                     } elseif ($jourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
                         $heure_75_jour += $heure;
+                        $heure75Jour = $heure_75_jour;
                     } elseif (($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::NUIT)) {
                         $heure_75_nuit += $heure;
+                        $heure75Nuit = $heure_75_nuit;
                     } elseif ($jourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::NUIT) {
                         $heure_100 += $heure;
+                        $heure100 = $heure_100;
                     }
                     $amountHoraire = $amountHoraire + $item->getAmount();
                 }
@@ -106,11 +116,11 @@ class HeureSupController extends AbstractController
                     'total_heure' => $totalHeure,
                     'typeDay' => $jourNormalOrFerie,
                     'typeJour' => $jourOrNuit,
-                    'heure_15_%' => $heure_15,
-                    'heure_50_%' => $heure_50,
-                    'heure_75_%_jour' => $heure_75_jour,
-                    'heure_75_%_nuit' => $heure_75_nuit,
-                    'heure_100_%_nuit' => $heure_100,
+                    'heure_15_%' => $heure15,
+                    'heure_50_%' => $heure50,
+                    'heure_75_%_jour' => $heure75Jour,
+                    'heure_75_%_nuit' => $heure75Nuit,
+                    'heure_100_%_nuit' => $heure100,
                     'taux_horaire' => $salaireHoraire,
                     'montant_heure_supp' => $amountHoraire,
                     'status' => $statut,
@@ -128,11 +138,11 @@ class HeureSupController extends AbstractController
         $years = $today->year;
         $month = $today->month;
         $personal = null;
-        if ($this->isGranted('ROLE_RH')){
-            
+        if ($this->isGranted('ROLE_RH')) {
+
             $heursSupps = $this->heureSupRepository->getAllByDate($month, $years);
 
-        }else{
+        } else {
 
             $heursSupps = $this->heureSupRepository->findHeureSupByEmployeRole($month, $years);
         }
@@ -146,11 +156,11 @@ class HeureSupController extends AbstractController
         $apiRequestHeureSupp = [];
         foreach ($heursSupps as $heureSup) {
             $apiRequestHeureSupp[] = [
-                
+
                 'matricule' => $heureSup->getPersonal()->getMatricule(),
                 'name' => $heureSup->getPersonal()->getFirstName(),
                 'last_name' => $heureSup->getPersonal()->getLastName(),
-                'date_naissance' => date_format($heureSup->getPersonal()->getBirthday(), 'd/m/Y'),
+                'date_naissance' => $heureSup->getPersonal()->getBirthday() ? date_format($heureSup->getPersonal()->getBirthday(), 'd/m/Y') : '',
                 'categorie_salarie' => '(' . $heureSup->getPersonal()->getCategorie()->getCategorySalarie()->getName() . ')' . '-' . $heureSup->getPersonal()->getCategorie()->getIntitule(),
                 'date_embauche' => date_format($heureSup->getPersonal()->getContract()->getDateEmbauche(), 'd/m/Y'),
                 'date_debut' => date_format($heureSup->getStartedDate(), 'd/m/Y'),

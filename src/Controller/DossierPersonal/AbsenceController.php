@@ -2,19 +2,18 @@
 
 namespace App\Controller\DossierPersonal;
 
-use Carbon\Carbon;
-use App\Entity\User;
-use App\Service\AbsenceService;
 use App\Entity\DossierPersonal\Personal;
+use App\Entity\User;
+use App\Form\DossierPersonal\PersonalAbsenceType;
+use App\Repository\DossierPersonal\AbsenceRepository;
+use App\Service\AbsenceService;
+use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Form\DossierPersonal\PersonalAbsenceType;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Repository\DossierPersonal\AbsenceRepository;
-use App\Repository\DossierPersonal\PersonalRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
 #[Route('/dossier/personal/absence', name: 'personal_absence_')]
@@ -22,7 +21,6 @@ class AbsenceController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
     private AbsenceRepository $absenceRepository;
-    private PersonalRepository $personalRepository;
 
     private AbsenceService $absenceService;
 
@@ -30,13 +28,11 @@ class AbsenceController extends AbstractController
         EntityManagerInterface $entityManager,
         AbsenceRepository      $absenceRepository,
         AbsenceService         $absenceService,
-        PersonalRepository $personalRepository
 
     )
     {
         $this->entityManager = $entityManager;
         $this->absenceRepository = $absenceRepository;
-        $this->personalRepository = $personalRepository;
         $this->absenceService = $absenceService;
     }
 
@@ -44,26 +40,20 @@ class AbsenceController extends AbstractController
     public function apiAbsence(): JsonResponse
     {
         $now = Carbon::today();
-        
-        if ($this->isGranted('ROLE_RH')){
-
+        if ($this->isGranted('ROLE_RH')) {
             $absences = $this->absenceRepository->getAbsenceByMonths($now->month, $now->year);
-
-        }else{
-
+        } else {
             $absences = $this->absenceRepository->getAbsenceByMonthsByEmployeRole($now->month, $now->year);
-
         }
-
+        $apiAbsences = [];
         foreach ($absences as $absence) {
-
             $newBaseAmount = $this->absenceService->getAmountByAbsence($absence);
+            $deducteur = $this->absenceService->getAmountDeduction($absence);
             $apiAbsences[] = [
-
                 'matricule' => $absence->getPersonal()->getMatricule(),
                 'name' => $absence->getPersonal()->getFirstName(),
                 'last_name' => $absence->getPersonal()->getLastName(),
-                'date_naissance' => date_format($absence->getPersonal()->getBirthday(), 'd/m/Y'),
+                'date_naissance' => $absence->getPersonal()->getBirthday() ? date_format($absence->getPersonal()->getBirthday(), 'd/m/Y') : '',
                 'categorie_salarie' => '(' . $absence->getPersonal()->getCategorie()->getCategorySalarie()->getName() . ')' .
                     '-' . $absence->getPersonal()->getCategorie()->getIntitule(),
                 'date_embauche' => date_format($absence->getPersonal()->getContract()->getDateEmbauche(), 'd/m/Y'),
@@ -73,13 +63,12 @@ class AbsenceController extends AbstractController
                 'status' => $absence->isJustified() ? 'OUI' : 'NON',
                 'description' => $absence->getDescription(),
                 'duree_jour' => $absence->getTotalDay(),
+                'montant_deduit' => $deducteur,
                 'nouveau_salaire_base' => $newBaseAmount,
                 'date_creation' => date_format($absence->getCreatedAt(), 'd/m/Y'),
                 'modifier' => $this->generateUrl('personal_absence_edit', ['uuid' => $absence->getPersonal()->getUuid()])
             ];
         }
-
-
         return new JsonResponse($apiAbsences);
     }
 
@@ -99,11 +88,10 @@ class AbsenceController extends AbstractController
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
     {
-         /**
+        /**
          * @var User $currentUser
          */
         $currentUser = $this->getUser();
-
 
 
         $form = $this->createForm(PersonalAbsenceType::class);
@@ -163,6 +151,5 @@ class AbsenceController extends AbstractController
             'editing' => true
         ]);
     }
-
 
 }

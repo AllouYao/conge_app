@@ -161,11 +161,18 @@ final class Status
     /**
      * Retenue forfetaire
      */
-    public const ASSURANCE_SANTE_SALARIALE = 'ASSURANCE SANTE PART SALARIALE';
-    public const ASSURANCE_SANTE_PATRONALE = 'ASSURANCE SANTE PART PATRONALE';
+    public const ASSURANCE_FAMILLE = 'ASSURANCE_SANTE_FAMILLE_SALARIALE';
+    public const ASSURANCE_CLASSIC = 'ASSURANCE_SANTE_CLASSIQUE_SALARIALE';
 
     /** Site de travail */
     public const STATION_AP_MAGIC = 'STATION AP MAGIC';
     public const DIRECTION = 'DIRECTION';
     public const STATION_SHELL_TREICH_HABITAT = 'STATION SHELL TREICHVILLE HABITAT';
+    public const SHELL_PARIS = 'SHELL PARIS';
+    public const STATION_AP_BENSON = 'STATION AP BENSON';
+    public const STATION_PO_SONGON = 'STATION PO SONGON';
+    public const STATION_SHELL_RO_GABON = 'STATION SHELL RO GABON';
+
+    /** Status de campagne */
+    public const EN_COURS = 'EN COURS';
 }

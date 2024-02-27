@@ -43,7 +43,7 @@ class PrimeSalaryType extends AbstractType
             ])
             ->add('smigHoraire', TextType::class, [
                 'attr' => [
-                    'readonly' => true
+                    'readonly' => true,
                 ],
                 'required' => true
             ])

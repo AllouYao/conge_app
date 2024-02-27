@@ -2,17 +2,17 @@
 
 namespace App\Controller\DossierPersonal;
 
-use App\Entity\User;
-use App\Service\SalaryImpotsService;
 use App\Entity\DossierPersonal\Personal;
+use App\Entity\User;
 use App\Form\DossierPersonal\ChargeType;
+use App\Repository\DossierPersonal\PersonalRepository;
+use App\Service\SalaryImpotsService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Repository\DossierPersonal\PersonalRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/dossier/personal/charge_people', name: 'charge_people_')]
 class ChargePeopleController extends AbstractController
@@ -20,14 +20,14 @@ class ChargePeopleController extends AbstractController
     #[Route('/api_charge_peaple', name: 'api_charge_people', methods: ['GET'])]
     public function apiChargePeople(PersonalRepository $personalRepository): JsonResponse
     {
-        if ($this->isGranted('ROLE_RH')){
+        if ($this->isGranted('ROLE_RH')) {
             $personals = $personalRepository->findPersonalWithChargePeaple();
 
-        }else{
+        } else {
 
             $personals = $personalRepository->findPersonalWithChargePeapleByEmployeRole();
         }
-        
+
         $apiChargePeaple = [];
 
         foreach ($personals as $personal) {
@@ -37,7 +37,7 @@ class ChargePeopleController extends AbstractController
                 'matricule' => $personal->getMatricule(),
                 'name' => $personal->getFirstName(),
                 'last_name' => $personal->getLastName(),
-                'date_naissance' => date_format($personal->getBirthday(), 'd/m/Y'),
+                'date_naissance' => $personal->getBirthday() ? date_format($personal->getBirthday(), 'd/m/Y') : '',
                 'categorie_salarie' => '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ')' . '-' . $personal->getCategorie()->getIntitule(),
                 'date_embauche' => date_format($personal->getContract()->getDateEmbauche(), 'd/m/Y'),
                 'date_creation' => date_format($personal->getCreatedAt(), 'd/m/Y'),
@@ -48,7 +48,7 @@ class ChargePeopleController extends AbstractController
     }
 
     #[Route('/', name: 'index')]
-    public function index(PersonalRepository $personalRepository): Response
+    public function index(): Response
     {
         return $this->render('dossier_personal/charge_people/index.html.twig');
     }
@@ -60,7 +60,7 @@ class ChargePeopleController extends AbstractController
         SalaryImpotsService    $salary
     ): Response
     {
-          /**
+        /**
          * @var User $currentUser
          */
         $currentUser = $this->getUser();
@@ -97,7 +97,7 @@ class ChargePeopleController extends AbstractController
         SalaryImpotsService    $salary
     ): Response
     {
-          /**
+        /**
          * @var User $currentUser
          */
         $currentUser = $this->getUser();

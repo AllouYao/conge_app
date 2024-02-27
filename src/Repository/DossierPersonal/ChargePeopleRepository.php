@@ -21,5 +21,13 @@ class ChargePeopleRepository extends ServiceEntityRepository
         parent::__construct($registry, ChargePeople::class);
     }
 
+    public function findPeopleByPersonalId(?int $personalId): \Doctrine\ORM\QueryBuilder
+    {
+        return $this->createQueryBuilder('ch')
+            ->join('ch.personal', 'personal')
+            ->where('personal.id = :personal')
+            ->setParameter('personal', $personalId);
+    }
+
 
 }

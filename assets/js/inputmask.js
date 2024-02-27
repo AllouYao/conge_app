@@ -13,3 +13,19 @@ export const runInputmask = () => {
         }).mask('.separator');
     });
 };
+
+export const runDecimalInputmask = () => {
+    $(function () {
+        Inputmask('', {
+            alias: 'currency',
+            numericInput: true,
+            groupSeparator: '',
+            autoGroup: true,
+            digits: 2,
+            allowMinus: false,
+            rightAlign: false,
+            removeMaskOnSubmit: true,
+            greedy: false,
+        }).mask('.decimalInput')
+    })
+}

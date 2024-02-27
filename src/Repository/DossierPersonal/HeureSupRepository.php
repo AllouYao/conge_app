@@ -6,7 +6,6 @@ namespace App\Repository\DossierPersonal;
 use App\Entity\DossierPersonal\HeureSup;
 use App\Entity\DossierPersonal\Personal;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -63,18 +62,18 @@ class HeureSupRepository extends ServiceEntityRepository
     public function findHeureSupByEmployeRole(int $month, int $year): ?array
     {
         return $this->createQueryBuilder('h')
-        ->join('h.personal', 'p') 
-        ->join('p.categorie', 'category') 
-        ->join('category.categorySalarie', 'categorySalarie') 
-        ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
-        ->andWhere('YEAR(h.startedDate) = :year')
-        ->andWhere('MONTH(h.startedDate) = :month')
-        ->setParameter('year', $year)
-        ->setParameter('month', $month)
-        ->setParameter('code_employe', 'OE') 
-        ->setParameter('code_chauffeur', 'CH') 
-        ->orderBy('h.startedDate', 'ASC')
-        ->getQuery()->getResult();
+            ->join('h.personal', 'p')
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'categorySalarie')
+            ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
+            ->andWhere('YEAR(h.startedDate) = :year')
+            ->andWhere('MONTH(h.startedDate) = :month')
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
+            ->setParameter('code_employe', 'OE')
+            ->setParameter('code_chauffeur', 'CH')
+            ->orderBy('h.startedDate', 'ASC')
+            ->getQuery()->getResult();
 
     }
 
@@ -85,6 +84,20 @@ class HeureSupRepository extends ServiceEntityRepository
             ->andWhere('MONTH(h.startedDate) = :month')
             ->setParameter('year', $year)
             ->setParameter('month', $month)
+            ->orderBy('h.startedDate', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getHeureSupByPeriode(?Personal $personal, mixed $startDate, mixed $endDate): array
+    {
+        return $this->createQueryBuilder('h')
+            ->andWhere('h.personal = :personal')
+            ->andWhere('h.startedDate >= :start_date')
+            ->andWhere('h.startedDate <= :end_date')
+            ->setParameter('personal', $personal)
+            ->setParameter('start_date', $startDate)
+            ->setParameter('end_date', $endDate)
             ->orderBy('h.startedDate', 'ASC')
             ->getQuery()
             ->getResult();

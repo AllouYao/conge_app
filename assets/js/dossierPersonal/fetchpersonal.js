@@ -65,8 +65,18 @@ let absence = () => {
     $('#personal_absence_hireDate').val(hireDate);
     $('#personal_absence_category').val(category);
 }
+let assurance = () => {
+    const selectedOption = $("#assurance_personal_Personal :selected");
+    const name = selectedOption.attr('data-name');
+    const hireDate = selectedOption.attr('data-hireDate');
+    const category = selectedOption.attr('data-category');
 
-$('body').on('change', '#charge_personal, #account_personal, #departure_personal, #conge_personal, #personal_heure_sup_personal, #personal_absence_personal', function () {
+    $('#assurance_personal_name').val(name);
+    $('#assurance_personal_hireDate').val(hireDate);
+    $('#assurance_personal_category').val(category);
+}
+
+$('body').on('change', '#charge_personal, #account_personal, #departure_personal, #conge_personal, #personal_heure_sup_personal, #personal_absence_personal, #assurance_personal_Personal', function () {
     if ($(this).attr('id') === 'charge_personal') {
         chargePeople();
     } else if ($(this).attr('id') === 'account_personal') {
@@ -79,6 +89,8 @@ $('body').on('change', '#charge_personal, #account_personal, #departure_personal
         heureSupp();
     } else if ($(this).attr('id') === 'personal_absence_personal') {
         absence();
+    } else if ($(this).attr('id') === 'assurance_personal_Personal') {
+        assurance();
     }
 });
 
@@ -88,3 +100,4 @@ depart();
 conge();
 heureSupp();
 absence();
+assurance();
