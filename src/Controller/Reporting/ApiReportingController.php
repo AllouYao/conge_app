@@ -15,6 +15,7 @@ use App\Service\HeureSupService;
 use App\Utils\Status;
 use Carbon\Carbon;
 use Doctrine\ORM\NonUniqueResultException;
+use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -202,7 +203,7 @@ class ApiReportingController extends AbstractController
         $declarationDgi = $this->payrollRepository->findEtatSalaire($startAt, $endAt, $personalID);
         foreach ($declarationDgi as $index => $declaration) {
             $transportNomImposable = 30000;
-            $primeAnciennete = $this->etatService->getPrimeAnciennete($declaration['personal_id'], $declaration['startedAt']);
+            $primeAnciennete = $this->etatService->getPrimeAnciennete($declaration['personal_id']);
             $amountHeureSupp = $this->heureSupService->getAmountHeursSuppByID($declaration['personal_id']);
             $gratification = $this->etatService->getGratification($declaration['personal_id']);
             $conges = $this->congeRepository->getLastCongeByID($declaration['personal_id'], false);
@@ -251,7 +252,7 @@ class ApiReportingController extends AbstractController
         $data = [];
         $declarationCnps = $this->payrollRepository->findEtatSalaire($startAt, $endAt, $personalID);
         foreach ($declarationCnps as $index => $declaration) {
-            $primeAnciennete = $this->etatService->getPrimeAnciennete($declaration['personal_id'], $declaration['startedAt']);
+            $primeAnciennete = $this->etatService->getPrimeAnciennete($declaration['personal_id']);
             $amountHeureSupp = $this->heureSupService->getAmountHeursSuppByID($declaration['personal_id']);
             $gratification = $this->etatService->getGratification($declaration['personal_id']);
             $conges = $this->congeRepository->getLastCongeByID($declaration['personal_id'], false);
@@ -291,7 +292,7 @@ class ApiReportingController extends AbstractController
         $data = [];
         $declarationFdfp = $this->payrollRepository->findEtatSalaire($startAt, $endAt, $personalID);
         foreach ($declarationFdfp as $index => $declaration) {
-            $primeAnciennete = $this->etatService->getPrimeAnciennete($declaration['personal_id'], $declaration['startedAt']);
+            $primeAnciennete = $this->etatService->getPrimeAnciennete($declaration['personal_id']);
             $amountHeureSupp = $this->heureSupService->getAmountHeursSuppByID($declaration['personal_id']);
             $gratification = $this->etatService->getGratification($declaration['personal_id']);
             $conges = $this->congeRepository->getLastCongeByID($declaration['personal_id'], false);
@@ -491,28 +492,111 @@ class ApiReportingController extends AbstractController
         return new  JsonResponse($dataElementVariable);
     }
 
+    /** Etat des versement (Virement et caisse) mensuel **/
     #[Route('/etat_virements', name: 'etat_virements', methods: ['GET'])]
     public function etatVersement(): JsonResponse
     {
         $dataVirement = [];
-        $requestVirements = $this->payrollRepository->getPayrollVirement(Status::VIREMENT);
+        $requestVirements = $this->payrollRepository->getPayrollVirement(Status::VIREMENT, true, true);
         if (!$requestVirements) {
             return $this->json(['data' => []]);
         }
 
         foreach ($requestVirements as $virement) {
             $dataVirement[] = [
-                'name_salaried' => $virement['nom_salaried'],
-                'second_name_salaried' => $virement['prenoms_salaried'],
-                'banques' => $virement['banque'],
-                'guichets' => $virement['code_compte'],
+                'name_salaried' => $virement['nom_salaried'] . ' ' . $virement['prenoms_salaried'],
+                'nom_banque' => $virement['name_banque'],
+                'code_agence' => $virement['code_agence'],
+                'code_banque' => $virement['code_compte'],
                 'comptes' => $virement['num_compte'],
                 'cles' => $virement['rib_compte'],
                 'salaire_net' => (double)$virement['net_payes'],
-                'versement_mode' => $virement['mode_paiement']
             ];
         }
         return new JsonResponse($dataVirement);
+    }
+
+    #[Route('/etat_caisse', name: 'etat_versement_caisse', methods: ['GET'])]
+    public function etatVersementCaisse(): JsonResponse
+    {
+        $dataCaisse = [];
+        $requestVirements = $this->payrollRepository->getPayrollVirement(Status::CAISSE, true, true);
+        if (!$requestVirements) {
+            return $this->json(['data' => []]);
+        }
+
+        foreach ($requestVirements as $index => $virement) {
+            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+            $date = $virement['debut'];
+            $periode = $formatter->format($date);
+            $dataCaisse[] = [
+                'ordre' => ++$index,
+                'emmolution' => 'ESPECE',
+                'name_salaried' => $virement['nom_salaried'] . ' ' . $virement['prenoms_salaried'],
+                'salaire_net' => (double)$virement['net_payes'],
+                'periode' => $periode,
+                'emargement' => '',
+                'stations' => $virement['station']
+            ];
+        }
+        return new JsonResponse($dataCaisse);
+    }
+
+    #[Route('/etat_virements_annuel', name: 'etat_virements_annuel', methods: ['GET'])]
+    public function etatVirementAnnuel(Request $request): JsonResponse
+    {
+        $startAt = $request->get('start_at');
+        $endAt = $request->get('end_at');
+        $personalID = (int)$request->get('personalsId');
+
+        if (!$request->isXmlHttpRequest()) {
+            return $this->json(['data' => []]);
+        }
+
+        $data = [];
+        $requestVirements = $this->payrollRepository->findPayrollVirementAnnuel(Status::VIREMENT, false, true, $startAt, $endAt, $personalID);
+        foreach ($requestVirements as $virement) {
+            $data[] = [
+                'name_salaried' => $virement['nom_salaried'] . ' ' . $virement['prenoms_salaried'],
+                'nom_banque' => $virement['name_banque'],
+                'code_agence' => $virement['code_agence'],
+                'code_banque' => $virement['code_compte'],
+                'comptes' => $virement['num_compte'],
+                'cles' => $virement['rib_compte'],
+                'salaire_net' => (double)$virement['net_payes'],
+            ];
+        }
+        return new JsonResponse($data);
+    }
+
+    #[Route('/etat_caisse_annuel', name: 'etat_versement_caisse_annuel', methods: ['GET'])]
+    public function etatVersementCaisseAnnel(Request $request): JsonResponse
+    {
+        $startAt = $request->get('start_at');
+        $endAt = $request->get('end_at');
+        $personalID = (int)$request->get('personalsId');
+
+        if (!$request->isXmlHttpRequest()) {
+            return $this->json(['data' => []]);
+        }
+
+        $data = [];
+        $requestVirements = $this->payrollRepository->findPayrollVirementAnnuel(Status::CAISSE, false, true, $startAt, $endAt, $personalID);
+        foreach ($requestVirements as $index => $virement) {
+            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+            $date = $virement['debut'];
+            $periode = $formatter->format($date);
+            $data[] = [
+                'ordre' => ++$index,
+                'emmolution' => 'ESPECE',
+                'name_salaried' => $virement['nom_salaried'] . ' ' . $virement['prenoms_salaried'],
+                'salaire_net' => (double)$virement['net_payes'],
+                'periode' => $periode,
+                'emargement' => '',
+                'stations' => $virement['station']
+            ];
+        }
+        return new JsonResponse($data);
     }
 
 }

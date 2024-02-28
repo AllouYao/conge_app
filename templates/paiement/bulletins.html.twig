@@ -37,16 +37,18 @@
                         </div>
                         <div class="col-md-12 mb-1" style="display: flex">
                             {# Debut logo #}
-                            <div class="col-md-1" style="margin-right: 5px; height: 140px; width: 140px; border: #0b0b0f solid 1px">
+                            <div class="col-md-1"
+                                 style="margin-right: 5px; height: 140px; width: 140px; border: #0b0b0f solid 1px">
                                 <p>
-                                    <img height="140" width="140"
-                                         src="{{ asset('img/logo.png') }}" alt="le logo"/>
+                                    <img height="136" width="136" style="margin-left: 2px"
+                                         src="{{ asset('img/logo-distrib.jpg') }}" alt="le logo"/>
                                 </p>
                             </div>
                             {# Fin logo #}
 
                             {# Debut information sur le salarié #}
-                            <div class="col-md-5" style="margin-right: 5px; height: 140px; width: 250px; border: #0b0b0f solid 1px" >
+                            <div class="col-md-5"
+                                 style="margin-right: 5px; height: 140px; width: 250px; border: #0b0b0f solid 1px">
                                 <table class="table table-sm table-borderless mt-3">
                                     <tbody>
                                     <tr class="small-text sans-bordure no-border-top no-border-button">
@@ -84,7 +86,8 @@
                                     <tbody>
                                     <tr class="small-text sans-bordure no-border-top no-border-button">
                                         <th style="font-size: smaller; font-weight: bolder;">Periode Exercice</th>
-                                        <td style="font-size: smaller"> du {{ payrolls.debut_exercise }} au {{ payrolls.fin_exercise }}</td>
+                                        <td style="font-size: smaller"> du {{ payrolls.debut_exercise }}
+                                            au {{ payrolls.fin_exercise }}</td>
                                     </tr>
                                     <tr class="small-text sans-bordure no-border-top no-border-button">
                                         <th style="font-size: smaller; font-weight: bolder;">Date Edition</th>
@@ -97,6 +100,10 @@
                                     <tr class="small-text sans-bordure no-border-top no-border-button">
                                         <th style="font-size: smaller; font-weight: bolder;">Emploi</th>
                                         <td style="font-size: smaller">{{ payrolls.departement|upper }}</td>
+                                    </tr>
+                                    <tr class="small-text sans-bordure no-border-top no-border-button">
+                                        <th style="font-size: smaller; font-weight: bolder;">Mode Paiement</th>
+                                        <td style="font-size: smaller">{{ payrolls.mode_paiement|upper }}</td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -635,14 +642,13 @@
                             <div class="col-md-4">
                                 <table class="table table-borderless table-sm">
                                     <tbody>
-                                    {% if payrolls.mode_paiement == caisse %}
-
+                                    {% if payrolls.mode_paiement == virement %}
+                                        <tr class="small-text sans-bordure">
+                                            <td class="h7">Banque & N° Compte du
+                                                salarié {{ payrolls.banque_name|upper }}
+                                                : {{ payrolls.account_number }}</td>
+                                        </tr>
                                     {% endif %}
-                                    <tr class="small-text sans-bordure">
-                                        <td class="h7">Mode de paiement {{ payrolls.mode_paiement|capitalize }}
-                                            sur {{ 'BIAO' }}
-                                            : {{ payrolls.account_number }}</td>
-                                    </tr>
                                     </tbody>
                                 </table>
                             </div>

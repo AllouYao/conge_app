@@ -456,9 +456,11 @@ class CampagneController extends AbstractController
             $periode = $payroll->getCampagne()->getDateDebut();
             $date = $formatter->format($periode);
             $accountNumber = null;
+            $nameBanque = null;
             $accountBanque = $payroll->getPersonal()->getAccountBanks();
             foreach ($accountBanque as $value) {
-                $accountNumber = $value->getCode() . ' ' . $value->getNumCompte() . ' ' . $value->getRib();
+                $accountNumber = $value->getCode() . ' ' . $value->getCodeAgence() . ' ' . $value->getNumCompte() . ' ' . $value->getRib();
+                $nameBanque = $value->getName();
             }
 
             $carbon = new Carbon();
@@ -476,20 +478,16 @@ class CampagneController extends AbstractController
             if ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $nbHeure <= 6) {
                 // 15% jour normal ~ 115%
                 $amountHeureSup15 = $payroll->getMajorationAmount();
-            }
-            elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $nbHeure > 6) {
+            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $nbHeure > 6) {
                 // 50% jour normal ~ 150%
                 $amountHeureSup50 = $payroll->getMajorationAmount();
-            }
-            elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
+            } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
                 // 75% jour ferié or dimanche jour ~ 175%
                 $amountHeureSup75A = $payroll->getMajorationAmount();
-            }
-            elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::NUIT) {
+            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::NUIT) {
                 // 75% jour normal or dimanche nuit ~ 175%
                 $amountHeureSup75B = $payroll->getMajorationAmount();
-            }
-            elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::NUIT) {
+            } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::NUIT) {
                 // 100% jour ferié et dimanche nuit ~ 200%
                 $amountHeureSup100 = $payroll->getMajorationAmount();
             }
@@ -536,6 +534,7 @@ class CampagneController extends AbstractController
                 /** Element en rapport avec la methode de paiement */
                 'mode_paiement' => $payroll->getPersonal()->getModePaiement() ?? '',
                 'account_number' => $accountNumber,
+                'banque_name' => $nameBanque,
                 /** Element lieu au cumul des salaire */
                 'salaire_brut' => (double)$payroll->getBrutAmount(),
                 'charge_salarial' => (double)$payroll->getTotalRetenueSalarie(),
@@ -590,8 +589,8 @@ class CampagneController extends AbstractController
                 'amount_prime_tt' => (double)$payroll->getAmountPrimeTenueTrav(),
                 'amount_prime_outi' => (double)$payroll->getAmountPrimeOutillage(),
                 'amount_prime_rendement' => (double)$payroll->getAmountPrimeRendement(),
-                'debut_exercise' => $payroll->getCampagne()->getDateDebut() ? date_format($payroll->getCampagne()->getDateDebut(), 'd/m/Y'):'',
-                'fin_exercise' => $payroll->getCampagne()->getDateFin() ? date_format($payroll->getCampagne()->getDateFin(), 'd/m/Y'):'',
+                'debut_exercise' => $payroll->getCampagne()->getDateDebut() ? date_format($payroll->getCampagne()->getDateDebut(), 'd/m/Y') : '',
+                'fin_exercise' => $payroll->getCampagne()->getDateFin() ? date_format($payroll->getCampagne()->getDateFin(), 'd/m/Y') : '',
             ];
         }
 
@@ -614,9 +613,11 @@ class CampagneController extends AbstractController
             $date = $formatter->format($periode);
             $personal = $payroll->getPersonal();
             $accountNumber = null;
+            $nameBanque = null;
             $accountBanque = $payroll->getPersonal()->getAccountBanks();
             foreach ($accountBanque as $value) {
-                $accountNumber = $value->getCode() . ' ' . $value->getNumCompte() . ' ' . $value->getRib();
+                $accountNumber = $value->getCode() . ' ' . $value->getCodeAgence() . ' ' . $value->getNumCompte() . ' ' . $value->getRib();
+                $nameBanque = $value->getName();
             }
 
             $carbon = new Carbon();
@@ -689,6 +690,7 @@ class CampagneController extends AbstractController
                 /** Element en rapport avec la methode de paiement */
                 'mode_paiement' => $payroll->getPersonal()->getModePaiement() ?? '',
                 'account_number' => $accountNumber,
+                'banque_name' => $nameBanque,
                 /** Element lieu au cumul des salaire */
                 'salaire_brut' => (double)$payroll->getBrutAmount(),
                 'charge_salarial' => (double)$payroll->getTotalRetenueSalarie(),
@@ -743,10 +745,15 @@ class CampagneController extends AbstractController
                 'amount_prime_tt' => (double)$payroll->getAmountPrimeTenueTrav(),
                 'amount_prime_outi' => (double)$payroll->getAmountPrimeOutillage(),
                 'amount_prime_rendement' => (double)$payroll->getAmountPrimeRendement(),
+                'debut_exercise' => $payroll->getCampagne()->getDateDebut() ? date_format($payroll->getCampagne()->getDateDebut(), 'd/m/Y') : '',
+                'fin_exercise' => $payroll->getCampagne()->getDateFin() ? date_format($payroll->getCampagne()->getDateFin(), 'd/m/Y') : '',
             ];
+
         }
         return $this->render('paiement/last.bulletin.html.twig', [
-            'payroll_data' => $payBookData
+            'payroll_data' => $payBookData,
+            'caisse' => Status::CAISSE,
+            'virement' => Status::VIREMENT
         ]);
     }
 }

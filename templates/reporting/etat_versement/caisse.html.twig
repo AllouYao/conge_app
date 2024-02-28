@@ -1,9 +1,9 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Etat des versement de salaire {% endblock %}
+{% block title %}Etat des versement de salaire en espece {% endblock %}
 {% block stylesheets %}
     <style>
-        #dataGridVirement {
+        #dataGridCaisse {
             border-width: 50px;
             height: 350px;
         }
@@ -16,11 +16,11 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white" id="date">
                         <i data-feather="list"></i>
-                        ORDRE DE VIREMENT SALAIRES DE {{ periode|upper }}
+                        SALAIRES ESPECES DE {{ periode|upper }}
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div id="dataGridVirement"></div>
+                    <div id="dataGridCaisse"></div>
                 </div>
             </div>
         </div>
@@ -41,8 +41,8 @@
             const month = date.getMonth() + 1;
             const day = date.getDate();
 
-            $("#dataGridVirement").dxDataGrid({
-                dataSource: `{{ url('api_reporting_etat_virements') }}`,
+            $("#dataGridCaisse").dxDataGrid({
+                dataSource: `{{ url('api_reporting_etat_versement_caisse') }}`,
                 showBorders: true,
                 showColumnLines: true,
                 showRowLines: true,
@@ -62,7 +62,7 @@
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('ORDRE DE VIREMENT SALAIRES');
+                        const worksheet = workbook.addWorksheet('SALAIRE ESPECE');
                         DevExpress.excelExporter.exportDataGrid({
                             component: e.component,
                             worksheet,
@@ -77,7 +77,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `ORDRE DE VIREMENT SALAIRES ${year}-${month < 10 ? '0' : ''}${month}-${day}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `SALAIRE ESPECE ${year}-${month < 10 ? '0' : ''}${month}-${day}.xlsx`);
                             });
                         });
                         e.cancel = true;
@@ -99,40 +99,28 @@
                 columnAutoWidth: true,
                 columns: [
                     {
-                        caption: 'NOM ET PRENOM BENEFICIAIRE',
+                        caption: 'S/N',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'ordre'
+                    },
+                    {
+                        caption: 'EMMOLUMENTS',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'emmolution'
+                    },
+                    {
+                        caption: 'NOM',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'name_salaried'
                     },
                     {
-                        caption: 'NOM BANQUE BENEFICIAIRE',
+                        caption: 'STATIONS',
                         alignment: 'left',
                         dataType: 'string',
-                        dataField: 'nom_banque'
-                    },
-                    {
-                        caption: 'CODE BANQUE BENEFICIAIRE',
-                        alignment: 'left',
-                        dataType: 'string',
-                        dataField: 'code_banque'
-                    },
-                    {
-                        caption: 'CODE AGENCE BENEFICIAIRE',
-                        alignment: 'left',
-                        dataType: 'string',
-                        dataField: 'code_agence'
-                    },
-                    {
-                        caption: 'NUMERO COMPTE (12 CARACTERES)',
-                        alignment: 'center',
-                        dataType: 'string',
-                        dataField: 'comptes'
-                    },
-                    {
-                        caption: 'CLE RIB BENEFICIAIRE',
-                        alignment: 'center',
-                        dataType: 'string',
-                        dataField: 'cles'
+                        dataField: 'stations'
                     },
                     {
                         caption: 'MONTANT',
@@ -142,19 +130,26 @@
                         customizeText: (data) => {
                             return new Intl.NumberFormat('fr-FR').format(data.value)
                         },
-                    }
+                    },
+                    {
+                        caption: 'PERIODE',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'periode'
+                    },
+                    {
+                        caption: 'EMARGEMENT',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'emargement'
+                    },
                 ],
                 summary: {
                     totalItems: [
                         {
                             column: 'name_salaried',
-                            summaryType: 'count',
-                            displayFormat: 'Nombre Salaries : {0}'
-                        },
-                        {
-                            column: 'cles',
                             customizeText() {
-                                return 'TOTAL '
+                                return 'CUMUL DES SALAIRE '
                             }
                         },
                         {

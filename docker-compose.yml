@@ -16,7 +16,7 @@ services:
       - orbis_paie
     image: mariadb:${POSTGRES_VERSION:-10.8.3}
     environment:
-      MARIADB_DATABASE: ${POSTGRES_DB:-app}
+      MARIADB_DATABASE: ${POSTGRES_DB:-orbis_paie}
       # You should definitely change the password in production
       MARIADB_ROOT_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
     volumes:

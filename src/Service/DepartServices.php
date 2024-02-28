@@ -478,7 +478,7 @@ class DepartServices
         $gratification = $this->indemniteCompensatriceCgs($departure)['gratification_prorata'];
 
         /** Element de preavis */
-        $drPreavis = $this->getDrPreavisInMonth($anciennityInYear, $categoryName);
+        //$drPreavis = $this->getDrPreavisInMonth($anciennityInYear, $categoryName);
         $indemnitePreavis = $this->getIndmtCompensPreavis($departure);
 
         /** Element de licenciement */

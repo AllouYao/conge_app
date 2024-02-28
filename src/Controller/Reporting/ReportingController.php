@@ -3,7 +3,9 @@
 namespace App\Controller\Reporting;
 
 use App\Repository\DossierPersonal\PersonalRepository;
+use App\Repository\Paiement\CampagneRepository;
 use Carbon\Carbon;
+use Doctrine\ORM\NonUniqueResultException;
 use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,7 +23,7 @@ class ReportingController extends AbstractController
         ]);
     }
 
-    #[Route('/declaration-dgi', name: 'declaration_dgi', methods: ['GET', 'POST'])]
+    #[Route('/declaration_dgi', name: 'declaration_dgi', methods: ['GET', 'POST'])]
     public function viewDeclarationDgi(PersonalRepository $personalRepository): Response
     {
         return $this->render('reporting/declaration_dgi/declaration.dgi.html.twig', [
@@ -58,7 +60,7 @@ class ReportingController extends AbstractController
         ]);
     }
 
-    #[Route('/declaration-dgi-current-month', name: 'declaration_dgi_current_month', methods: ['GET', 'POST'])]
+    #[Route('/declaration_dgi_current_month', name: 'declaration_dgi_current_month', methods: ['GET', 'POST'])]
     public function viewDeclarationMensuelDgi(PersonalRepository $personalRepository): Response
     {
         return $this->render('reporting/declaration_dgi/declaration_mensuelle.dgi.html.twig', [
@@ -66,7 +68,7 @@ class ReportingController extends AbstractController
         ]);
     }
 
-    #[Route('/declaration_cnps-current-month', name: 'declaration_cnps_current_month', methods: ['GET', 'POST'])]
+    #[Route('/declaration_cnps_current_month', name: 'declaration_cnps_current_month', methods: ['GET', 'POST'])]
     public function viewDeclarationMensuelCnps(PersonalRepository $personalRepository): Response
     {
         return $this->render('reporting/declaration_fdfp/declaration_mensuelle.cnps.html.twig', [
@@ -74,7 +76,7 @@ class ReportingController extends AbstractController
         ]);
     }
 
-    #[Route('/declaration_fdfp-current-month', name: 'declaration_fdfp_current_month', methods: ['GET', 'POST'])]
+    #[Route('/declaration_fdfp_current_month', name: 'declaration_fdfp_current_month', methods: ['GET', 'POST'])]
     public function viewDeclarationMensuelFdfp(PersonalRepository $personalRepository): Response
     {
         return $this->render('reporting/declaration_cnps/declaration_mensuelle.fdfp.html.twig', [
@@ -106,14 +108,49 @@ class ReportingController extends AbstractController
         ]);
     }
 
-    #[Route('/etat_versement', name: 'etat_versement', methods: ['GET', 'POST'])]
-    public function viewEtatVersement(): Response
+    /**
+     * @throws NonUniqueResultException
+     */
+    #[Route('/etat_versement_mensuel', name: 'etat_versement', methods: ['GET', 'POST'])]
+    public function viewEtatVersement(CampagneRepository $campagneRepository): Response
     {
+        $campagne = $campagneRepository->active();
         $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
-        $today = Carbon::now();
-        $date = $formatter->format($today);
+        $date = $campagne->getDateDebut();
+        $periode = $formatter->format($date);
         return $this->render('reporting/etat_versement/versement.html.twig', [
-            'date' => $date
+            'periode' => $periode
+        ]);
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    #[Route('/etat_versement_caisse_mensuel', name: 'etat_versement_caisse', methods: ['GET', 'POST'])]
+    public function viewEtatVersementCaisse(CampagneRepository $campagneRepository): Response
+    {
+        $campagne = $campagneRepository->active();
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+        $date = $campagne->getDateDebut();
+        $periode = $formatter->format($date);
+        return $this->render('reporting/etat_versement/caisse.html.twig', [
+            'periode' => $periode
+        ]);
+    }
+
+    #[Route('/etat_versement_annuel', name: 'etat_versement_annuel', methods: ['GET', 'POST'])]
+    public function viewEtatVersementAnnuel(PersonalRepository $personalRepository): Response
+    {
+        return $this->render('reporting/etat_versement/virement.annuel.html.twig', [
+            'personals' => $personalRepository->findPersonalWithContract()
+        ]);
+    }
+
+    #[Route('/etat_versement_caisse_annuel', name: 'etat_versement_caisse_annuel', methods: ['GET', 'POST'])]
+    public function viewEtatVersementCaisseAnnuel(PersonalRepository $personalRepository): Response
+    {
+        return $this->render('reporting/etat_versement/caisse.annuel.html.twig', [
+            'personals' => $personalRepository->findPersonalWithContract()
         ]);
     }
 

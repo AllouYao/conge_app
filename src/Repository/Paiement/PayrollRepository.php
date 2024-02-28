@@ -55,21 +55,23 @@ class PayrollRepository extends ServiceEntityRepository
             ->setParameter('active', $active)
             ->getQuery()->getResult();
     }
+
     public function findPayrollByCampaignEmploye(bool $active): ?array
     {
         return $this->createQueryBuilder('pr')
-        ->join('pr.personal', 'p') 
-        ->join('p.categorie', 'category') 
-        ->join('category.categorySalarie', 'categorySalarie') 
-        ->join('pr.campagne', 'c') 
-        ->andWhere('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
-        ->andWhere('c.active = :active') 
-        ->setParameter('active', $active) 
-        ->setParameter('code_employe', 'OE') 
-        ->setParameter('code_chauffeur', 'CH') 
-        ->getQuery()->getResult();
+            ->join('pr.personal', 'p')
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'categorySalarie')
+            ->join('pr.campagne', 'c')
+            ->andWhere('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
+            ->andWhere('c.active = :active')
+            ->setParameter('active', $active)
+            ->setParameter('code_employe', 'OE')
+            ->setParameter('code_chauffeur', 'CH')
+            ->getQuery()->getResult();
 
     }
+
     public function findEtatSalaire(mixed $mouth1, mixed $mouth2, ?int $personalId): array
     {
         $qb = $this->createQueryBuilder('payroll');
@@ -312,28 +314,74 @@ class PayrollRepository extends ServiceEntityRepository
     }
 
     /** Retourner les elements pour l'état des virement */
-    public function getPayrollVirement(?string $typeVersement): ?array
+    public function getPayrollVirement(?string $typeVersement, bool $active, bool $type): ?array
     {
         return $this->createQueryBuilder('pr')
             ->select([
                 'p.firstName as nom_salaried',
                 'p.lastName as prenoms_salaried',
                 'ac.bankId as banque',
+                'ac.name as name_banque',
+                'ac.codeAgence as code_agence',
                 'ac.code as code_compte',
                 'ac.numCompte as num_compte',
                 'ac.rib as rib_compte',
                 'pr.netPayer as net_payes',
-                'p.modePaiement as mode_paiement'
+                'p.modePaiement as mode_paiement',
+                'c.dateDebut as debut',
+                'c.dateFin as fin',
+                'p.service as station'
             ])
             ->join('pr.personal', 'p')
             ->join('pr.campagne', 'c')
             ->leftJoin('p.accountBanks', 'ac')
-            ->where('c.ordinary = true')
-            ->andWhere('c.active = true')
+            ->where('c.ordinary = :type')
+            ->andWhere('c.active = :active')
             ->andWhere('p.modePaiement = :type_versement')
             ->setParameter('type_versement', $typeVersement)
+            ->setParameter('type', $type)
+            ->setParameter('active', $active)
             ->getQuery()
             ->getResult();
+    }
+
+    /** Retourner les elements pour l'etat des virement par periode */
+    public function findPayrollVirementAnnuel(?string $typeVersement, bool $active, bool $type, mixed $debut, mixed $fin, ?int $personalId): array
+    {
+        $qb = $this->createQueryBuilder('payroll');
+        $qb
+            ->select([
+                'p.firstName as nom_salaried',
+                'p.lastName as prenoms_salaried',
+                'ac.bankId as banque',
+                'ac.name as name_banque',
+                'ac.codeAgence as code_agence',
+                'ac.code as code_compte',
+                'ac.numCompte as num_compte',
+                'ac.rib as rib_compte',
+                'pr.netPayer as net_payes',
+                'p.modePaiement as mode_paiement',
+                'c.dateDebut as debut',
+                'c.dateFin as fin',
+                'p.service as station'
+            ])
+            ->join('pr.personal', 'p')
+            ->join('pr.campagne', 'c')
+            ->leftJoin('p.accountBanks', 'ac')
+            ->where('c.ordinary = :type')
+            ->andWhere('c.active = :active')
+            ->andWhere('p.modePaiement = :type_versement')
+            ->andWhere('e.dateDebut >= :date_debut')
+            ->andWhere('e.dateFin <= :date_fin');
+        $qb->setParameter('type', $type)
+            ->setParameter('active', $active)
+            ->setParameter('type_versement', $typeVersement)
+            ->setParameter('date_debut', $debut)
+            ->setParameter('date_fin', $fin);
+        if ($personalId) {
+            $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
+        }
+        return $qb->getQuery()->getResult();
     }
 
 }
