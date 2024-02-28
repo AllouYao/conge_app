@@ -288,7 +288,9 @@ class DepartServices
             $day[] = $date;
         }
         $dayPresence = count($day);
+
         $netPayer = (double)$this->payrollRepository->getAmountNetPayer($departure->getPersonal());
+
         return round(($netPayer / 30) * $dayPresence, 2);
     }
 
@@ -336,7 +338,7 @@ class DepartServices
         $anciennityInYear = $this->getAncienneteByDepart($departure)['anciennity_in_year'];
         $drPreavis = $this->getDrPreavisInMonth($anciennityInYear, $categoryName);
         $primeAnciennity = $this->utimePaiementService->getAmountAnciennete($personal);
-        $heursSupp = $this->utimePaiementService->getAmountMajorationHeureSupp($personal);
+        $heursSupp = $this->utimePaiementService->getAmountMajorationHeureSupps($personal);
         $salaireBrut = $personal->getSalary()->getBrutAmount() - $personal->getSalary()->getAmountAventage();
 
         /** Determiner le plafond de l'indemnite theorique exonere */
@@ -494,10 +496,12 @@ class DepartServices
         /** Total des droits et indemnites imposable */
         $totalIndemniteImposable = $this->getTotalIndemniteImposable($departure);
 
-        switch ($reason) {
-            case $reason === Status::LICENCIEMENT_FAUTE_LOURDE || $reason === Status::ABANDON_DE_POST || $reason === Status::DEMISSION:
+            if($reason === Status::LICENCIEMENT_FAUTE_LOURDE || $reason === Status::ABANDON_DE_POST || $reason === Status::DEMISSION){
+
+
                 if ($reason === Status::ABANDON_DE_POST || $reason === Status::LICENCIEMENT_FAUTE_LOURDE) {
                     $salairePresence = $salaireDueProrata;
+
                 } else {
                     $salairePresence = $salaireDue;
                 }
@@ -512,20 +516,23 @@ class DepartServices
                     ->setFraisFuneraire(null)
                     ->setTotalIndemniteImposable($totalIndemniteImposable);
 
-                break;
-            case $reason === Status::LICENCIEMENT_COLLECTIF || $reason === Status::LICENCIEMENT_FAIT_EMPLOYEUR || $reason === Status::MALADIE || $reason === Status::RETRAITE:
+            }
+                
+
+            if($reason === Status::LICENCIEMENT_COLLECTIF || $reason === Status::LICENCIEMENT_FAIT_EMPLOYEUR || $reason === Status::MALADIE || $reason === Status::RETRAITE){
                 $departure
-                    ->setSalaryDue($salaireDue)
-                    ->setGratification($gratification)
-                    ->setCongeAmount($indemniteConges)
-                    ->setNoticeAmount($indemnitePreavis)
-                    ->setDissmissalAmount($indemniteLicenciement)
-                    ->setAmountLcmtImposable($indemniteLcmtImposable)
-                    ->setAmountLcmtNoImposable($indemniteLcmtNoImposable)
-                    ->setFraisFuneraire(null)
-                    ->setTotalIndemniteImposable($totalIndemniteImposable);
-                break;
-            case $reason === Status::DECES:
+                ->setSalaryDue($salaireDue)
+                ->setGratification($gratification)
+                ->setCongeAmount($indemniteConges)
+                ->setNoticeAmount($indemnitePreavis)
+                ->setDissmissalAmount($indemniteLicenciement)
+                ->setAmountLcmtImposable($indemniteLcmtImposable)
+                ->setAmountLcmtNoImposable($indemniteLcmtNoImposable)
+                ->setFraisFuneraire(null)
+                ->setTotalIndemniteImposable($totalIndemniteImposable);
+            }
+                
+            if($reason === Status::DECES){
                 $departure
                     ->setSalaryDue(null)
                     ->setGratification(null)
@@ -536,8 +543,7 @@ class DepartServices
                     ->setAmountLcmtNoImposable($indemniteLcmtNoImposable)
                     ->setFraisFuneraire($fraisFuneraire)
                     ->setTotalIndemniteImposable($totalIndemniteImposable);
-                break;
-        }
+            }
     }
 
     // REGIME FIXCAL APPLICABLE A L'INDEMNITE DE LICENCIEMENT SUITE//
@@ -573,6 +579,7 @@ class DepartServices
                 $impotBrut += $montantImposable;
                 break;
             }
+            
         }
         return round($impotBrut, 2);
     }

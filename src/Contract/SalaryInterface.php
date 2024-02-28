@@ -11,7 +11,7 @@ interface SalaryInterface
 
     public function chargeEmployeur(Personal $personal, Campagne $campagne): void;
 
-    public function chargePersonalByDeparture(Personal $personal): void;
+    public function chargePersonalByDeparture(Personal $personal, Campagne $campagne): void;
 
-    public function chargeEmployeurByDeparture(Personal $personal): void;
+    public function chargeEmployeurByDeparture(Personal $personal, Campagne $campagne): void;
 }

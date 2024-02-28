@@ -61,72 +61,85 @@
         <div class="col-md-12">
             <div class="widget">
                 <div class="widget-content">
-                    <div class="row mb-3">
-                        <div class="col-md-12 mb-3" style="border: 2px double silver; padding: 10px; border-radius: 5px"
+                    <div class="row mb-1">
+                        <div class="col-md-12 mb-2" style="border: 2px double silver; padding: 8px; border-radius: 5px"
                              id="header">
-                            <h4 class="text-center"><strong>BULLETIN DE PAIE </strong></h4>
+                            <h5 class="text-center"><strong>BULLETIN DE PAIE </strong></h5>
                         </div>
                         <div class="col-md-12 mb-1" style="display: flex">
+                            {# Debut logo #}
                             <div class="col-md-1"
                                  style="margin-right: 5px; height: 140px; width: 140px; border: #0b0b0f solid 1px">
                                 <p>
-                                    <img height="140" width="140"
-                                         src="{{ asset('img/logo.png') }}" alt="le logo"/>
+                                    <img height="136" width="136" style="margin-left: 2px"
+                                         src="{{ asset('img/logo-distrib.jpg') }}" alt="le logo"/>
                                 </p>
                             </div>
+                            {# Fin logo #}
+
+                            {# Debut information sur le salarié #}
                             <div class="col-md-5"
                                  style="margin-right: 5px; height: 140px; width: 250px; border: #0b0b0f solid 1px">
-                                <table class="table table-sm table-borderless">
+                                <table class="table table-sm table-borderless mt-3">
                                     <tbody>
                                     <tr class="small-text sans-bordure no-border-top no-border-button">
-                                        <th style="font-size: smaller">Matricule</th>
-                                        <td style="font-weight: bolder; font-size: smaller">{{ payrolls.matricule }}</td>
+                                        <th style="font-size: smaller; font-weight: bolder;">Matricule</th>
+                                        <td style="font-size: smaller">{{ payroll_departure.matricule }}</td>
                                     </tr>
                                     <tr class="small-text sans-bordure no-border-top no-border-button">
-                                        <th style="font-size: smaller">Service</th>
-                                        <td style="font-size: smaller">{{ payrolls.service }}</td>
+                                        <th style="font-size: smaller; font-weight: bolder;">Service</th>
+                                        <td style="font-size: smaller">{{ payroll_departure.service }}</td>
                                     </tr>
                                     <tr class="small-text sans-bordure no-border-top no-border-button">
-                                        <th style="font-size: smaller">Catégorie</th>
-                                        <td style="font-size: smaller">{{ payrolls.categorie }}</td>
+                                        <th style="font-size: smaller; font-weight: bolder;">Catégorie</th>
+                                        <td style="font-size: smaller">{{ payroll_departure.categorie }}</td>
                                     </tr>
                                     <tr class="small-text sans-bordure no-border-top no-border-button">
-                                        <th style="font-size: smaller">Salaire catégoriel</th>
-                                        <td style="font-size: smaller">{{ payrolls.Salaire_categoriel }}</td>
+                                        <th style="font-size: smaller; font-weight: bolder;">Nbre de part</th>
+                                        <td style="font-size: smaller">{{ payroll_departure.nombre_part|number_format(1, ',', ' ') }}</td>
                                     </tr>
                                     <tr class="small-text sans-bordure no-border-top no-border-button">
-                                        <th style="font-size: smaller">Nbre de part</th>
-                                        <td style="font-size: smaller">{{ payrolls.nombre_part }}</td>
-                                    </tr>
-                                    <tr class="small-text sans-bordure no-border-top no-border-button">
-                                        <th style="font-size: smaller">Date d'entrée</th>
-                                        <td style="font-size: smaller">{{ payrolls.date_embauche }}</td>
+                                        <th style="font-size: smaller; font-weight: bolder;">Date d'entrée</th>
+                                        <td style="font-size: smaller">{{ payroll_departure.date_embauche }}</td>
                                     </tr>
                                     <tr class="small-text sans-bordure no-border-top ">
-                                        <th style="font-size: smaller">N° CNPS</th>
-                                        <td style="font-size: smaller">{{ payrolls.numero_cnps }}</td>
+                                        <th style="font-size: smaller; font-weight: bolder;">N° CNPS</th>
+                                        <td style="font-size: smaller">{{ payroll_departure.numero_cnps }}</td>
                                     </tr>
                                     </tbody>
                                 </table>
                             </div>
+                            {# Fin information sur le salarié #}
+
+                            {# Debut information sur la campagne #}
                             <div class="col-md-6" style="height: 140px; width: 250px; border: #0b0b0f solid 1px">
-                                <p style="font-weight: bold; margin: 0  0 0 2px">
-                                    <span style="font-size: smaller">PERIODE DE PAIE:</span>
-                                    <span style="text-align: right; margin-left: 2px; font-size: smaller">{{ payrolls.periode_paie|capitalize }}</span>
-                                </p>
-                                <p style="font-weight: bold; margin: 0  0 0 2px">
-                                    <span style="font-size: smaller">DATE D'EDITION:</span>
-                                    <span style="text-align: right; margin-left: 2px; font-size: smaller">{{ payrolls.date_edition }}</span>
-                                </p>
-                                <p style="font-weight: bold; margin: 0  0 0 2px">
-                                    <span style="font-size: smaller">NOM ET PRENOMS	:</span>
-                                    <span style="text-align: right; margin-left: 2px; font-size: smaller">{{ payrolls.nom_prenoms|upper }}</span>
-                                </p>
-                                <p style="font-weight: bold; margin: 0  0 0 2px">
-                                    <span style="font-size: smaller">EMPLOIS:</span>
-                                    <span style="text-align: right; margin-left: 2px; font-size: smaller">{{ payrolls.departement|upper }}</span>
-                                </p>
+                                <table class="table table-sm table-borderless mt-3">
+                                    <tbody>
+                                    <tr class="small-text sans-bordure no-border-top no-border-button">
+                                        <th style="font-size: smaller; font-weight: bolder;">Periode Exercice</th>
+                                        <td style="font-size: smaller"> du {{ payroll_departure.debut_exercise }}
+                                            au {{ payroll_departure.fin_exercise }}</td>
+                                    </tr>
+                                    <tr class="small-text sans-bordure no-border-top no-border-button">
+                                        <th style="font-size: smaller; font-weight: bolder;">Date Edition</th>
+                                        <td style="font-size: smaller">{{ payroll_departure.date_edition }}</td>
+                                    </tr>
+                                    <tr class="small-text sans-bordure no-border-top no-border-button">
+                                        <th style="font-size: smaller; font-weight: bolder;">Nom & Prénoms</th>
+                                        <td style="font-size: smaller">{{ payroll_departure.nom_prenoms|upper }}</td>
+                                    </tr>
+                                    <tr class="small-text sans-bordure no-border-top no-border-button">
+                                        <th style="font-size: smaller; font-weight: bolder;">Emploi</th>
+                                        <td style="font-size: smaller">{{ payroll_departure.departement|upper }}</td>
+                                    </tr>
+                                    <tr class="small-text sans-bordure no-border-top no-border-button">
+                                        <th style="font-size: smaller; font-weight: bolder;">Mode Paiement</th>
+                                        <td style="font-size: smaller">{{ payroll_departure.mode_paiement|upper }}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
                             </div>
+                            {# Fin information sur la campagne #}
                         </div>
                         <div class="col-md-12">
                             <table class="table table-bordered" style="height: 200px; border: #0b0b0f solid 1px">

@@ -257,5 +257,6 @@ class PayrollService
             ->setNetPayer($netPayer);
 
         $this->manager->persist($payroll);
+
     }
 }
