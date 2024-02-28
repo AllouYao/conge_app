@@ -179,8 +179,6 @@ class ApiReportingController extends AbstractController
                 'prestationFamille' => (int)$prestationTravail
             ];
         }
-
-
         return new JsonResponse($data);
     }
 
@@ -598,5 +596,4 @@ class ApiReportingController extends AbstractController
         }
         return new JsonResponse($data);
     }
-
 }

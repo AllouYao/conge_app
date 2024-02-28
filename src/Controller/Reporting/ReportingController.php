@@ -138,7 +138,7 @@ class ReportingController extends AbstractController
         ]);
     }
 
-    #[Route('/etat_versement_annuel', name: 'etat_versement_annuel', methods: ['GET', 'POST'])]
+    #[Route('/etat_versement_annuels', name: 'etat_versement_annuel', methods: ['GET', 'POST'])]
     public function viewEtatVersementAnnuel(PersonalRepository $personalRepository): Response
     {
         return $this->render('reporting/etat_versement/virement.annuel.html.twig', [
@@ -146,7 +146,7 @@ class ReportingController extends AbstractController
         ]);
     }
 
-    #[Route('/etat_versement_caisse_annuel', name: 'etat_versement_caisse_annuel', methods: ['GET', 'POST'])]
+    #[Route('/etat_versement_caisse_annuels', name: 'etat_versement_caisse_annuel', methods: ['GET', 'POST'])]
     public function viewEtatVersementCaisseAnnuel(PersonalRepository $personalRepository): Response
     {
         return $this->render('reporting/etat_versement/caisse.annuel.html.twig', [

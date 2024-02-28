@@ -348,7 +348,7 @@ class PayrollRepository extends ServiceEntityRepository
     /** Retourner les elements pour l'etat des virement par periode */
     public function findPayrollVirementAnnuel(?string $typeVersement, bool $active, bool $type, mixed $debut, mixed $fin, ?int $personalId): array
     {
-        $qb = $this->createQueryBuilder('payroll');
+        $qb = $this->createQueryBuilder('pr');
         $qb
             ->select([
                 'p.firstName as nom_salaried',
@@ -363,7 +363,9 @@ class PayrollRepository extends ServiceEntityRepository
                 'p.modePaiement as mode_paiement',
                 'c.dateDebut as debut',
                 'c.dateFin as fin',
-                'p.service as station'
+                'p.service as station',
+                'MONTH(c.dateDebut) as start_month',
+                'MONTH(c.dateFin) as end_month',
             ])
             ->join('pr.personal', 'p')
             ->join('pr.campagne', 'c')
@@ -371,15 +373,16 @@ class PayrollRepository extends ServiceEntityRepository
             ->where('c.ordinary = :type')
             ->andWhere('c.active = :active')
             ->andWhere('p.modePaiement = :type_versement')
-            ->andWhere('e.dateDebut >= :date_debut')
-            ->andWhere('e.dateFin <= :date_fin');
+            ->andWhere('c.dateDebut >= :date_debut')
+            ->andWhere('c.dateFin <= :date_fin');
         $qb->setParameter('type', $type)
             ->setParameter('active', $active)
             ->setParameter('type_versement', $typeVersement)
             ->setParameter('date_debut', $debut)
-            ->setParameter('date_fin', $fin);
+            ->setParameter('date_fin', $fin)
+        ;
         if ($personalId) {
-            $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
+            $qb->andWhere($qb->expr()->eq('p.id', $personalId));
         }
         return $qb->getQuery()->getResult();
     }

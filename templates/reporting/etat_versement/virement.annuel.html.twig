@@ -3,10 +3,9 @@
 {% block title %}Livre de paie{% endblock %}
 {% block stylesheets %}
     <style>
-        #dataGridVirementAnnuel {
-            height: 500px;
+        #dataGridVirementAnnuels {
+            height: 368px;
             border-width: 50px;
-
         }
     </style>
 {% endblock %}
@@ -26,7 +25,7 @@
                         {{ include('reporting/etat_versement/form.html.twig') }}
                     </div>
                     <div class="card-footer">
-                        <button class="btn btn-primary float-end">Rechercher</button>
+                        <button type="submit" class="btn btn-primary float-end">Rechercher</button>
                     </div>
                 </div>
             </form>
@@ -42,7 +41,7 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div id="dataGridVirementAnnuel">Cliquer sur recherche pour afficher le tableau</div>
+                    <div id="dataGridVirementAnnuels">Cliquer sur recherche pour afficher le tableau</div>
                 </div>
             </div>
         </div>
@@ -53,6 +52,7 @@
     <script>
 
         const $form = $(`form[name="form_reporting_etat_virements_annuel"]`);
+        console.log($form)
         $form.submit(function (e) {
             e.preventDefault();
             const form = $(e.currentTarget);
@@ -69,7 +69,7 @@
                 return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
             }
 
-            $('#dataGridEtatSalaire').dxDataGrid({
+            $('#dataGridVirementAnnuels').dxDataGrid({
                 dataSource: `{{ url('api_reporting_etat_virements_annuel') }}?${$data}`,
                 showBorders: true,
                 scrolling: {
@@ -103,19 +103,87 @@
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('Employees');
+                        const worksheet = workbook.addWorksheet('ETAT DES ORDRE DE VIREMENTS ');
                         DevExpress.excelExporter.exportDataGrid({
                             component: e.component,
                             worksheet,
                             autoFilterEnabled: true,
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then((buffer) => {
-                                saveAs(new Blob([buffer], {type: 'application /octet-stream'}), `Balance âgé des tiers ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application /octet-stream'}), `Etat des ordre de virements du ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')}.xlsx`);
                             });
                         });
                         e.cancel = true;
                     }
                 },
+                columns: [
+                    {
+                        caption: 'NOM ET PRENOM BENEFICIAIRE',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'name_salaried'
+                    },
+                    {
+                        caption: 'NOM BANQUE BENEFICIAIRE',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'nom_banque'
+                    },
+                    {
+                        caption: 'CODE BANQUE BENEFICIAIRE',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'code_banque'
+                    },
+                    {
+                        caption: 'CODE AGENCE BENEFICIAIRE',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'code_agence'
+                    },
+                    {
+                        caption: 'NUMERO COMPTE (12 CARACTERES)',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'comptes'
+                    },
+                    {
+                        caption: 'CLE RIB BENEFICIAIRE',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'cles'
+                    },
+                    {
+                        caption: 'MONTANT',
+                        alignment: 'right',
+                        dataType: 'number',
+                        dataField: 'salaire_net',
+                        customizeText: (data) => {
+                            return new Intl.NumberFormat('fr-FR').format(data.value)
+                        },
+                    }
+                ],
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'name_salaried',
+                            summaryType: 'count',
+                            displayFormat: 'Nombre Salaries : {0}'
+                        },
+                        {
+                            column: 'cles',
+                            customizeText() {
+                                return 'TOTAL '
+                            }
+                        },
+                        {
+                            column: 'salaire_net', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                    ],
+                }
             });
         });
     </script>
