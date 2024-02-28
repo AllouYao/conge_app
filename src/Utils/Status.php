@@ -21,8 +21,8 @@ final class Status
     /**
      * Sex
      */
-    public const FEMININ = 'FEMININ';
-    public const MASCULIN = 'MASCULIN';
+    public const FEMININ = 'FEMME';
+    public const MASCULIN = 'HOMME';
 
     /**
      * Mode Paiement
@@ -172,6 +172,9 @@ final class Status
     public const STATION_AP_BENSON = 'STATION AP BENSON';
     public const STATION_PO_SONGON = 'STATION PO SONGON';
     public const STATION_SHELL_RO_GABON = 'STATION SHELL RO GABON';
+    public const STATION_IW_YOPOUGON = 'STATION IW YOPOUGON ';
+    public const BOUTIQUE_AGBOVILLE = 'BOUTIQUE AGBOVILLE';
+
 
     /** Status de campagne */
     public const EN_COURS = 'EN COURS';

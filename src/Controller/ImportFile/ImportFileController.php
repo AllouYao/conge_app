@@ -41,10 +41,9 @@ class ImportFileController extends AbstractController
                     return $this->redirectToRoute('import_file_new', [], Response::HTTP_SEE_OTHER);
                 }
 
-                flash()->addDanger("Erreur d'importation personnel!");
+                flash()->addError("Erreur d'importation personnel!");
 
                 return $this->redirectToRoute('import_file_new', [], Response::HTTP_SEE_OTHER);
-
 
             }
 

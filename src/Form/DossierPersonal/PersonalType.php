@@ -152,7 +152,9 @@ class PersonalType extends AbstractType
                     'SHELL PARIS' => Status::SHELL_PARIS,
                     'STATION AP BENSON' => Status::STATION_AP_BENSON,
                     'STATION PO SONGON' => Status::STATION_PO_SONGON,
-                    'STATION SHELL RO GABON' => Status::STATION_SHELL_RO_GABON
+                    'STATION SHELL RO GABON' => Status::STATION_SHELL_RO_GABON,
+                    'STATION IW YOPOUGON' => Status::STATION_IW_YOPOUGON,
+                    'BOUTIQUE AGBOVILLE' => status::BOUTIQUE_AGBOVILLE
                 ],
                 'placeholder' => 'Sélectionner le site de travail'
             ]);

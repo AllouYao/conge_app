@@ -4,6 +4,7 @@ namespace App\Service\ImportFileService;
 
 use App\Utils\Status;
 use App\Service\MatriculeGenerator;
+use App\Entity\DossierPersonal\Salary;
 use App\Entity\DossierPersonal\Absence;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Entity\DossierPersonal\Contract;
@@ -12,7 +13,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use App\Entity\DossierPersonal\AccountBank;
 use App\Entity\DossierPersonal\ChargePeople;
+use App\Repository\Settings\PrimesRepository;
 use App\Repository\Settings\CategoryRepository;
+use App\Entity\DossierPersonal\DetailPrimeSalary;
+use App\Entity\DossierPersonal\DetailSalary;
 use App\Repository\DossierPersonal\AbsenceRepository;
 
 class ImportFileService
@@ -21,6 +25,7 @@ class ImportFileService
     public function __construct(
         private MatriculeGenerator $matriculeGenerator,
         private CategoryRepository $categoryRepository,
+        private PrimesRepository $primesRepository,
         private EntityManagerInterface $entityManager){
 
     }
@@ -32,14 +37,13 @@ class ImportFileService
             $reader = new Xlsx();
             $spreadsheet = $reader->load($filePath);
             $worksheet = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
-
             foreach ($worksheet as $row) {
                 $matricule = $this->matriculeGenerator->generateMatricule();
                 $numCNPS = $this->matriculeGenerator->generateNumCnps();
                 $numContract = $this->matriculeGenerator->generateNumContract();
 
                 $personal = new Personal();
-                //$salary = new Salary();
+                $salary = new Salary();
                 $contract = new Contract();
                 $accountBank = new AccountBank();
 
@@ -66,8 +70,8 @@ class ImportFileService
                 $personal->setRefCNPS($row['J'] ?? $numCNPS);
 
                 $personal->setLieuNaissance($row['I' ?? 'N/A']); //Lieu de naissance
-                $personal->setPiece("ID");
-                $personal->setAddress('ADRESSE');
+                $personal->setPiece("CNI");
+                $personal->setRefPiece('N/A');
                 $personal->setTelephone($row['Q' ?? 'N/A']); // Phone number
                 $personal->setEmail('N/A');
 
@@ -75,17 +79,14 @@ class ImportFileService
                 $categories = $this->categoryRepository->findAll();
                 foreach($categories as $category){
                     if($category->getIntitule()==$row['S']){
-
-                        $personal->setCategorie($category);
-                    }else{
                         $personal->setCategorie($category);
                     }
                 }
-                //$personal->setConjoint('Nom du conjoint');
-                //$personal->setNumCertificat('Numéro du certificat');
-                //$personal->setNumExtraitActe('Numéro de l\'extrait d\'acte');
+                $personal->setConjoint('N/A');
+                $personal->setNumCertificat('N/A');
+                $personal->setNumExtraitActe('N/A');
                 $personal->setEtatCivil($row['F'] ?? 'N/A'); // Situation matrimoniale
-                //$personal->setNiveauFormation('Niveau de formation');
+                $personal->setNiveauFormation('N/A');
                 $personal->setFonction($row['P'] ?? 'N/A');
                 $personal->setService($row['T'] ?? 'N/A');
 
@@ -94,10 +95,44 @@ class ImportFileService
 
                 $contract->setDateEmbauche(new \DateTime($row['H'] ?? 'now')); // date d'embauche
                 $contract->setDateEffet(new \DateTime($row['H'] ?? 'now'));
-                $contract->setTypeContrat('CDD');
+                $contract->setTypeContrat('CDI');
                 $personal->setContract($contract);
-                //$personal->setSalary($salary);
 
+                // Salaire
+                $salary->setSursalaire($row['V'] ?? 0);
+                $salary->setSmig(75000);
+                $salary->setAmountAventage(0);
+                $salary->setBrutImposable(0);
+                $salary->setBaseAmount(0);
+                $salary->setBrutAmount(0);
+                $salary->setPrimeTransport(30000);
+                $salary->setPersonal($personal);
+
+
+                 // primes
+
+                 $primes = $this->primesRepository->findAll();
+                 foreach($primes as $prime){
+ 
+                     if($row['W'] && $prime->getCode() == "PRIME TENUE TRAVAIL"){
+                        $detailSalary = new DetailSalary();
+                        $detailSalary->setAmountPrime($row['W']);
+                        $detailSalary->setPrime($prime);
+                        $salary->addDetailSalary($detailSalary);
+                        
+                        $this->entityManager->persist($detailSalary);
+                     }
+ 
+                     if($row['X'] && $prime->getCode() == "PRIME SALISSURE"){
+
+                        $detailSalary = new DetailSalary();
+                        $detailSalary->setAmountPrime($row['X']);   
+                        $detailSalary->setPrime($prime);
+                        $salary->addDetailSalary($detailSalary);
+
+                        $this->entityManager->persist($detailSalary);
+                     }
+                 }
                // personne à charge
 
                 for($i= 0; $i <$row['D']; $i++)
@@ -112,6 +147,10 @@ class ImportFileService
                     $chargePeople->setPersonal($personal);
                     $this->entityManager->persist($chargePeople);
                 }
+
+               
+
+
 
                 // Info bancaire
                 $accountBank->setBankId(0);
@@ -128,7 +167,17 @@ class ImportFileService
                 // Nom bank
                 $accountBank->setName($row['K'] ?? 'N/A');
 
+                if($row['M']){
+
+                    $personal->setModePaiement("VIREMENT");
+
+                }else{
+
+                    $personal->setModePaiement("CAISSE");
+                }
+
                 $accountBank->setPersonal($personal);
+                $this->entityManager->persist($salary);
                 $this->entityManager->persist($accountBank);
                 $this->entityManager->persist($personal);
                 $this->entityManager->flush();
@@ -138,6 +187,8 @@ class ImportFileService
         return $this->success = true;
 
         } catch (\Exception $ex) {
+
+            //dd($ex->getMessage());
             return $this->success = false;
         }
     }
