@@ -136,6 +136,7 @@ class DepartureController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
             $this->departServices->calculeDroitsAndIndemnity($departure);
             $departure->setUser($currentUser);
             $manager->persist($departure);

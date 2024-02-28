@@ -38,6 +38,22 @@ class CampagneExcepType extends AbstractType
                 'html5' => true,
                 'widget' => 'single_text',
                 'required' => true
+            ])
+            ->add('dateDebut', DateTimeType::class, [
+                'attr' => [
+                    'class' => 'form-control form-control-sm'
+                ],
+                'html5' => true,
+                'widget' => 'single_text',
+                'required' => true
+            ])
+            ->add('dateFin', DateTimeType::class, [
+                'attr' => [
+                    'class' => 'form-control form-control-sm'
+                ],
+                'html5' => true,
+                'widget' => 'single_text',
+                'required' => true
             ]);
 
         $formModifier = static function (FormInterface $form) {
@@ -87,14 +103,14 @@ class CampagneExcepType extends AbstractType
                     $personal = $this->repositoryPer->findAllPersonalDepart();
                     foreach ($personal as $individual) {
                         $campagne->addPersonal($individual);
-                        $this->salaryInterface->chargePersonalByDeparture($individual);
-                        $this->salaryInterface->chargeEmployeurByDeparture($individual);
+                        $this->salaryInterface->chargePersonalByDeparture($individual, $campagne);
+                        $this->salaryInterface->chargeEmployeurByDeparture($individual, $campagne);
                     }
                 } else {
                     foreach ($personal as $individual) {
                         $campagne->addPersonal($individual);
-                        $this->salaryInterface->chargePersonalByDeparture($individual);
-                        $this->salaryInterface->chargeEmployeurByDeparture($individual);
+                        $this->salaryInterface->chargePersonalByDeparture($individual, $campagne);
+                        $this->salaryInterface->chargeEmployeurByDeparture($individual, $campagne);
                     }
                 }
             }

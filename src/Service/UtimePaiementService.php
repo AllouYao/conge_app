@@ -49,9 +49,18 @@ class UtimePaiementService
         $this->congeRepository = $congeRepository;
         $this->heureSupRepository = $heureSupRepository;
     }
+    public function getAmountMajorationHeureSupps(Personal $personal): float|int
+    {
+        $majoration = 0;
+        $heureSupps = $personal->getHeureSups();
+        foreach ($heureSupps as $supp) {
+            $majoration += $supp?->getAmount();
+        }
+        return $majoration;
+    }
 
     /** Montant de la majoration des heures supplémentaire */
-    public function getAmountMajorationHeureSupp(Personal $personal, Campagne $campagne): float|int
+    public function getAmountMajorationHeureSupp(Personal $personal, ?Campagne $campagne): float|int
     {
         $majoration = 0;
         $dateDebut = $campagne->getDateDebut();

@@ -293,8 +293,8 @@ class PayrollRepository extends ServiceEntityRepository
             ->setMaxResults(1)
             ->setParameter('personal', $personal)
             ->getQuery();
-        $result = $query->getSingleResult();
-        return $result['netPayer'];
+        $result = $query->getOneOrNullResult();
+        return $result['netPayer']?? null;
     }
 
     /** Retourne le dictionnaire  de salaire en fonction de l'id de la campagne */

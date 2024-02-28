@@ -31,8 +31,7 @@ class SalaryImpotsService implements SalaryInterface
         UtimePaiementService      $utimePaiementService,
         VariablePaieRepository    $paieRepository,
         DepartServices            $departServices
-    )
-    {
+    ) {
         $this->manager = $manager;
         $this->chargePersonalRt = $chargePersonalsRepository;
         $this->chargeEmployeurRt = $chargeEmployeurRepository;
@@ -83,12 +82,16 @@ class SalaryImpotsService implements SalaryInterface
         $this->manager->flush();
     }
 
-    public function chargePersonalByDeparture(Personal $personal): void
+    public function chargePersonalByDeparture(Personal $personal, Campagne $campagne): void
     {
+        $netImposable = (double)$personal->getDepartures()->getTotalIndemniteImposable();
         $part = $this->utimePaiementService->getNumberParts($personal);
         $impotBrut = $this->departServices->calculerImpotBrutDeparture($personal->getDepartures());
         $creditImpot = $this->departServices->calculateCreditImpotDeparture($personal->getDepartures());
         $impotNet = $this->departServices->getAmountITS($personal->getDepartures());
+        if ($netImposable <= 75000 || $impotNet < 0) {
+            $impotNet = 0;
+        }
         $amountCNPS = $this->departServices->getAmountCNPS($personal->getDepartures());
         $amountCMU = $this->departServices->getAmountCMU($personal->getDepartures());
         $charge = $this->chargePersonalRt->findOneBy(['personal' => $personal, 'departure' => $personal->getDepartures()]);
@@ -162,7 +165,7 @@ class SalaryImpotsService implements SalaryInterface
         $this->manager->flush();
     }
 
-    public function chargeEmployeurByDeparture(Personal $personal): void
+    public function chargeEmployeurByDeparture(Personal $personal, Campagne $campagne): void
     {
         $montantIs = $this->departServices->getAmountIS($personal->getDepartures());
         $montantCR = $this->departServices->getAmountRCNPS_CR($personal->getDepartures());
