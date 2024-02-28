@@ -154,7 +154,28 @@ class PersonalType extends AbstractType
                     'STATION PO SONGON' => Status::STATION_PO_SONGON,
                     'STATION SHELL RO GABON' => Status::STATION_SHELL_RO_GABON,
                     'STATION IW YOPOUGON' => Status::STATION_IW_YOPOUGON,
-                    'BOUTIQUE AGBOVILLE' => status::BOUTIQUE_AGBOVILLE
+                    'BOUTIQUE AGBOVILLE' => status::BOUTIQUE_AGBOVILLE,
+                    'SHOP MANAGER' => status::SHOP_MANAGER,
+                    'BOUTIQUE SHELL ADZOPE' => status::BOUTIQUE_SHELL_ADZOPE,
+                    'BOUTIQUE TREICHVILLE HABITAT' => status::BOUTIQUE_TREICHVILLE_HABITAT,
+                    'STATION SHELL AGBOVILLE' => status::STATION_SHELL_AGBOVILLE,
+                    'STATION PO LOCODJORO' => status::STATION_PO_LOCODJORO,
+                    'STATION SHELL LAGUNAIRE' => status::STATION_SHELL_LAGUNAIRE,
+                    'SS RO GABON' => status::SS_RO_GABON,
+                    'SS LAGUNAIRE' => status::SS_LAGUNAIRE,
+                    'STATION SHELL ADZOPE' => status::STATION_SHELL_ADZOPE,
+                    'BOUTIQUE  PO LOCODJORO' => status::BOUTIQUE_PO_LOCODJORO,
+
+
+
+
+
+
+
+
+
+
+
                 ],
                 'placeholder' => 'Sélectionner le site de travail'
             ]);

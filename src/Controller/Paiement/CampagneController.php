@@ -364,22 +364,24 @@ class CampagneController extends AbstractController
     #[Route('/bulletin/exeptionnel/{uuid}', name: 'bulletin', methods: ['GET'])]
     public function editBulletin(Personal $personal): Response
     {
-        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
-        $today = Carbon::now();
-        $date = $formatter->format($today);
         $payrolls = $this->payrollRepository->findBulletinByCampaign(true, false, $personal);
         $reason = null;
         $departurePayroll = null;
         foreach ($payrolls as $payroll) {
+            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+            $periode = $payroll->getCampagne()->getDateDebut();
+            $date = $formatter->format($periode);
             $reason = $payroll->getPersonal()->getDepartures()->getReason();
             $totalImposableCnps = $payroll->getTotalIndemniteImposable() ?? 0;
             if ($totalImposableCnps > 1647314) {
                 $totalImposableCnps = 1647314;
             }
             $accountNumber = null;
+            $nameBanque = null;
             $accountBanque = $payroll->getPersonal()->getAccountBanks();
             foreach ($accountBanque as $value) {
-                $accountNumber = $value->getCode() . ' ' . $value->getNumCompte() . ' ' . $value->getRib();
+                $accountNumber = $value->getCode() . ' ' . $value->getCodeAgence() . ' ' . $value->getNumCompte() . ' ' . $value->getRib();
+                $nameBanque = $value->getName();
             }
             $tauxCnpsSalarial = $this->categoryChargeRepository->findOneBy(['codification' => 'CNPS'])->getValue();
             $tauxCrEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_CR'])->getValue();
@@ -422,6 +424,7 @@ class CampagneController extends AbstractController
                 'net_payer' => $payroll->getNetPayer() ?? 0,
                 'mode_paiement' => $payroll->getPersonal()->getModePaiement() ?? '',
                 'account_number' => $accountNumber,
+                'banque_name' => $nameBanque,
                 'matricule' => $payroll->getMatricule(),
                 'service' => $payroll->getService(),
                 'categorie' => $payroll->getCategories(),
@@ -432,7 +435,9 @@ class CampagneController extends AbstractController
                 'periode_paie' => $date,
                 'date_edition' => date_format($payroll->getCampagne()->getStartedAt(), 'd/m/Y'),
                 'nom_prenoms' => $payroll->getPersonal()->getFirstName() . ' ' . $payroll->getPersonal()->getLastName(),
-                'departement' => $payroll->getDepartement()
+                'departement' => $payroll->getDepartement(),
+                'debut_exercise' => $payroll->getCampagne()->getDateDebut() ? date_format($payroll->getCampagne()->getDateDebut(), 'd/m/Y') : '',
+                'fin_exercise' => $payroll->getCampagne()->getDateFin() ? date_format($payroll->getCampagne()->getDateFin(), 'd/m/Y') : '',
 
             ];
         }

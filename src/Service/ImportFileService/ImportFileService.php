@@ -37,6 +37,7 @@ class ImportFileService
             $reader = new Xlsx();
             $spreadsheet = $reader->load($filePath);
             $worksheet = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+
             foreach ($worksheet as $row) {
                 $matricule = $this->matriculeGenerator->generateMatricule();
                 $numCNPS = $this->matriculeGenerator->generateNumCnps();
@@ -93,8 +94,8 @@ class ImportFileService
                 // Contract
                 $contract->setRefContract($numContract);
 
-                $contract->setDateEmbauche(new \DateTime($row['H'] ?? 'now')); // date d'embauche
-                $contract->setDateEffet(new \DateTime($row['H'] ?? 'now'));
+                $contract->setDateEmbauche(new \DateTime($row['D'] ?? 'now')); // date d'embauche
+                $contract->setDateEffet(new \DateTime($row['D'] ?? 'now'));
                 $contract->setTypeContrat('CDI');
                 $personal->setContract($contract);
 
@@ -188,7 +189,7 @@ class ImportFileService
 
         } catch (\Exception $ex) {
 
-            //dd($ex->getMessage());
+            dd($ex->getMessage());
             return $this->success = false;
         }
     }
