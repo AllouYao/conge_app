@@ -74,13 +74,21 @@ class CampagneController extends AbstractController
     #[Route('/index', name: 'livre', methods: ['GET'])]
     public function index(): Response
     {
+        $dateDebut = null;
+        $dateFin = null;
         if ($this->isGranted('ROLE_RH')) {
             $payBooks = $this->payrollRepository->findPayrollByCampaign(true);
         } else {
             $payBooks = $this->payrollRepository->findPayrollByCampaignEmploye(true);
         }
+        foreach ($payBooks as $book) {
+            $dateDebut = $book->getCampagne()->getDateDebut();
+            $dateFin = $book->getCampagne()->getDateFin();
+        }
         return $this->render('paiement/campagne/pay_book.html.twig', [
-            'payBooks' => $payBooks
+            'payBooks' => $payBooks,
+            'date_debut' => date_format($dateDebut, 'd/m/Y'),
+            'date_fin' => date_format($dateFin, 'd/m/Y')
         ]);
     }
 
@@ -336,7 +344,7 @@ class CampagneController extends AbstractController
 
         foreach ($campagneActives as $campagneActive) {
             $campagneActive->setClosedAt(new DateTime());
-            $campagneActive->setActive(false);
+            $campagneActive->setActive(false)->setStatus(Status::TERMINER);
         }
 
         $manager->flush();
@@ -440,12 +448,13 @@ class CampagneController extends AbstractController
     #[Route('/bulletin/ordinaire/{uuid}', name: 'bulletin_ordinaire', methods: ['GET'])]
     public function bulletin(Personal $personal): Response
     {
-        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
-        $today = Carbon::now();
-        $date = $formatter->format($today);
+
         $payrolls = $this->payrollRepository->findBulletinByCampaign(true, true, $personal);
         $dataPayroll = null;
         foreach ($payrolls as $payroll) {
+            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+            $periode = $payroll->getCampagne()->getDateDebut();
+            $date = $formatter->format($periode);
             $accountNumber = null;
             $accountBanque = $payroll->getPersonal()->getAccountBanks();
             foreach ($accountBanque as $value) {
@@ -589,12 +598,12 @@ class CampagneController extends AbstractController
     #[Route('/bulletin/all_print', name: 'print_all_bulletin', methods: ['GET'])]
     public function findAllBulletin(): Response
     {
-        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
-        $today = Carbon::now();
-        $date = $formatter->format($today);
         $payrolls = $this->payrollRepository->findPayrollByCampaign(true);
         $payBookData = [];
         foreach ($payrolls as $payroll) {
+            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+            $periode = $payroll->getCampagne()->getDateDebut();
+            $date = $formatter->format($periode);
             $personal = $payroll->getPersonal();
             $accountNumber = null;
             $accountBanque = $payroll->getPersonal()->getAccountBanks();
