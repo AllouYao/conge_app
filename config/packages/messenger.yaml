@@ -12,6 +12,8 @@ framework:
         routing:
             # Route your messages to the transports
              App\Message\ImportFile: async
+             App\Scheduler\UpdateOlderPersonal: async
+             App\Scheduler\UpdateGratification: async
 
 # when@test:
 #    framework:

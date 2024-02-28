@@ -1,0 +1,122 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Livre de paie{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridVirementAnnuel {
+            height: 500px;
+            border-width: 50px;
+
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <form action="{{ url('api_reporting_etat_virements_annuel') }}" method="get" class="form-horizontal"
+                  name="form_reporting_etat_virements_annuel" id="form_reporting_etat_virements_annuel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title-custom" style="color: white">
+                            <i data-feather="list"></i>
+                            RECHERCHE
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {{ include('reporting/etat_versement/form.html.twig') }}
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-primary float-end">Rechercher</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        ETAT DES ORDRE DE VIREMENTS
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="dataGridVirementAnnuel">Cliquer sur recherche pour afficher le tableau</div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+
+        const $form = $(`form[name="form_reporting_etat_virements_annuel"]`);
+        $form.submit(function (e) {
+            e.preventDefault();
+            const form = $(e.currentTarget);
+            const $data = form.serialize();
+            const tab = $data.split('&');
+            const tab2_deb = tab[0].split('=');
+            const tab2_fin = tab[1].split('=');
+            const debut = tab2_deb[1];
+            const fin = tab2_fin[1];
+
+            $('#head').html(`du ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')} `);
+
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+            }
+
+            $('#dataGridEtatSalaire').dxDataGrid({
+                dataSource: `{{ url('api_reporting_etat_virements_annuel') }}?${$data}`,
+                showBorders: true,
+                scrolling: {
+                    mode: 'virtual',
+                    columnRenderingMode: 'virtual'
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('Employees');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then((buffer) => {
+                                saveAs(new Blob([buffer], {type: 'application /octet-stream'}), `Balance âgé des tiers ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+            });
+        });
+    </script>
+{% endblock %}
