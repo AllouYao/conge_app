@@ -87,8 +87,8 @@ class CampagneController extends AbstractController
         }
         return $this->render('paiement/campagne/pay_book.html.twig', [
             'payBooks' => $payBooks,
-            'date_debut' => date_format($dateDebut, 'd/m/Y'),
-            'date_fin' => date_format($dateFin, 'd/m/Y')
+            'date_debut' => $dateDebut ? date_format($dateDebut, 'd/m/Y') : ' ',
+            'date_fin' => $dateFin ? date_format($dateFin, 'd/m/Y') : ' ',
         ]);
     }
 
@@ -229,7 +229,7 @@ class CampagneController extends AbstractController
             $manager->persist($campagne);
             $manager->flush();
             flash()->addSuccess('Campagne ouverte avec succès.');
-            return $this->redirectToRoute('campagne_livre');
+            return $this->redirectToRoute('app_home');
         }
 
         return $this->render('paiement/campagne/open.html.twig', [
@@ -476,16 +476,20 @@ class CampagneController extends AbstractController
             if ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $nbHeure <= 6) {
                 // 15% jour normal ~ 115%
                 $amountHeureSup15 = $payroll->getMajorationAmount();
-            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $nbHeure > 6) {
+            }
+            elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $nbHeure > 6) {
                 // 50% jour normal ~ 150%
                 $amountHeureSup50 = $payroll->getMajorationAmount();
-            } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
+            }
+            elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
                 // 75% jour ferié or dimanche jour ~ 175%
                 $amountHeureSup75A = $payroll->getMajorationAmount();
-            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::NUIT) {
+            }
+            elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::NUIT) {
                 // 75% jour normal or dimanche nuit ~ 175%
                 $amountHeureSup75B = $payroll->getMajorationAmount();
-            } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::NUIT) {
+            }
+            elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::NUIT) {
                 // 100% jour ferié et dimanche nuit ~ 200%
                 $amountHeureSup100 = $payroll->getMajorationAmount();
             }
@@ -586,11 +590,15 @@ class CampagneController extends AbstractController
                 'amount_prime_tt' => (double)$payroll->getAmountPrimeTenueTrav(),
                 'amount_prime_outi' => (double)$payroll->getAmountPrimeOutillage(),
                 'amount_prime_rendement' => (double)$payroll->getAmountPrimeRendement(),
+                'debut_exercise' => $payroll->getCampagne()->getDateDebut() ? date_format($payroll->getCampagne()->getDateDebut(), 'd/m/Y'):'',
+                'fin_exercise' => $payroll->getCampagne()->getDateFin() ? date_format($payroll->getCampagne()->getDateFin(), 'd/m/Y'):'',
             ];
         }
 
         return $this->render('paiement/bulletins.html.twig', [
-            'payrolls' => $dataPayroll
+            'payrolls' => $dataPayroll,
+            'caisse' => Status::CAISSE,
+            'virement' => Status::VIREMENT
         ]);
 
     }
