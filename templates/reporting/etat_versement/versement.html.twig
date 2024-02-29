@@ -139,9 +139,6 @@
                         alignment: 'right',
                         dataType: 'number',
                         dataField: 'salaire_net',
-                        customizeText: (data) => {
-                            return new Intl.NumberFormat('fr-FR').format(data.value)
-                        },
                     }
                 ],
                 summary: {
@@ -159,9 +156,6 @@
                         },
                         {
                             column: 'salaire_net', summaryType: 'sum',
-                            customizeText: (data) => {
-                                return new Intl.NumberFormat('fr-FR').format(data.value)
-                            },
                         },
                     ],
                 }
