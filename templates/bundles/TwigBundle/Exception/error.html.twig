@@ -1,0 +1,28 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-lg-5 col-8">
+                <div class="text-center">
+                    <div>
+                        <img src="{{ asset('images/server-down.png') }}" alt="" class="img-fluid"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 text-center">
+                <h3 class="mt-3 text-dark">Traitement échoué</h3>
+                <p class="mb-4 font-size-14">
+                    Erreur de traitement. Nous nous excusons et corrigeons le problème.
+                    Veuillez réessayer ultérieurement.
+                    <code>{{ exception.message }}</code>
+                </p>
+
+                <a href="{{ path('home') }}" class="btn btn-lg btn-primary">Retour à l'accueil</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
