@@ -161,7 +161,13 @@
                         customizeText: (data) => {
                             return new Intl.NumberFormat('fr-FR').format(data.value)
                         },
-                    }
+                    },
+                    {
+                        caption: 'PERIODE',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'periode'
+                    },
                 ],
                 summary: {
                     totalItems: [

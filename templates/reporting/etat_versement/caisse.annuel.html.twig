@@ -1,10 +1,185 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Livre de paie{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridVirementCaisseAnnuels {
+            height: 368px;
+            border-width: 50px;
+        }
+    </style>
+{% endblock %}
 {% block body %}
-
+    <div class="row">
+        <div class="col-12">
+            <form action="{{ url('api_reporting_etat_versement_caisse_annuel') }}" method="get" class="form-horizontal"
+                  name="form_reporting_etat_versement_caisse_annuel" id="form_reporting_etat_versement_caisse_annuel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title-custom" style="color: white">
+                            <i data-feather="list"></i>
+                            RECHERCHE
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {{ include('reporting/etat_versement/form.html.twig') }}
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary float-end">Rechercher</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        ETAT DES PAIEMENTS ESPECES
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="dataGridVirementCaisseAnnuels">Cliquer sur recherche pour afficher le tableau</div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
-{% block title %}
+{% block javascripts %}
+    <script>
 
+        const $form = $(`form[name="form_reporting_etat_versement_caisse_annuel"]`);
+        console.log($form)
+        $form.submit(function (e) {
+            e.preventDefault();
+            const form = $(e.currentTarget);
+            const $data = form.serialize();
+            const tab = $data.split('&');
+            const tab2_deb = tab[0].split('=');
+            const tab2_fin = tab[1].split('=');
+            const debut = tab2_deb[1];
+            const fin = tab2_fin[1];
+
+            $('#head').html(`du ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')} `);
+
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+            }
+
+            $('#dataGridVirementCaisseAnnuels').dxDataGrid({
+                dataSource: `{{ url('api_reporting_etat_versement_caisse_annuel') }}?${$data}`,
+                showBorders: true,
+                scrolling: {
+                    mode: 'virtual',
+                    columnRenderingMode: 'virtual'
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('ETAT DES PAIEMENTS ESPECES ');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then((buffer) => {
+                                saveAs(new Blob([buffer], {type: 'application /octet-stream'}), `Etat des paiements espèces du ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                columns: [
+                    {
+                        caption: 'S/N',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'ordre'
+                    },
+                    {
+                        caption: 'EMMOLUMENTS',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'emmolution'
+                    },
+                    {
+                        caption: 'NOM',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'name_salaried'
+                    },
+                    {
+                        caption: 'STATIONS',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'stations'
+                    },
+                    {
+                        caption: 'MONTANT',
+                        alignment: 'right',
+                        dataType: 'number',
+                        dataField: 'salaire_net',
+                        customizeText: (data) => {
+                            return new Intl.NumberFormat('fr-FR').format(data.value)
+                        },
+                    },
+                    {
+                        caption: 'PERIODE',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'periode'
+                    },
+                ],
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'ordre',
+                            summaryType: 'count',
+                            displayFormat: 'Nombre Salaries : {0}'
+                        },
+                        {
+                            column: 'name_salaried',
+                            customizeText() {
+                                return 'CUMUL DES SALAIRE '
+                            }
+                        },
+                        {
+                            column: 'salaire_net', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                    ],
+                }
+            });
+        });
+    </script>
 {% endblock %}
 

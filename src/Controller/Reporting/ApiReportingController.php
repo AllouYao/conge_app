@@ -554,6 +554,9 @@ class ApiReportingController extends AbstractController
         $data = [];
         $requestVirements = $this->payrollRepository->findPayrollVirementAnnuel(Status::VIREMENT, false, true, $startAt, $endAt, $personalID);
         foreach ($requestVirements as $virement) {
+            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+            $date = $virement['debut'];
+            $periode = $formatter->format($date);
             $data[] = [
                 'name_salaried' => $virement['nom_salaried'] . ' ' . $virement['prenoms_salaried'],
                 'nom_banque' => $virement['name_banque'],
@@ -562,6 +565,7 @@ class ApiReportingController extends AbstractController
                 'comptes' => $virement['num_compte'],
                 'cles' => $virement['rib_compte'],
                 'salaire_net' => (double)$virement['net_payes'],
+                'periode' => $periode,
             ];
         }
         return new JsonResponse($data);
