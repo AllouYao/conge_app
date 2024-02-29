@@ -176,6 +176,7 @@ class PersonalType extends AbstractType
 
 
 
+
                 ],
                 'placeholder' => 'Sélectionner le site de travail'
             ]);
