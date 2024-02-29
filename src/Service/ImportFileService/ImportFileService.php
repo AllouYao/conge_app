@@ -3,10 +3,8 @@
 namespace App\Service\ImportFileService;
 
 use App\Entity\DossierPersonal\DetailRetenueForfetaire;
-use App\Utils\Status;
 use App\Service\MatriculeGenerator;
 use App\Entity\DossierPersonal\Salary;
-use App\Entity\DossierPersonal\Absence;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Entity\DossierPersonal\Contract;
 use App\Entity\DossierPersonal\Personal;
@@ -16,9 +14,7 @@ use App\Entity\DossierPersonal\AccountBank;
 use App\Entity\DossierPersonal\ChargePeople;
 use App\Repository\Settings\PrimesRepository;
 use App\Repository\Settings\CategoryRepository;
-use App\Entity\DossierPersonal\DetailPrimeSalary;
 use App\Entity\DossierPersonal\DetailSalary;
-use App\Repository\DossierPersonal\AbsenceRepository;
 use App\Repository\DossierPersonal\RetenueForfetaireRepository;
 use Psr\Log\LoggerInterface;
 
@@ -39,22 +35,20 @@ class ImportFileService
     public function import($filePath):bool
     {
         try {
-
-            $amountBrut =0;
-            $baseSalary =0;
-            $amountPrimes = 0;
-            $amountBrutImposable = 0;
-            $surSursalaire =0;
-            $transport = 30000.00;
-
-
-
             $spreadsheet = IOFactory::load($filePath);
             $reader = new Xlsx();
             $spreadsheet = $reader->load($filePath);
             $worksheet = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
 
             foreach ($worksheet as $row) {
+
+                $amountBrut =0;
+                $baseSalary =0;
+                $amountPrimes = 0;
+                $amountBrutImposable = 0;
+                $surSursalaire =0;
+                $transport = 30000.00;
+                
                 $matricule = $this->matriculeGenerator->generateMatricule();
                 $numCNPS = $this->matriculeGenerator->generateNumCnps();
                 $numContract = $this->matriculeGenerator->generateNumContract();
@@ -149,12 +143,15 @@ class ImportFileService
                  // primes
                 if(!empty($row['W']) || !empty($row['X'])) {
                     $detailSalary = (new DetailSalary() )->setSalary($salary);
+                    $primeTenue = 0;
+                    $primeSalissure = 0;
+
                     if($row['W']) {
                         /** Fecth prime TENUE TRAVAIM */
                         $primeWork =  $this->primesRepository->findOneBy(array('code'=> 'PRIME TENUE TRAVAIL'));
                         $detailSalary->setAmountPrime($row['W']);
                         $detailSalary->setPrime($primeWork);
-                        $amountPrimes += $row['W'];
+                        $primeTenue = $row['W'];
                     }
 
                     if  ($row['X']) {
@@ -162,16 +159,17 @@ class ImportFileService
                         $primeSalissure =  $this->primesRepository->findOneBy(array('code'=> 'PRIME SALISSURE'));
                         $detailSalary->setAmountPrime($row['X']);  
                         $detailSalary->setPrime($primeSalissure);
-                        $amountPrimes += $row['X'];
+                        $primeSalissure = $row['X'];
                     }
+                    $amountPrimes = $primeTenue+$primeSalissure;
                     $this->entityManager->persist($detailSalary);
                     $this->loggerInterface->info('Assurance prime');
                 }
                  
 
                // personne à charge
-
-                for($i= 0; $i <$row['D']; $i++)
+                
+                for($i= 0; $i <$row['G']; $i++)
                 {
                     $chargePeople =  new ChargePeople();
                     $chargePeople->setFirstName($row['B'] ?? 'N/A');
@@ -184,10 +182,6 @@ class ImportFileService
                     $this->entityManager->persist($chargePeople);
                     $this->loggerInterface->info('Charge pepole traité');
                 }
-
-               
-
-
 
                 // Info bancaire
                 $accountBank->setBankId(0);
@@ -219,10 +213,10 @@ class ImportFileService
                 $surSursalaire = $row['V'] ?? 0;
                 
                 // Salaire brut
-                $amountBrut = $baseSalary+$surSursalaire+$amountPrimes+$transport;
+                $amountBrut = $baseSalary + $surSursalaire + $amountPrimes + $transport;
 
                 //Salaire brut imposable
-                $amountBrutImposable = $baseSalary+$surSursalaire+$amountPrimes;
+                $amountBrutImposable = $baseSalary + $surSursalaire + $amountPrimes;
 
                 // Salaire
                 $salary->setSursalaire($surSursalaire);
@@ -230,7 +224,7 @@ class ImportFileService
                 $salary->setAmountAventage(0);
                 $salary->setBrutImposable($amountBrutImposable);
                 $salary->setBrutAmount($amountBrut);
-                $salary->setPrimeTransport(30000.0);
+                $salary->setPrimeTransport($transport);
                 // $salary->setPersonal($personal);
                 $salary->setTotalPrimeJuridique($amountPrimes);
                 $salary->setAvantage(null);

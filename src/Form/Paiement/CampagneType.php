@@ -12,7 +12,7 @@ use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -33,7 +33,7 @@ class CampagneType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('startedAt', DateTimeType::class, [
+            ->add('startedAt', DateType::class, [
                 'attr' => [
                     'class' => 'form-control form-control-sm'
                 ],
@@ -41,7 +41,7 @@ class CampagneType extends AbstractType
                 'widget' => 'single_text',
                 'required' => true
             ])
-            ->add('dateDebut', DateTimeType::class, [
+            ->add('dateDebut', DateType::class, [
                 'attr' => [
                     'class' => 'form-control form-control-sm'
                 ],
@@ -49,7 +49,7 @@ class CampagneType extends AbstractType
                 'widget' => 'single_text',
                 'required' => true
             ])
-            ->add('dateFin', DateTimeType::class, [
+            ->add('dateFin', DateType::class, [
                 'attr' => [
                     'class' => 'form-control form-control-sm'
                 ],

@@ -45,7 +45,6 @@ class SalaryImpotsService implements SalaryInterface
         $part = $this->utimePaiementService->getNumberParts($personal);
         $impotBrut = $this->utimePaiementService->calculerAmountImpotBrut($personal, $campagne);
         $creditImpot = $this->utimePaiementService->calculateAmountCreditImpot($personal);
-        /** @var  $netImposable */
         $salaire = $this->utimePaiementService->getAmountSalaireBrutAndImposable($personal);
         $majorationHeursSupp = $this->utimePaiementService->getAmountMajorationHeureSupp($personal, $campagne);
         $primeAnciennete = $this->utimePaiementService->getAmountAnciennete($personal);
