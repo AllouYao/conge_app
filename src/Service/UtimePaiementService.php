@@ -122,7 +122,7 @@ class UtimePaiementService
             'brut_amount' => round($salaireBrut, 2),
             'brut_imposable_amount' => round($brutImposable, 2)
         ];
-    }
+    } 
 
     /** Obtenir le nombre de part du salarie */
     public function getNumberParts(Personal $personal): float|int

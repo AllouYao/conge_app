@@ -2,6 +2,7 @@
 
 namespace App\Service\ImportFileService;
 
+use App\Entity\DossierPersonal\DetailRetenueForfetaire;
 use App\Utils\Status;
 use App\Service\MatriculeGenerator;
 use App\Entity\DossierPersonal\Salary;
@@ -18,6 +19,8 @@ use App\Repository\Settings\CategoryRepository;
 use App\Entity\DossierPersonal\DetailPrimeSalary;
 use App\Entity\DossierPersonal\DetailSalary;
 use App\Repository\DossierPersonal\AbsenceRepository;
+use App\Repository\DossierPersonal\RetenueForfetaireRepository;
+use Psr\Log\LoggerInterface;
 
 class ImportFileService
 {
@@ -26,12 +29,25 @@ class ImportFileService
         private MatriculeGenerator $matriculeGenerator,
         private CategoryRepository $categoryRepository,
         private PrimesRepository $primesRepository,
-        private EntityManagerInterface $entityManager){
+        private RetenueForfetaireRepository $retenueForfetaireRepository,
+        private EntityManagerInterface $entityManager,
+        private LoggerInterface $loggerInterface,
+        )
+        {
 
     }
     public function import($filePath):bool
     {
         try {
+
+            $amountBrut =0;
+            $baseSalary =0;
+            $amountPrimes = 0;
+            $amountBrutImposable = 0;
+            $surSursalaire =0;
+            $transport = 30000.00;
+
+
 
             $spreadsheet = IOFactory::load($filePath);
             $reader = new Xlsx();
@@ -79,8 +95,12 @@ class ImportFileService
                 // Category
                 $categories = $this->categoryRepository->findAll();
                 foreach($categories as $category){
+
                     if($category->getIntitule()==$row['S']){
+
                         $personal->setCategorie($category);
+                        $salary->setBaseAmount($category->getAmount());
+                        $baseSalary += $category->getAmount();
                     }
                 }
                 $personal->setConjoint('N/A');
@@ -99,41 +119,56 @@ class ImportFileService
                 $contract->setTypeContrat('CDI');
                 $personal->setContract($contract);
 
-                // Salaire
-                $salary->setSursalaire($row['V'] ?? 0);
-                $salary->setSmig(75000);
-                $salary->setAmountAventage(0);
-                $salary->setBrutImposable(0);
-                $salary->setBaseAmount(0);
-                $salary->setBrutAmount(0);
-                $salary->setPrimeTransport(30000);
-                $salary->setPersonal($personal);
+                
+
+                // baseAmount ---category
+                // 
+
+
+                //Assurance
+
+                if($row['Z'] && !is_null($row['Z'])) {
+                    $codeType = $row['Z'] === 'FAMILLE' ? 'ASSURANCE_SANTE_FAMILLE_SALARIALE' :'ASSURANCE_SANTE_CLASSIQUE_SALARIALE';
+                    $retenue =$this->retenueForfetaireRepository->findOneBy(['code' =>$codeType]);
+                    $detailRetenueForfetaire =  new DetailRetenueForfetaire();
+                    $detailRetenueForfetaire->setSalary($salary);
+                    $detailRetenueForfetaire->setRetenuForfetaire($retenue);
+                    if($row['Z'] === 'FAMILLE') {
+                        $amountEmpl = 3000.00;
+                    }
+                    if ($row['Z'] == 'CLASSIQUE' ) {
+                        $amountEmpl = 1250.00;
+                    }
+                    $detailRetenueForfetaire->setAmount($row['Y']);
+                    $detailRetenueForfetaire->setAmountEmp($amountEmpl);
+                    $this->entityManager->persist($detailRetenueForfetaire);
+                    $this->loggerInterface->info('Assurance traité');
+                }
 
 
                  // primes
-
-                 $primes = $this->primesRepository->findAll();
-                 foreach($primes as $prime){
- 
-                     if($row['W'] && $prime->getCode() == "PRIME TENUE TRAVAIL"){
-                        $detailSalary = new DetailSalary();
+                if(!empty($row['W']) || !empty($row['X'])) {
+                    $detailSalary = (new DetailSalary() )->setSalary($salary);
+                    if($row['W']) {
+                        /** Fecth prime TENUE TRAVAIM */
+                        $primeWork =  $this->primesRepository->findOneBy(array('code'=> 'PRIME TENUE TRAVAIL'));
                         $detailSalary->setAmountPrime($row['W']);
-                        $detailSalary->setPrime($prime);
-                        $salary->addDetailSalary($detailSalary);
-                        
-                        $this->entityManager->persist($detailSalary);
-                     }
- 
-                     if($row['X'] && $prime->getCode() == "PRIME SALISSURE"){
+                        $detailSalary->setPrime($primeWork);
+                        $amountPrimes += $row['W'];
+                    }
 
-                        $detailSalary = new DetailSalary();
-                        $detailSalary->setAmountPrime($row['X']);   
-                        $detailSalary->setPrime($prime);
-                        $salary->addDetailSalary($detailSalary);
+                    if  ($row['X']) {
+                         /** Fecth prime TENUE TRAVAIM */
+                        $primeSalissure =  $this->primesRepository->findOneBy(array('code'=> 'PRIME SALISSURE'));
+                        $detailSalary->setAmountPrime($row['X']);  
+                        $detailSalary->setPrime($primeSalissure);
+                        $amountPrimes += $row['X'];
+                    }
+                    $this->entityManager->persist($detailSalary);
+                    $this->loggerInterface->info('Assurance prime');
+                }
+                 
 
-                        $this->entityManager->persist($detailSalary);
-                     }
-                 }
                // personne à charge
 
                 for($i= 0; $i <$row['D']; $i++)
@@ -147,6 +182,7 @@ class ImportFileService
                     $chargePeople->setContact($row['Q'] ?? 'N/A');
                     $chargePeople->setPersonal($personal);
                     $this->entityManager->persist($chargePeople);
+                    $this->loggerInterface->info('Charge pepole traité');
                 }
 
                
@@ -177,6 +213,29 @@ class ImportFileService
                     $personal->setModePaiement("CAISSE");
                 }
 
+                // Total des primes juridiques
+
+                //SurSalaire
+                $surSursalaire = $row['V'] ?? 0;
+                
+                // Salaire brut
+                $amountBrut = $baseSalary+$surSursalaire+$amountPrimes+$transport;
+
+                //Salaire brut imposable
+                $amountBrutImposable = $baseSalary+$surSursalaire+$amountPrimes;
+
+                // Salaire
+                $salary->setSursalaire($surSursalaire);
+                $salary->setSmig(75000.0);
+                $salary->setAmountAventage(0);
+                $salary->setBrutImposable($amountBrutImposable);
+                $salary->setBrutAmount($amountBrut);
+                $salary->setPrimeTransport(30000.0);
+                // $salary->setPersonal($personal);
+                $salary->setTotalPrimeJuridique($amountPrimes);
+                $salary->setAvantage(null);
+
+                $personal->setSalary($salary);
                 $accountBank->setPersonal($personal);
                 $this->entityManager->persist($salary);
                 $this->entityManager->persist($accountBank);
@@ -189,7 +248,7 @@ class ImportFileService
 
         } catch (\Exception $ex) {
 
-            dd($ex->getMessage());
+            dd($ex->getMessage(), $row['A']);
             return $this->success = false;
         }
     }

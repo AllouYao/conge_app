@@ -116,7 +116,7 @@ class ReportingController extends AbstractController
     {
         $campagne = $campagneRepository->active();
         $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
-        $date = $campagne->getDateDebut();
+        $date = $campagne ? $campagne->getDateDebut() : ' ';
         $periode = $formatter->format($date);
         return $this->render('reporting/etat_versement/versement.html.twig', [
             'periode' => $periode
@@ -131,7 +131,7 @@ class ReportingController extends AbstractController
     {
         $campagne = $campagneRepository->active();
         $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
-        $date = $campagne->getDateDebut();
+        $date = $campagne ? $campagne->getDateDebut() : ' ';
         $periode = $formatter->format($date);
         return $this->render('reporting/etat_versement/caisse.html.twig', [
             'periode' => $periode

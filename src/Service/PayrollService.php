@@ -258,5 +258,5 @@ class PayrollService
 
         $this->manager->persist($payroll);
 
-    }
+    } 
 }
