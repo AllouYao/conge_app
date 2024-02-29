@@ -20,3 +20,5 @@ TRUNCATE `messenger_messages`;
 TRUNCATE `payroll`;
 TRUNCATE `personal`;
 TRUNCATE `salary`;
+TRUNCATE `campagne`;
+TRUNCATE `campagne_personal`;

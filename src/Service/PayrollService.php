@@ -72,6 +72,8 @@ class PayrollService
         $chargePersonal = $this->chargePersonalsRepository->findOneBy(['personal' => $personal]);
         $nombrePart = round($chargePersonal?->getNumPart(), 2);
         $salaryIts = round($chargePersonal?->getAmountIts());
+        //dd($salaryIts);
+
         $salaryCnps = round($chargePersonal?->getAmountCNPS());
         $salaryCmu = round($chargePersonal?->getAmountCMU());
         $assuranceSanteSalariale = $this->utimePaiementService->getAssuranceSante($personal)['assurance_salariale'];
@@ -258,5 +260,5 @@ class PayrollService
 
         $this->manager->persist($payroll);
 
-    } 
+    }
 }
