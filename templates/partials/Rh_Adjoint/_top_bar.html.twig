@@ -8,7 +8,7 @@
                             <i data-feather="home"></i> ACCUEIL
                         </a>
                     </li>
-                    
+
 
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
@@ -26,20 +26,31 @@
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
                                     <a href="{{ path('campagne_livre') }}"
                                        class="dropdown-item">Livre de paie de la periode</a>
-                                       <a href="{{ path('campagne_print_all_bulletin') }}"
+                                    <a href="{{ path('campagne_print_all_bulletin') }}"
                                        class="dropdown-item">Etat des bulletins</a>
                                     <a href="{{ path('reporting_etat_versement') }}"
-                                        class="dropdown-item">Etat des virements</a>
+                                       class="dropdown-item">Etat des virements</a>
                                     <a href="{{ path('reporting_etat_versement_caisse') }}"
-                                        class="dropdown-item">Etat des paiements espèces</a>
+                                       class="dropdown-item">Etat des paiements espèces</a>
                                 </div>
                             </div>
-                        
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Editions
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('reporting_etat_salaire') }}"
+                                       class="dropdown-item">Etat des salaires</a>
+                                    <a href="{{ path('reporting_etat_versement_annuel') }}"
+                                       class="dropdown-item">Etat des virements</a>
+                                    <a href="{{ path('reporting_etat_versement_caisse_annuel') }}"
+                                       class="dropdown-item">Etat des paiements espèces</a>
+                                </div>
+                            </div>
                         </div>
                     </li>
-
-
-
 
 
                     {# <li class="nav-item dropdown">
