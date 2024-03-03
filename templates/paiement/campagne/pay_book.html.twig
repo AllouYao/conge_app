@@ -126,6 +126,7 @@
                         dataType: "string",
                         alignment: "center",
                         fixed: true,
+                        width: 150
                     },
                     {
                         caption: 'NOM ET PRENOMS',
@@ -133,264 +134,85 @@
                         dataType: 'string',
                         alignment: 'left',
                         fixed: true,
+                        width: 150
                     },
                     {
                         caption: 'CATEGORIE AGENT',
                         dataField: 'category_salaried',
                         dataType: 'string',
                         alignment: 'center',
+                        width: 150
                     },
                     {
                         caption: "SITE DE TRAVAIL ",
                         dataField: "service",
                         dataType: "string",
-                        alignment: "left"
+                        alignment: "left",
+                        width: 150
                     },
                     {
                         caption: 'NOMBRE DE PART',
                         dataField: 'number_part_salaried',
                         dataType: 'string',
-                        alignment: 'right',
+                        alignment: 'center',
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
+                        width: 150
+                    },
+                    {
+                        caption: 'NOMBRE DE JOUR TRAVAILLER',
+                        dataField: 'day_of_presence',
+                        dataType: 'string',
+                        alignment: 'center',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                        width: 150
                     },
                     {
                         caption: 'SALAIRE DE BASE',
                         dataField: 'salaire_base_salaried',
                         dataType: 'number',
                         alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
+                        width: 150
                     },
                     {
                         caption: 'SURSALAIRE',
                         dataField: 'sursalaire_salaried',
                         dataType: 'number',
                         alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
-                    },
-                    {
-                        caption: 'MAJORATION HEURE SUPP.',
-                        dataField: 'majoration_heurs_supp',
-                        dataType: 'number',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
-                    },
-                    {
-                        caption: 'NBR JOUR CONGES ACQUIS',
-                        dataField: 'nb_jour_conges_acquis',
-                        dataType: 'number',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
-                    },
-                    {
-                        caption: 'CONGES PAYES',
-                        dataField: 'conge_payes',
-                        dataType: 'number',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
+                        width: 150
                     },
                     {
                         caption: 'PRIME ANCIENNETE',
                         dataField: 'prime_anciennete',
                         dataType: 'number',
                         alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
+                        width: 150
+
                     },
                     {
                         caption: 'PRIME DE TENUE',
                         dataField: 'prime_de_tenue',
                         dataType: 'number',
                         alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
+                        width: 150
+
                     },
                     {
                         caption: 'PRIME DE SALISSURE',
                         dataField: 'prime_de_salissure',
                         dataType: 'number',
                         alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
-                    },
-                    {
-                        caption: 'PRIME OUTILLAGE',
-                        dataField: 'prime_outillage',
-                        dataType: 'number',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
-                    },
-                    {
-                        caption: 'PRIME DE PANIER',
-                        dataField: 'prime_panier',
-                        dataType: 'number',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
-                    },
-                    {
-                        caption: 'PRIME TRANSPORT IMPOSABLE',
-                        dataField: 'prime_transport_imposable',
-                        dataType: 'number',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
-                    },
-                    {
-                        caption: 'PRIME DE FONCTION',
-                        dataField: 'prime_fonction',
-                        dataType: 'number',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
-                    },
-                    {
-                        caption: 'PRIME DE LOGEMENT',
-                        dataField: 'prime_logement',
-                        dataType: 'number',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
-                    },
-                    {
-                        caption: 'INDEMNITE DE FONCTION',
-                        dataField: 'indemnite_fonction',
-                        dataType: 'number',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
-                    },
-                    {
-                        caption: 'INDEMNITE DE LOGEMENT',
-                        dataField: 'indemnite_logement',
-                        dataType: 'number',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
-                    },
-                    {
-                        caption: 'AV. NATURE IMPOSABLE',
-                        dataField: 'avantage_imposable',
-                        dataType: 'number',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
+                        width: 150
                     },
                     {
                         caption: 'BRUT IMPOSABLE',
                         dataField: 'salaire_imposable_salaried',
                         dataType: 'number',
                         alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
-                    },
-                    {
-                        caption: 'Partie des céssations de contrat',
-                        alignment: 'center',
-                        columns: [
-                            {
-                                caption: 'Date cessation',
-                                alignment: 'center',
-                                dataType: 'string',
-                                dataField: 'date_cessation',
-                            },
-                            {
-                                caption: 'Solde presence',
-                                alignment: 'right',
-                                dataType: 'number',
-                                dataField: 'solde_presence',
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
-                            },
-                            {
-                                caption: 'Gratification prorata',
-                                alignment: 'right',
-                                dataType: 'number',
-                                dataField: 'solde_gratification',
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
-                            },
-                            {
-                                caption: 'Solde congés',
-                                alignment: 'right',
-                                dataType: 'number',
-                                dataField: 'solde_conges',
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
-                            },
-                            {
-                                caption: 'Solde préavis',
-                                alignment: 'right',
-                                dataType: 'number',
-                                dataField: 'solde_preavis',
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
-                            },
-                            {
-                                caption: 'Indemnite licenciement',
-                                alignment: 'right',
-                                dataType: 'number',
-                                dataField: 'solde_indemnite_licenciement',
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
-                            },
-                            {
-                                caption: 'Indemnite retraite',
-                                alignment: 'right',
-                                dataType: 'number',
-                                dataField: 'solde_retraite',
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
-                            },
-                            {
-                                caption: 'Indemnite déces',
-                                alignment: 'right',
-                                dataType: 'number',
-                                dataField: 'solde_indemnite_deces',
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
-                            },
-                            {
-                                caption: 'Frais funéraire',
-                                alignment: 'right',
-                                dataType: 'number',
-                                dataField: 'frais_funeraire',
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
-                            },
-                        ]
+                        width: 150
                     },
                     {
                         caption: "CHARGES SALARIALES",
@@ -401,45 +223,35 @@
                                 dataField: 'its_salaried',
                                 dataType: 'number',
                                 alignment: 'right',
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
+                                width: 150
                             },
                             {
                                 caption: 'TOTAL RETENUE FISCALE',
                                 dataField: 'fixcale_salariale',
                                 dataType: 'number',
                                 alignment: 'right',
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
+                                width: 150
                             },
                             {
                                 caption: 'CNPS',
                                 dataField: 'cnps_salaried',
                                 dataType: 'number',
                                 alignment: 'right',
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
+                                width: 150
                             },
                             {
                                 caption: 'CMU',
                                 dataField: 'cmu_salaried',
                                 dataType: 'number',
                                 alignment: 'right',
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
+                                width: 150
                             },
                             {
                                 caption: 'TOTAL RETENUE',
                                 dataField: 'charge_salarial',
                                 dataType: 'number',
                                 alignment: 'right',
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
+                                width: 150
                             },
                         ]
                     },
@@ -448,27 +260,21 @@
                         dataField: 'prime_transport_legal',
                         dataType: 'number',
                         alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
+                        width: 150
                     },
                     {
                         caption: 'ASSURANCE',
                         dataField: 'assurance_salariale',
                         dataType: 'number',
                         alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
+                        width: 150
                     },
                     {
                         caption: 'NET A PAYER',
                         dataField: 'net_payer_salaried',
                         dataType: 'number',
                         alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
+                        width: 150
                     },
                     {
                         caption: 'CHARGES FISCALES PATRONALES',
@@ -479,20 +285,14 @@
                                 dataField: 'employer_is',
                                 dataType: 'number',
                                 alignment: 'right',
-                                width: 100,
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
+                                width: 150
                             },
                             {
                                 caption: 'FDFP',
                                 dataField: 'amount_fdfp',
                                 dataType: 'number',
                                 alignment: 'right',
-                                width: 100,
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
+                                width: 150
                             }
                         ]
                     },
@@ -505,37 +305,32 @@
                                 dataField: 'employer_cr',
                                 dataType: 'number',
                                 alignment: 'right',
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
+                                width: 150
+
                             },
                             {
                                 caption: 'CMU',
                                 dataField: 'employer_cmu',
                                 dataType: 'number',
                                 alignment: 'right',
-                                width: 100,
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
+                                width: 150
+
                             },
                             {
                                 caption: 'PRESTATION FAMILIALE',
                                 dataField: 'employer_pr',
                                 dataType: 'number',
                                 alignment: 'right',
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
+                                width: 150
+
                             },
                             {
                                 caption: 'ACCIDENT DE TRAVAIL',
                                 dataField: 'employer_at',
                                 dataType: 'number',
                                 alignment: 'right',
-                                customizeText: function (data) {
-                                    return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                                },
+                                width: 150
+
                             },
                         ]
                     },
@@ -544,28 +339,22 @@
                         dataField: 'assurance_patronales',
                         dataType: 'number',
                         alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
+                        width: 150
+
                     },
                     {
                         caption: 'TOTAL CHARGES PATRONALES',
                         dataField: 'charge_patronal',
                         dataType: 'number',
                         alignment: 'right',
-                        width: 120,
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
+                        width: 150
                     },
                     {
                         caption: 'MASSE SALARIALE',
                         dataField: 'masse_salariale',
                         dataType: 'number',
                         alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(Math.round(data.value));
-                        },
+                        width: 150
                     },
                     {
                         dataField: 'print_bulletin',
@@ -608,20 +397,6 @@
                             },
                         },
                         {
-                            column: 'majoration_heurs_supp',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
-                            column: 'conge_payes',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
                             column: 'prime_anciennete',
                             summaryType: 'sum',
                             customizeText: function (data) {
@@ -643,119 +418,7 @@
                             },
                         },
                         {
-                            column: 'prime_outillage',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
-                            column: 'prime_panier',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
-                            column: 'prime_transport_imposable',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
-                            column: 'avantage_imposable',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
-                            column: 'prime_fonction',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
-                            column: 'prime_logement',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
-                            column: 'indemnite_fonction',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
-                            column: 'indemnite_logement',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
                             column: 'salaire_imposable_salaried',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
-                            column: 'solde_presence',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
-                            column: 'solde_preavis',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
-                            column: 'solde_conges',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
-                            column: 'solde_gratification',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
-                            column: 'solde_indemnite_deces',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
-                            column: 'frais_funeraire',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
-                            column: 'solde_retraite',
-                            summaryType: 'sum',
-                            customizeText: function (data) {
-                                return new Intl.NumberFormat('fr-FR').format(data.value);
-                            },
-                        },
-                        {
-                            column: 'solde_indemnite_licenciement',
                             summaryType: 'sum',
                             customizeText: function (data) {
                                 return new Intl.NumberFormat('fr-FR').format(data.value);

@@ -4,8 +4,10 @@ namespace App\Repository\Paiement;
 
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Payroll;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Exception;
 
 /**
  * @extends ServiceEntityRepository<Payroll>
@@ -24,20 +26,19 @@ class PayrollRepository extends ServiceEntityRepository
 
     /**
      * @param bool $active
-     * @param bool $type
      * @param Personal $personal
      * @return Payroll[]|null
      * Retourne le dictionnaire des salaire de la campagne en fonction du type et du status de la campagne pour les bulletins
      */
-    public function findBulletinByCampaign(bool $active, bool $type, Personal $personal): ?array
+    public function findBulletinByCampaign(bool $active, Personal $personal): ?array
     {
         return $this->createQueryBuilder('pr')
             ->join('pr.personal', 'p')
             ->join('pr.campagne', 'c')
-            ->where('c.ordinary = :type')
             ->andWhere('c.active = :active')
             ->andWhere('p.id = :personal')
-            ->setParameters(['active' => $active, 'type' => $type, 'personal' => $personal->getId()])
+            ->setParameter('active', $active)
+            ->setParameter('personal', $personal->getId())
             ->getQuery()->getResult();
     }
 
@@ -78,32 +79,64 @@ class PayrollRepository extends ServiceEntityRepository
         $qb
             ->select([
                 'personal.id as personal_id',
-                'personal.firstName',
-                'personal.lastName',
-                'personal.matricule',
+                'personal.firstName as nom',
+                'personal.lastName as prenoms',
                 'personal.refCNPS',
+                'personal.older',
+                'personal.service as station',
+                'personal.uuid as personal_uuid',
                 'YEAR(personal.birthday) as personal_birthday',
-                'contract.dateEmbauche as embauche',
-                'salary.totalPrimeJuridique as prime_juridique',
-                'salary.primeLogement as aventage_nature_imposable',
-                'contract.dateEmbauche',
+                'payroll.matricule',
                 'payroll.baseAmount',
+                'payroll.sursalaire',
+                'payroll.AncienneteAmount',
+                'payroll.primeFonctionAmount',
+                'payroll.primeLogementAmount',
+                'payroll.indemniteFonctionAmount',
+                'payroll.indemniteLogementAmount',
+                'payroll.majorationAmount',
+                'payroll.congesPayesAmount',
                 'payroll.brutAmount',
-                'payroll.salaryCnps',
                 'payroll.imposableAmount',
+                'payroll.salaryCnps',
                 'payroll.salaryIts',
+                'payroll.fixcalAmount',
                 'payroll.salaryCmu',
                 'payroll.salarySante',
+                'payroll.totalRetenueSalarie',
+                'payroll.netPayer',
+                'payroll.employeurCr',
+                'payroll.employeurIs',
+                'payroll.employeurCmu',
+                'payroll.amountTA',
+                'payroll.amountFPC',
+                'payroll.employeurFdfp',
+                'payroll.employeurAt',
+                'payroll.employeurPf',
+                'payroll.employeurSante',
+                'payroll.totalRetenuePatronal',
+                'payroll.masseSalary',
+                'payroll.salaryTransport',
+                'payroll.amountPrimePanier',
+                'payroll.amountPrimeSalissure',
+                'payroll.amountPrimeOutillage',
+                'payroll.amountPrimeTenueTrav',
+                'payroll.amountPrimeRendement',
+                'payroll.amountPrimeRendement',
+                'payroll.aventageNonImposable',
                 'payroll.numberPart',
+                'payroll.numCnps',
+                'payroll.dateEmbauche',
                 'payroll.createdAt',
-                'campagnes.startedAt'
+                'campagnes.startedAt',
+                'campagnes.dateDebut as periode_debut',
+                'campagnes.dateFin as periode_fin',
+                'campagnes.ordinary'
             ])
             ->join('payroll.campagne', 'campagnes')
             ->join('payroll.personal', 'personal')
-            ->leftJoin('personal.salary', 'salary')
-            ->leftJoin('personal.contract', 'contract')
             ->where('campagnes.active = false')
-            ->andWhere('payroll.dateCreated BETWEEN ?1 and ?2');
+            ->andWhere('campagnes.dateDebut BETWEEN ?1 AND ?2');
         $qb->setParameters(['1' => $mouth1, '2' => $mouth2]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
@@ -169,23 +202,29 @@ class PayrollRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    /** Obtenir le cumul des salaire de la période du prémier janvier à la date de depart  */
-    public function getCumulSalaries(Personal $personal, mixed $start, mixed $end): float|int|null
+    /** Obtenir le cumul des salaire de la période du prémier janvier à la date de depart
+     * @throws Exception
+     */
+    public function getCumulSalaries(Personal $personal, mixed $endDate): float|int|null
     {
-        $dateDebut = clone $start;
-        $dateFin = clone $end;
+        // Créer une instance de DateTime pour le 1er janvier de l'année en cours
+        $startDate = new DateTime(date('Y') . '-01-01');
+
         $query = $this->createQueryBuilder('pr')
             ->select('SUM(pr.brutAmount + pr.AncienneteAmount + pr.majorationAmount - pr.salaryTransport) as cumulSalaries')
             ->join('pr.personal', 'personal')
             ->join('pr.campagne', 'campagnes')
             ->where('pr.personal = :personal')
-            ->andWhere('pr.dateCreated BETWEEN :dateDebut AND :dateFin')
+            ->andWhere('campagnes.active = false')
+            ->andWhere('campagnes.dateDebut BETWEEN :start AND :end')
             ->setParameter('personal', $personal)
-            ->setParameter('dateDebut', $dateDebut)
-            ->setParameter('dateFin', $dateFin)
+            ->setParameter('start', $startDate)
+            ->setParameter('end', $endDate)
             ->getQuery();
+
         $result = $query->getSingleResult();
-        return $result['cumulSalaries'];
+
+        return $result['cumulSalaries'] ?? 0; // Retourne 0 si aucun résultat trouvé
     }
 
     /** Obtenir le cumul des salaire de la periode des 12 mois partant du premier mois de l'annee précédente jusqu'à la date de depart en conges */
@@ -224,7 +263,7 @@ class PayrollRepository extends ServiceEntityRepository
             $lastTwelveMonths[] = $date;
         }
         return $this->createQueryBuilder('pr')
-            ->select('SUM(pr.brutAmount + pr.AncienneteAmount + pr.majorationAmount - pr.salaryTransport) as amount_moyen')
+            ->select('SUM(pr.imposableAmount + pr.AncienneteAmount + pr.majorationAmount) as amount_moyen')
             ->join('pr.personal', 'personal')
             ->join('pr.campagne', 'campagnes')
             ->leftJoin('personal.departures', 'departures')
@@ -296,7 +335,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->setParameter('personal', $personal)
             ->getQuery();
         $result = $query->getOneOrNullResult();
-        return $result['netPayer']?? null;
+        return $result['netPayer'] ?? null;
     }
 
     /** Retourne le dictionnaire  de salaire en fonction de l'id de la campagne */
@@ -379,8 +418,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->setParameter('active', $active)
             ->setParameter('type_versement', $typeVersement)
             ->setParameter('date_debut', $debut)
-            ->setParameter('date_fin', $fin)
-        ;
+            ->setParameter('date_fin', $fin);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('p.id', $personalId));
         }

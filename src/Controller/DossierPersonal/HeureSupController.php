@@ -7,6 +7,7 @@ use App\Form\DossierPersonal\PersonalHeureSupType;
 use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Service\HeureSupService;
+use App\Service\Personal\ChargesServices;
 use App\Service\UtimePaiementService;
 use App\Utils\Status;
 use Carbon\Carbon;
@@ -25,20 +26,20 @@ class HeureSupController extends AbstractController
     private EntityManagerInterface $entityManager;
     private PersonalRepository $personalRepository;
     private HeureSupRepository $heureSupRepository;
-    private UtimePaiementService $utimePaiementService;
+    private ChargesServices $chargesServices;
 
 
     public function __construct(
         EntityManagerInterface $entityManager,
         PersonalRepository     $personalRepository,
         HeureSupRepository     $heureSupRepository,
-        UtimePaiementService   $utimePaiementService
+        ChargesServices        $chargesServices
     )
     {
         $this->entityManager = $entityManager;
         $this->personalRepository = $personalRepository;
         $this->heureSupRepository = $heureSupRepository;
-        $this->utimePaiementService = $utimePaiementService;
+        $this->chargesServices = $chargesServices;
     }
 
     #[Route('/api/heure_supp_super_book', name: 'api_heure_supp_super_book', methods: ['GET'])]
@@ -66,10 +67,9 @@ class HeureSupController extends AbstractController
 
         foreach ($personals as $personal) {
             $heureSupp = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
-            //$heureSupp = $this->heureSupRepository->findAll();
             $statut = $personal->getContract()->getTempsContractuel() === Status::TEMPS_PLEIN ? 'PERMANENT' : 'VACATAIRES';
             $fullnamePersonal = $personal->getFirstName() . ' ' . $personal->getLastName();
-            $personalSalaireBase = $this->utimePaiementService->getAmountSalaireBrutAndImposable($personal)['salaire_categoriel'];
+            $personalSalaireBase = $this->chargesServices->amountSalaireBrutAndImposable($personal)['salaire_categoriel'];
             $amountHoraire = 0;
             $heure_15 = 0;
             $heure15 = 0;
@@ -92,7 +92,7 @@ class HeureSupController extends AbstractController
                     if ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure <= 6) {
                         $heure_15 += $heure;
                         $heure15 = $heure_15;
-                    } elseif ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR &&  $heure > 6) {
+                    } elseif ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure > 6) {
                         $heure_6 = 6;
                         $heure15 += $heure_15;
                         $heure_50 += $heure - $heure_6;
@@ -137,7 +137,6 @@ class HeureSupController extends AbstractController
         $today = Carbon::now();
         $years = $today->year;
         $month = $today->month;
-        $personal = null;
         if ($this->isGranted('ROLE_RH')) {
 
             $heursSupps = $this->heureSupRepository->getAllByDate($month, $years);
@@ -146,13 +145,6 @@ class HeureSupController extends AbstractController
 
             $heursSupps = $this->heureSupRepository->findHeureSupByEmployeRole($month, $years);
         }
-        /*
-        foreach ($heursSupps as $supp) {  
-            //$personal = $supp->getPersonal();
-            $requestHeursSupp = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
-        }
-*/
-        //dd($heursSupps);
         $apiRequestHeureSupp = [];
         foreach ($heursSupps as $heureSup) {
             $apiRequestHeureSupp[] = [

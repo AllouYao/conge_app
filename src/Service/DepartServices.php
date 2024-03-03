@@ -7,11 +7,14 @@ use App\Repository\DossierPersonal\CongeRepository;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Repository\Paiement\PayrollRepository;
 use App\Repository\Settings\PrimesRepository;
+use App\Service\Personal\ChargesServices;
+use App\Service\Personal\PrimeService;
 use App\Utils\Status;
 use Carbon\Carbon;
 use DateInterval;
 use DatePeriod;
 use DateTime;
+use Exception;
 
 class DepartServices
 {
@@ -21,16 +24,18 @@ class DepartServices
     const JOUR_CONGE_CALANDAIRE = 1.25;
     private CongeRepository $congeRepository;
     private PrimesRepository $primesRepository;
-    private UtimePaiementService $utimePaiementService;
     private CategoryChargeRepository $categoryChargeRepository;
+    private ChargesServices $chargesServices;
+    private PrimeService $primeService;
 
     public function __construct(
         CongeService             $congeService,
         PayrollRepository        $payrollRepository,
         CongeRepository          $congeRepository,
         PrimesRepository         $primesRepository,
-        UtimePaiementService     $utimePaiementService,
-        CategoryChargeRepository $categoryChargeRepository
+        CategoryChargeRepository $categoryChargeRepository,
+        ChargesServices          $chargesServices,
+        PrimeService             $primeService
 
     )
     {
@@ -38,43 +43,11 @@ class DepartServices
         $this->payrollRepository = $payrollRepository;
         $this->congeRepository = $congeRepository;
         $this->primesRepository = $primesRepository;
-        $this->utimePaiementService = $utimePaiementService;
         $this->categoryChargeRepository = $categoryChargeRepository;
+        $this->chargesServices = $chargesServices;
+        $this->primeService = $primeService;
     }
 
-    /** Permet d'obtenir l'ancienneté du salarie en fonction de son départ cela en jour, mois et année */
-    public function getAncienneteByDepart(Departure $departure): array
-    {
-        $personal = $departure->getPersonal();
-        $dateDepart = $departure->getDate();
-        $dateEmbauche = $personal->getContract()->getDateEmbauche();
-        $anciennityInDay = $dateDepart->diff($dateEmbauche)->days;
-        $anciennityInMonth = $anciennityInDay / 12;
-        $anciennityInYear = $anciennityInDay / 360;
-
-        return [
-            'anciennity_in_days' => round($anciennityInDay, 2),
-            'anciennity_in_month' => round($anciennityInMonth, 2),
-            'anciennity_in_year' => round($anciennityInYear, 2)
-        ];
-    }
-
-    /** Element du personnel utilisé pour les départ */
-    public function personalElementOfDeparture(Departure $departure): array
-    {
-        $personal = $departure->getPersonal();
-        $genre = $personal->getGenre();
-        $chargePeople = $personal->getChargePeople();
-        $older = $personal->getOlder();
-        $salaireBase = $this->utimePaiementService->getAmountSalaireBrutAndImposable($personal)['salaire_categoriel'];
-
-        return [
-            'personal_genre' => $genre,
-            'personal_charge_peaple' => $chargePeople,
-            'personal_ancienity' => $older,
-            'salaire_base' => $salaireBase
-        ];
-    }
 
     /** Determiner le nombre de mois de présence ou periode de presence depuis le premier mois de l'annee*/
     public function getPeriodOfPresence($departure): float|int|null
@@ -92,13 +65,12 @@ class DepartServices
         }
         /** Obtenir le nombre de mois de presence que fait la période */
         return count($mois);
-
     }
 
-    /** Determiner le nombre de jour de présence ou periode de presence depuis le premier mois de l'année */
+    /** Determiner le nombre de jour de présence ou periode de presence depuis le premier jours de l'année */
     public function getPeriodOfPresenceInDay($departure): float|int|null
     {
-        /** Obtenir les mois précédent le jour du départ dépuis le premier mois de l'année */
+        /** Obtenir les jours précédent le jour du départ dépuis le premier jours de l'année */
         $dateDepart = $departure->getDate();
         $anneeDepart = $dateDepart->format('Y');
         $annee = (int)$anneeDepart;
@@ -109,13 +81,45 @@ class DepartServices
         foreach ($periode as $date) {
             $day[] = $date;
         }
-        /** Obtenir le nombre de mois de presence que fait la période */
-        return count($day);
+        /** Obtenir le nombre de jours de presence que fait la période */
+        return ceil(count($day) / 1.25);
+    }
 
+
+    /** Permet d'obtenir l'ancienneté du salarie en fonction de son départ cela en jour, mois et année */
+    public function getAncienneteByDepart(Departure $departure): array
+    {
+        $personal = $departure->getPersonal();
+        $dateDepart = $departure->getDate();
+        $dateEmbauche = $personal->getContract()->getDateEmbauche();
+        $anciennityInDay = $dateDepart->diff($dateEmbauche)->days;
+        $anciennityInMonth = $anciennityInDay / 12;
+        $anciennityInYear = $anciennityInDay / 360;
+        return [
+            'anciennity_in_days' => round($anciennityInDay, 2),
+            'anciennity_in_month' => round($anciennityInMonth, 2),
+            'anciennity_in_year' => round($anciennityInYear, 2)
+        ];
+    }
+
+    /** Element du personnel utilisé pour les départ */
+    public function personalElementOfDeparture(Departure $departure): array
+    {
+        $personal = $departure->getPersonal();
+        $genre = $personal->getGenre();
+        $chargePeople = $personal->getChargePeople();
+        $older = $personal->getOlder();
+        $salaireBase = $this->chargesServices->amountSalaireBrutAndImposable($personal)['salaire_categoriel'];
+        return [
+            'personal_genre' => $genre,
+            'personal_charge_peaple' => $chargePeople,
+            'personal_ancienity' => $older,
+            'salaire_base' => $salaireBase
+        ];
     }
 
     /** Determiner le nombre de jour de presence dans le mois courrant */
-    public function getDayOfPresence(Departure $departure): float|int|null
+    public function getDayOfPresenceCurrentMonth(Departure $departure): float|int|null
     {
         $dateDepart = $departure->getDate();
         $today = Carbon::today();
@@ -128,11 +132,11 @@ class DepartServices
         foreach ($periode as $date) {
             $day[] = $date;
         }
-        return count($day);
+        return ceil(count($day) / 1.25);
     }
 
     /** Determiner le nombre de mois de présence ou periode de presence que */
-    public function getPeriodReference(mixed $start, mixed $end): ?int
+    public function getPeriodReferenceForConge(mixed $start, mixed $end): ?int
     {
         $interval = new DateInterval('P1M');
         $periode = new DatePeriod($start, $interval, $end);
@@ -140,10 +144,12 @@ class DepartServices
         foreach ($periode as $date) {
             $mois[] = $date->format('F');
         }
-        return count($mois);
+        return count($mois) - 1;
     }
 
-    /** Determiner l'indemnité compensatrice de congé */
+    /** Determiner l'indemnité compensatrice de congé
+     * @throws Exception
+     */
     public function indemniteCompensatriceCgs(Departure $departure): array
     {
         /** Element of departure */
@@ -153,16 +159,16 @@ class DepartServices
         $dateDepart = $departure->getDate();
 
         $retourDConge = null;
+        $workMonthInCurrentYear = null;
         $lastConges = $this->congeRepository->getLastCongeByID($personal->getId(), false);
         if ($lastConges) {
-            /** Obtenir les mois précédent le jour du départ dépuis le premier mois de l'année */
             $retourConge = $lastConges->getDateDernierRetour();
             $retourDConge = date_format($lastConges->getDateDernierRetour(), 'd/m/Y');
             /** Obtenir le nombre de mois de presence depuis le retour du conges jusqu'à la fin du mois précédent le mois de depart */
-            $monthPresence = $this->getPeriodReference($retourConge, $dateDepart) - 1;
-            /** Nombre de jour de présence éffectué pendant le mois actuel */
-            $jrPdrOfPresence = $this->getDayOfPresence($departure);
-            $totalMonthPresence = round($monthPresence + ($jrPdrOfPresence / 30), 2);
+            $monthPresence = $this->getPeriodReferenceForConge($retourConge, $dateDepart);
+            /** Nombre de jour de présence éffectué pendant le mois actuel, jour ouvrable */
+            $jrPdrOfPresence = $this->getDayOfPresenceCurrentMonth($departure);
+            $totalMonthPresence = round($monthPresence + ($jrPdrOfPresence * 1.25 / 30));
 
             /** Determiner le nombre de jour ouvrable */
             $dayOuvrable = ceil($totalMonthPresence * self::JOUR_CONGE_OUVRABLE);
@@ -177,8 +183,9 @@ class DepartServices
             /** Quote-part de la prime de fin d'année de la periode de présence */
             $tauxGratif = (int)$this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux() / 100;
             $basePeriode = $personalElement['salaire_base'];
+            /** nombre de jour ouvrable de présence dans l'annee actuel depuis le debut de l'année */
             $newYearDayWork = $this->getPeriodOfPresenceInDay($departure);
-            $quotePartCorrespondent = round($basePeriode * $tauxGratif * $newYearDayWork / 360, 2);
+            $quotePartCorrespondent = round($basePeriode * $tauxGratif * $newYearDayWork * 1.25 / 360);
 
             /** Salaire brut de la période */
             $brutPeriode = round($this->payrollRepository->getPeriodiqueSalary2($personal, $retourConge), 2);
@@ -186,12 +193,11 @@ class DepartServices
         } else {
             /** Date d'embauche */
             $dateEmbauche = $personal->getContract()->getDateEmbauche();
-            /** Obtenir le nombre de mois de presence depuis le retour du conges jusqu'à la fin du mois précédent le mois de depart */
-            $monthPresence = $this->getPeriodReference($dateEmbauche, $dateDepart) - 1;
+            /** Obtenir le nombre de mois de presence depuis la date d'embauche jusqu'à la fin du mois précédent le mois de depart */
+            $monthPresence = $this->getPeriodReferenceForConge($dateEmbauche, $dateDepart);
             /** Nombre de jour de présence éffectué pendant le mois actuel */
-            $jrPdrOfPresence = $this->getDayOfPresence($departure);
-            $totalMonthPresence = round($monthPresence + ($jrPdrOfPresence / 30), 2);
-
+            $jrPdrOfPresence = $this->getDayOfPresenceCurrentMonth($departure);
+            $totalMonthPresence = round($monthPresence + ($jrPdrOfPresence * 1.25 / 30));
             /** Determiner le nombre de jour ouvrable */
             $dayOuvrable = ceil($totalMonthPresence * self::JOUR_CONGE_OUVRABLE);
             /** Determiner le nombre de jour calandaire */
@@ -205,17 +211,19 @@ class DepartServices
             /** Quote-part de la prime de fin d'année de la periode de présence */
             $tauxGratif = (int)$this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux() / 100;
             $basePeriode = $personalElement['salaire_base'];
+            /** nombre de jour ouvrable de présence dans l'annee actuel depuis le debut de l'année */
             $newYearDayWork = $this->getPeriodOfPresenceInDay($departure);
-            $quotePartCorrespondent = round($basePeriode * $tauxGratif * $newYearDayWork / 360, 2);
+            $quotePartCorrespondent = round($basePeriode * $tauxGratif * $newYearDayWork * 1.25 / 360);
 
             /** Salaire brut de la période */
-            $brutPeriode = round($this->payrollRepository->getPeriodiqueSalary1($personal, $dateDepart), 2);
-
+            $brutPeriode = round($this->payrollRepository->getCumulSalaries($personal, $dateDepart));
+            /** Nombre de mois travailler depuis le debut de l'annee jusqu'a la date de depart */
+            $workMonthInCurrentYear = $this->getPeriodOfPresence($departure) - 1;
         }
         /** Determiner le salaire moyen mensuel */
-        $smm = round($brutPeriode / $totalMonthPresence, 2);
+        $smm = round($brutPeriode / $workMonthInCurrentYear);
         /** Indemnite de congé */
-        $indemniteConge = round(($smm * (self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE * $totalMonthPresence + $drJourSupp2 + $drJourSupp1)) / 30, 2);
+        $indemniteConge = round(($smm + $quotePartCorrespondent * (self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE * $totalMonthPresence + $drJourSupp2 + $drJourSupp1)) / 30, 2);
 
         return [
             'duree_conges' => $drCongesTotal,
@@ -226,7 +234,9 @@ class DepartServices
         ];
     }
 
-    /** Determiner le salaire global moyen des 12 dernier mois */
+    /** Determiner le salaire global moyen des 12 dernier mois
+     * @throws Exception
+     */
     public function salaireGlobalMoyen(Departure $departure): float|int|null
     {
         $personal = $departure->getPersonal();
@@ -243,7 +253,9 @@ class DepartServices
         return round($salaireGlobal / 12, 2);
     }
 
-    /** Permet d'obtenir l'indemnite de licenciement du salarié et salaire global moyen */
+    /** Permet d'obtenir l'indemnite de licenciement du salarié et salaire global moyen
+     * @throws Exception
+     */
     public function getIndemniteLicenciement(Departure $departure): float|int|null
     {
         /** Permet d'obtenir le salaire global moyen qui est la somme du salaire des 12 mois qui on précédé la date de depart */
@@ -337,12 +349,12 @@ class DepartServices
         $categoryName = $personal->getCategorie()->getCategorySalarie()->getName();
         $anciennityInYear = $this->getAncienneteByDepart($departure)['anciennity_in_year'];
         $drPreavis = $this->getDrPreavisInMonth($anciennityInYear, $categoryName);
-        $primeAnciennity = $this->utimePaiementService->getAmountAnciennete($personal);
-        $heursSupp = $this->utimePaiementService->getAmountMajorationHeureSupps($personal);
+        $primeAnciennity = $this->chargesServices->amountAnciennete($personal);
+        $heursSupp = $this->chargesServices->amountMajorationHeureSupps($personal);
         $salaireBrut = $personal->getSalary()->getBrutAmount() - $personal->getSalary()->getAmountAventage();
 
         /** Determiner le plafond de l'indemnite theorique exonere */
-        $transport = $this->utimePaiementService->getPrimeTransportLegal();
+        $transport = $this->primeService->getPrimeTransportLegal();
         $primeNonJuridique = round($personal->getSalary()->getTotalPrimeJuridique(), 2);
 
         /** Rémumération total hors avantage en nature  */
@@ -408,7 +420,9 @@ class DepartServices
 
     // REGIME FIXCAL APPLICABLE A L'INDEMNITE DE LICENCIEMENT //
 
-    /** Permet de determiner le quotité de l'indemnité de licenciement non imposable et celle qui est imposable */
+    /** Permet de determiner le quotité de l'indemnité de licenciement non imposable et celle qui est imposable
+     * @throws Exception
+     */
     public function getQuotityIndemniteLicenciement(Departure $departure): array
     {
         $reason = $departure->getReason();
@@ -425,7 +439,9 @@ class DepartServices
         ];
     }
 
-    /** Permet de determiner le montant total des droits et indemnites imposable du depart */
+    /** Permet de determiner le montant total des droits et indemnites imposable du depart
+     * @throws Exception
+     */
     public function getTotalIndemniteImposable(Departure $departure): float|int|null
     {
         $reason = $departure->getReason();
@@ -466,11 +482,13 @@ class DepartServices
     }
 
     // CALCULE DES DROITS LEGAUX POUR LE DEPART DU SALARIE //
+
+    /**
+     * @throws Exception
+     */
     public function calculeDroitsAndIndemnity(Departure $departure): void
     {
         $personal = $departure->getPersonal();
-        $categoryName = $personal->getCategorie()->getCategorySalarie()->getName();
-        $anciennityInYear = $this->getAncienneteByDepart($departure)['anciennity_in_year'];
         $reason = $departure->getReason();
 
         /** Element de conges */
@@ -478,7 +496,6 @@ class DepartServices
         $gratification = $this->indemniteCompensatriceCgs($departure)['gratification_prorata'];
 
         /** Element de preavis */
-        //$drPreavis = $this->getDrPreavisInMonth($anciennityInYear, $categoryName);
         $indemnitePreavis = $this->getIndmtCompensPreavis($departure);
 
         /** Element de licenciement */
@@ -496,31 +513,31 @@ class DepartServices
         /** Total des droits et indemnites imposable */
         $totalIndemniteImposable = $this->getTotalIndemniteImposable($departure);
 
-            if($reason === Status::LICENCIEMENT_FAUTE_LOURDE || $reason === Status::ABANDON_DE_POST || $reason === Status::DEMISSION){
+        if ($reason === Status::LICENCIEMENT_FAUTE_LOURDE || $reason === Status::ABANDON_DE_POST || $reason === Status::DEMISSION) {
 
 
-                if ($reason === Status::ABANDON_DE_POST || $reason === Status::LICENCIEMENT_FAUTE_LOURDE) {
-                    $salairePresence = $salaireDueProrata;
+            if ($reason === Status::ABANDON_DE_POST || $reason === Status::LICENCIEMENT_FAUTE_LOURDE) {
+                $salairePresence = $salaireDueProrata;
 
-                } else {
-                    $salairePresence = $salaireDue;
-                }
-                $departure
-                    ->setSalaryDue($salairePresence)
-                    ->setGratification($gratification)
-                    ->setCongeAmount($indemniteConges)
-                    ->setNoticeAmount(null)
-                    ->setDissmissalAmount(null)
-                    ->setAmountLcmtImposable(null)
-                    ->setAmountLcmtNoImposable(null)
-                    ->setFraisFuneraire(null)
-                    ->setTotalIndemniteImposable($totalIndemniteImposable);
-
+            } else {
+                $salairePresence = $salaireDue;
             }
-                
+            $departure
+                ->setSalaryDue($salairePresence)
+                ->setGratification($gratification)
+                ->setCongeAmount($indemniteConges)
+                ->setNoticeAmount(null)
+                ->setDissmissalAmount(null)
+                ->setAmountLcmtImposable(null)
+                ->setAmountLcmtNoImposable(null)
+                ->setFraisFuneraire(null)
+                ->setTotalIndemniteImposable($totalIndemniteImposable);
 
-            if($reason === Status::LICENCIEMENT_COLLECTIF || $reason === Status::LICENCIEMENT_FAIT_EMPLOYEUR || $reason === Status::MALADIE || $reason === Status::RETRAITE){
-                $departure
+        }
+
+
+        if ($reason === Status::LICENCIEMENT_COLLECTIF || $reason === Status::LICENCIEMENT_FAIT_EMPLOYEUR || $reason === Status::MALADIE || $reason === Status::RETRAITE) {
+            $departure
                 ->setSalaryDue($salaireDue)
                 ->setGratification($gratification)
                 ->setCongeAmount($indemniteConges)
@@ -530,20 +547,20 @@ class DepartServices
                 ->setAmountLcmtNoImposable($indemniteLcmtNoImposable)
                 ->setFraisFuneraire(null)
                 ->setTotalIndemniteImposable($totalIndemniteImposable);
-            }
-                
-            if($reason === Status::DECES){
-                $departure
-                    ->setSalaryDue(null)
-                    ->setGratification(null)
-                    ->setCongeAmount(null)
-                    ->setNoticeAmount(null)
-                    ->setDissmissalAmount($indemniteLicenciement)
-                    ->setAmountLcmtImposable($indemniteLcmtImposable)
-                    ->setAmountLcmtNoImposable($indemniteLcmtNoImposable)
-                    ->setFraisFuneraire($fraisFuneraire)
-                    ->setTotalIndemniteImposable($totalIndemniteImposable);
-            }
+        }
+
+        if ($reason === Status::DECES) {
+            $departure
+                ->setSalaryDue(null)
+                ->setGratification(null)
+                ->setCongeAmount(null)
+                ->setNoticeAmount(null)
+                ->setDissmissalAmount($indemniteLicenciement)
+                ->setAmountLcmtImposable($indemniteLcmtImposable)
+                ->setAmountLcmtNoImposable($indemniteLcmtNoImposable)
+                ->setFraisFuneraire($fraisFuneraire)
+                ->setTotalIndemniteImposable($totalIndemniteImposable);
+        }
     }
 
     // REGIME FIXCAL APPLICABLE A L'INDEMNITE DE LICENCIEMENT SUITE//
@@ -553,7 +570,6 @@ class DepartServices
     public function calculerImpotBrutDeparture(Departure $departure): float|int
     {
 
-        //$netImposable = $this->getTotalIndemniteImposable($departure);
         $netImposable = (double)$departure->getTotalIndemniteImposable();
         $tranchesImposition = [
             ['min' => 0, 'limite' => 75000, 'taux' => 0],
@@ -579,7 +595,7 @@ class DepartServices
                 $impotBrut += $montantImposable;
                 break;
             }
-            
+
         }
         return round($impotBrut, 2);
     }
@@ -588,7 +604,7 @@ class DepartServices
     function calculateCreditImpotDeparture(Departure $departure): float|int
     {
         $personal = $departure->getPersonal();
-        $nbrePart = $this->utimePaiementService->getNumberParts($personal);
+        $nbrePart = $this->chargesServices->nombrePartPersonal($personal);
         $creditImpot = null;
         switch ($nbrePart) {
             case 1;
@@ -637,7 +653,6 @@ class DepartServices
     public function getAmountCNPS(Departure $departure): float
     {
 
-        //$netImposable = $this->getTotalIndemniteImposable($departure);
         $netImposable = (double)$departure->getTotalIndemniteImposable();
         if ($netImposable > 1647314) {
             $netImposable = 1647314;
@@ -651,7 +666,6 @@ class DepartServices
     /** Determiner le montant de la part patronal I.S locaux, de 1,20 % */
     public function getAmountIS(Departure $departure): float|int
     {
-        //$netImposable = $this->getTotalIndemniteImposable($departure);
         $netImposable = (double)$departure->getTotalIndemniteImposable();
         $categoryRate = $this->categoryChargeRepository->findOneBy(['codification' => 'IS']);
         return round($netImposable * $categoryRate?->getValue() / 100, 2);
@@ -685,7 +699,6 @@ class DepartServices
     /** Determiner le montant du taux d'apprentissage, charge patronal */
     public function getAmountTA(Departure $departure): float|int
     {
-        //$netImposable = $this->getTotalIndemniteImposable($departure);
         $netImposable = (double)$departure->getTotalIndemniteImposable();
         $categoryRateFDFP_TA = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_TA']);
         return round($netImposable * $categoryRateFDFP_TA->getValue() / 100, 2);
@@ -694,7 +707,6 @@ class DepartServices
     /** Determiner le montant de la FPC, charge patronal */
     public function getAmountFPC(Departure $departure): float|int
     {
-        //$netImposable = $this->getTotalIndemniteImposable($departure);
         $netImposable = (double)$departure->getTotalIndemniteImposable();
         $categoryRateFDFP_FPC = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC']);
         return round($netImposable * $categoryRateFDFP_FPC->getValue() / 100, 2);
@@ -703,7 +715,6 @@ class DepartServices
     /** Determiner le montant de la FPC complement annuel */
     public function getAmountFPCAnnuel(Departure $departure): float|int
     {
-        //$netImposable = $this->getTotalIndemniteImposable($departure);
         $netImposable = (double)$departure->getTotalIndemniteImposable();
         $categoryRateFDFP_FPC_VER = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC_VER']);
         return round($netImposable * $categoryRateFDFP_FPC_VER->getValue() / 100, 2);

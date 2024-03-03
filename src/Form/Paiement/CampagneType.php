@@ -6,8 +6,6 @@ use App\Contract\SalaryInterface;
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Campagne;
 use App\Repository\DossierPersonal\PersonalRepository;
-use Carbon\Carbon;
-use DateTime;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -68,18 +66,12 @@ class CampagneType extends AbstractType
                     ],
                     'query_builder' => function (EntityRepository $er) {
                         // obtenir le premier et le dernier jour du mois
-                        $carbon = Carbon::today();
-                        $month = $carbon->month;
-                        $years = $carbon->year;
-                        $firstDay = new DateTime("$years-$month-1");
-                        $lastDay = new DateTime("$years-$month-" . $firstDay->format("t"));
+
                         return $er->createQueryBuilder('p')
                             ->join('p.contract', 'contract')
                             ->leftJoin('p.departures', 'departures')
                             ->where('contract.id is not null')
-                            ->orWhere('departures.date BETWEEN :start AND :end')
-                            ->setParameter('start', $firstDay)
-                            ->setParameter('end', $lastDay);
+                            ->andWhere('departures.id is null');
                     },
                     'multiple' => true,
                     'help' => 'La campagne est fonction des salarié'

@@ -203,6 +203,9 @@ class Payroll
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $totalRetenuePatronal = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $dayOfPresence = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -924,6 +927,18 @@ class Payroll
     public function setTotalRetenuePatronal(?string $totalRetenuePatronal): static
     {
         $this->totalRetenuePatronal = $totalRetenuePatronal;
+
+        return $this;
+    }
+
+    public function getDayOfPresence(): ?string
+    {
+        return $this->dayOfPresence;
+    }
+
+    public function setDayOfPresence(?string $dayOfPresence): static
+    {
+        $this->dayOfPresence = $dayOfPresence;
 
         return $this;
     }

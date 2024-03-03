@@ -112,9 +112,7 @@ class ApiReportingController extends AbstractController
         return new JsonResponse($personalPrime);
     }
 
-    /**
-     * @throws NonUniqueResultException
-     */
+
     #[Route('/etat_salaire_globale', name: 'etat_salaire', methods: ['GET'])]
     public function etatSalarialeGlobale(Request $request): JsonResponse
     {
@@ -129,54 +127,45 @@ class ApiReportingController extends AbstractController
         $data = [];
         $salaries = $this->payrollRepository->findEtatSalaire($startAt, $endAt, $personalID);
         foreach ($salaries as $index => $salary) {
-            $primeAnciennete = $this->etatService->getPrimeAnciennete($salary['personal_id']);
-            $amountHeureSupp = $this->heureSupService->getAmountHeursSuppByID($salary['personal_id']);
-            $gratification = $this->etatService->getGratification($salary['personal_id']);
-            $conges = $this->congeRepository->getLastCongeByID($salary['personal_id'], false);
-            $allocationConger = $conges?->getAllocationConge();
-            $categoryRateFDFP_TA = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_TA'])->getValue();
-            $categoryRateFDFP_FPC = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC'])->getValue();
-            $categoryRateRCNPS_CR = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_CR'])->getValue();
-            $categoryRateIS = $this->categoryChargeRepository->findOneBy(['codification' => 'IS'])->getValue();
-            $categoryRCNPS_AT = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_AT'])->getValue();
-            $categoryRCNPS_PF = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_PF'])->getValue();
-            $salaireBrut = $salary['brutAmount'] + $primeAnciennete + $amountHeureSupp + $gratification + $allocationConger;
-            $salaireImposable = $salary['imposableAmount'] + $primeAnciennete + $amountHeureSupp + $gratification + $allocationConger;
-            $retenueDivers = $salary['salaryCmu'] + $salary['salarySante'];
-            $retenueCNPS = ($salaireImposable * $categoryRateRCNPS_CR) / 100;
-            $itsPatronal = ($salaireImposable * $categoryRateIS) / 100;
-            $tauxApprentissage = ($salaireImposable * $categoryRateFDFP_TA) / 100;
-            $tfc = ($salaireImposable * $categoryRateFDFP_FPC) / 100;
-            $accidentTravail = ($salaireImposable * $categoryRCNPS_AT) / 100;
-            $prestationTravail = ($salaireImposable * $categoryRCNPS_PF) / 100;
-            $totalRetenue = $retenueCNPS + $itsPatronal + $tauxApprentissage + $tfc + $accidentTravail + $prestationTravail;
-            $salaireNet = $salaireBrut - $totalRetenue;
+            $url = $this->generateUrl('campagne_bulletin_incatif', ['uuid' => $salary['personal_uuid']]);
+            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+            $date = $salary['periode_debut'];
+            $periode = $formatter->format($date);
+            $type = $salary['ordinary'] ? 'ORDINAIRE' : 'EXEPTIONNEL';
             $data[] = [
                 'index' => ++$index,
                 'dateCreation' => date_format($salary['startedAt'], 'd/m/Y'),
-                'fullName' => $salary['firstName'] . ' ' . $salary['lastName'],
+                'type_campagne' => $type,
+                'periode' => $periode,
+                'nom' => $salary['nom'],
+                'prenoms' => $salary['prenoms'],
                 'matricule' => $salary['matricule'],
+                'service' => $salary['station'],
                 'salaireBase' => (int)$salary['baseAmount'],
-                'primeAnciennete' => $primeAnciennete,
-                'autrePrimes' => (int)$salary['prime_juridique'],
-                'amountHeureSupp' => (int)$amountHeureSupp,
-                'gratification' => (int)$gratification,
-                'congePaye' => (int)$allocationConger,
-                'salaireBrut' => (int)$salaireBrut,
-                'personalCnps' => (int)$salary['salaryCnps'],
-                'salaireImposable' => (int)$salaireImposable,
-                'itsNetCreditImpot' => (int)$salary['salaryIts'],
-                'prêtDuMois' => 0,
-                'retenueDivers' => (int)$retenueDivers,
-                'autreDroits' => 0,
-                'salaireNet' => (int)$salaireNet,
-                'observation' => '',
-                'cnpsPatronal' => (int)$retenueCNPS,
-                'itsPatronal' => (int)$itsPatronal,
-                'tauxApprentissage' => (int)$tauxApprentissage,
-                'TFC' => (int)$tfc,
-                'accidentTravail' => (int)$accidentTravail,
-                'prestationFamille' => (int)$prestationTravail
+                'sursalaire_salaried' => (int)$salary['sursalaire'],
+                'primeAnciennete' => (int)$salary['AncienneteAmount'],
+                'prime_tenue_travail' => (int)$salary['amountPrimeTenueTrav'],
+                'prime_salissure' => (int)$salary['amountPrimeSalissure'],
+                'amountHeureSupp' => (int)$salary['majorationAmount'],
+                'salaireImposable' => (int)$salary['imposableAmount'],
+                'its_salaried' => (int)$salary['salaryIts'],
+                'fixcale_salariale' => (int)$salary['fixcalAmount'],
+                'cnps_salaried' => (int)$salary['salaryCnps'],
+                'cmu_salaried' => (int)$salary['salaryCmu'],
+                'charge_salarial' => (int)$salary['totalRetenueSalarie'],
+                'prime_transport_legal' => (int)$salary['salaryTransport'],
+                'assurance_salariale' => (int)$salary['salarySante'],
+                'net_payer_salaried' => (int)$salary['netPayer'],
+                'employer_is' => (int)$salary['employeurIs'],
+                'amount_fdfp' => (int)$salary['employeurFdfp'],
+                'employer_cr' => (int)$salary['employeurCr'],
+                'employer_cmu' => (int)$salary['employeurCmu'],
+                'employer_pr' => (int)$salary['employeurPf'],
+                'employer_at' => (int)$salary['employeurAt'],
+                'assurance_patronales' => (int)$salary['employeurSante'],
+                'charge_patronal' => (int)$salary['totalRetenuePatronal'],
+                'masse_salariale' => (int)$salary['masseSalary'],
+                'print_bulletin' => $url
             ];
         }
         return new JsonResponse($data);

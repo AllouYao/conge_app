@@ -33,6 +33,9 @@ class DepartureController extends AbstractController
         $this->departServices = $departServices;
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route('/api/depart', name: 'api', methods: ['GET'])]
     public function apiDepart(): JsonResponse
     {
@@ -51,6 +54,7 @@ class DepartureController extends AbstractController
             $departures = $this->departureRepository->getDepartureByDateByEmployeRole($month, $years);
 
         }
+        $departures = $this->departureRepository->findAll();
         foreach ($departures as $departure) {
             $personal = $departure->getPersonal();
             $smm = $this->departServices->indemniteCompensatriceCgs($departure)['salaire_moyen_mensuel'];

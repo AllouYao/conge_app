@@ -173,7 +173,7 @@ class CongeService
      */
     public function suppConger(mixed $genre, mixed $chargPeapleOfPersonal, mixed $today): int|float
     {
-        $nbJrCongeSupp = 0;
+        $nbJrCongeSupp = null;
         if ($genre === Status::FEMININ) {
             foreach ($chargPeapleOfPersonal->getValues() as $item) {
                 $yearOfChargPeaple = $item->getBirthday()->diff($today)->y;

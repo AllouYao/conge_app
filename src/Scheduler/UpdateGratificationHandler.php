@@ -4,10 +4,9 @@ namespace App\Scheduler;
 
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\Settings\PrimesRepository;
-use App\Service\UtimePaiementService;
+use App\Service\Personal\ChargesServices;
 use App\Utils\Status;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
@@ -18,23 +17,20 @@ final class UpdateGratificationHandler implements ScheduleProviderInterface
 {
     private PersonalRepository $personalRepository;
     private PrimesRepository $primesRepository;
-    private UtimePaiementService $utimePaiementService;
     private EntityManagerInterface $entityManager;
-    private LoggerInterface $logger;
+    private ChargesServices $chargesServices;
 
     public function __construct(
         PersonalRepository     $personalRepository,
         PrimesRepository       $primesRepository,
-        UtimePaiementService   $utimePaiementService,
         EntityManagerInterface $entityManager,
-        LoggerInterface        $logger
+        ChargesServices        $chargesServices
     )
     {
         $this->personalRepository = $personalRepository;
         $this->primesRepository = $primesRepository;
-        $this->utimePaiementService = $utimePaiementService;
         $this->entityManager = $entityManager;
-        $this->logger = $logger;
+        $this->chargesServices = $chargesServices;
     }
 
     public function __invoke(UpdateGratification $message): void
@@ -43,7 +39,7 @@ final class UpdateGratificationHandler implements ScheduleProviderInterface
         $tauxGratification = (int)$this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux();
         foreach ($personal as $item) {
             $olderMonth = $item->getOlder() * 12;
-            $service = $this->utimePaiementService->getAmountSalaireBrutAndImposable($item);
+            $service = $this->chargesServices->amountSalaireBrutAndImposable($item);
             $salaireCategoriel = $service['salaire_categoriel'];
             if ($olderMonth < 12) {
                 $gratification = ((($salaireCategoriel * $tauxGratification) / 100) * ($olderMonth * 30)) / 360;

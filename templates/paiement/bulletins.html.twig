@@ -3,7 +3,6 @@
 {% block title %}Bulletin de paie{% endblock %}
 
 {% block stylesheets %}
- 
     <style>
         .sans-bordure th, .sans-bordure td {
             border-bottom: none;
@@ -22,7 +21,6 @@
             border-top: none;
         }
     </style>
-
 {% endblock %}
 
 {% block content %}
@@ -94,8 +92,12 @@
                                         <td style="font-size: smaller">{{ payrolls.date_edition }}</td>
                                     </tr>
                                     <tr class="small-text sans-bordure no-border-top no-border-button">
-                                        <th style="font-size: smaller; font-weight: bolder;">Nom & Prénoms</th>
-                                        <td style="font-size: smaller">{{ payrolls.nom_prenoms|upper }}</td>
+                                        <th style="font-size: smaller; font-weight: bolder;">Nom</th>
+                                        <td style="font-size: smaller">{{ payrolls.nom|upper }}</td>
+                                    </tr>
+                                    <tr class="small-text sans-bordure no-border-top no-border-button">
+                                        <th style="font-size: smaller; font-weight: bolder;">Prénoms</th>
+                                        <td style="font-size: smaller">{{ payrolls.prenom|upper }}</td>
                                     </tr>
                                     <tr class="small-text sans-bordure no-border-top no-border-button">
                                         <th style="font-size: smaller; font-weight: bolder;">Emploi</th>
@@ -116,6 +118,7 @@
                                 <tr class="small-text text-center sans-bordure">
                                     <th rowspan="2">Rubrique</th>
                                     <th rowspan="2">Libelle</th>
+                                    <th rowspan="2">Nombre</th>
                                     <th rowspan="2">Base</th>
                                     <th colspan="3">Part salariale</th>
                                     <th colspan="2">Part patronale</th>
@@ -133,6 +136,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO1</td>
                                         <td>Salaire de base</td>
+                                        <td class="text-end">{{ payrolls.nombre_jour_travailler|number_format(2, ',', ' ') }} </td>
                                         <td class="text-end">{{ payrolls.salaire_base|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.salaire_base|number_format(0, ',', ' ') }}</td>
@@ -145,6 +149,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO2</td>
                                         <td>Sursalaire</td>
+                                        <td class="text-end">{{ payrolls.nombre_jour_travailler|number_format(2, ',', ' ') }} </td>
                                         <td class="text-end">{{ payrolls.sursalaire|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.sursalaire|number_format(0, ',', ' ') }}</td>
@@ -157,6 +162,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO3</td>
                                         <td>Majoration H.S à 15%</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.majoration_heure_sup_15|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.majoration_heure_sup_15|number_format(0, ',', ' ') }}</td>
@@ -169,6 +175,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO4</td>
                                         <td>Majoration H.S à 50%</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.majoration_heure_sup_50|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.majoration_heure_sup_50|number_format(0, ',', ' ') }}</td>
@@ -181,6 +188,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO5</td>
                                         <td>Majoration H.S à 75% (ferié/dimanche jrs)</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.majoration_heure_sup_75_A|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.majoration_heure_sup_75_A|number_format(0, ',', ' ') }}</td>
@@ -193,6 +201,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO6</td>
                                         <td>Majoration H.S à 75% (normal/dimanche nuit)</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.majoration_heure_sup_75_B|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.majoration_heure_sup_75_B|number_format(0, ',', ' ') }}</td>
@@ -205,6 +214,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO7</td>
                                         <td>Majoration H.S à 75% (normal/dimanche jrs)</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.majoration_heure_sup_100|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.majoration_heure_sup_100|number_format(0, ',', ' ') }}</td>
@@ -217,6 +227,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO8</td>
                                         <td>Prime transport Imp</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.transport_imposable|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.transport_imposable|number_format(0, ',', ' ') }}</td>
@@ -229,6 +240,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO9</td>
                                         <td>Aventage nature Imp</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.avantage_imposable|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.avantage_imposable|number_format(0, ',', ' ') }}</td>
@@ -241,6 +253,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>O10</td>
                                         <td>Prime fonction</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.prime_fonction|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.prime_fonction|number_format(0, ',', ' ') }}</td>
@@ -253,6 +266,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>O11</td>
                                         <td>Prime logement</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.prime_logement|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.prime_logement|number_format(0, ',', ' ') }}</td>
@@ -265,6 +279,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>O12</td>
                                         <td>Indemnite fonction</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.indemnite_fonction|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.indemnite_fonction|number_format(0, ',', ' ') }}</td>
@@ -277,6 +292,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>O13</td>
                                         <td>Indemnite logement</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.indemnite_logement|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.indemnite_logement|number_format(0, ',', ' ') }}</td>
@@ -289,6 +305,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>O14</td>
                                         <td>Prime d'ancienneté</td>
+                                        <td class="text-end">{{ payrolls.nombre_jour_travailler|number_format(2, ',', ' ') }} </td>
                                         <td class="text-end">{{ payrolls.prime_anciennete|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.prime_anciennete|number_format(0, ',', ' ') }}</td>
@@ -303,6 +320,7 @@
                                         <td>Prime panier</td>
                                         <td></td>
                                         <td></td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.amount_prime_panier|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td></td>
@@ -313,6 +331,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>027</td>
                                         <td>Prime salissure</td>
+                                        <td></td>
                                         <td></td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.amount_prime_salissure|number_format(0, ',', ' ') }}</td>
@@ -327,6 +346,7 @@
                                         <td>Prime tenue travail</td>
                                         <td></td>
                                         <td></td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.amount_prime_tt|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td></td>
@@ -337,6 +357,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>029</td>
                                         <td>Prime outillage</td>
+                                        <td></td>
                                         <td></td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.amount_prime_outi|number_format(0, ',', ' ') }}</td>
@@ -351,6 +372,7 @@
                                         <td>Prime rendement</td>
                                         <td></td>
                                         <td></td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.amount_prime_rendement|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td></td>
@@ -361,6 +383,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td></td>
                                         <td class="text-center">Total brut imposable</td>
+                                        <td></td>
                                         <td></td>
                                         <td></td>
                                         <td class="text-end"
@@ -374,6 +397,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>015</td>
                                         <td>ITS</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.total_brut|number_format(0, ',', ' ') }}</td>
                                         <td class="text-end">{{ payrolls.taux_its }}</td>
                                         <td></td>
@@ -386,6 +410,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>016</td>
                                         <td>Retenue CNPS</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.total_brut|number_format(0, ',', ' ') }}</td>
                                         <td class="text-end">{{ payrolls.taux_cnps_salarial|number_format(2, ',', ' ') }}</td>
                                         <td></td>
@@ -398,6 +423,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>031</td>
                                         <td>Assurance</td>
+                                        <td></td>
                                         <td class="text-end"></td>
                                         <td class="text-end"></td>
                                         <td></td>
@@ -410,6 +436,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>017</td>
                                         <td>Retenue Générale CNPS</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.total_brut|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td></td>
@@ -422,6 +449,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>018</td>
                                         <td>Prestations Familiales</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.smig|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td></td>
@@ -434,6 +462,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>019</td>
                                         <td>Accident du travail</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.smig|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td></td>
@@ -446,6 +475,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>020</td>
                                         <td>Part patronale I.S local</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.total_brut|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td></td>
@@ -458,6 +488,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>021</td>
                                         <td>Taux D'apprentissage</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.total_brut|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td></td>
@@ -470,6 +501,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>022</td>
                                         <td>FPC</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.total_brut|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td></td>
@@ -482,6 +514,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>023</td>
                                         <td>FPC REGUL</td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.total_brut|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td></td>
@@ -497,6 +530,7 @@
                                         <td></td>
                                         <td></td>
                                         <td></td>
+                                        <td></td>
                                         <td class="text-end">{{ payrolls.amount_cmu_salarial|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.amount_cmu_patronal|number_format(0, ',', ' ') }}</td>
@@ -506,6 +540,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>031</td>
                                         <td>Assurance part patronale</td>
+                                        <td></td>
                                         <td class="text-end"></td>
                                         <td class="text-end"></td>
                                         <td></td>
@@ -520,6 +555,7 @@
                                         <td class="text-center">Total Cotisations</td>
                                         <td></td>
                                         <td></td>
+                                        <td></td>
                                         <td style="border-top: solid 1px"></td>
                                         <td class="text-end"
                                             style="border-top: solid 1px">{{ payrolls.charge_salarial|number_format(0, ',', ' ') }}</td>
@@ -532,6 +568,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>025</td>
                                         <td>Prime transport NI</td>
+                                        <td class="text-end">{{ payrolls.nombre_jour_travailler|number_format(2, ',', ' ') }} </td>
                                         <td></td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.prime_transport|number_format(0, ',', ' ') }}</td>
@@ -593,7 +630,7 @@
                                     <th>Net imposable</th>
                                     <th>Heures travaillées</th>
                                     <th>Heures Supplémentaires</th>
-                                    <th style="border: #0b0b0f 2px inset">NET A PAYER</th>
+                                    <th style="border: #0b0b0f 1px inset">NET A PAYER</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -606,8 +643,8 @@
                                     <td class="text-end">{{ payrolls.net_imposable|number_format(0, ',', ' ') }}</td>
                                     <td class="text-end">{{ payrolls.heure_travailler|number_format(0, ',', ' ') }}</td>
                                     <td class="text-end">{{ payrolls.nb_heure_supp|number_format(0, ',', ' ') }}</td>
-                                    <td class="text-end"
-                                        style="border: #0b0b0f 2px inset">{{ payrolls.net_payes|number_format(0, ',', ' ') }}</td>
+                                    <td class="text-center"
+                                        style="border: #0b0b0f 1px inset; font-weight: bolder">{{ payrolls.net_payes|number_format(0, ',', ' ') }}</td>
                                 </tr>
                                 </tbody>
                             </table>

@@ -1,11 +1,12 @@
 {% if campagne.lastCampagne %}
     <fieldset>
-        <legend>Situation de l'exercice précédente</legend>
+        <legend>Situation de paie précédente</legend>
         <table class="table table-bordered table-responsive table-sm">
             <thead class="table-light">
             <tr>
                 <th class="text-center" colspan="2">Ouverture</th>
                 <th class="text-center" colspan="2">Fermeture</th>
+                <th class="text-center" style="vertical-align: middle !important;" rowspan="2">Periode de paie</th>
                 <th class="text-center" style="vertical-align: middle !important;" rowspan="2">Salariés</th>
                 <th class="text-center" style="vertical-align: middle !important;" colspan="3">Charge global des
                     salariés (Fcfa)
@@ -28,17 +29,16 @@
                 <th class="text-center">Total charges fiscales</th>
                 <th class="text-center">Total charges sociales</th>
                 <th class="text-center">Total charges</th>
-
             </tr>
             </thead>
             <tbody>
             <tr>
                 <td class="text-center">{{ campagne.lastCampagne.startedAt | date("d/m/Y") }}</td>
                 <td class="text-center">{{ campagne.lastCampagne.startedAt | date("H:i") }}</td>
-                <td class="text-center">{{ campagne.lastCampagne.updatedAt | date("d/m/Y") }}</td>
-                <td class="text-center">{{ campagne.lastCampagne.updatedAt | date("H:i") }}</td>
+                <td class="text-center">{{ campagne.lastCampagne.closedAt | date("d/m/Y") }}</td>
+                <td class="text-center">{{ campagne.lastCampagne.closedAt | date("H:i") }}</td>
+                <td class="text-center">{{ periode_paie|capitalize }}</td>
                 <td class="text-center">{{ lastCampagne.nombre_personal | number_format(0, ",", " ") }}</td>
-
                 <td class="text-end">{{ lastCampagne.fiscale_salariale | number_format(0, ",", " ") }}</td>
                 <td class="text-end">{{ lastCampagne.sociale_salariale | number_format(0, ",", " ") }}</td>
                 <td class="text-end">{{ lastCampagne.global_charge_personal | number_format(0, ",", " ") }}</td>
@@ -57,7 +57,7 @@
     <li class="nav-item">
         <a href="#date" data-bs-toggle="tab" aria-expanded="false" class="nav-link active">
             <span class="d-block d-sm-none"><i class="uil-home-alt"></i></span>
-            <span class="d-none d-sm-block">Nouvelle Campagne</span>
+            <span class="d-none d-sm-block">Nouvelle paie</span>
         </a>
     </li>
     <li class="nav-item">
@@ -70,7 +70,7 @@
 <div class="tab-content text-muted">
     <div class="tab-pane active" id="date">
         <fieldset>
-            <legend>Date ouverture & Période d'exercice</legend>
+            <legend>Date ouverture & Période paie</legend>
             <div class="mb-2" style="display: flex">
                 <label class="col-form-label" style="margin-right: 50px">Date <span class="text-danger">*</span></label>
                 <div class="col-md-3" style="margin-right: 35px">

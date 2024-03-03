@@ -4,7 +4,7 @@ namespace App\Command;
 
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\Settings\PrimesRepository;
-use App\Service\UtimePaiementService;
+use App\Service\Personal\ChargesServices;
 use App\Utils\Status;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -23,8 +23,7 @@ class GratificationAnnuelCommand extends Command
         private readonly PrimesRepository       $primesRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly PersonalRepository     $personalRepository,
-        private readonly UtimePaiementService   $utimePaiementService,
-
+        private readonly ChargesServices        $chargesServices
     )
     {
         parent::__construct();
@@ -42,7 +41,7 @@ class GratificationAnnuelCommand extends Command
         $tauxGratification = (int)$this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux();
         foreach ($personal as $item) {
             $olderMonth = $item->getOlder() * 12;
-            $service = $this->utimePaiementService->getAmountSalaireBrutAndImposable($item);
+            $service = $this->chargesServices->amountSalaireBrutAndImposable($item);
             $salaireCategoriel = $service['salaire_categoriel'];
             if ($olderMonth < 12) {
                 $gratification = ((($salaireCategoriel * $tauxGratification) / 100) * ($olderMonth * 30)) / 360;
