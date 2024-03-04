@@ -169,9 +169,10 @@ class CongeService
      * @param mixed $genre
      * @param mixed $chargPeapleOfPersonal
      * @param mixed $today
-     * @return int|float
+     * @return int|float|null
      */
-    public function suppConger(mixed $genre, mixed $chargPeapleOfPersonal, mixed $today): int|float
+    public function suppConger(mixed $genre, mixed $chargPeapleOfPersonal, mixed $today): int|float|null
+
     {
         $nbJrCongeSupp = null;
         if ($genre === Status::FEMININ) {

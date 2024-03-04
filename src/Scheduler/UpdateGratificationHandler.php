@@ -7,30 +7,31 @@ use App\Repository\Settings\PrimesRepository;
 use App\Service\Personal\ChargesServices;
 use App\Utils\Status;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Scheduler\Attribute\AsSchedule;
-use Symfony\Component\Scheduler\RecurringMessage;
-use Symfony\Component\Scheduler\Schedule;
-use Symfony\Component\Scheduler\ScheduleProviderInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsSchedule(name: 'default')]
-final class UpdateGratificationHandler implements ScheduleProviderInterface
+#[AsMessageHandler]
+final class UpdateGratificationHandler
 {
     private PersonalRepository $personalRepository;
     private PrimesRepository $primesRepository;
     private EntityManagerInterface $entityManager;
     private ChargesServices $chargesServices;
+    private LoggerInterface $logger;
 
     public function __construct(
         PersonalRepository     $personalRepository,
         PrimesRepository       $primesRepository,
         EntityManagerInterface $entityManager,
-        ChargesServices        $chargesServices
+        ChargesServices        $chargesServices,
+        LoggerInterface        $logger
     )
     {
         $this->personalRepository = $personalRepository;
         $this->primesRepository = $primesRepository;
         $this->entityManager = $entityManager;
         $this->chargesServices = $chargesServices;
+        $this->logger = $logger;
     }
 
     public function __invoke(UpdateGratification $message): void
@@ -50,14 +51,6 @@ final class UpdateGratificationHandler implements ScheduleProviderInterface
             $this->entityManager->persist($item);
         }
         $this->entityManager->flush();
-        //$this->logger->info(sprintf("Tâche executée avec succès %s", (new \DateTime())->format('d/M/Y')));
-    }
-
-    public function getSchedule(): Schedule
-    {
-        return $this->schedule ??= (new Schedule())
-            ->add(
-                RecurringMessage::cron('*/1 * * * *', new UpdateGratification())
-            );
+        $this->logger->info(sprintf("Tâche executée avec succès %s", (new \DateTime())->format('d/M/Y')));
     }
 }

@@ -6,13 +6,14 @@ use App\Repository\DossierPersonal\PersonalRepository;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 use Symfony\Component\Scheduler\ScheduleProviderInterface;
 
-#[AsSchedule(name: 'gratification')]
-final class UpdateOlderPersonalHandler implements ScheduleProviderInterface
+#[AsMessageHandler]
+final class UpdateOlderPersonalHandler
 {
     private PersonalRepository $personalRepository;
     private EntityManagerInterface $entityManager;
@@ -37,14 +38,5 @@ final class UpdateOlderPersonalHandler implements ScheduleProviderInterface
         }
         $this->entityManager->flush();
         $this->logger->info('Tâche executée avec succès %s');
-    }
-
-    public function getSchedule(): Schedule
-    {
-        return $this->schedule ??= (new Schedule())
-            ->add(
-                RecurringMessage::cron('*/1 * * * *', new UpdateOlderPersonal())
-            )
-            ;
     }
 }
