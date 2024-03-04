@@ -25,7 +25,7 @@ class HomeController extends AbstractController
     #[Route('/home', name: 'app_home')]
     public function index(MessageBusInterface $messageBus): Response
     {
-        $messageBus->dispatch(new UpdateOlderPersonal());
+        //$messageBus->dispatch(new UpdateOlderPersonal());
         $today = Carbon::today();
         $congerEnCours = $this->congeRepository->activeForAll();
         foreach ($congerEnCours as $enCour) {
