@@ -8,30 +8,32 @@
     "packages": [
         {
             "name": "beberlei/doctrineextensions",
-            "version": "v1.4.0",
+            "version": "v1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/beberlei/DoctrineExtensions.git",
-                "reference": "249eab82aa35b65741388f38499b3162403d9956"
+                "reference": "281f1650641c2f438b0a54d8eaa7ba50ac7e3eb6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/beberlei/DoctrineExtensions/zipball/249eab82aa35b65741388f38499b3162403d9956",
-                "reference": "249eab82aa35b65741388f38499b3162403d9956",
+                "url": "https://api.github.com/repos/beberlei/DoctrineExtensions/zipball/281f1650641c2f438b0a54d8eaa7ba50ac7e3eb6",
+                "reference": "281f1650641c2f438b0a54d8eaa7ba50ac7e3eb6",
                 "shasum": ""
             },
             "require": {
-                "doctrine/orm": "^2.15",
+                "doctrine/orm": "^2.19 || ^3.0",
                 "php": "^7.2 || ^8.0"
             },
             "require-dev": {
                 "doctrine/annotations": "^1.14 || ^2",
                 "doctrine/coding-standard": "^9.0.2 || ^12.0",
-                "nesbot/carbon": "*",
-                "phpunit/phpunit": "^7.0 || ^8.0 || ^9.0",
+                "nesbot/carbon": "^2.72 || ^3",
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^8.5 || ^9.6",
                 "squizlabs/php_codesniffer": "^3.8",
-                "symfony/cache": "^4.4 || ^5.4 || ^6.4 || ^7.0",
-                "symfony/yaml": "^4.4 || ^5.3 || ^6.0 || ^7.0",
+                "symfony/cache": "^5.4 || ^6.4 || ^7.0",
+                "symfony/yaml": "^5.4 || ^6.4 || ^7.0",
+                "vimeo/psalm": "^3.18 || ^5.22",
                 "zf1/zend-date": "^1.12",
                 "zf1/zend-registry": "^1.12"
             },
@@ -62,9 +64,9 @@
                 "orm"
             ],
             "support": {
-                "source": "https://github.com/beberlei/DoctrineExtensions/tree/v1.4.0"
+                "source": "https://github.com/beberlei/DoctrineExtensions/tree/v1.5.0"
             },
-            "time": "2024-02-05T17:02:44+00:00"
+            "time": "2024-03-03T17:55:15+00:00"
         },
         {
             "name": "brick/math",
@@ -241,16 +243,16 @@
         },
         {
             "name": "cron/cron-bundle",
-            "version": "3.0.4",
+            "version": "3.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Cron/Symfony-Bundle.git",
-                "reference": "39773a35a6ff64c33181202ab5c089685e35e5b7"
+                "reference": "cbb83120bee54fc5c7d3c1184418a654bfd80106"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Cron/Symfony-Bundle/zipball/39773a35a6ff64c33181202ab5c089685e35e5b7",
-                "reference": "39773a35a6ff64c33181202ab5c089685e35e5b7",
+                "url": "https://api.github.com/repos/Cron/Symfony-Bundle/zipball/cbb83120bee54fc5c7d3c1184418a654bfd80106",
+                "reference": "cbb83120bee54fc5c7d3c1184418a654bfd80106",
                 "shasum": ""
             },
             "require": {
@@ -270,7 +272,7 @@
             },
             "require-dev": {
                 "doctrine/doctrine-bundle": "*",
-                "phpunit/phpunit": "^8.0",
+                "phpunit/phpunit": "^10",
                 "symfony/framework-bundle": "^5.0|^6.0|^7.0",
                 "symfony/security-csrf": "^5.0|^6.0|^7.0",
                 "symfony/translation": "^5.0|^6.0|^7.0",
@@ -303,9 +305,9 @@
             "description": "Symfony cron",
             "support": {
                 "issues": "https://github.com/Cron/Symfony-Bundle/issues",
-                "source": "https://github.com/Cron/Symfony-Bundle/tree/3.0.4"
+                "source": "https://github.com/Cron/Symfony-Bundle/tree/3.1.0"
             },
-            "time": "2024-02-17T13:24:18+00:00"
+            "time": "2024-03-03T16:03:23+00:00"
         },
         {
             "name": "doctrine/cache",
@@ -1278,16 +1280,16 @@
         },
         {
             "name": "doctrine/migrations",
-            "version": "3.7.2",
+            "version": "3.7.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/migrations.git",
-                "reference": "47af29eef49f29ebee545947e8b2a4b3be318c8a"
+                "reference": "ebb383e8e689767ac719bbb6fbf32f6293e899b0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/migrations/zipball/47af29eef49f29ebee545947e8b2a4b3be318c8a",
-                "reference": "47af29eef49f29ebee545947e8b2a4b3be318c8a",
+                "url": "https://api.github.com/repos/doctrine/migrations/zipball/ebb383e8e689767ac719bbb6fbf32f6293e899b0",
+                "reference": "ebb383e8e689767ac719bbb6fbf32f6293e899b0",
                 "shasum": ""
             },
             "require": {
@@ -1360,7 +1362,7 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/migrations/issues",
-                "source": "https://github.com/doctrine/migrations/tree/3.7.2"
+                "source": "https://github.com/doctrine/migrations/tree/3.7.3"
             },
             "funding": [
                 {
@@ -1376,20 +1378,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-12-05T11:35:05+00:00"
+            "time": "2024-03-01T12:07:17+00:00"
         },
         {
             "name": "doctrine/orm",
-            "version": "2.18.1",
+            "version": "2.19.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/orm.git",
-                "reference": "e6eef1a97d41f1ee244b6e69d7359d00cb3e4c4a"
+                "reference": "a809a71aa6a233a6c82e68ebaaf8954adc4998dc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/orm/zipball/e6eef1a97d41f1ee244b6e69d7359d00cb3e4c4a",
-                "reference": "e6eef1a97d41f1ee244b6e69d7359d00cb3e4c4a",
+                "url": "https://api.github.com/repos/doctrine/orm/zipball/a809a71aa6a233a6c82e68ebaaf8954adc4998dc",
+                "reference": "a809a71aa6a233a6c82e68ebaaf8954adc4998dc",
                 "shasum": ""
             },
             "require": {
@@ -1418,14 +1420,14 @@
                 "doctrine/annotations": "^1.13 || ^2",
                 "doctrine/coding-standard": "^9.0.2 || ^12.0",
                 "phpbench/phpbench": "^0.16.10 || ^1.0",
-                "phpstan/phpstan": "~1.4.10 || 1.10.35",
+                "phpstan/phpstan": "~1.4.10 || 1.10.59",
                 "phpunit/phpunit": "^7.5 || ^8.5 || ^9.6",
                 "psr/log": "^1 || ^2 || ^3",
                 "squizlabs/php_codesniffer": "3.7.2",
                 "symfony/cache": "^4.4 || ^5.4 || ^6.4 || ^7.0",
                 "symfony/var-exporter": "^4.4 || ^5.4 || ^6.2 || ^7.0",
                 "symfony/yaml": "^3.4 || ^4.0 || ^5.0 || ^6.0 || ^7.0",
-                "vimeo/psalm": "4.30.0 || 5.16.0"
+                "vimeo/psalm": "4.30.0 || 5.22.2"
             },
             "suggest": {
                 "ext-dom": "Provides support for XSD validation for XML mapping files",
@@ -1475,9 +1477,9 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/orm/issues",
-                "source": "https://github.com/doctrine/orm/tree/2.18.1"
+                "source": "https://github.com/doctrine/orm/tree/2.19.0"
             },
-            "time": "2024-02-22T12:22:44+00:00"
+            "time": "2024-03-03T17:43:41+00:00"
         },
         {
             "name": "doctrine/persistence",
