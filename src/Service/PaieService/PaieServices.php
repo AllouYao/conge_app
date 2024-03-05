@@ -33,10 +33,10 @@ class PaieServices
     /** Obtenir le nombre de jour de présence depuis le premier jour du mois actuel jusqu'au dernier jour du mois
      * @throws Exception
      */
-    public function NbDayOfPresenceByCurrentMonth(Campagne $departure): float|int|null
+    public function NbDayOfPresenceByCurrentMonth(Campagne $campagne): float|int|null
     {
         /** Obtenir les jours précédent le jour du départ dépuis le premier jours du mois de licenciement de l'année */
-        $dateDepart = $departure->getDateDebut();
+        $dateDepart = $campagne->getDateDebut();
         $anneeDepart = $dateDepart->format('Y');
         $moisDepart = $dateDepart->format('m');
         $annee = (int)$anneeDepart;

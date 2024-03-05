@@ -53,8 +53,6 @@
         }
 
         $(document).ready(function () {
-            let debut;
-            let fin;
             $("#dataGridPayBook").dxDataGrid({
                 // Configuration goes here
                 dataSource: `{{ url('campagne_pay_book') }}`,
@@ -62,7 +60,7 @@
                 showColumnLines: true,
                 showRowLines: true,
                 rowAlternationEnabled: true,
-                height: 500,
+                height: 400,
                 scrolling: {
                     columnRenderingMode: 'virtual'
                 },
@@ -92,7 +90,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Livre de paie ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Livre de paie.xlsx`);
                             });
                         });
                         e.cancel = true;
@@ -119,14 +117,6 @@
                         dataType: "string",
                         alignment: "center",
                         fixed: true,
-                    },
-                    {
-                        caption: "TYPE",
-                        dataField: "type_campagne",
-                        dataType: "string",
-                        alignment: "center",
-                        fixed: true,
-                        width: 150
                     },
                     {
                         caption: 'NOM ET PRENOMS',
@@ -237,7 +227,7 @@
                                 dataField: 'cnps_salaried',
                                 dataType: 'number',
                                 alignment: 'right',
-                                width: 150
+                                width: 120
                             },
                             {
                                 caption: 'CMU',

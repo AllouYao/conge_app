@@ -45,6 +45,7 @@ class AbsenceController extends AbstractController
         } else {
             $absences = $this->absenceRepository->getAbsenceByMonthsByEmployeRole($now->month, $now->year);
         }
+        $absences = $this->absenceRepository->findAll();
         $apiAbsences = [];
         foreach ($absences as $absence) {
             $newBaseAmount = $this->absenceService->getAmountByAbsence($absence);

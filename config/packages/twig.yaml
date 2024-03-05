@@ -1,5 +1,5 @@
 twig:
-    default_path: '%kernel.project_dir%/templates'
+    file_name_pattern: '*.twig'
     form_theme: 'form/custom_form.html.twig'
     globals:
         society_info: '@App\Service\SocietyService'
