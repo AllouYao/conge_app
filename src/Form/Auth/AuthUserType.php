@@ -27,7 +27,7 @@ class AuthUserType extends AbstractType
             ->add('email')
             ->add('customRoles', EntityType::class, [
                 'class' => Role::class,
-                'placeholder' => 'Choisir un role',
+                'placeholder' => " Ajouter un rôle ",
                 'attr' => [
                     'data-plugin' => 'customselect',
                 ],

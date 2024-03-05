@@ -23,12 +23,10 @@
                         <div id="dataGridSmig"></div>
                     </div>
                 </div>
-                {% if smig_id is null %}
                     <div class="card-footer">
                         <a href="{{ path('settings_smig_new') }}"
                            class="btn btn-primary float-end" style="color: white">Nouveau</a>
                     </div>
-                {% endif %}
             </div>
         </div>
     </div>
@@ -114,6 +112,18 @@
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_fin',
+                    },
+                    {
+                        caption: 'Catégorie associée',
+                        alignment: 'center',
+                        dataType: 'object',
+                        dataField: 'category',
+                        cellTemplate: function (container, options) {
+                            $("<span>")
+                                .addClass("badge badge-soft-primary")
+                                .text(options.value)
+                                .appendTo(container);
+                        },
                     },
                     {
                         caption: 'Montant',

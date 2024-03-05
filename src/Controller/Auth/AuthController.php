@@ -36,7 +36,7 @@ class AuthController extends AbstractController
     }
 
     #[Route('/api', name: 'api', methods: ['GET'])]
-    public function api_categorySalaire(): JsonResponse
+    public function api_utilisateur(): JsonResponse
     {
         $allUsers = $this->userRepository->findAll();
         $users = [];
@@ -56,9 +56,9 @@ class AuthController extends AbstractController
         return new JsonResponse($users);
     }
 
-
-    #[IsGranted("ROLE_RH", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
-    #[IsGranted("ROLE_ADMIN", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
+    #[IsGranted("ROLE_DEV_PAIE", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
+    //#[IsGranted("ROLE_RH", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
+    //#[IsGranted("ROLE_ADMIN", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/', name: 'index')]
     public function index(): Response
     {
@@ -69,8 +69,7 @@ class AuthController extends AbstractController
         ]);
     }
 
-
-
+    #[IsGranted("ROLE_DEV_PAIE", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
     {

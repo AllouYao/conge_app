@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20240304144418 extends AbstractMigration
+final class Version20240305150143 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,12 +20,16 @@ final class Version20240304144418 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE campagne ADD type_campagne VARCHAR(255) DEFAULT NULL');
+        $this->addSql('ALTER TABLE smig DROP FOREIGN KEY FK_7F28AC0812469DE2');
+        $this->addSql('DROP INDEX IDX_7F28AC0812469DE2 ON smig');
+        $this->addSql('ALTER TABLE smig DROP category_id');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE campagne DROP type_campagne');
+        $this->addSql('ALTER TABLE smig ADD category_id INT DEFAULT NULL');
+        $this->addSql('ALTER TABLE smig ADD CONSTRAINT FK_7F28AC0812469DE2 FOREIGN KEY (category_id) REFERENCES category_salarie (id)');
+        $this->addSql('CREATE INDEX IDX_7F28AC0812469DE2 ON smig (category_id)');
     }
 }
