@@ -25,6 +25,10 @@
         {% include 'partials/_header.html.twig' %}
         {% include 'partials/Rh_Adjoint/_top_bar.html.twig' %}
     {% endif %}
+    {% if is_granted('ROLE_DEV_PAIE') %}
+        {% include 'partials/_header.html.twig' %}
+        {% include 'partials/DevPaie/_top.bar.html.twig' %}
+    {% endif %}
 
     <!-- ============================================================== -->
     <!-- Start Page Content here -->
