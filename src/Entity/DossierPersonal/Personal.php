@@ -2,6 +2,7 @@
 
 namespace App\Entity\DossierPersonal;
 
+use App\Entity\DevPaie\Operation;
 use App\Entity\DossierPersonal\HeureSup;
 use App\Entity\ElementVariable\VariablePaie;
 use App\Entity\Impots\ChargeEmployeur;
@@ -140,6 +141,9 @@ class Personal
 
     #[ORM\OneToMany(mappedBy: 'Personal', targetEntity: DetailRetenueForfetaire::class, orphanRemoval: true)]
     private Collection $detailRetenueForfetaires;
+
+    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Operation::class)]
+    private Collection $operations;
     public function __construct()
     {
         $this->chargePeople = new ArrayCollection();
@@ -153,6 +157,7 @@ class Personal
         $this->absences = new ArrayCollection();
         $this->variablePaies = new ArrayCollection();
         $this->detailRetenueForfetaires = new ArrayCollection();
+        $this->operations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -829,6 +834,36 @@ class Personal
             // set the owning side to null (unless already changed)
             if ($detailRetenueForfetaire->getPersonal() === $this) {
                 $detailRetenueForfetaire->setPersonal(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Operation>
+     */
+    public function getOperations(): Collection
+    {
+        return $this->operations;
+    }
+
+    public function addOperation(Operation $operation): static
+    {
+        if (!$this->operations->contains($operation)) {
+            $this->operations->add($operation);
+            $operation->setPersonal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOperation(Operation $operation): static
+    {
+        if ($this->operations->removeElement($operation)) {
+            // set the owning side to null (unless already changed)
+            if ($operation->getPersonal() === $this) {
+                $operation->setPersonal(null);
             }
         }
 

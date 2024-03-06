@@ -190,4 +190,9 @@ final class Status
     public const EN_COURS = 'EN COURS';
     public const TERMINER = 'TERMINER';
     public const PERIODIQUE = 'PAIE_PERIODIQUE';
+
+    /** Status Operation */
+    public const REMBOURSEMENT = 'REMBOURSEMENT';
+    public const RETENUES = 'RETENUES';
+
 }
