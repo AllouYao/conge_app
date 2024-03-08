@@ -189,7 +189,8 @@ final class Status
     /** Status de campagne */
     public const EN_COURS = 'EN COURS';
     public const TERMINER = 'TERMINER';
-    public const PERIODIQUE = 'PAIE_PERIODIQUE';
+    public const EN_ATTENTE = 'EN ATTENTE';
+    public const VALIDATED = 'VALIDEE';
 
     /** Status Operation */
     public const REMBOURSEMENT = 'REMBOURSEMENT';

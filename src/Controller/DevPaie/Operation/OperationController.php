@@ -18,6 +18,12 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/dev/paie/operation', name: 'dev_paie_operation_')]
 class OperationController extends AbstractController
 {
+    public function __construct(
+        private readonly OperationRepository $operationRepository
+    )
+    {
+    }
+
     #[Route('/api_operation', name: 'api_operation', methods: ['GET'])]
     public function apiOperations(OperationRepository $operationRepository): JsonResponse
     {
@@ -61,7 +67,7 @@ class OperationController extends AbstractController
          */
         $currentUser = $this->getUser();
         if ($form->isSubmitted() && $form->isValid()) {
-            $operation->setUser($currentUser);
+            $operation->setUser($currentUser)->setStatus(Status::EN_ATTENTE);
             $entityManager->persist($operation);
             $entityManager->flush();
             flash()->addSuccess('Opération de ' . $operation->getTypeOperations() . ' enregistrer avec succès');
@@ -74,12 +80,33 @@ class OperationController extends AbstractController
         ]);
     }
 
-    #[Route('/{uuid}', name: 'show', methods: ['GET'])]
-    public function show(Operation $operation): Response
+    #[Route('/validates', name: 'show_validate', methods: ['POST', 'GET'])]
+    public function show(Request $request, EntityManagerInterface $entityManager): Response
     {
-        return $this->render('dev_paie/operation/show.html.twig', [
-            'operation' => $operation,
-        ]);
+        if ($request->request->has('remboursementValidation') && $request->isMethod('POST')) {
+            $remboursementInput = $request->request->get('remboursementValidation');
+            if (!$remboursementInput) {
+
+                $remboursements = json_decode($remboursementInput);
+                foreach ($remboursements as $remboursementId) {
+                    $remboursement = $this->operationRepository->findOneBy(['id' => $remboursementId]);
+                    if ($remboursement) {
+                        if ($remboursement->getStatus() === Status::EN_ATTENTE) {
+                            $remboursement->setStatus(Status::VALIDATED);
+                            $entityManager->persist($remboursement);
+                            $entityManager->flush();
+                            flash()->addSuccess('Remboursement validé avec succès!');
+                        }
+
+                    }
+
+                }
+            } else {
+                flash()->addWarning('Aucun remboursement en attente sélectionner !');
+                return $this->redirectToRoute('reporting_paie_remboursement_salaires');
+            }
+        }
+        return $this->redirectToRoute('reporting_paie_remboursement_salaires');
     }
 
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
@@ -93,7 +120,7 @@ class OperationController extends AbstractController
          */
         $currentUser = $this->getUser();
         if ($form->isSubmitted() && $form->isValid()) {
-            $operation->setUser($currentUser);
+            $operation->setUser($currentUser)->setStatus(Status::EN_ATTENTE);
             $entityManager->flush();
             flash()->addSuccess('Opération de ' . $operation->getTypeOperations() . ' modifier avec succès');
             return $this->redirectToRoute('dev_paie_operation_index', [], Response::HTTP_SEE_OTHER);
@@ -105,7 +132,7 @@ class OperationController extends AbstractController
         ]);
     }
 
-    #[Route('/{uuid}', name: 'delete', methods: ['POST'])]
+    #[Route('/{uuid}/delete', name: 'delete', methods: ['GET', 'POST'])]
     public function delete(Request $request, Operation $operation, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete' . $operation->getId(), $request->request->get('_token'))) {

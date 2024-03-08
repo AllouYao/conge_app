@@ -21,13 +21,37 @@ class OperationRepository extends ServiceEntityRepository
         parent::__construct($registry, Operation::class);
     }
 
-    public function findOperationByType(?array $type): ?array
+    public function findOperationByType(?array $types): ?array
     {
         return $this->createQueryBuilder('o')
             ->join('o.personal', 'personal')
             ->where('o.typeOperations IN (:types)')
+            ->setParameter('types', $types)
+            ->orderBy('o.typeOperations')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findOperationByTypeAndStatus(string $type, ?array $status): ?array
+    {
+        return $this->createQueryBuilder('o')
+            ->select([
+                'DATE(o.dateOperation) as date_operation',
+                'o.typeOperations as type_operations',
+                'personal.matricule as matricule_personal',
+                'personal.firstName as name_personal',
+                'personal.lastName as lastname_personal',
+                'personal.service as stations_personal',
+                'o.amountBrut as montant_brut',
+                'o.amountNet as montant_net',
+                'o.status as status_operation',
+                'o.id as operation_id'
+            ])
+            ->join('o.personal', 'personal')
+            ->where('o.typeOperations =:types')
+            ->andWhere('o.status IN (:status)')
             ->setParameter('types', $type)
-            ->groupBy('o.typeOperations')
+            ->setParameter('status', $status)
             ->getQuery()
             ->getResult();
     }
