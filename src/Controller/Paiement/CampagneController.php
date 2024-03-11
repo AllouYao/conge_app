@@ -328,7 +328,6 @@ class CampagneController extends AbstractController
     #[Route('/bulletin/ordinaire/{uuid}', name: 'bulletin_ordinaire', methods: ['GET'])]
     public function bulletin(Personal $personal): Response
     {
-
         $payrolls = $this->payrollRepository->findBulletinByCampaign(true, $personal);
         $dataPayroll = null;
         foreach ($payrolls as $payroll) {
