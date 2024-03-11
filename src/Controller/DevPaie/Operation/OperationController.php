@@ -85,8 +85,7 @@ class OperationController extends AbstractController
     {
         if ($request->request->has('remboursementValidation') && $request->isMethod('POST')) {
             $remboursementInput = $request->request->get('remboursementValidation');
-            if (!$remboursementInput) {
-
+            if (!empty($remboursementInput)) {
                 $remboursements = json_decode($remboursementInput);
                 foreach ($remboursements as $remboursementId) {
                     $remboursement = $this->operationRepository->findOneBy(['id' => $remboursementId]);
@@ -97,9 +96,7 @@ class OperationController extends AbstractController
                             $entityManager->flush();
                             flash()->addSuccess('Remboursement validé avec succès!');
                         }
-
                     }
-
                 }
             } else {
                 flash()->addWarning('Aucun remboursement en attente sélectionner !');

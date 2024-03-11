@@ -10,7 +10,7 @@
     </style>
 {% endblock %}
 {% block body %}
-    <form method="post" action="{{ path('dev_paie_operation_show_validate') }}">
+    <form method="post" action="{{ path('dev_paie_operation_show_validate') }}" id="formContainerRemboursement">
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -39,11 +39,13 @@
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annuler
                                         </button>
-                                        <button type="button" class="btn btn-success confirm" name="confirm" id="confirmValidationButton">
+                                        <button type="button" class="btn btn-success confirm" name="confirm"
+                                                id="confirmValidationButton">
                                             Confirmer
                                         </button>
                                     </div>
-                                    <input type="hidden" name="_token" value="{{ csrf_token('validate_remboursement') }}">
+                                    <input type="hidden" name="_token"
+                                           value="{{ csrf_token('validate_remboursement') }}">
                                 </div>
                             </div>
                         </div>
@@ -51,8 +53,6 @@
                 </div>
             </div>
         </div>
-    </form>
-    <form method="post" action="{{ path('dev_paie_operation_show_validate') }}" id="formContainerRemboursement">
         <input type="hidden" id="remboursementValidation" name="remboursementValidation" value="[]">
     </form>
 {% endblock %}
@@ -67,9 +67,9 @@
         $(document).ready(function () {
 
             const date = new Date();
-           // const year = date.getFullYear();
-           // const month = date.getMonth() + 1;
-          //  const day = date.getDate();
+            // const year = date.getFullYear();
+            // const month = date.getMonth() + 1;
+            //  const day = date.getDate();
 
             const dataGrid = $("#dataGridRemboursement").dxDataGrid({
                 dataSource: '{{ url("api_reporting_paie_remboursement_salaire") }}',
@@ -261,20 +261,17 @@
             $('#confirmValidationButton').click(function () {
                 // Récupérer les éléments sélectionnés dans la grille de données
                 const selectedKeys = dataGrid.getSelectedRowKeys();
-
                 const remboursements = [];
 
-                selectedKeys.forEach((remboursement)=>{
-                    if(remboursement.hasOwnProperty('operation_id')){
+                selectedKeys.forEach((remboursement) => {
+                    if (remboursement.hasOwnProperty('operation_id')) {
                         remboursements.push(remboursement.operation_id)
                     }
                 })
 
-               $('#remboursementValidation').val(remboursements)
+                $('#remboursementValidation').val(`[${remboursements}]`)
                 $('#formContainerRemboursement').submit()
-                console.log(remboursements)
             });
-
         })
     </script>
 
