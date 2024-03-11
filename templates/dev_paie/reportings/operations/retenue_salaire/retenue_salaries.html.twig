@@ -1,27 +1,27 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Etat des retenues sur salaire (Remboursement) {% endblock %}
+{% block title %}Etat des retenues sur salaire (retenue) {% endblock %}
 {% block stylesheets %}
     <style>
-        #dataGridRemboursement {
+        #dataGridRetenueSalaire {
             border-width: 50px;
             height: 350px;
         }
     </style>
 {% endblock %}
 {% block body %}
-    <form method="post" action="{{ path('dev_paie_operation_show_validate') }}" id="formContainerRemboursement">
+    <form method="post" action="{{ path('dev_paie_operation_validate_retenue') }}" id="formContainerRetenueSalaire">
         <div class="row">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title-custom" style="color: white" id="date">
                             <i data-feather="list"></i>
-                            REMBOURSEMENT SUR SALAIRE
+                            RETENUE SUR SALAIRE
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div id="dataGridRemboursement"></div>
+                        <div id="dataGridRetenueSalaire"></div>
                         <div class="modal fade" id="validationConfirmationModal" tabindex="-1" role="dialog"
                              aria-labelledby="validationConfirmationModal" aria-hidden="true">
                             <div class="modal-dialog" role="document">
@@ -34,7 +34,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        Êtes-vous sûr de vouloir valider les remboursement sélectionnés ?
+                                        Êtes-vous sûr de vouloir valider les retenues sur salaire sélectionnées ?
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annuler
@@ -45,7 +45,7 @@
                                         </button>
                                     </div>
                                     <input type="hidden" name="_token"
-                                           value="{{ csrf_token('validate_remboursement') }}">
+                                           value="{{ csrf_token('validate_retenu_salaire') }}">
                                 </div>
                             </div>
                         </div>
@@ -53,7 +53,7 @@
                 </div>
             </div>
         </div>
-        <input type="hidden" id="remboursementValidation" name="remboursementValidation" value="">
+        <input type="hidden" id="retenueSalaireValidation" name="retenueSalaireValidation" value="">
     </form>
 {% endblock %}
 
@@ -65,8 +65,8 @@
         }
 
         $(document).ready(function () {
-            const dataGrid = $("#dataGridRemboursement").dxDataGrid({
-                dataSource: '{{ url("api_reporting_paie_remboursement_salaire") }}',
+            const dataGrids = $("#dataGridRetenueSalaire").dxDataGrid({
+                dataSource: '{{ url("api_reporting_paie_retenue_salaire") }}',
                 showBorders: true,
                 showColumnLines: true,
                 showRowLines: true,
@@ -93,7 +93,7 @@
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('REMBOURSEMENT SUR SALAIRE');
+                        const worksheet = workbook.addWorksheet('RETENUE SUR SALAIRE');
                         DevExpress.excelExporter.exportDataGrid({
                             component: e.component,
                             worksheet,
@@ -113,7 +113,7 @@
                             const day = date.getDate();
                             const dateFormat = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `REMBOURSEMENT SUR SALAIRE ${dateFormat}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `RETENUE SUR SALAIRE ${dateFormat}.xlsx`);
                             });
                         });
                         e.cancel = true;
@@ -144,13 +144,13 @@
                         caption: 'Date opération',
                         alignment: 'center',
                         dataType: 'string',
-                        dataField: 'date_remboursement'
+                        dataField: 'date_retenue'
                     },
                     {
                         caption: 'Emolument',
                         alignment: 'center',
                         dataType: 'string',
-                        dataField: 'remboursement'
+                        dataField: 'retenue'
                     },
                     {
                         caption: 'Matricule',
@@ -180,19 +180,19 @@
                         caption: 'Remboursement en brut',
                         alignment: 'right',
                         dataType: 'number',
-                        dataField: 'remboursement_montant_brut'
+                        dataField: 'retenue_montant_brut'
                     },
                     {
                         caption: 'Remboursement en net',
                         alignment: 'right',
                         dataType: 'number',
-                        dataField: 'remboursement_montant_net'
+                        dataField: 'retenue_montant_net'
                     },
                     {
                         caption: 'Statut',
                         alignment: 'center',
                         dataType: 'object',
-                        dataField: 'remboursement_status',
+                        dataField: 'retenue_status',
                         cellTemplate: function (container, options) {
                             const status = options.value;
                             let badgeClass = 'badge badge badge-soft-primary';
@@ -213,16 +213,16 @@
                         {
                             column: 'nom_salarie',
                             customizeText() {
-                                return 'CUMUL DES REMBOURSEMENTS ';
+                                return 'CUMUL DES RETENUES SUR SALAIRE';
                             }
                         },
                         {
-                            column: 'remboursement_montant_brut',
+                            column: 'retenue_montant_brut',
                             summaryType: 'sum',
                             displayFormat: 'Sur le Brut : {0}'
                         },
                         {
-                            column: 'remboursement_montant_net',
+                            column: 'retenue_montant_net',
                             summaryType: 'sum',
                             displayFormat: 'Sur le Net : {0}'
                         }
@@ -234,7 +234,7 @@
                             location: 'after',
                             widget: 'dxButton',
                             options: {
-                                text: 'Valider les remboursements',
+                                text: 'Valider les retenues sur salaire',
                                 icon: 'bi bi-journal-check',
                                 disabled: false,
                                 onClick() {
@@ -249,17 +249,17 @@
             // Gérer le clic sur le bouton de confirmation dans le modal de validation
             $('#confirmValidationButton').click(function () {
                 // Récupérer les éléments sélectionnés dans la grille de données
-                const selectedKeys = dataGrid.getSelectedRowKeys();
-                const remboursements = [];
+                const selectedKeys = dataGrids.getSelectedRowKeys();
+                const retenue_salaire = [];
 
-                selectedKeys.forEach((remboursement) => {
-                    if (remboursement.hasOwnProperty('operation_id')) {
-                        remboursements.push(remboursement.operation_id)
+                selectedKeys.forEach((retenueSalaire) => {
+                    if (retenueSalaire.hasOwnProperty('operation_id')) {
+                        retenue_salaire.push(retenueSalaire.operation_id)
                     }
                 })
 
-                $('#remboursementValidation').val(`[${remboursements}]`)
-                $('#formContainerRemboursement').submit()
+                $('#retenueSalaireValidation').val(`[${retenue_salaire}]`)
+                $('#formContainerRetenueSalaire').submit()
             });
         })
     </script>

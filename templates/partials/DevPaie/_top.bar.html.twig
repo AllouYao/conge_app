@@ -152,8 +152,32 @@
                             <div class="arrow-down"></div>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="topnav-components">
-                            <a href="{{ path('reporting_paie_remboursement_salaires') }}"
-                               class="dropdown-item">Reversement</a>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Reversement
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('reporting_paie_remboursement_salaires') }}"
+                                       class="dropdown-item">Reversement en attente</a>
+                                    <a href="{{ path('reporting_paie_validated_remboursement') }}"
+                                       class="dropdown-item">Reversement valider</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Retenue sur salaire
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('reporting_paie_retenue_salaires') }}"
+                                       class="dropdown-item">Retenue en attente</a>
+                                    <a href="{{ path('reporting_paie_validated_retenue_salaires') }}"
+                                       class="dropdown-item">Retenue valider</a>
+                                </div>
+                            </div>
                         </div>
                     </li>
                 </ul> <!-- end navbar-->
