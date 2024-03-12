@@ -118,6 +118,112 @@
                                 </div>
                             </div>
                             {# <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Etat des Primes et indemnités</a> #}
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Sociétés
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('admin_society_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('admin_society_show') }}"
+                                       class="dropdown-item">Modifer</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Utilisateurs
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('auth_user_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('auth_user_index') }}"
+                                       class="dropdown-item">Liste utilisateurs</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Categories prof.
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('settings_category_salarie_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('settings_category_salarie_index') }}"
+                                       class="dropdown-item">Liste categories</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Smig légal
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('settings_smig_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('settings_smig_index') }}"
+                                       class="dropdown-item">Liste smig</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Grille des salaires
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('settings_category_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('settings_category_index') }}"
+                                       class="dropdown-item">Liste Grille salariale</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Charges fiscales & sociales
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('impot_category_charge_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('impot_category_charge_index_fixcale') }}"
+                                       class="dropdown-item">Liste Charges fiscales</a>
+                                    <a href="{{ path('impot_category_charge_index_sociale') }}"
+                                       class="dropdown-item">Liste Charges sociales</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Primes
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('settings_prime_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('settings_prime_index') }}"
+                                       class="dropdown-item">Liste primes</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Retenue forfaitaire
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('settings_retenue_forfetaire_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('settings_retenue_forfetaire_index') }}"
+                                       class="dropdown-item">Liste retenues forfaitaire</a>
+                                </div>
+                            </div>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
@@ -236,6 +342,19 @@
                                 </div>
                             </div>
                             {# <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Etat des Primes et indemnités</a> #}
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Retenue & Remboursement
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('dev_paie_operation_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('dev_paie_operation_index') }}"
+                                       class="dropdown-item">Liste retenues & Remboursement</a>
+                                </div>
+                            </div>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
@@ -245,6 +364,8 @@
                             <div class="arrow-down"></div>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="topnav-components">
+                            <a href="{{ path('reporting_paie_remboursement_salaires') }}"
+                               class="dropdown-item">Reversement</a>
                         </div>
                     </li>
                 </ul> <!-- end navbar-->

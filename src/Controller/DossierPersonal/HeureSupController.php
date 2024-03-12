@@ -8,7 +8,6 @@ use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Service\HeureSupService;
 use App\Service\Personal\ChargesServices;
-use App\Service\UtimePaiementService;
 use App\Utils\Status;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;

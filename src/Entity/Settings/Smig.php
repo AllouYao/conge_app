@@ -5,6 +5,8 @@ namespace App\Entity\Settings;
 use App\Repository\Settings\SmigRepository;
 use App\Utils\Horodatage;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -31,6 +33,14 @@ class Smig
 
     #[ORM\Column]
     private ?bool $isActive = null;
+
+    #[ORM\OneToMany(mappedBy: 'smigs', targetEntity: CategorySalarie::class)]
+    private Collection $categorySalaries;
+
+    public function __construct()
+    {
+        $this->categorySalaries = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -81,6 +91,36 @@ class Smig
     public function setIsActive(bool $isActive): static
     {
         $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CategorySalarie>
+     */
+    public function getCategorySalaries(): Collection
+    {
+        return $this->categorySalaries;
+    }
+
+    public function addCategorySalary(CategorySalarie $categorySalary): static
+    {
+        if (!$this->categorySalaries->contains($categorySalary)) {
+            $this->categorySalaries->add($categorySalary);
+            $categorySalary->setSmigs($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCategorySalary(CategorySalarie $categorySalary): static
+    {
+        if ($this->categorySalaries->removeElement($categorySalary)) {
+            // set the owning side to null (unless already changed)
+            if ($categorySalary->getSmigs() === $this) {
+                $categorySalary->setSmigs(null);
+            }
+        }
 
         return $this;
     }

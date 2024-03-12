@@ -3,7 +3,7 @@
 {% block title %}Smig{% endblock %}
 {% block stylesheets %}
     <style>
-        #dataGridSmig {
+        #dataGridOperation {
             border-width: 50px;
         }
     </style>
@@ -15,18 +15,18 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        SALAIRE MINIMUM INTERPROFESSIONNELLE GARANTI (SMIG)
+                        REMBOURSEMENTS & RETENUES
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="card-body">
-                        <div id="dataGridSmig"></div>
+                        <div id="dataGridOperation"></div>
                     </div>
                 </div>
-                    <div class="card-footer">
-                        <a href="{{ path('settings_smig_new') }}"
-                           class="btn btn-primary float-end" style="color: white">Nouveau</a>
-                    </div>
+                <div class="card-footer">
+                    <a href="{{ path('dev_paie_operation_new') }}"
+                       class="btn btn-primary float-end" style="color: white">Nouveau</a>
+                </div>
             </div>
         </div>
     </div>
@@ -45,8 +45,8 @@
             const month = date.getMonth() + 1;
             const day = date.getDate();
 
-            $("#dataGridSmig").dxDataGrid({
-                dataSource: `{{ url('settings_smig_api_smig') }}`,
+            $("#dataGridOperation").dxDataGrid({
+                dataSource: `{{ url('dev_paie_operation_api_operation') }}`,
                 showBorders: true,
                 scrolling: {
                     columnRenderingMode: 'virtual',
@@ -63,7 +63,7 @@
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('SMIG');
+                        const worksheet = workbook.addWorksheet('OPERATION REMBOURSEMENTS & RETENUES');
                         DevExpress.excelExporter.exportDataGrid({
                             component: e.component,
                             worksheet,
@@ -78,7 +78,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Smig du ${year}-${month <10 ? '0':''}${month}-${day}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Remboursement & retenue du ${year}-${month < 10 ? '0' : ''}${month}-${day}.xlsx`);
                             });
                         });
                         e.cancel = true;
@@ -102,43 +102,46 @@
                 columnAutoWidth: true,
                 columns: [
                     {
-                        caption: 'Date debut',
+                        caption: 'Date Opération',
                         alignment: 'center',
                         dataType: 'string',
-                        dataField: 'date_debut',
+                        dataField: 'date_operation',
                     },
                     {
-                        caption: 'Date fin',
+                        caption: 'Type Opération',
                         alignment: 'center',
                         dataType: 'string',
-                        dataField: 'date_fin',
+                        dataField: 'type_operation',
                     },
                     {
-                        caption: 'Catégorie associée',
+                        caption: 'Matricule',
                         alignment: 'center',
-                        dataType: 'object',
-                        dataField: 'category',
-                        cellTemplate: function (container, options) {
-                            $("<span>")
-                                .addClass("badge badge-soft-primary")
-                                .text(options.value)
-                                .appendTo(container);
-                        },
+                        dataType: 'string',
+                        dataField: 'personal_matricule',
                     },
                     {
-                        caption: 'Montant',
+                        caption: 'Nom & Prénoms',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'personal_fullname',
+                    },
+                    {
+                        caption: 'Montant Brut',
                         alignment: 'right',
                         dataType: 'number',
-                        dataField: 'amount',
+                        dataField: 'amount_brut',
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
                     },
                     {
-                        caption: 'Actif ?',
-                        alignment: 'center',
-                        dataType: 'string',
-                        dataField: 'active',
+                        caption: 'Montant Net',
+                        alignment: 'right',
+                        dataType: 'number',
+                        dataField: 'amount_net',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
                     },
                     {
                         caption: 'Action',
@@ -153,6 +156,33 @@
                         },
                     },
                 ],
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'date_operation',
+                            summaryType: 'count',
+                            displayFormat: 'Total salariés : {0}'
+                        },
+                        {
+                            column: 'personal_fullname',
+                            displayFormat: 'Total Montant :'
+                        },
+                        {
+                            column: 'amount_brut',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'amount_net',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                    ]
+                }
             })
         })
     </script>

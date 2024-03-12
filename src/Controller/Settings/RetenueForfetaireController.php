@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/settings/retenue_forfetaire', name: 'settings_retenue_forfetaire_')]
 class RetenueForfetaireController extends AbstractController
@@ -34,12 +35,14 @@ class RetenueForfetaireController extends AbstractController
         return new JsonResponse($apiForfetaire);
     }
 
+    #[IsGranted("ROLE_DEV_PAIE", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(): Response
     {
         return $this->render('settings/retenue_forfetaire/index.html.twig');
     }
 
+    #[IsGranted("ROLE_DEV_PAIE", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -60,6 +63,7 @@ class RetenueForfetaireController extends AbstractController
         ]);
     }
 
+    #[IsGranted("ROLE_DEV_PAIE", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, RetenueForfetaire $retenueForfetaire, EntityManagerInterface $entityManager): Response
     {

@@ -21,7 +21,7 @@ class DateCustomType extends AbstractType
             ],
             'html5' => true,
             'widget' => 'single_text',
-            'required' => false
+            'required' => true
         ]);
     }
 }
