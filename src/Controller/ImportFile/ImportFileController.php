@@ -20,7 +20,7 @@ class ImportFileController extends AbstractController
 {
     #[Route('/new', name: 'new', methods: ['GET','POST'])]
         
-    public function import(Request $request, ImportFileService $importFileService): Response
+    public function import(Request $request, MatriculeGenerator $matriculeGenerator, ImportFileService $importFileService): Response
     {
         $form = $this->createForm(ImportFileType::class);
         $form->handleRequest($request);
