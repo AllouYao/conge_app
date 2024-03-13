@@ -22,12 +22,17 @@
 {% block _account_accountBanks_entry_widget %}
     <tr id="block_{{ id }}" data-id="{{ id }}" class="data-row">
         <td>
-            {{ form_widget(form.bankId,{'attr': {
+            {{ form_widget(form.name,{'attr': {
                 "class": 'form-control form-control-sm',
             }}) }}
         </td>
         <td>
             {{ form_widget(form.code,{'attr': {
+                "class": 'form-control form-control-sm',
+            }}) }}
+        </td>
+        <td>
+            {{ form_widget(form.codeAgence,{'attr': {
                 "class": 'form-control form-control-sm',
             }}) }}
         </td>
