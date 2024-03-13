@@ -105,7 +105,7 @@ class PersonalType extends AbstractType
                 'label_attr' => [
                     'class' => 'radio-inline'
                 ],
-                'required' => false
+                //'required' => false
             ])
             ->add('niveauFormation', ChoiceType::class, [
                 'attr' => [
