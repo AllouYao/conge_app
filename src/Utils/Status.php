@@ -54,6 +54,7 @@ final class Status
      */
     public const CDD = 'CDD';
     public const  CDI = 'CDI';
+    public const  CDDI = 'CDDI';
     public const STAGE = 'STAGE';
     public const OCCASIONNEL = 'OCCASIONNEL';
 
@@ -195,5 +196,26 @@ final class Status
     /** Status Operation */
     public const REMBOURSEMENT = 'REMBOURSEMENT';
     public const RETENUES = 'RETENUES';
+
+    /** Statut des fonctions */
+    public const COMMERCIAL_PISTE = 'COMMERCIAL PISTE';
+    public const COMMERCIAL_BOUTIQUE = 'COMMERCIAL BOUTIQUE';
+    public const QHM = 'QHM';
+    public const SITE_MANAGER = 'SITE MANAGER';
+    public const LAVEUR = 'LAVEUR';
+    public const SEA = 'SEA';
+    public const OS = 'OS';
+    public const RH = 'RESOURCE HUMAINE';
+    public const ASSISTANT_RH = 'ASSISTANT RH';
+    public const TRESORERIE = 'TRESORERIE';
+    public const ASSISTANCE_TR = 'ASSISTANT TRESORERIE';
+    public const GERANTE = 'GERANTE';
+    public const RESPONSABLE_SO = 'RESPONSABLE OPERATION';
+    public const ASSISTANT_SO = 'ASSISTANT SERVICE OPERATION';
+    public const ESCORTE = 'ESCORTE';
+    public const SUPERVISEUR = 'SUPERVISEUR';
+    public const RMG = 'RESPONSABLE DES MOYENS GENERAUX';
+    public const COMPTABLE = 'COMPTABLE';
+    public const ASSISTANT_COMT = 'ASSISTANT COMPTABLE';
 
 }

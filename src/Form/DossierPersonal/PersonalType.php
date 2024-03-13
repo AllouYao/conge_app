@@ -105,7 +105,7 @@ class PersonalType extends AbstractType
                 'label_attr' => [
                     'class' => 'radio-inline'
                 ],
-                //'required' => false
+                'required' => false
             ])
             ->add('niveauFormation', ChoiceType::class, [
                 'attr' => [
@@ -137,8 +137,33 @@ class PersonalType extends AbstractType
                 ],
                 'placeholder' => 'Sélectionner le mode de paiement'
             ])
-            ->add('fonction', TextType::class, [
-                'required' => false
+            ->add('fonction', ChoiceType::class, [
+                'required' => false,
+                'attr' => [
+                    'data-plugin' => 'customselect',
+                ],
+                'choices' => [
+                    'COMMERCIAL PISTE' => Status::COMMERCIAL_PISTE,
+                    'COMMERCIAL BOUTIQUE' => Status::COMMERCIAL_BOUTIQUE,
+                    'QHM' => Status::QHM,
+                    'SITE MANAGER' => Status::SITE_MANAGER,
+                    'LAVEUR (SE)' => Status::LAVEUR,
+                    'SEA' => Status::SEA,
+                    'OS' => Status::OS,
+                    'RESOURCE HUMAINE' => Status::RH,
+                    'ASSISTANT RH' => Status::ASSISTANT_RH,
+                    'TRESORERIE' => Status::TRESORERIE,
+                    'ASSISTANCE TRESORERIE' => Status::ASSISTANCE_TR,
+                    'GERANTE' => Status::GERANTE,
+                    'RESPONSABLE OPERATION' => Status::RESPONSABLE_SO,
+                    'ASSISTANT SERVICE OPERATION' => Status::ASSISTANT_SO,
+                    'ESCORTE' => Status::ESCORTE,
+                    'SUPERVISEUR' => Status::SUPERVISEUR,
+                    'RESPONSABLE DES MOYENS GENERAUX' => Status::RMG,
+                    'COMPTABLE' => Status::COMPTABLE,
+                    'ASSISTANT COMPTABLE' => Status::ASSISTANT_COMT
+                ],
+                'placeholder' => 'Sélectionner une fonction'
             ])
             ->add('service', ChoiceType::class, [
                 'required' => false,
@@ -165,18 +190,6 @@ class PersonalType extends AbstractType
                     'SS LAGUNAIRE' => status::SS_LAGUNAIRE,
                     'STATION SHELL ADZOPE' => status::STATION_SHELL_ADZOPE,
                     'BOUTIQUE  PO LOCODJORO' => status::BOUTIQUE_PO_LOCODJORO,
-
-
-
-
-
-
-
-
-
-
-
-
                 ],
                 'placeholder' => 'Sélectionner le site de travail'
             ]);

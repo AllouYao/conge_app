@@ -19,7 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/dossier/personal', name: 'personal_')]
 class PersonalController extends AbstractController
@@ -113,13 +113,9 @@ class PersonalController extends AbstractController
     public function getPersonalSalaried(): JsonResponse
     {
         if ($this->isGranted('ROLE_RH')) {
-
             $personal = $this->personalRepository->findPersonalSalaried();
-
         } else {
-
             $personal = $this->personalRepository->findPersonalSalariedByEmployeRole();
-
         }
 
         $personalSalaried = [];
@@ -159,16 +155,10 @@ class PersonalController extends AbstractController
     public function index(): Response
     {
         if ($this->isGranted('ROLE_RH')) {
-
             $personal = $this->personalRepository->findPersonalSalaried();
-
         } else {
-
             $personal = $this->personalRepository->findPersonalSalariedByEmployeRole();
-
         }
-
-        //$personal = $this->personalRepository->findPersonalSalaried();
         return $this->render('dossier_personal/personal/index.html.twig', [
             'personals' => $personal
         ]);
