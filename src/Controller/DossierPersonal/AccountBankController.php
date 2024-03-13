@@ -40,7 +40,8 @@ class AccountBankController extends AbstractController
                     . '-' . $accountBank->getPersonal()->getCategorie()->getIntitule(),
                 'date_embauche' => date_format($accountBank->getPersonal()->getContract()->getDateEmbauche(), 'd/m/Y'),
                 'number_compte' => $accountBank->getNumCompte(),
-                'bank' => $accountBank->getBankId(),
+                'code_banque' => $accountBank->getCode(),
+                'nom_banque' => $accountBank->getName(),
                 'rib' => $accountBank->getRib(),
                 'date_creation' => date_format($accountBank->getCreatedAt(), 'd/m/Y'),
                 'modifier' => $this->generateUrl('personal_account_bank_edit', ['uuid' => $accountBank->getUuid()])
