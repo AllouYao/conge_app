@@ -64,7 +64,9 @@ class AbsenceType extends AbstractType
                     'placeholder' => 'Sélectionner le type d\'absence'
                 ]
             )
-            ->add('description', TextType::class);
+            ->add('description', TextType::class,[
+                'required' => false,
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

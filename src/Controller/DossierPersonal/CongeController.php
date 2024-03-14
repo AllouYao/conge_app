@@ -2,6 +2,7 @@
 
 namespace App\Controller\DossierPersonal;
 
+use App\Entity\DevPaie\CongePartiel;
 use Exception;
 use Carbon\Carbon;
 use App\Entity\User;
@@ -36,14 +37,15 @@ class CongeController extends AbstractController
     public function getCongesSalaried(): JsonResponse
     {
 
-        if ($this->isGranted('ROLE_RH')){
+       // if ($this->isGranted('ROLE_RH')){
             
-            $conges = $this->congeRepository->findConge(Status::CONGE_GLOBAL);
+            $conges = $this->congeRepository->findConge();
 
-        }else{
+        //}else{
 
-            $conges = $this->congeRepository->findCongeByEmployeRole(Status::CONGE_GLOBAL);
-        }
+        //    $conges = $this->congeRepository->findCongeByEmployeRole(Status::CONGE_GLOBAL);
+       // }
+
 
         $congeSalaried = [];
         foreach ($conges as $conge => $item) {
@@ -97,10 +99,12 @@ class CongeController extends AbstractController
          */
         $currentUser = $this->getUser();
 
+
         $conge = new Conge();
         $form = $this->createForm(CongeType::class, $conge);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+
             $personal = $conge->getPersonal();
             $lastConge = $congeRepository->getLastCongeByID($personal->getId(), false);
             $lastDateReturn = !$lastConge ? $conge->getDateRetour() : $lastConge->getDateDernierRetour();
@@ -111,14 +115,37 @@ class CongeController extends AbstractController
                 est actuellement en congés n\'est donc pas éligible pour une acquisition de congés.');
                 return $this->redirectToRoute('conge_index');
             }
-            if ($lastConge)
+            if ($lastConge){
                 $congeService->congesPayerByLast($conge);
+
+                if(!$congeService->success){
+
+                    flash()->addInfo($congeService->messages);
+                    return $this->redirectToRoute('conge_new');
+                }
+
+            }
             $congeService->congesPayerByFirst($conge);
+            
+            if(!$congeService->success){
+                    
+                    flash()->addInfo($congeService->messages);
+                    return $this->redirectToRoute('conge_new');
+                }
             $conge
                 ->setDateDernierRetour($lastDateReturn)
-                ->setTypeConge(Status::CONGE_GLOBAL)
                 ->setIsConge(true)
                 ->setUser($currentUser);
+
+            if($conge->getTypeConge()=="Partiel"){ 
+                 
+                $partialLeave = new CongePartiel();
+                $partialLeave->setDateDepart($conge->getDateDepart())
+                             ->setDateRetour($conge->getDateRetour())
+                             ->setConge($conge);
+                
+                $entityManager->persist($partialLeave);
+            }
 
             $entityManager->persist($conge);
             $entityManager->flush();

@@ -2,21 +2,22 @@
 
 namespace App\Form\DossierPersonal;
 
-use App\Entity\DossierPersonal\Conge;
-use App\Entity\DossierPersonal\Personal;
-use App\Form\CustomType\DateCustomType;
-use App\Repository\DossierPersonal\CongeRepository;
-use App\Service\CongeService;
-use Carbon\Carbon;
 use DateTime;
+use Carbon\Carbon;
+use App\Service\CongeService;
 use Doctrine\ORM\EntityRepository;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\FormBuilderInterface;
+use App\Entity\DossierPersonal\Conge;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use App\Form\CustomType\DateCustomType;
+use App\Entity\DossierPersonal\Personal;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use App\Repository\DossierPersonal\CongeRepository;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class CongeType extends AbstractType
 {
@@ -32,18 +33,44 @@ class CongeType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('typeConge', ChoiceType::class, [
+                'choices' => [
+                    'Effectif' => "Effectif",
+                    'Partiel' => "Partiel",
+                ],
+                'expanded' => true,
+                'multiple' => false,
+                'label_attr' => [
+                    'class' => 'radio-inline'
+                ],
+                "data"=>"Effectif"
+                //'required' => false
+            ])
+            ->add('typePayementConge', ChoiceType::class, [
+                'choices' => [
+                    'Immédiat' => "Immédiat",
+                    'Ultérieur' => "Ultérieur",
+                ],
+                'expanded' => true,
+                'multiple' => false,
+                'label_attr' => [
+                    'class' => 'radio-inline'
+                ],
+                "data"=>"Immédiat"
+
+                //'required' => false
+            ])
             ->add('dateDepart', DateCustomType::class)
             ->add('dateRetour', DateCustomType::class)
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
-                'choice_label' => 'matricule',
-                'query_builder' => function (EntityRepository $er) {
+                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('p')
                         ->join('p.contract', 'ct')
                         ->leftJoin('p.conges', 'c')
                         ->leftJoin('p.departures', 'departure')
                         ->where('c.id IS NULL OR c.dateDernierRetour < :today AND c.isConge = false ')
-                        ->andWhere('departure.id IS NULL')
+                        ->andWhere('departure.id IS NULL') 
                         ->setParameter('today', new DateTime())
                         ->orderBy('p.matricule', 'ASC');
                 },

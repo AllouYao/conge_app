@@ -18,6 +18,9 @@ class CongeService
 
     private CongeRepository $congeRepository;
     private PayrollRepository $payrollRepository;
+    public string $messages;
+    public string $success;
+
 
     public function __construct(
         CongeRepository      $congeRepository,
@@ -26,6 +29,8 @@ class CongeService
     {
         $this->congeRepository = $congeRepository;
         $this->payrollRepository = $payrollRepository;
+        $this->success = false;
+
     }
 
 
@@ -89,10 +94,12 @@ class CongeService
                 ->setDays($dayCgsExploiter)
                 ->setAllocationConge($allocationCgs)
                 ->setRemainingVacation($remainingVacation);
+            $this->success = true;
+
         } else {
-            throw new \Exception('Mr/Mdm ' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' 
+            $this->messages = 'Mr/Mdm ' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' 
                  n\'est pas éligible pour une acquisition de congés, nombre de mois travailler depuis la date de debut d\'exercice insufisant: '
-                . ceil($worksMonths) . ' mois');
+                . ceil($worksMonths) . ' mois';
         }
     }
 
@@ -156,16 +163,17 @@ class CongeService
                 ->setDays($dayCgsExploiter)
                 ->setAllocationConge($allocationCgs)
                 ->setRemainingVacation($remainingVacation);
+            $this->success = true;
         }else {
-            throw new \Exception('Mr/Mdm ' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' 
+            $this->messages = 'Mr/Mdm ' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' 
                  n\'est pas éligible pour une acquisition de congés, nombre de mois travailler depuis le retour de congés insufisant: '
-                . ceil($worksMonths) . ' mois');
+                . ceil($worksMonths) . ' mois';
         }
     }
 
 
     /**
-     * Conges supplémentaires
+     * Conges supplémentaires 
      * @param mixed $genre
      * @param mixed $chargPeapleOfPersonal
      * @param mixed $today

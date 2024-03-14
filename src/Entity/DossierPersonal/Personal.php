@@ -144,6 +144,8 @@ class Personal
 
     #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Operation::class)]
     private Collection $operations;
+    #[ORM\Column]
+    private ?bool $active = null;
     public function __construct()
     {
         $this->chargePeople = new ArrayCollection();
@@ -866,6 +868,17 @@ class Personal
                 $operation->setPersonal(null);
             }
         }
+
+        return $this;
+    }
+    public function isActive(): ?bool
+    {
+        return $this->active;
+    }
+
+    public function setActive(bool $active): static
+    {
+        $this->active = $active;
 
         return $this;
     }
