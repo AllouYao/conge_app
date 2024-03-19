@@ -164,6 +164,7 @@ class HeureSupService
             }
 
             $heureSupp
+                ->setStatus(Status::EN_ATTENTE) 
                 ->setPersonal($personal)
                 ->setAmount((int)$amountHeureSup)
                 ->setUser($this->tokenStorage->getToken()->getUser());

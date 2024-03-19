@@ -8,7 +8,6 @@ use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Service\HeureSupService;
 use App\Service\Personal\ChargesServices;
-use App\Service\UtimePaiementService;
 use App\Utils\Status;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
@@ -64,6 +63,7 @@ class HeureSupController extends AbstractController
             $personals = $this->personalRepository->findAllPersonalByEmployeRole();
         }
 
+        dd($personals);
 
         foreach ($personals as $personal) {
             $heureSupp = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
@@ -111,6 +111,7 @@ class HeureSupController extends AbstractController
                 }
                 $apiHeureSupp[] = [
                     'index' => ++$index,
+                    'heureSuppId' => ++$index,
                     'full_name' => $fullnamePersonal,
                     'heure_normal' => 40,
                     'total_heure' => $totalHeure,
@@ -148,7 +149,7 @@ class HeureSupController extends AbstractController
         $apiRequestHeureSupp = [];
         foreach ($heursSupps as $heureSup) {
             $apiRequestHeureSupp[] = [
-
+                'id' => $heureSup->getId(),
                 'matricule' => $heureSup->getPersonal()->getMatricule(),
                 'name' => $heureSup->getPersonal()->getFirstName(),
                 'last_name' => $heureSup->getPersonal()->getLastName(),
@@ -161,6 +162,7 @@ class HeureSupController extends AbstractController
                 'heure_fin' => date_format($heureSup->getEndedHour(), 'H:m'),
                 'total_horaire' => $heureSup->getTotalHorraire(),
                 'date_creation' => date_format($heureSup->getCreatedAt(), 'd/m/Y'),
+                'status' => $heureSup->getStatus(),
                 'modifier' => $this->generateUrl('personal_heure_sup_edit', ['uuid' => $heureSup->getPersonal()->getUuid()])
             ];
         }
@@ -235,5 +237,35 @@ class HeureSupController extends AbstractController
             'form' => $form->createView(),
             'editing' => true
         ]);
+    }
+    #[Route('/pending', name: 'pending', methods: ['GET'])]
+    public function pending(): Response
+    {
+        return $this->render('dossier_personal/heure_sup/pending.html.twig');
+    }
+    #[Route('/validate', name: 'validate', methods: ['POST'])]
+    public function validate(Request $request ): Response
+    {
+
+        if ($request->request->has('heureSupInput') && $request->isMethod('POST')) {
+            $heureSupInput = $request->request->get('heureSupInput');
+            if ($heureSupInput) {
+                $heureSups = json_decode($heureSupInput);
+                foreach ($heureSups as $heureSupId) {
+                    $heureSup = $this->heureSupRepository->findOneBy(['id' => $heureSupId]);
+                    if ($heureSup) {
+                        $heureSup->setStatus(Status::VALIDATED);
+                        $this->entityManager->persist($heureSup);
+                     }
+                     $this->entityManager->flush();
+                     flash()->addSuccess('Heure supplémentaire validé avec succès!');
+                 
+                }
+            } else {
+                flash()->addWarning('Aucune heure supplementaire sélectionnée');
+                return $this->redirectToRoute('personal_heure_sup_pending', [], Response::HTTP_SEE_OTHER);
+            }
+        }
+        return $this->redirectToRoute('personal_heure_sup_pending', [], Response::HTTP_SEE_OTHER);
     }
 }

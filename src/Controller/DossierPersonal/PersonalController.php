@@ -301,14 +301,18 @@ class PersonalController extends AbstractController
             $personal = $this->personalRepository->findOneBy(['id'=>$personalId]);
 
             if($personal){
+
                 $personal->setActive(false); 
                 $entityManager->persist($personal);
                 $entityManager->flush();
                 flash()->addSuccess('Salarié Désactivé avec succès.');
                 return $this->redirectToRoute('personal_index');
+
             }else{
+
                 flash()->addWarning('Action impossible !');
                 return $this->redirectToRoute('personal_index');
+                
             }
             
         }

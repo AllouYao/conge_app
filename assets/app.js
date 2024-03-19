@@ -707,7 +707,7 @@ DevExpress.localization.loadMessages({
         "dxGallery-itemName": "Gallery item",
         "dxMultiView-elementAriaRoleDescription": "MultiView",
         "dxMultiView-elementAriaLabel": "Use the arrow keys or swipe to navigate between views",
-        "dxMultiView-itemAriaRoleDescription": "View",
+        "dxMultiView-itemAriaRoleDescription": "View", 
         "dxMultiView-itemAriaLabel": "{0} of {1}",
     }
 });

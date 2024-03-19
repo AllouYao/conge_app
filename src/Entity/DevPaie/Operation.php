@@ -41,7 +41,6 @@ class Operation
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $status = null;
-
     public function getId(): ?int
     {
         return $this->id;

@@ -1,0 +1,203 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Etat des remboursement validés{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridOperationValider {
+            border-width: 50px;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        REMBOURSEMENTS VALIDES
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="card-body">
+                        <div id="dataGridOperationValider"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        $(document).ready(function () {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+
+            $("#dataGridOperationValider").dxDataGrid({
+                dataSource: `{{ url('api_reporting_paie_remboursement_salaire_validate') }}`,
+                showBorders: true,
+                height: 400,
+                scrolling: {
+                    columnRenderingMode: 'virtual',
+                    mode: "virtual",
+                },
+                selection: {
+                    mode: 'multiple',
+                    showCheckBoxesMode: 'always'
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('OPERATION REMBOURSEMENTS');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                            customizeCell: function (options) {
+                                const {gridCell, excelCell} = options;
+                                if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
+                                    excelCell.text = formatNumber(gridCell.value)
+                                    excelCell.font = {size: 9};
+                                    excelCell.alignment = {horizontal: 'left'};
+                                }
+                            }
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then(function (buffer) {
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Remboursement ${year}-${month < 10 ? '0' : ''}${month}-${day}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                columns: [
+                    {
+                        caption: 'S/N',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'ordre'
+                    },
+                    {
+                        caption: 'Date opération',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_remboursement'
+                    },
+                    {
+                        caption: 'Emolument',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'remboursement'
+                    },
+                    {
+                        caption: 'Matricule',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'matricule_salarie'
+                    },
+                    {
+                        caption: 'Nom',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'nom_salarie'
+                    },
+                    {
+                        caption: 'Prénoms',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'prenom_salarie'
+                    },
+                    {
+                        caption: 'Stations',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'station_salarie'
+                    },
+                    {
+                        caption: 'Remboursement en brut',
+                        alignment: 'right',
+                        dataType: 'number',
+                        dataField: 'remboursement_montant_brut'
+                    },
+                    {
+                        caption: 'Remboursement en net',
+                        alignment: 'right',
+                        dataType: 'number',
+                        dataField: 'remboursement_montant_net'
+                    },
+                    {
+                        caption: 'Statut',
+                        alignment: 'center',
+                        dataType: 'object',
+                        dataField: 'remboursement_status',
+                        cellTemplate: function (container, options) {
+                            const status = options.value;
+                            let badgeClass = 'badge badge-soft-success';
+                            $("<span>")
+                                .addClass(badgeClass)
+                                .text(status)
+                                .appendTo(container);
+                        }
+                    }
+                ],
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'ordre',
+                            summaryType: 'count',
+                            displayFormat: 'Salariés : {0}'
+                        },
+                        {
+                            column: 'nom_salarie',
+                            customizeText() {
+                                return 'CUMUL DES REMBOURSEMENTS ';
+                            }
+                        },
+                        {
+                            column: 'remboursement_montant_brut',
+                            summaryType: 'sum',
+                            displayFormat: 'Sur le Brut : {0}'
+                        },
+                        {
+                            column: 'remboursement_montant_net',
+                            summaryType: 'sum',
+                            displayFormat: 'Sur le Net : {0}'
+                        }
+                    ]
+                },
+            })
+        })
+    </script>
+
+{% endblock %}
