@@ -56,6 +56,7 @@ final class Status
     public const  CDI = 'CDI';
     public const STAGE = 'STAGE';
     public const OCCASIONNEL = 'OCCASIONNEL';
+    public const CDDI = 'CDDI';
 
     /**
      * Type Temps Contractuel

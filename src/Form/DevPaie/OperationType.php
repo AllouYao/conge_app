@@ -60,11 +60,15 @@ class OperationType extends AbstractType
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
                 'choice_label' => 'matricule',
+                'choice_label' => 'firstName',
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('p')
                         ->join('p.contract', 'contract')
                         ->leftJoin('p.departures', 'departures')
-                        ->where('departures.id IS NULL');
+                        ->where('departures.id IS NULL')
+                        ->andWhere('contract.typeContrat IN (:type)')
+                        ->andWhere('p.active = true')
+                        ->setParameter('type', [Status::CDI, Status::CDD, Status::CDDI]);
                 },
                 'placeholder' => 'Sélectionner un matricule',
                 'attr' => [
