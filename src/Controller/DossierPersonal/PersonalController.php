@@ -122,6 +122,8 @@ class PersonalController extends AbstractController
 
         }
 
+       // dd($personal);
+
         $personalSalaried = [];
         foreach ($personal as $value => $item) {
             $anciennete = $item['older'];
@@ -149,7 +151,11 @@ class PersonalController extends AbstractController
                 'nature_piece' => $item['personal_piece'] . '° ' . $item['personal_numero_piece'],
                 'numero_cnps' => $item['personal_numero_cnps'],
                 'action' => $this->generateUrl('personal_print_salary_info', ['uuid' => $item['uuid']]),
-                'modifier' => $this->generateUrl('personal_edit', ['uuid' => $item['uuid']])
+                'modifier' => $this->generateUrl('personal_edit', ['uuid' => $item['uuid']]),
+                'active' => $item['active'],
+                'personal_id' => $item['personal_id']
+
+
             ];
         }
         return new JsonResponse($personalSalaried);
@@ -259,5 +265,55 @@ class PersonalController extends AbstractController
             'form' => $form->createView(),
             'editing' => true
         ]);
+    }
+    #[Route('/enable', name: 'enable', methods: ['POST'])]
+    public function enablePersonal(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        if($request->request->has('personalEnableInput') && $request->isMethod('POST')){
+
+            $personalId = $request->request->get("personalEnableInput");
+            $personal = $this->personalRepository->findOneBy(['id'=>$personalId]);
+
+            if($personal){
+                $personal->setActive(true); 
+                $entityManager->persist($personal);
+                $entityManager->flush();
+                flash()->addSuccess('Salarié Activé avec succès.');
+                return $this->redirectToRoute('personal_index');
+            }else{
+                flash()->addWarning('Action impossible !');
+                return $this->redirectToRoute('personal_index');
+            }
+            
+        }
+
+        return $this->redirectToRoute('personal_index');
+           
+
+      
+    }
+    #[Route('/disable', name: 'disable', methods: ['POST'])]
+    public function disablePersonal(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        if($request->request->has('personalDisableInput') && $request->isMethod('POST')){
+
+            $personalId = $request->request->get("personalDisableInput");
+            $personal = $this->personalRepository->findOneBy(['id'=>$personalId]);
+
+            if($personal){
+                $personal->setActive(false); 
+                $entityManager->persist($personal);
+                $entityManager->flush();
+                flash()->addSuccess('Salarié Désactivé avec succès.');
+                return $this->redirectToRoute('personal_index');
+            }else{
+                flash()->addWarning('Action impossible !');
+                return $this->redirectToRoute('personal_index');
+            }
+            
+        }
+
+        return $this->redirectToRoute('personal_index');
+
     }
 }
