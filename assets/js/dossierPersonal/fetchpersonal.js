@@ -75,24 +75,37 @@ let assurance = () => {
     $('#assurance_personal_hireDate').val(hireDate);
     $('#assurance_personal_category').val(category);
 }
+let operation = () => {
+    const selectedOption = $("#operation_personal :selected");
+    const name = selectedOption.attr('data-name');
+    const hireDate = selectedOption.attr('data-hireDate');
+    const category = selectedOption.attr('data-category');
 
-$('body').on('change', '#charge_personal, #account_personal, #departure_personal, #conge_personal, #personal_heure_sup_personal, #personal_absence_personal, #assurance_personal_Personal', function () {
-    if ($(this).attr('id') === 'charge_personal') {
-        chargePeople();
-    } else if ($(this).attr('id') === 'account_personal') {
-        accountPersonal();
-    } else if ($(this).attr('id') === 'departure_personal') {
-        depart();
-    } else if ($(this).attr('id') === 'conge_personal') {
-        conge();
-    } else if ($(this).attr('id') === 'personal_heure_sup_personal') {
-        heureSupp();
-    } else if ($(this).attr('id') === 'personal_absence_personal') {
-        absence();
-    } else if ($(this).attr('id') === 'assurance_personal_Personal') {
-        assurance();
-    }
-});
+    $('#operation_name').val(name);
+    $('#operation_hireDate').val(hireDate);
+    $('#operation_category').val(category);
+}
+
+$('body').on('change',
+    '#charge_personal, #account_personal, #departure_personal, #conge_personal, #personal_heure_sup_personal, #personal_absence_personal, #assurance_personal_Personal, #operation_personal', function () {
+        if ($(this).attr('id') === 'charge_personal') {
+            chargePeople();
+        } else if ($(this).attr('id') === 'account_personal') {
+            accountPersonal();
+        } else if ($(this).attr('id') === 'departure_personal') {
+            depart();
+        } else if ($(this).attr('id') === 'conge_personal') {
+            conge();
+        } else if ($(this).attr('id') === 'personal_heure_sup_personal') {
+            heureSupp();
+        } else if ($(this).attr('id') === 'personal_absence_personal') {
+            absence();
+        } else if ($(this).attr('id') === 'assurance_personal_Personal') {
+            assurance();
+        } else if ($(this).attr('id') === 'operation_personal') {
+            operation();
+        }
+    });
 
 chargePeople();
 accountPersonal();
@@ -101,3 +114,4 @@ conge();
 heureSupp();
 absence();
 assurance();
+operation();
