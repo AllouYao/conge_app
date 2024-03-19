@@ -32,6 +32,9 @@ class CategorySalarie
     #[ORM\OneToMany(mappedBy: 'categorySalarie', targetEntity: Category::class, orphanRemoval: true)]
     private Collection $categories;
 
+    #[ORM\ManyToOne(inversedBy: 'categorySalaries')]
+    private ?Smig $smigs = null;
+
     public function __construct()
     {
         $this->categories = new ArrayCollection();
@@ -111,5 +114,17 @@ class CategorySalarie
     public function __toString(): string
     {
         return $this->name;
+    }
+
+    public function getSmigs(): ?Smig
+    {
+        return $this->smigs;
+    }
+
+    public function setSmigs(?Smig $smigs): static
+    {
+        $this->smigs = $smigs;
+
+        return $this;
     }
 }

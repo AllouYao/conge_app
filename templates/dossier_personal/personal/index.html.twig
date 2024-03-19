@@ -22,14 +22,21 @@
                     <div id="dataGridPersonal"></div>
                 </div>
                 <div class="card-footer">
-                    <a href="{{ path('import_file_new') }}" class="btn btn-primary float-end mx-2"
-                       style="color: white">Importer</a>
                     <a href="{{ path('personal_new') }}" class="btn btn-primary float-end"
-                    style="color: white">Nouveau</a>
+                       style="color: white">Nouveau</a>
                 </div>
             </div>
         </div>
     </div>
+    <form id="personalEnable" method="POST" action="/dossier/personal/enable">
+        <input id="personalEnableInput"  type="hidden" name="personalEnableInput">
+    </form>
+    <form id="personalDisable" method="POST" action="/dossier/personal/disable">
+        <input id="personalDisableInput" type="hidden" name="personalDisableInput">
+    </form>
+
+
+
 {% endblock %}
 
 {% block javascripts %}
@@ -260,12 +267,37 @@
                                     feather.replace();
                                 }
                             },
+                            {
+                                dataField: 'active',
+                                caption: 'Activer/Desactiver',
+                                alignment: 'center',
+                                cellTemplate: function (container, options) { 
+                                    if (options.data.active === true) {
+
+                                        $(`<div class="form-check form-switch" >`)
+                                                .html(`<input class="form-check-input toggle-disable" type="checkbox" id="disablePersonal${options.data.personal_id}" checked="checked" value="${options.data.personal_id}"> <label class="form-check-label" for="disablePersonal${options.data.personal_id}"></label> </div>`)
+                                                .appendTo(container);
+                                            feather.replace();
+                                    } else{
+
+                                        $(`<div class="form-check form-switch">`)
+                                                .html(`<input class="form-check-input toggle-enable" type="checkbox" id="enablePersonal${options.data.personal_id}" value="${options.data.personal_id}"> <label class="form-check-label" for="enablePersonal${options.data.personal_id}"></label> </div>`)
+                                                .appendTo(container);
+                                            feather.replace();
+                                    }
+                                    
+                                }
+                            },
                         ],
                         width: 120
                     }
                 ],
             })
         })
+
+        function bonjour(){
+            console.log('click');
+        }
     </script>
 
 {% endblock %}

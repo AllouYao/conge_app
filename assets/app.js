@@ -707,7 +707,7 @@ DevExpress.localization.loadMessages({
         "dxGallery-itemName": "Gallery item",
         "dxMultiView-elementAriaRoleDescription": "MultiView",
         "dxMultiView-elementAriaLabel": "Use the arrow keys or swipe to navigate between views",
-        "dxMultiView-itemAriaRoleDescription": "View",
+        "dxMultiView-itemAriaRoleDescription": "View", 
         "dxMultiView-itemAriaLabel": "{0} of {1}",
     }
 });
@@ -736,6 +736,9 @@ import './js/dossierPersonal/add_prime_juridique';
 import './js/dossierPersonal/fetchpersonal'
 import './js/dossierPersonal/personal1'
 import './js/dossierPersonal/salary'
+import './js/dossierPersonal/enableDisablePersonal'
+
+
 
 import './js/app';
 

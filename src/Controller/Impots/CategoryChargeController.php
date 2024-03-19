@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/impots/category/charge', name: 'impot_category_charge_')]
 class CategoryChargeController extends AbstractController
@@ -21,7 +22,7 @@ class CategoryChargeController extends AbstractController
     {
         $categoryCharge = $categoryChargeRepository->findBy(['typeCharge' => Status::FISCALE_CHARGE]);
         $charge = [];
-        foreach ($categoryCharge as $index => $item) {
+        foreach ($categoryCharge as $item) {
             $charge[] = [
                 'type_charge' => $item->getTypeCharge(),
                 'categorie' => $item->getCategory(),
@@ -41,7 +42,7 @@ class CategoryChargeController extends AbstractController
     {
         $categoryCharge = $categoryChargeRepository->findBy(['typeCharge' => Status::SOCIALE_CHARGE]);
         $charge = [];
-        foreach ($categoryCharge as $index => $item) {
+        foreach ($categoryCharge as $item) {
             $charge[] = [
                 'type_charge' => $item->getTypeCharge(),
                 'categorie' => $item->getCategory(),
@@ -56,17 +57,21 @@ class CategoryChargeController extends AbstractController
         return new JsonResponse($charge);
     }
 
+    #[IsGranted("ROLE_DEV_PAIE", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/fixcale', name: 'index_fixcale', methods: ['GET'])]
     public function indexFixcale(): Response
     {
         return $this->render('impots/category_charge/fiscale.html.twig');
     }
+
+    #[IsGranted("ROLE_DEV_PAIE", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/sociale', name: 'index_sociale', methods: ['GET'])]
     public function indexSociale(): Response
     {
         return $this->render('impots/category_charge/sociale.html.twig');
     }
 
+    #[IsGranted("ROLE_DEV_PAIE", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -87,6 +92,7 @@ class CategoryChargeController extends AbstractController
         ]);
     }
 
+    #[IsGranted("ROLE_DEV_PAIE", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, CategoryCharge $categoryCharge, EntityManagerInterface $entityManager): Response
     {

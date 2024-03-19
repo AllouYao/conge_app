@@ -26,7 +26,7 @@ class CongeRepository extends ServiceEntityRepository
     /**
      * @return Conge[]
      */
-    public function findConge(string $typeConges): array
+    public function findConge(): array
     {
         return $this->createQueryBuilder('co')
             ->select([
@@ -42,12 +42,11 @@ class CongeRepository extends ServiceEntityRepository
                 'co.totalDays',
                 'co.days',
                 'co.remainingVacation',
+                'co.typeConge',
+
             ])
             ->join('co.personal', 'p')
-            ->where('co.personal is not null')
-            ->andWhere('co.typeConge = :type_conge')
-            ->setParameter('type_conge', $typeConges)
-            ->orderBy('co.dateDernierRetour', 'DESC')
+            ->orderBy('co.typeConge', 'ASC')
             ->getQuery()
             ->getResult();
 

@@ -5,16 +5,20 @@ namespace App\Service;
 use App\Entity\DossierPersonal\Absence;
 use App\Entity\DossierPersonal\Personal;
 use App\Repository\DossierPersonal\AbsenceRepository;
+use App\Repository\Settings\TauxHoraireRepository;
 use App\Utils\Status;
 
 class AbsenceService
 {
     private AbsenceRepository $absenceRepository;
+    private $hourRate;
 
 
-    public function __construct(AbsenceRepository $absenceRepository)
+    public function __construct(AbsenceRepository $absenceRepository,private TauxHoraireRepository $tauxHoraireRepository)
     {
         $this->absenceRepository = $absenceRepository;
+        $tauxHorraire = $this->tauxHoraireRepository->findOneBy(['isActive'=>true]);
+        $this->hourRate = $tauxHorraire->getAmount() ?? Status::TAUX_HEURE;
     }
 
     /**
@@ -36,37 +40,37 @@ class AbsenceService
         return $totalAbsenceDay * 8;
     }
 
-    /** Retourne le solde catégoriel par absence du moi */
+    /** Retourne le montant que fait des abasence dans le moi */
     public function getAmountByMonth(Personal $personal, int $month, int $year): float
     {
         $salaireCategoriel = $personal->getSalary()->getBaseAmount();
-        $workHours = Status::TAUX_HEURE;
-        $salaireHorraire = $salaireCategoriel / $workHours;
+        $hourRate = $this->hourRate;
+        $salaireHorraire = $salaireCategoriel / $hourRate;
         $absences = $this->absenceRepository->getAbsenceByMonth($personal, $month, $year);
 
         foreach ($absences as $absence) {
             $totalHours = $this->getHours($absence);
-            $workHours -= $totalHours; // TAUX_HORRAIRE - NBRE HEURE ABSENEC
+            $hourRate -= $totalHours; // TAUX_HORRAIRE - NBRE HEURE ABSENEC
         }
 
-        return $workHours * $salaireHorraire;
+        return $hourRate * $salaireHorraire;
     }
 
     /** Retourne le solde catégoriel par absence */
     public function getAmountByAbsence(Absence $absence): float|int
     {
         $salaireCategoriel = $absence->getPersonal()->getSalary()->getBaseAmount();
-        $workHours = Status::TAUX_HEURE;
-        $salaireHorraire = $salaireCategoriel / $workHours;
+        $hourRate = $this->hourRate;
+        $salaireHorraire = $salaireCategoriel / $hourRate;
 
         if ($absence->isJustified()) {
-            return $workHours * $salaireHorraire;
+            return $hourRate * $salaireHorraire;
         }
 
         $totalHours = $this->getHours($absence);
-        $workHours -= $totalHours; // TAUX_HORRAIRE - NBRE HEURE ABSENEC
+        $hourRate -= $totalHours; // TAUX_HORRAIRE - NBRE HEURE ABSENCE
 
-        return $workHours * $salaireHorraire;
+        return $hourRate * $salaireHorraire;
     }
 
 
@@ -74,8 +78,8 @@ class AbsenceService
     public function getAmountDeduction(Absence $absence): float|int
     {
         $salaireCategoriel = $absence->getPersonal()->getSalary()->getBaseAmount();
-        $workHours = Status::TAUX_HEURE;
-        $salaireHorraire = $salaireCategoriel / $workHours;
+        $hourRate = $this->hourRate;
+        $salaireHorraire = $salaireCategoriel / $hourRate;
         if ($absence->isJustified()) {
             return 0;
         }

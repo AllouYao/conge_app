@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Entity\Auth\Role;
+use App\Entity\DevPaie\Operation;
 use App\Entity\DossierPersonal\Absence;
 use App\Entity\DossierPersonal\AccountBank;
 use App\Entity\DossierPersonal\ChargePeople;
@@ -68,6 +69,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: DetailRetenueForfetaire::class)]
     private Collection $detailRetenueForfetaires;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Operation::class)]
+    private Collection $operations;
     public function __construct()
     {
         $this->customRoles = new ArrayCollection();
@@ -78,6 +82,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->user = new ArrayCollection();
         $this->chargepeople = new ArrayCollection();
         $this->detailRetenueForfetaires = new ArrayCollection();
+        $this->operations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -394,6 +399,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($detailRetenueForfetaire->getUser() === $this) {
                 $detailRetenueForfetaire->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Operation>
+     */
+    public function getOperations(): Collection
+    {
+        return $this->operations;
+    }
+
+    public function addOperation(Operation $operation): static
+    {
+        if (!$this->operations->contains($operation)) {
+            $this->operations->add($operation);
+            $operation->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOperation(Operation $operation): static
+    {
+        if ($this->operations->removeElement($operation)) {
+            // set the owning side to null (unless already changed)
+            if ($operation->getUser() === $this) {
+                $operation->setUser(null);
             }
         }
 

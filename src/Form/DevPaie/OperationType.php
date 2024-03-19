@@ -59,6 +59,7 @@ class OperationType extends AbstractType
             ])
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
+                'choice_label' => 'matricule',
                 'choice_label' => 'firstName',
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('p')

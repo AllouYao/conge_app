@@ -2,10 +2,13 @@
 
 namespace App\Entity\DossierPersonal;
 
+use App\Entity\DevPaie\CongePartiel;
 use App\Entity\User;
 use App\Repository\DossierPersonal\CongeRepository;
 use App\Utils\Horodatage;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -45,6 +48,8 @@ class Conge
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $typeConge = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $typePayementConge = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $gratification = null;
@@ -72,6 +77,14 @@ class Conge
 
     #[ORM\ManyToOne(inversedBy: 'conges')]
     private ?User $user = null;
+
+    #[ORM\OneToMany(mappedBy: 'conge', targetEntity: CongePartiel::class)]
+    private Collection $congePartiels;
+
+    public function __construct()
+    {
+        $this->congePartiels = new ArrayCollection();
+    }
 
 
     public function getId(): ?int
@@ -171,6 +184,17 @@ class Conge
     public function setTypeConge(?string $typeConge): static
     {
         $this->typeConge = $typeConge;
+
+        return $this;
+    }
+    public function getTypePayementConge(): ?string
+    {
+        return $this->typePayementConge;
+    }
+
+    public function setTypePayementConge(?string $typePayementConge): static
+    {
+        $this->typePayementConge = $typePayementConge;
 
         return $this;
     }
@@ -280,6 +304,36 @@ class Conge
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CongePartiel>
+     */
+    public function getCongePartiels(): Collection
+    {
+        return $this->congePartiels;
+    }
+
+    public function addCongePartiel(CongePartiel $congePartiel): static
+    {
+        if (!$this->congePartiels->contains($congePartiel)) {
+            $this->congePartiels->add($congePartiel);
+            $congePartiel->setConge($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCongePartiel(CongePartiel $congePartiel): static
+    {
+        if ($this->congePartiels->removeElement($congePartiel)) {
+            // set the owning side to null (unless already changed)
+            if ($congePartiel->getConge() === $this) {
+                $congePartiel->setConge(null);
+            }
+        }
 
         return $this;
     }

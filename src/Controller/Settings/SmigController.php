@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/settings/smig', name: 'settings_smig_')]
 class SmigController extends AbstractController
@@ -18,32 +19,37 @@ class SmigController extends AbstractController
     #[Route('/api_smig', name: 'api_smig', methods: ['GET'])]
     public function apiSmig(SmigRepository $smigRepository): JsonResponse
     {
-        $smig = $smigRepository->findOneBy([], ['id' => 'DESC']);
-        if (!$smig) {
+        $smigLegal = $smigRepository->findSmigActive();
+        if (!$smigLegal) {
             return $this->json(['data' => []]);
         }
-        $apiSmig[] = [
-            'date_debut' => date_format($smig->getDateDebut(), 'd/m/Y'),
-            'date_fin' => date_format($smig->getDateFin(), 'd/m/Y'),
-            'amount' => $smig->getAmount(),
-            'active' => $smig->isIsActive() ? 'OUI' : 'NOM',
-            'modifier' => $this->generateUrl('settings_smig_edit', ['uuid' => $smig->getUuid()])
-        ];
+        $apiSmig = [];
+        foreach ($smigLegal as $smig) {
+            $nameCategory = null;
+            foreach ($smig->getCategorySalaries() as $value) {
+                $nameCategory .= ' | '.$value->getName() ;
+            }
+            $apiSmig[] = [
+                'date_debut' => date_format($smig->getDateDebut(), 'd/m/Y'),
+                'date_fin' => date_format($smig->getDateFin(), 'd/m/Y'),
+                'category' => $nameCategory,
+                'amount' => $smig->getAmount(),
+                'active' => $smig->isIsActive() ? 'OUI' : 'NOM',
+                'modifier' => $this->generateUrl('settings_smig_edit', ['uuid' => $smig->getUuid()])
+            ];
+        }
         return new JsonResponse($apiSmig);
     }
 
 
+    #[IsGranted('ROLE_DEV_PAIE', message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(SmigRepository $smigRepository): Response
+    public function index(): Response
     {
-        $smigArray = $smigRepository->findOneBy([], ['id' => 'DESC']);
-        $smigId = $smigArray?->getId();
-
-        return $this->render('settings/smig/index.html.twig', [
-            'smig_id' => $smigId
-        ]);
+        return $this->render('settings/smig/index.html.twig');
     }
 
+    #[IsGranted('ROLE_DEV_PAIE', message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -52,6 +58,9 @@ class SmigController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            foreach ($smig->getCategorySalaries() as $categorySalary) {
+                $categorySalary->setSmigs($smig);
+            }
             $entityManager->persist($smig);
             $entityManager->flush();
             flash()->addSuccess('Smig ajouté avec succès');
@@ -64,6 +73,7 @@ class SmigController extends AbstractController
         ]);
     }
 
+    #[IsGranted('ROLE_DEV_PAIE', message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Smig $smig, EntityManagerInterface $entityManager): Response
     {
@@ -71,6 +81,9 @@ class SmigController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            foreach ($smig->getCategorySalaries() as $categorySalary) {
+                $categorySalary->setSmigs($smig);
+            }
             $entityManager->flush();
             flash()->addSuccess('Smig modifié avec succès');
             return $this->redirectToRoute('settings_smig_index', [], Response::HTTP_SEE_OTHER);

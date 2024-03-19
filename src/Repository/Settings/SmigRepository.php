@@ -29,4 +29,13 @@ class SmigRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+public function findSmigActive(): ?array
+    {
+        return $this->createQueryBuilder('s')
+            ->join('s.categorySalaries', 'category_salaries')
+            ->where('s.isActive = true')
+            ->getQuery()
+            ->getResult();
+    }
 }
