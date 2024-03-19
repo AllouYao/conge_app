@@ -140,6 +140,9 @@ class Personal
 
     #[ORM\OneToMany(mappedBy: 'Personal', targetEntity: DetailRetenueForfetaire::class, orphanRemoval: true)]
     private Collection $detailRetenueForfetaires;
+
+    #[ORM\Column]
+    private ?bool $active = null;
     public function __construct()
     {
         $this->chargePeople = new ArrayCollection();
@@ -831,6 +834,18 @@ class Personal
                 $detailRetenueForfetaire->setPersonal(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isActive(): ?bool
+    {
+        return $this->active;
+    }
+
+    public function setActive(bool $active): static
+    {
+        $this->active = $active;
 
         return $this;
     }

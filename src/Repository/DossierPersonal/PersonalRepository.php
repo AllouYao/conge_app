@@ -4,8 +4,10 @@ namespace App\Repository\DossierPersonal;
 
 use App\Entity\DossierPersonal\Personal;
 use App\Utils\Status;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Exception;
 
 /**
  * @extends ServiceEntityRepository<Personal>
@@ -28,6 +30,12 @@ class PersonalRepository extends ServiceEntityRepository
     public function findAllPersonalOnCampain(): array
     {
         $qb = $this->createQueryBuilder('p')
+            ->join('p.contract', 'contract')
+            ->leftJoin('p.departures', 'departures')
+            ->where('departures.id IS NULL')
+            ->andWhere('contract.typeContrat IN (:type)')
+            ->andWhere('p.active = true')
+            ->setParameter('type', [Status::CDI, Status::CDD, Status::CDDI])
             ->getQuery()
             ->getResult();
         return array_map(function ($result) {
@@ -50,16 +58,17 @@ class PersonalRepository extends ServiceEntityRepository
             return $result;
         }, $qb);
     }
+
     public function findAllPersonalByEmployeRole(): array
     {
         $qb = $this->createQueryBuilder('p')
-            ->join('p.categorie', 'category') 
-            ->join('category.categorySalarie', 'categorySalarie') 
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'categorySalarie')
             ->leftJoin('p.departures', 'departures')
             ->where('departures.id IS NULL')
-            ->andWhere('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
-            ->setParameter('code_employe', 'OE') 
-            ->setParameter('code_chauffeur', 'CH') 
+            ->andWhere('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
+            ->setParameter('code_employe', 'OE')
+            ->setParameter('code_chauffeur', 'CH')
             ->getQuery()
             ->getResult();
         return array_map(function ($result) {
@@ -158,7 +167,7 @@ class PersonalRepository extends ServiceEntityRepository
     public function findPersonalSalariedByEmployeRole(): array
     {
         return $this->createQueryBuilder('p')
-            ->select([ 
+            ->select([
                 'category.intitule as categorie_intitule',
                 'categorie_salary.name as categorie_name',
                 'p.id as personal_id',
@@ -203,7 +212,7 @@ class PersonalRepository extends ServiceEntityRepository
                 'account_banks.rib as rib',
             ])
             ->leftJoin('p.categorie', 'category')
-            ->join('category.categorySalarie', 'categorySalarie') 
+            ->join('category.categorySalarie', 'categorySalarie')
             ->leftJoin('p.contract', 'contract')
             ->leftJoin('p.salary', 'salary')
             ->leftJoin('p.accountBanks', 'account_banks')
@@ -211,8 +220,8 @@ class PersonalRepository extends ServiceEntityRepository
             ->leftJoin('salary.avantage', 'avantage')
             ->leftJoin('p.departures', 'departures')
             ->where('departures.id IS NULL')
-            ->andWhere('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
-            ->setParameter('code_employe', 'OE') 
+            ->andWhere('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
+            ->setParameter('code_employe', 'OE')
             ->setParameter('code_chauffeur', 'CH')
             ->getQuery()
             ->getResult();
@@ -244,19 +253,20 @@ class PersonalRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
     /**
      * @return Personal[] Returns an array of Personal objects
      */
     public function findPersonalWithChargePeapleByEmployeRole(): array
     {
         return $this->createQueryBuilder('p')
-            ->join('p.categorie', 'category') 
-            ->join('category.categorySalarie', 'categorySalarie') 
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'categorySalarie')
             ->join('p.chargePeople', 'charge_people')
             ->where('charge_people.id is not null')
-            ->andWhere('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
-            ->setParameter('code_employe', 'OE') 
-            ->setParameter('code_chauffeur', 'CH') 
+            ->andWhere('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
+            ->setParameter('code_employe', 'OE')
+            ->setParameter('code_chauffeur', 'CH')
             ->getQuery()
             ->getResult();
     }
@@ -271,15 +281,15 @@ class PersonalRepository extends ServiceEntityRepository
 
     public function getPersonalAbsenceByMonth(int $month, int $year): ?array
     {
-        return $this->createQueryBuilder('p') 
-        ->leftJoin('p.absences', 'abs') 
-        ->andWhere('YEAR(abs.startedDate) = :year') 
-        ->andWhere('MONTH(abs.startedDate) = :month') 
-        ->andWhere('abs.startedDate IS NOT NULL') 
-        ->setParameter('year', $year) 
-        ->setParameter('month', $month) 
-        ->groupBy('p.id') 
-        ->getQuery() 
-        ->getResult();
+        return $this->createQueryBuilder('p')
+            ->leftJoin('p.absences', 'abs')
+            ->andWhere('YEAR(abs.startedDate) = :year')
+            ->andWhere('MONTH(abs.startedDate) = :month')
+            ->andWhere('abs.startedDate IS NOT NULL')
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
+            ->groupBy('p.id')
+            ->getQuery()
+            ->getResult();
     }
 }

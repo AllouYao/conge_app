@@ -35,12 +35,11 @@ class PaieServices
      */
     public function NbDayOfPresenceByCurrentMonth(Campagne $campagne): float|int|null
     {
-        /** Obtenir les jours précédent le jour du départ dépuis le premier jours du mois de licenciement de l'année */
-        $dateDepart = $campagne->getDateDebut();
-        $anneeDepart = $dateDepart->format('Y');
-        $moisDepart = $dateDepart->format('m');
-        $annee = (int)$anneeDepart;
-        $mois = (int)$moisDepart;
+        $dateDebut = $campagne->getDateDebut();
+        $anneeDebut = $dateDebut->format('Y');
+        $moisDebut = $dateDebut->format('m');
+        $annee = (int)$anneeDebut;
+        $mois = (int)$moisDebut;
         $firstDayOfMonth = new DateTime("$annee-$mois-01");
         $lastDayOfMonth = new DateTime(date('Y-m-t', mktime(0, 0, 0, $mois + 1, 0, $annee)));
         $interval = new DateInterval('P1D');
@@ -52,7 +51,6 @@ class PaieServices
         /** Obtenir le nombre de jours de presence que fait la période */
         return ceil(count($day) + 1);
     }
-
 
     /** Montant de la majoration des heures supplémentaire dans la periode de campagne */
     public function getHeureSuppCampagne(Personal $personal, Campagne $campagne): float|int

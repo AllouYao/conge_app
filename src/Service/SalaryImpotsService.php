@@ -11,6 +11,7 @@ use App\Entity\Paiement\Campagne;
 use App\Repository\Impots\ChargeEmployeurRepository;
 use App\Repository\Impots\ChargePersonalsRepository;
 use App\Service\CasExeptionel\DepartureCampagneService;
+use App\Service\PaieService\PaieByPeriodService;
 use App\Service\PaieService\PaieServices;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -25,11 +26,12 @@ class SalaryImpotsService implements SalaryInterface
     private DepartureCampagneService $departureCampagneService;
 
     public function __construct(
-        EntityManagerInterface    $manager,
-        ChargePersonalsRepository $chargePersonalsRepository,
-        ChargeEmployeurRepository $chargeEmployeurRepository,
-        PaieServices              $paieServices,
-        DepartureCampagneService  $departureCampagneService
+        EntityManagerInterface               $manager,
+        ChargePersonalsRepository            $chargePersonalsRepository,
+        ChargeEmployeurRepository            $chargeEmployeurRepository,
+        PaieServices                         $paieServices,
+        DepartureCampagneService             $departureCampagneService,
+        private readonly PaieByPeriodService $paieByPeriodService
     )
     {
         $this->manager = $manager;
@@ -39,22 +41,40 @@ class SalaryImpotsService implements SalaryInterface
         $this->departureCampagneService = $departureCampagneService;
     }
 
+    /**
+     * @throws Exception
+     */
     public function chargePersonal(Personal $personal, Campagne $campagne): void
     {
-        $part = $this->paieServices->getPartCampagne($personal);
-        $impotBrut = $this->paieServices->amountImpotBrutCampagne($personal, $campagne);
-        $creditImpot = $this->paieServices->amountCreditImpotCampagne($personal);
-        $salaire = $this->paieServices->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne);
-        $majorationHeursSupp = $this->paieServices->getHeureSuppCampagne($personal, $campagne);
-        $primeAnciennete = $this->paieServices->getPrimeAncienneteCampagne($personal);
-        $congesPayes = null; // Ajouter ici la fonction qui nous permet d'obtenir le montant de l'allocation conges du mois actuel.
-        $netImposable = $salaire['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
-        $impotNet = $impotBrut - $creditImpot;
-        if ($netImposable <= 75000 || $impotNet < 0) {
-            $impotNet = 0;
+        if ($personal->getContract()->getDateEmbauche() > $campagne->getDateDebut() && $personal->getContract()->getDateEmbauche() <= $campagne->getDateFin()) {
+            $part = $this->paieByPeriodService->getPartCampagne($personal);
+            $impotBrut = $this->paieByPeriodService->amountImpotBrutCampagne($personal, $campagne);
+            $creditImpot = $this->paieByPeriodService->amountCreditImpotCampagne($personal);
+            $salaire = $this->paieByPeriodService->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne);
+            $majorationHeursSupp = $this->paieByPeriodService->amountHeureSuppProrata($personal, $campagne);
+            $netImposable = $salaire['brut_imposable_amount'] + $majorationHeursSupp;
+            $impotNet = $impotBrut - $creditImpot;
+            if ($netImposable <= 75000 || $impotNet < 0) {
+                $impotNet = 0;
+            }
+            $amountCNPS = $this->paieByPeriodService->amountCNPSCampagne($personal, $campagne);
+            $amountCMU = $this->paieByPeriodService->amountCMUCampagne($personal);
+        } else {
+            $part = $this->paieServices->getPartCampagne($personal);
+            $impotBrut = $this->paieServices->amountImpotBrutCampagne($personal, $campagne);
+            $creditImpot = $this->paieServices->amountCreditImpotCampagne($personal);
+            $salaire = $this->paieServices->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne);
+            $majorationHeursSupp = $this->paieServices->getHeureSuppCampagne($personal, $campagne);
+            $primeAnciennete = $this->paieServices->getPrimeAncienneteCampagne($personal);
+            $congesPayes = null; // Ajouter ici la fonction qui nous permet d'obtenir le montant de l'allocation conges du mois actuel.
+            $netImposable = $salaire['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
+            $impotNet = $impotBrut - $creditImpot;
+            if ($netImposable <= 75000 || $impotNet < 0) {
+                $impotNet = 0;
+            }
+            $amountCNPS = $this->paieServices->amountCNPSCampagne($personal, $campagne);
+            $amountCMU = $this->paieServices->amountCMUCampagne($personal);
         }
-        $amountCNPS = $this->paieServices->amountCNPSCampagne($personal, $campagne);
-        $amountCMU = $this->paieServices->amountCMUCampagne($personal);
         $totalCharges = $impotNet + $amountCMU + $amountCNPS;
         $charge = $this->chargePersonalRt->findOneBy(['personal' => $personal]);
         if (!$charge) {
@@ -81,17 +101,31 @@ class SalaryImpotsService implements SalaryInterface
         $this->manager->flush();
     }
 
+    /**
+     * @throws Exception
+     */
     public function chargeEmployeur(Personal $personal, Campagne $campagne): void
     {
-        $montantIs = $this->paieServices->amountISCampagne($personal, $campagne);
-        $montantFPC = $this->paieServices->amountFPCCampagne($personal, $campagne);
-        $montantFPCAnnuel = $this->paieServices->amountFPCAnnuelCampagne($personal, $campagne);
-        $montantTA = $this->paieServices->amountTACampagne($personal, $campagne);
-        $montantCR = $this->paieServices->amountCRCampagne($personal, $campagne);
-        $montantPF = $this->paieServices->amountPFCampagne($personal);
-        $montantAT = $this->paieServices->amountATCampagne($personal);
+        if ($personal->getContract()->getDateEmbauche() > $campagne->getDateDebut() && $personal->getContract()->getDateEmbauche() <= $campagne->getDateFin()) {
+            $montantIs = $this->paieByPeriodService->amountISCampagne($personal, $campagne);
+            $montantFPC = $this->paieByPeriodService->amountFPCCampagne($personal, $campagne);
+            $montantFPCAnnuel = $this->paieByPeriodService->amountFPCAnnuelCampagne($personal, $campagne);
+            $montantTA = $this->paieByPeriodService->amountTACampagne($personal, $campagne);
+            $montantCR = $this->paieByPeriodService->amountCRCampagne($personal, $campagne);
+            $montantPF = $this->paieByPeriodService->amountPFCampagne($personal);
+            $montantAT = $this->paieByPeriodService->amountATCampagne($personal);
+            $montantCMU = $this->paieByPeriodService->amountCMUEmpCampagne();
+        } else {
+            $montantIs = $this->paieServices->amountISCampagne($personal, $campagne);
+            $montantFPC = $this->paieServices->amountFPCCampagne($personal, $campagne);
+            $montantFPCAnnuel = $this->paieServices->amountFPCAnnuelCampagne($personal, $campagne);
+            $montantTA = $this->paieServices->amountTACampagne($personal, $campagne);
+            $montantCR = $this->paieServices->amountCRCampagne($personal, $campagne);
+            $montantPF = $this->paieServices->amountPFCampagne($personal);
+            $montantAT = $this->paieServices->amountATCampagne($personal);
+            $montantCMU = $this->paieServices->amountCMUEmpCampagne();
+        }
         $montantRetenuCNPS = $montantCR + $montantPF + $montantAT;
-        $montantCMU = $this->paieServices->amountCMUEmpCampagne();
         $totalChargeEmployeur = $montantIs + $montantFPC + $montantFPCAnnuel + $montantTA + $montantRetenuCNPS + $montantCMU;
         $chargeEmpl = $this->chargeEmployeurRt->findOneBy(['personal' => $personal]);
         if (!$chargeEmpl) {

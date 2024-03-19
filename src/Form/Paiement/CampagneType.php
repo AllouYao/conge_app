@@ -6,6 +6,7 @@ use App\Contract\SalaryInterface;
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Campagne;
 use App\Repository\DossierPersonal\PersonalRepository;
+use App\Utils\Status;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -38,22 +39,6 @@ class CampagneType extends AbstractType
                 'html5' => true,
                 'widget' => 'single_text',
                 'required' => true
-            ])
-            ->add('dateDebut', DateType::class, [
-                'attr' => [
-                    'class' => 'form-control form-control-sm'
-                ],
-                'html5' => true,
-                'widget' => 'single_text',
-                'required' => true
-            ])
-            ->add('dateFin', DateType::class, [
-                'attr' => [
-                    'class' => 'form-control form-control-sm'
-                ],
-                'html5' => true,
-                'widget' => 'single_text',
-                'required' => true
             ]);
 
         $formModifier = static function (FormInterface $form) {
@@ -65,13 +50,13 @@ class CampagneType extends AbstractType
                         'data-plugin' => 'customselect'
                     ],
                     'query_builder' => function (EntityRepository $er) {
-                        // obtenir le premier et le dernier jour du mois
-
                         return $er->createQueryBuilder('p')
                             ->join('p.contract', 'contract')
                             ->leftJoin('p.departures', 'departures')
-                            ->where('contract.id is not null')
-                            ->andWhere('departures.id is null');
+                            ->where('contract.typeContrat IN (:type)')
+                            ->andWhere('departures.id is null')
+                            ->andWhere('p.active = true')
+                            ->setParameter('type', [Status::CDDI, Status::CDI, Status::CDD]);
                     },
                     'multiple' => true,
                     'help' => 'La campagne est fonction des salarié'

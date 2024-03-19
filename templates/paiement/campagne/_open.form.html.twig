@@ -71,21 +71,16 @@
     <div class="tab-pane active" id="date">
         <fieldset>
             <legend>Date ouverture & Période paie</legend>
-            <div class="mb-2" style="display: flex">
-                <label class="col-form-label" style="margin-right: 50px">Date <span class="text-danger">*</span></label>
-                <div class="col-md-3" style="margin-right: 35px">
+            <div class="mb-2 row">
+                <label class="col-form-label col-md-2">Date ouverture<span class="text-danger">*</span></label>
+                <div class="col-md-4">
                     {{ form_widget(form.startedAt) }}
                     {{ form_errors(form.startedAt) }}
                 </div>
-                <label class="col-md-1 col-form-label">Période du<span class="text-danger">*</span></label>
-                <div class="col-md-3" style="margin-right: 35px">
-                    {{ form_widget(form.dateDebut) }}
-                    {{ form_errors(form.dateDebut) }}
-                </div>
-                <label class="col-form-label" style="margin-right: 60px">au<span class="text-danger">*</span></label>
-                <div class="col-md-3">
-                    {{ form_widget(form.dateFin) }}
-                    {{ form_errors(form.dateFin) }}
+                <label class="col-lg-2 col-form-label" for="example-month">Période de paie</label>
+                <div class="col-lg-4">
+                    <input class="form-control form-control-sm" id="example-month" type="month" name="dateDebut"
+                           required>
                 </div>
             </div>
         </fieldset>

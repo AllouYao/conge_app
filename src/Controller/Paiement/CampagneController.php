@@ -8,9 +8,11 @@ use App\Form\Paiement\CampagneExcepType;
 use App\Form\Paiement\CampagneType;
 use App\Repository\DossierPersonal\CongeRepository;
 use App\Repository\DossierPersonal\HeureSupRepository;
+use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Repository\Paiement\CampagneRepository;
 use App\Repository\Paiement\PayrollRepository;
+use App\Service\PaieService\PaieByPeriodService;
 use App\Service\PayrollService;
 use App\Utils\Status;
 use DateTime;
@@ -158,7 +160,7 @@ class CampagneController extends AbstractController
      * @throws Exception
      */
     #[Route('/paiement/campagne/open', name: 'open_campagne', methods: ['GET', 'POST'])]
-    public function openNormalExercice(Request $request, EntityManagerInterface $manager): Response
+    public function openCompleteExercice(Request $request, EntityManagerInterface $manager, PaieByPeriodService $paieByPeriodService): Response
     {
 
         $ordinaryCampagne = $this->campagneRepository->getOrdinaryCampagne();
@@ -168,6 +170,17 @@ class CampagneController extends AbstractController
         }
 
         $campagne = new Campagne();
+
+        // setter the value of dateDebut and dateFin
+        $dateRequest = $request->request->get('dateDebut');
+        if ($dateRequest) {
+            $dateRequestObj = DateTime::createFromFormat('Y-m', $dateRequest);
+            $dateDebut = $dateRequestObj->format('Y-m-01');
+            $dateFin = $dateRequestObj->format('Y-m-t');
+            $campagne->setDateDebut(new DateTime($dateDebut))->setDateFin(new DateTime($dateFin));
+        }
+
+
         $lastCampagne = $this->getDetailOfLastCampagne($campagne, true);
         $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
         $periode = $lastCampagne['periode'];
@@ -178,15 +191,23 @@ class CampagneController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $personal = $form->get('personal')->getData();
+
             foreach ($personal as $item) {
-                $this->payrollService->setPayroll($item, $campagne);
+                $dateEmbauche = $item->getContract()->getDateEmbauche();
+                if ($dateEmbauche > $campagne->getDateDebut() && $dateEmbauche <= $campagne->getDateFin()) {
+                    $dataPayroll = $this->payrollService->setProrataPayroll($item, $campagne);
+                    dd($dataPayroll);
+                }else {
+                    $dataPayroll = $this->payrollService->setPayroll($item, $campagne);
+                }
+                dd($dataPayroll);
             }
             $campagne
                 ->setActive(true)
                 ->setStatus(Status::EN_COURS)
                 ->setOrdinary(true);
             $manager->persist($campagne);
-            $manager->flush();
+            //$manager->flush();
             flash()->addSuccess('Paie ouverte avec succès.');
             return $this->redirectToRoute('app_home');
         }
@@ -205,7 +226,7 @@ class CampagneController extends AbstractController
      * @throws Exception
      */
     #[Route('/paiement/campagne/exceptional/open', name: 'open_campagne_exceptional', methods: ['GET', 'POST'])]
-    public function openSpecialExercice(Request $request, EntityManagerInterface $manager): Response
+    public function openProrataExercice(Request $request, EntityManagerInterface $manager): Response
     {
 
         $exceptionalCampagne = $this->campagneRepository->getExceptionalCampagne();

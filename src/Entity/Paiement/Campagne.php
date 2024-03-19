@@ -2,6 +2,7 @@
 
 namespace App\Entity\Paiement;
 
+use App\Entity\DevPaie\Operation;
 use App\Entity\DossierPersonal\Personal;
 use App\Repository\Paiement\CampagneRepository;
 use App\Utils\Horodatage;
@@ -56,10 +57,14 @@ class Campagne
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateFin = null;
 
+    #[ORM\OneToMany(mappedBy: 'campagne', targetEntity: Operation::class)]
+    private Collection $operations;
+
     public function __construct()
     {
         $this->personal = new ArrayCollection();
         $this->payrolls = new ArrayCollection();
+        $this->operations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -229,6 +234,36 @@ class Campagne
     public function setDateFin(?\DateTimeInterface $dateFin): static
     {
         $this->dateFin = $dateFin;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Operation>
+     */
+    public function getOperations(): Collection
+    {
+        return $this->operations;
+    }
+
+    public function addOperation(Operation $operation): static
+    {
+        if (!$this->operations->contains($operation)) {
+            $this->operations->add($operation);
+            $operation->setCampagne($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOperation(Operation $operation): static
+    {
+        if ($this->operations->removeElement($operation)) {
+            // set the owning side to null (unless already changed)
+            if ($operation->getCampagne() === $this) {
+                $operation->setCampagne(null);
+            }
+        }
 
         return $this;
     }

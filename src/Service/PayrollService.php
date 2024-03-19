@@ -9,6 +9,7 @@ use App\Entity\Paiement\Payroll;
 use App\Repository\Impots\ChargeEmployeurRepository;
 use App\Repository\Impots\ChargePersonalsRepository;
 use App\Service\CasExeptionel\DepartureCampagneService;
+use App\Service\PaieService\PaieByPeriodService;
 use App\Service\PaieService\PaieServices;
 use App\Service\Personal\PrimeService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,6 +23,7 @@ class PayrollService
     private PrimeService $primeService;
     private PaieServices $paieServices;
     private DepartureCampagneService $departureCampagneService;
+    private PaieByPeriodService $paieByPeriodService;
 
 
     public function __construct(
@@ -30,7 +32,8 @@ class PayrollService
         ChargePersonalsRepository $chargePersonalsRepository,
         PrimeService              $primeService,
         PaieServices              $paieServices,
-        DepartureCampagneService  $departureCampagneService
+        DepartureCampagneService  $departureCampagneService,
+        PaieByPeriodService       $paieByPeriodService
     )
     {
         $this->manager = $entityManager;
@@ -39,6 +42,7 @@ class PayrollService
         $this->primeService = $primeService;
         $this->paieServices = $paieServices;
         $this->departureCampagneService = $departureCampagneService;
+        $this->paieByPeriodService = $paieByPeriodService;
     }
 
     /**
@@ -48,7 +52,6 @@ class PayrollService
      */
     public function setPayroll(Personal $personal, Campagne $campagne): void
     {
-
         /** Nombre de jour travailler pendant la periode current de paie */
         $dayOfCurrentMonth = $this->paieServices->NbDayOfPresenceByCurrentMonth($campagne);
 
@@ -203,6 +206,153 @@ class PayrollService
         /** Enregistrement du livre de paie */
         $this->manager->persist($payroll);
         $this->manager->persist($salary);
+    }
+
+
+    /** Remplire le dictionnaire de paie pour les salariées dont la date d'embauche est inclus dans la periode de paie
+     * @throws Exception
+     */
+    public function setProrataPayroll(Personal $personal, Campagne $campagne): void
+    {
+        /** Nombre de jour travailler pendant la periode current de paie */
+        $dayOfPresence = $this->paieByPeriodService->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne)['nb_jour_presence'];
+
+        /** Ajouter les Informations utile du salarié */
+        $matricule = $personal->getMatricule();
+        $service = $personal->getService();
+        $categorie = '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ') - ' . $personal->getCategorie()->getIntitule();
+        $departement = $personal->getFonction();
+        $dateEmbauche = $personal->getContract()->getDateEmbauche();
+        $numeroCnps = $personal->getRefCNPS();
+
+        /** Ajouter les éléments qui constitue le salaire imposable du salarié */
+        $salary = $personal->getSalary();
+        $salaire = $this->paieByPeriodService->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne);
+        $baseSalaire = ceil((double)$salaire['salaire_categoriel']);
+        $sursalaire = ceil((double)$salary->getSursalaire() * $dayOfPresence / 30);
+        $majorationHeursSupp = round($this->paieByPeriodService->amountHeureSuppProrata($personal, $campagne));
+
+        /** Ajouter toutes les primes possible  */
+        $primeFonctions = ceil($this->primeService->getPrimeFonction($personal) * $dayOfPresence / 30);
+        $primeLogements = ceil($this->primeService->getPrimeLogement($personal) * $dayOfPresence / 30);
+        $indemniteFonctions = ceil($this->primeService->getIndemniteFonction($personal) * $dayOfPresence / 30);
+        $indemniteLogements = ceil($this->primeService->getIndemniteLogement($personal) * $dayOfPresence / 30);
+        $primeTransportLegal = ceil($this->primeService->getPrimeTransportLegal() * $dayOfPresence / 30);
+        $primeTransportImposable = ceil(((double)($salary->getPrimeTransport() * $dayOfPresence / 30) - $primeTransportLegal));
+        $primePaniers = ceil($this->primeService->getPrimePanier($personal) * $dayOfPresence / 30);
+        $primeSalissures = ceil($this->primeService->getPrimeSalissure($personal) * $dayOfPresence / 30);
+        $primeTenueTravails = ceil($this->primeService->getPrimeTT($personal) * $dayOfPresence / 30);
+        $primeOutillages = ceil($this->primeService->getPrimeOutil($personal) * $dayOfPresence / 30);
+        $primeRendement = ceil($this->primeService->getPrimeRendement($personal) * $dayOfPresence / 30);
+
+        /** Avantage en nature non imposable */
+        $avantageNonImposable = round((double)$salary->getAvantage()?->getTotalAvantage() * $dayOfPresence / 30);
+        $avantageNatureImposable = round(((double)($salary?->getAmountAventage() * $dayOfPresence / 30) - $avantageNonImposable));
+
+        /** Ajouter les charges du salarié ( retenues fiscales et sociales) */
+        $chargePersonal = $this->chargePersonalsRepository->findOneBy(['personal' => $personal]);
+        $nombrePart = round($chargePersonal?->getNumPart(), 1);
+        $salaryIts = ceil($chargePersonal?->getAmountIts());
+        $salaryCnps = ceil($chargePersonal?->getAmountCNPS());
+        $salaryCmu = ceil($chargePersonal?->getAmountCMU());
+        $assuranceSanteSalariale = $this->paieByPeriodService->amountAssuranceSante($personal)['assurance_salariale'];
+        $amountChargFiscalPersonal = $salaryIts;
+        $amountChargSocialPersonal = $salaryCnps + $salaryCmu + $assuranceSanteSalariale;
+        $chargeSalarie = ceil($amountChargFiscalPersonal + $amountChargSocialPersonal);
+
+        /** Ajouter les charges de l'employeur (retenues fiscales et sociales) */
+        $chargeEmployeur = $this->chargeEmployeurRepository->findOneBy(['personal' => $personal]);
+        $employeurIS = round($chargeEmployeur?->getAmountIS());
+        $employeurFPC = round($chargeEmployeur?->getAmountFPC());
+        $employeurFPCAnnuel = round($chargeEmployeur?->getAmountAnnuelFPC());
+        $employeurTA = round($chargeEmployeur?->getAmountTA());
+        $employeurCMU = round($chargeEmployeur?->getAmountCMU());
+        $employeurCR = round($chargeEmployeur?->getAmountCR());
+        $employeurPF = round($chargeEmployeur?->getAmountPF());
+        $employeurAT = round($chargeEmployeur?->getAmountAT());
+        $assuranceSantePatronale = $this->paieServices->amountAssuranceSante($personal)['assurance_patronale'];
+        $amountChargFiscalPatronale = $employeurIS + $employeurFPC + $employeurFPCAnnuel + $employeurTA;
+        $amountChargSocialPatronale = $employeurCMU + $employeurCR + $employeurAT + $employeurPF + $assuranceSantePatronale;
+        $chargePatronal = round($amountChargFiscalPatronale + $amountChargSocialPatronale);
+
+        /** Ajouter le salaire brut qui constitue l'ensemble des élements de salaire imposable et non imposable */
+        $salaireBrut = $baseSalaire + $sursalaire + $majorationHeursSupp + $primeFonctions + $primeLogements
+            + $indemniteFonctions + $indemniteLogements + $primeTransportImposable + $avantageNatureImposable
+            + $primeTransportLegal + $avantageNonImposable;
+
+
+        /** Ajouter le net imposable qui constitue l'ensemble des élements de salaire imposable uniquement */
+        $netImposable = $baseSalaire + $sursalaire + $majorationHeursSupp + $primeFonctions + $primeLogements
+            + $indemniteFonctions + $indemniteLogements + $primeTransportImposable + $avantageNatureImposable;
+
+
+        /** Ajouter le net à payer, total retenue, indemnité de transport et assurance santé du personnel */
+        $netPayer = ceil($netImposable + $primeTransportLegal + $avantageNonImposable - $chargeSalarie);
+
+        /** Ajouter la masse salariale */
+        $masseSalaried = $netPayer + $chargePatronal + $chargeSalarie;
+
+        /** Remplire le dictionnaire */
+        $payroll = (new Payroll())
+            ->setCampagne($campagne)
+            ->setPersonal($personal)
+            ->setNumberPart($nombrePart)
+            ->setDayOfPresence($dayOfPresence)
+            ->setMatricule($matricule)
+            ->setService($service)
+            ->setCategories($categorie)
+            ->setDepartement($departement)
+            ->setDateEmbauche($dateEmbauche)
+            ->setNumCnps($numeroCnps)
+            /** element de salaire */
+            ->setBaseAmount($baseSalaire)
+            ->setSursalaire($sursalaire)
+            ->setMajorationAmount($majorationHeursSupp)
+            ->setBrutAmount($salaireBrut)
+            ->setImposableAmount($netImposable)
+            ->setNetPayer($netPayer)
+            ->setMasseSalary($masseSalaried)
+            /** les primes */
+            ->setPrimeFonctionAmount($primeFonctions)
+            ->setPrimeLogementAmount($primeLogements)
+            ->setIndemniteFonctionAmount($indemniteFonctions)
+            ->setIndemniteLogementAmount($indemniteLogements)
+            ->setSalaryTransport($primeTransportLegal)
+            ->setAmountTransImposable($primeTransportImposable)
+            ->setAmountPrimePanier($primePaniers)
+            ->setAmountPrimeSalissure($primeSalissures)
+            ->setAmountPrimeTenueTrav($primeTenueTravails)
+            ->setAmountPrimeOutillage($primeOutillages)
+            ->setAmountPrimeRendement($primeRendement)
+            /** les aventages en natures */
+            ->setAmountAvantageImposable($avantageNatureImposable)
+            ->setAventageNonImposable($avantageNonImposable)
+            /** charge salariale */
+            ->setSalaryIts($salaryIts)
+            ->setSalaryCnps($salaryCnps)
+            ->setSalaryCmu($salaryCmu)
+            ->setSalarySante($assuranceSanteSalariale)
+            ->setFixcalAmount($amountChargFiscalPersonal)
+            ->setSocialAmount($amountChargSocialPersonal)
+            ->setTotalRetenueSalarie($chargeSalarie)
+            /** charge patronale */
+            ->setEmployeurIs($employeurIS)
+            ->setEmployeurCr($employeurCR)
+            ->setEmployeurCmu($employeurCMU)
+            ->setAmountTA($employeurTA)
+            ->setAmountFPC($employeurFPC)
+            ->setAmountAnnuelFPC($employeurFPCAnnuel)
+            ->setEmployeurFdfp($employeurTA + $employeurFPC + $employeurFPCAnnuel)
+            ->setEmployeurPf($employeurPF)
+            ->setEmployeurAt($employeurAT)
+            ->setEmployeurCnps($employeurCR + $employeurPF + $employeurAT)
+            ->setEmployeurSante($assuranceSantePatronale)
+            ->setFixcalAmountEmployeur($amountChargFiscalPatronale)
+            ->setSocialAmountEmployeur($amountChargSocialPatronale)
+            ->setTotalRetenuePatronal($chargePatronal);
+
+        /** Enregistrement du livre de paie */
+        $this->manager->persist($payroll);
     }
 
     /**
