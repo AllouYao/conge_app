@@ -1,9 +1,9 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Etat des remboursement validés{% endblock %}
+{% block title %}Liste des heures supp validé{% endblock %}
 {% block stylesheets %}
     <style>
-        #dataGridOperationValider {
+        #dataGridHeureSupplementaire {
             border-width: 50px;
         }
     </style>
@@ -15,13 +15,11 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        REMBOURSEMENTS VALIDES
+                        HEURES SUPPLEMENTAIRES
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="card-body">
-                        <div id="dataGridOperationValider"></div>
-                    </div>
+                    <div id="dataGridHeureSupplementaire"></div>
                 </div>
             </div>
         </div>
@@ -36,25 +34,18 @@
         }
 
         $(document).ready(function () {
-            const date = new Date();
-            const year = date.getFullYear();
-            const month = date.getMonth() + 1;
-            const day = date.getDate();
-
-            $("#dataGridOperationValider").dxDataGrid({
-                dataSource: `{{ url('api_reporting_paie_remboursement_salaire_validate') }}`,
+            let debut;
+            let fin;
+            $("#dataGridHeureSupplementaire").dxDataGrid({
+                dataSource: `{{ url('personal_heure_sup_api_heure_supplementaire') }}`,
                 showBorders: true,
-                height: 400,
+                height: 300,
                 scrolling: {
                     columnRenderingMode: 'virtual',
-                    mode: "virtual",
-                },
-                selection: {
-                    mode: 'multiple',
-                    showCheckBoxesMode: 'always'
+                    mode: "virtual"
                 },
                 groupPanel: {
-                    visible: true
+                    visible: true,
                 },
                 export: {
                     enabled: true,
@@ -64,7 +55,7 @@
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('OPERATION REMBOURSEMENTS');
+                        const worksheet = workbook.addWorksheet('HEURES SUPPLEMENTAIRES');
                         DevExpress.excelExporter.exportDataGrid({
                             component: e.component,
                             worksheet,
@@ -79,7 +70,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Remboursement ${year}-${month < 10 ? '0' : ''}${month}-${day}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `HEURES SUPPLEMENTAIRE ${debut ?? " "} - ${fin ?? " "}.xlsx`);
                             });
                         });
                         e.cancel = true;
@@ -103,99 +94,100 @@
                 columnAutoWidth: true,
                 columns: [
                     {
-                        caption: 'S/N',
-                        alignment: 'center',
-                        dataType: 'string',
-                        dataField: 'ordre'
-                    },
-                    {
-                        caption: 'Date opération',
-                        alignment: 'center',
-                        dataType: 'string',
-                        dataField: 'date_remboursement'
-                    },
-                    {
-                        caption: 'Emolument',
-                        alignment: 'center',
-                        dataType: 'string',
-                        dataField: 'remboursement'
-                    },
-                    {
                         caption: 'Matricule',
-                        alignment: 'center',
+                        alignment: 'left',
                         dataType: 'string',
-                        dataField: 'matricule_salarie'
+                        dataField: 'matricule',
                     },
                     {
                         caption: 'Nom',
                         alignment: 'left',
                         dataType: 'string',
-                        dataField: 'nom_salarie'
+                        dataField: 'name',
                     },
                     {
-                        caption: 'Prénoms',
+                        caption: 'Prénom(s)',
                         alignment: 'left',
                         dataType: 'string',
-                        dataField: 'prenom_salarie'
+                        dataField: 'last_name',
                     },
                     {
-                        caption: 'Stations',
+                        caption: 'Date de naissance',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_naissance',
+                    },
+                    {
+                        caption: 'Catégorie salarié',
                         alignment: 'left',
                         dataType: 'string',
-                        dataField: 'station_salarie'
+                        dataField: 'categorie_salarie',
                     },
                     {
-                        caption: 'Remboursement en brut',
-                        alignment: 'right',
-                        dataType: 'number',
-                        dataField: 'remboursement_montant_brut'
+                        caption: 'Date d\'embauche',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_embauche',
                     },
                     {
-                        caption: 'Remboursement en net',
-                        alignment: 'right',
+                        caption: 'Date début',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_debut',
+                    },
+                    {
+                        caption: 'Heure début',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'heure_debut',
+                    },
+                    {
+                        caption: 'Date fin',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_fin',
+                    },
+                    {
+                        caption: 'Heure fin',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'heure_fin',
+                    },
+                    {
+                        caption: 'Total horraire',
+                        alignment: 'center',
                         dataType: 'number',
-                        dataField: 'remboursement_montant_net'
+                        dataField: 'total_horaire',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Ajouté le',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_creation',
                     },
                     {
                         caption: 'Statut',
                         alignment: 'center',
                         dataType: 'object',
-                        dataField: 'remboursement_status',
+                        dataField: 'status',
                         cellTemplate: function (container, options) {
                             const status = options.value;
-                            let badgeClass = 'badge badge-soft-success';
+                            let badgeClass = '';
+                            if (status === 'VALIDEE') {
+                                badgeClass = 'badge badge-soft-success';
+                            } else if (status === 'EN ATTENTE') {
+                                badgeClass = 'badge badge badge-soft-primary';
+                            }
                             $("<span>")
                                 .addClass(badgeClass)
                                 .text(status)
                                 .appendTo(container);
                         }
-                    }
+                    },
                 ],
-                summary: {
-                    totalItems: [
-                        {
-                            column: 'ordre',
-                            summaryType: 'count',
-                            displayFormat: 'Salariés : {0}'
-                        },
-                        {
-                            column: 'nom_salarie',
-                            customizeText() {
-                                return 'CUMUL DES REMBOURSEMENTS ';
-                            }
-                        },
-                        {
-                            column: 'remboursement_montant_brut',
-                            summaryType: 'sum',
-                            displayFormat: 'Sur le Brut : {0}'
-                        },
-                        {
-                            column: 'remboursement_montant_net',
-                            summaryType: 'sum',
-                            displayFormat: 'Sur le Net : {0}'
-                        }
-                    ]
-                },
             })
         })
     </script>
