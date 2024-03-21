@@ -3,6 +3,7 @@
                 class="text-danger">*</span></label>
     <div class="col-md-8">
         {{ form_widget(form.etatCivil) }}
+        {{ form_errors(form.etatCivil) }}
     </div>
 </div>
 <br>
@@ -14,16 +15,19 @@
                         class="text-danger"> *</span></label>
             <div class="col-md-2">
                 {{ form_widget(form.conjoint) }}
+                {{ form_errors(form.conjoint) }}
             </div>
             <label class="col-md-2 col-form-label">N° Certificat marriage<span
                         class="text-danger"> *</span></label>
             <div class="col-md-2">
                 {{ form_widget(form.numCertificat) }}
+                {{ form_errors(form.numCertificat) }}
             </div>
             <label class="col-md-2 col-form-label">N° Acte marriage<span
                         class="text-danger"> *</span></label>
             <div class="col-md-2">
                 {{ form_widget(form.numExtraitActe) }}
+                {{ form_errors(form.numExtraitActe) }}
             </div>
         </div>
     </fieldset>

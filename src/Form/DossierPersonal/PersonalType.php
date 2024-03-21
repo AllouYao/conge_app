@@ -14,6 +14,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class PersonalType extends AbstractType
 {
@@ -21,9 +22,21 @@ class PersonalType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('matricule')
-            ->add('firstName')
-            ->add('lastName')
+            ->add('matricule', TextType::class, [
+                'constraints' => [
+                    new NotBlank()
+                ]
+            ])
+            ->add('firstName', TextType::class, [
+                'constraints' => [
+                    new NotBlank()
+                ]
+            ])
+            ->add('lastName', TextType::class, [
+                'constraints' => [
+                    new NotBlank()
+                ]
+            ])
             ->add('genre', ChoiceType::class, [
                 'attr' => [
                     'data-plugin' => 'customselect',
@@ -33,7 +46,10 @@ class PersonalType extends AbstractType
                     'Féminin' => Status::FEMININ
                 ],
                 'placeholder' => 'Sélectionner un genre',
-                'required' => false
+                'required' => false,
+                'constraints' => [
+                    new NotBlank()
+                ]
             ])
             ->add('birthday', DateCustomType::class, [
                 'required' => false
@@ -82,7 +98,10 @@ class PersonalType extends AbstractType
                 'group_by' => 'categorySalarie',
                 'query_builder' => function (CategoryRepository $categoryRepository): QueryBuilder {
                     return $categoryRepository->findCategorieByEmploye();
-                }
+                },
+                'constraints' => [
+                    new NotBlank()
+                ]
             ])
             ->add('conjoint', TextType::class, [
                 'required' => false
@@ -105,6 +124,9 @@ class PersonalType extends AbstractType
                 'label_attr' => [
                     'class' => 'radio-inline'
                 ],
+                'constraints' => [
+                    new NotBlank()
+                ]
                 //'required' => false
             ])
             ->add('niveauFormation', ChoiceType::class, [
@@ -118,7 +140,7 @@ class PersonalType extends AbstractType
                     'Master (Bac + 5)' => Status::Master
                 ],
                 'placeholder' => 'Sélectionner votre niveau de formation',
-                'required' => false
+                'required' => false,
             ])
             ->add('contract', ContractType::class, [
                 'required' => false
@@ -135,10 +157,16 @@ class PersonalType extends AbstractType
                     'Virement' => Status::VIREMENT,
                     'Caisse' => Status::CAISSE,
                 ],
-                'placeholder' => 'Sélectionner le mode de paiement'
+                'placeholder' => 'Sélectionner le mode de paiement',
+                'constraints' => [
+                    new NotBlank()
+                ]
             ])
             ->add('fonction', TextType::class, [
-                'required' => false
+                'required' => false,
+                'constraints' => [
+                    new NotBlank()
+                ]
             ])
             ->add('service', ChoiceType::class, [
                 'required' => false,
@@ -167,18 +195,11 @@ class PersonalType extends AbstractType
                     'BOUTIQUE  PO LOCODJORO' => status::BOUTIQUE_PO_LOCODJORO,
 
 
-
-
-
-
-
-
-
-
-
-
                 ],
-                'placeholder' => 'Sélectionner le site de travail'
+                'placeholder' => 'Sélectionner le site de travail',
+                'constraints' => [
+                    new NotBlank()
+                ]
             ]);
     }
 

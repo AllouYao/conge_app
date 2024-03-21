@@ -3,11 +3,13 @@
                 class="text-danger">*</span></label>
     <div class="col-md-4">
         {{ form_widget(form.categorie) }}
+        {{ form_errors(form.categorie) }}
     </div>
     <label class="col-md-2 col-form-label">Niveau de formation <span
                 class="text-danger">*</span></label>
     <div class="col-md-4">
         {{ form_widget(form.niveauFormation) }}
+        {{ form_errors(form.niveauFormation) }}
     </div>
 </div>
 <div class="mb-2 row">
@@ -15,10 +17,12 @@
                 class="text-danger">*</span></label>
     <div class="col-md-4">
         {{ form_widget(form.fonction) }}
+        {{ form_errors(form.fonction) }}
     </div>
     <label class="col-md-2 col-form-label">Département ou Service<span
                 class="text-danger">*</span></label>
     <div class="col-md-4">
         {{ form_widget(form.service) }}
+        {{ form_errors(form.service) }}
     </div>
 </div>

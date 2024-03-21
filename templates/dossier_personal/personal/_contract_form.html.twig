@@ -3,11 +3,13 @@
                 class="text-danger">*</span></label>
     <div class="col-md-3">
         {{ form_widget(form.contract.typeContrat) }}
+        {{ form_errors(form.contract.typeContrat) }}
     </div>
     <label class="col-md-2 col-form-label">Date d’embauche <span
                 class="text-danger">*</span></label>
     <div class="col-md-2">
         {{ form_widget(form.contract.dateEmbauche) }}
+        {{ form_errors(form.contract.dateEmbauche) }}
     </div>
     <label class="col-md-1 col-form-label">Date de début <span
                 class="text-danger">*</span></label>
@@ -30,5 +32,6 @@
                 class="text-danger">*</span></label>
     <div class="col-md-2">
         {{ form_widget(form.contract.refContract) }}
+        {{ form_errors(form.contract.refContract) }}
     </div>
 </div>

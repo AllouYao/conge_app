@@ -17,6 +17,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class SalaryType extends AbstractType
 {
@@ -49,7 +50,10 @@ class SalaryType extends AbstractType
                     'readonly' => true,
                     'class' => 'separator text-end'
                 ],
-                'required' => false
+                'required' => false,
+                'constraints' => [
+                    new NotBlank()
+                ]
             ])
             ->add('sursalaire', TextType::class, [
                 'required' => false,
@@ -62,11 +66,17 @@ class SalaryType extends AbstractType
                 'attr' => [
                     'class' => 'total-prime separator text-end'
                 ],
+                'constraints' => [
+                    new NotBlank()
+                ]
             ])
             ->add('amountAventage', TextType::class, [
                 'required' => true,
                 'attr' => [
                     'class' => 'total-prime separator text-end'
+                ],
+                'constraints' => [
+                    new NotBlank()
                 ]
             ])
             ->add('brutAmount', TextType::class, [
@@ -74,12 +84,18 @@ class SalaryType extends AbstractType
                     'readonly' => true,
                     'class' => 'total-prime separator text-end'
                 ],
+                'constraints' => [
+                    new NotBlank()
+                ]
             ])
             ->add('brutImposable', TextType::class, [
                 'attr' => [
                     'readonly' => true,
                     'class' => 'total-prime separator text-end'
                 ],
+                'constraints' => [
+                    new NotBlank()
+                ]
             ])
             ->add('detailSalaries', CollectionType::class, [
                 "entry_type" => PrimeSalaryType::class,

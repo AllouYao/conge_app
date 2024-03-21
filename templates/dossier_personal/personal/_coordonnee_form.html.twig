@@ -3,14 +3,17 @@
         <label class="col-md-1 col-form-label">Adresse </label>
         <div class="col-md-3">
             {{ form_widget(form.address) }}
+            {{ form_errors(form.address) }}
         </div>
         <label class="col-md-1 col-form-label">Téléphone </label>
         <div class="col-md-3">
             {{ form_widget(form.telephone) }}
+            {{ form_errors(form.telephone) }}
         </div>
         <label class="col-md-1 col-form-label">E-mail </label>
         <div class="col-md-3">
             {{ form_widget(form.email) }}
+            {{ form_errors(form.email) }}
         </div>
     </div>
 </fieldset>

@@ -9,6 +9,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ContractType extends AbstractType
 {
@@ -26,10 +27,16 @@ class ContractType extends AbstractType
                     //'Occasionnel' => Status::OCCASIONNEL,
                 ],
                 'placeholder' => 'Sélectionner votre type de contrat',
-                'required' => true
+                'required' => true,
+                'constraints' => [
+                    new NotBlank()
+                ]
             ])
             ->add('dateEmbauche', DateCustomType::class, [
-                'required' => true
+                'required' => true,
+                'constraints' => [
+                    new NotBlank()
+                ]
             ])
             ->add('dateEffet', DateCustomType::class, [
                 'required' => false
@@ -46,7 +53,7 @@ class ContractType extends AbstractType
                     'Temps partiel' => Status::TEMPS_PARTIEL,
                 ],
                 'placeholder' => 'Sélectionner votre temps contractuel',
-                'required' => true
+                'required' => false,
             ])
             ->add('refContract');
     }
