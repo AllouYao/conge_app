@@ -23,31 +23,6 @@ class AbsenceRepository extends ServiceEntityRepository
         parent::__construct($registry, Absence::class);
     }
 
-    //    /**
-    //     * @return Absence[] Returns an array of Absence objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('a.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Absence
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
-
     /**
      * @param Personal|null $personal
      * @param int $month
@@ -90,6 +65,7 @@ class AbsenceRepository extends ServiceEntityRepository
             ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
             ->andWhere('YEAR(abs.startedDate) = :year')
             ->andWhere('MONTH(abs.startedDate) = :month')
+            ->andWhere('personal.active = true')
             ->setParameter('year', $year)
             ->setParameter('month', $month)
             ->setParameter('code_employe', 'OE') 
@@ -106,11 +82,12 @@ class AbsenceRepository extends ServiceEntityRepository
             ->join('abs.personal', 'personal') 
             ->join('personal.categorie', 'category') 
             ->join('category.categorySalarie', 'categorySalarie') 
-            ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
+            ->where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
             ->andWhere('YEAR(abs.startedDate) = :year')
             ->andWhere('MONTH(abs.startedDate) = :month')
             ->andWhere('abs.justified = :justified')
             ->andWhere('abs.personal = :personal')
+            ->andWhere('personal.active = true')
             ->setParameter('code_employe', 'OE') 
             ->setParameter('code_chauffeur', 'CH') 
             ->setParameter('personal', $personal)

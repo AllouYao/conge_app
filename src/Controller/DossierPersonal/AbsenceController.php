@@ -9,6 +9,7 @@ use App\Repository\DossierPersonal\AbsenceRepository;
 use App\Service\AbsenceService;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
+use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,10 +46,8 @@ class AbsenceController extends AbstractController
         } else {
             $absences = $this->absenceRepository->getAbsenceByMonthsByEmployeRole($now->month, $now->year);
         }
-        $absences = $this->absenceRepository->findAll();
         $apiAbsences = [];
         foreach ($absences as $absence) {
-            $newBaseAmount = $this->absenceService->getAmountByAbsence($absence);
             $deducteur = $this->absenceService->getAmountDeduction($absence);
             $apiAbsences[] = [
                 'matricule' => $absence->getPersonal()->getMatricule(),
@@ -64,8 +63,7 @@ class AbsenceController extends AbstractController
                 'status' => $absence->isJustified() ? 'OUI' : 'NON',
                 'description' => $absence->getDescription(),
                 'duree_jour' => $absence->getTotalDay(),
-                'montant_deduit' => $deducteur,
-                'nouveau_salaire_base' => $newBaseAmount,
+                'montant_deduit' => ceil($deducteur),
                 'date_creation' => date_format($absence->getCreatedAt(), 'd/m/Y'),
                 'modifier' => $this->generateUrl('personal_absence_edit', ['uuid' => $absence->getPersonal()->getUuid()])
             ];
@@ -77,7 +75,7 @@ class AbsenceController extends AbstractController
     public function index(): Response
     {
         $absence = $this->absenceRepository->findAll();
-        $formatter = new \IntlDateFormatter('fr_FR', \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'MMMM Y');
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, 'MMMM Y');
         $today = Carbon::now();
         $date = $formatter->format($today);
         return $this->render('dossier_personal/absence/index.html.twig', [
@@ -98,10 +96,13 @@ class AbsenceController extends AbstractController
         $form = $this->createForm(PersonalAbsenceType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $PersonalAbsence = $form->get('absence')->getData();
+            $personalAbsence = $form->get('absence')->getData();
             $personal = $form->get('personal')->getData();
-
-            foreach ($PersonalAbsence as $absence) {
+            if ($form->get('absence')->count() == 0) {
+                flash()->addInfo('Veillez s\'il vous plait ajouter au moins une ligne pour continuer merci !');
+                return $this->redirectToRoute('personal_absence_new');
+            }
+            foreach ($personalAbsence as $absence) {
                 $absence->setPersonal($personal);
                 $absence->setUser($currentUser);
                 $this->entityManager->persist($absence);

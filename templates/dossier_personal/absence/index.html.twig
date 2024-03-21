@@ -158,12 +158,12 @@
                         dataType: 'string',
                         dataField: 'status',
                         cellTemplate: function (container, options) {
-                            var status = options.data.status;
-                            var statusText = status === 'OUI' ? 'Apporter' : 'Non apporter';
-                            var labelClass = status === 'OUI' ? 'bg-success' : 'bg-danger';
+                            let status = options.data.status;
+                            let statusText = status === 'OUI' ? 'Apporter' : 'Non apporter';
+                            let labelClass = status === 'OUI' ? 'bg-success' : 'bg-danger';
 
                             // Créer une structure HTML personnalisée pour la cellule
-                            var htmlContent = '<span class="badge ' + labelClass + '">' + statusText + '</span>';
+                            let htmlContent = '<span class="badge ' + labelClass + '">' + statusText + '</span>';
 
                             // Ajouter la structure HTML à la cellule
                             container.append(htmlContent);
@@ -189,15 +189,6 @@
                         alignment: 'center',
                         dataType: 'number',
                         dataField: 'montant_deduit',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                    },
-                    {
-                        caption: 'Nouveau salaire catégoriel',
-                        alignment: 'center',
-                        dataType: 'number',
-                        dataField: 'nouveau_salaire_base',
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
