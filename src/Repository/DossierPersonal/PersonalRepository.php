@@ -4,10 +4,8 @@ namespace App\Repository\DossierPersonal;
 
 use App\Entity\DossierPersonal\Personal;
 use App\Utils\Status;
-use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Exception;
 
 /**
  * @extends ServiceEntityRepository<Personal>
@@ -50,8 +48,13 @@ class PersonalRepository extends ServiceEntityRepository
     public function findAllPersonal(): array
     {
         $qb = $this->createQueryBuilder('p')
+            ->join('p.contract', 'contract')
             ->leftJoin('p.departures', 'departures')
             ->where('departures.id IS NULL')
+            ->andWhere('contract.id IS NOT NULL')
+            ->andWhere('contract.typeContrat IN (:type)')
+            ->andWhere('p.active = true')
+            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
             ->getQuery()
             ->getResult();
         return array_map(function ($result) {
@@ -59,14 +62,20 @@ class PersonalRepository extends ServiceEntityRepository
         }, $qb);
     }
 
+    /** Retourne les employer en fonction de la catégorie et par rôle de l'utilisateur */
     public function findAllPersonalByEmployeRole(): array
     {
         $qb = $this->createQueryBuilder('p')
+            ->join('p.contract', 'contract')
             ->join('p.categorie', 'category')
             ->join('category.categorySalarie', 'categorySalarie')
             ->leftJoin('p.departures', 'departures')
             ->where('departures.id IS NULL')
             ->andWhere('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
+            ->andWhere('contract.id IS NOT NULL')
+            ->andWhere('contract.typeContrat IN (:type)')
+            ->andWhere('p.active = true')
+            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
             ->setParameter('code_employe', 'OE')
             ->setParameter('code_chauffeur', 'CH')
             ->getQuery()

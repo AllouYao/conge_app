@@ -4,6 +4,7 @@
 namespace App\Form\DossierPersonal;
 
 use App\Entity\DossierPersonal\Personal;
+use App\Utils\Status;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -11,6 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class PersonalHeureSupType extends AbstractType
 {
@@ -20,12 +22,15 @@ class PersonalHeureSupType extends AbstractType
         $builder
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
-                'choice_label' => 'matricule',
+                'choice_label' => 'firstName',
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('p')
                         ->join('p.contract', 'ct')
                         ->leftJoin('p.departures', 'departures')
-                        ->where('departures.id IS NULL');
+                        ->where('departures.id IS NULL')
+                        ->andWhere('ct.typeContrat IN (:type)')
+                        ->andWhere('p.active = true')
+                        ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD]);
                 },
                 'placeholder' => 'Sélectionner un matricule',
                 'attr' => [
@@ -35,9 +40,12 @@ class PersonalHeureSupType extends AbstractType
                     return [
                         'data-name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
                         'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y'),
-                        'data-category' => '( ' . $personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' . $personal->getCategorie()->getIntitule()
+                        'data-category' => '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ') - ' . $personal->getCategorie()->getIntitule()
                     ];
-                }
+                },
+                'constraints' => [
+                    new NotBlank()
+                ]
             ])
             ->add('name', TextType::class, [
                 'mapped' => false,

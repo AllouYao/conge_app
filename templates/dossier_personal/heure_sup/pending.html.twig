@@ -3,7 +3,7 @@
 {% block title %}Heures supplémentaires {% endblock %}
 {% block stylesheets %}
     <style>
-        #dataGridRemboursement {
+        #dataGridSup {
             border-width: 50px;
             height: 350px;
         }
@@ -17,7 +17,7 @@
                     <div class="card-header">
                         <h5 class="card-title-custom" style="color: white" id="date">
                             <i data-feather="list"></i>
-                            HEURES SUPPLEMENTAIRES
+                            HEURES SUPPLEMENTAIRES EN ATTENTE
                         </h5>
                     </div>
                     <div class="card-body">
@@ -63,12 +63,6 @@
         }
 
         $(document).ready(function () {
-
-            const date = new Date();
-            // const year = date.getFullYear();
-            // const month = date.getMonth() + 1;
-            //  const day = date.getDate();
-
             const dataGrid = $("#dataGridSup").dxDataGrid({
                 dataSource: '{{ url("personal_heure_sup_api_heure_supplementaire_pending") }}',
                 showBorders: true,
@@ -220,12 +214,7 @@
                         dataField: 'status',
                         cellTemplate: function (container, options) {
                             const status = options.value;
-                            let badgeClass = '';
-                            if (status === 'VALIDEE') {
-                                badgeClass = 'badge badge-soft-success';
-                            } else if (status === 'EN ATTENTE') {
-                                badgeClass = 'badge badge badge-soft-primary';
-                            }
+                            let badgeClass = 'badge badge badge-soft-primary';
                             $("<span>")
                                 .addClass(badgeClass)
                                 .text(status)

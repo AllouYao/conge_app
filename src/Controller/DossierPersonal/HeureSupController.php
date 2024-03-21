@@ -2,14 +2,12 @@
 
 namespace App\Controller\DossierPersonal;
 
-use App\Entity\DevPaie\WorkTime;
 use App\Entity\DossierPersonal\Personal;
 use App\Form\DossierPersonal\PersonalHeureSupType;
 use App\Repository\DevPaie\WorkTimeRepository;
 use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Service\HeureSupService;
-use App\Service\Personal\ChargesServices;
 use App\Utils\Status;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,27 +25,23 @@ class HeureSupController extends AbstractController
     private EntityManagerInterface $entityManager;
     private PersonalRepository $personalRepository;
     private HeureSupRepository $heureSupRepository;
-    private ChargesServices $chargesServices;
 
 
     public function __construct(
         EntityManagerInterface $entityManager,
         PersonalRepository     $personalRepository,
         HeureSupRepository     $heureSupRepository,
-        ChargesServices        $chargesServices
     )
     {
         $this->entityManager = $entityManager;
         $this->personalRepository = $personalRepository;
         $this->heureSupRepository = $heureSupRepository;
-        $this->chargesServices = $chargesServices;
     }
 
     #[Route('/api/heure_supp_super_book', name: 'api_heure_supp_super_book', methods: ['GET'])]
     public function apiBookHour(WorkTimeRepository $workTimeRepository): JsonResponse
     {
 
-        $defaultRate = 100;
         $jourNormalOrFerie = null;
         $jourOrNuit = null;
         $index = 0;
@@ -58,11 +52,8 @@ class HeureSupController extends AbstractController
         $salaireHoraire = 0;
 
         if ($this->isGranted('ROLE_RH')) {
-
             $personals = $this->personalRepository->findAllPersonal();
-
         } else {
-
             $personals = $this->personalRepository->findAllPersonalByEmployeRole();
         }
 
@@ -71,7 +62,7 @@ class HeureSupController extends AbstractController
             $heureSupp = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
             $statut = $personal->getContract()->getTempsContractuel() === Status::TEMPS_PLEIN ? 'PERMANENT' : 'VACATAIRES';
             $fullnamePersonal = $personal->getFirstName() . ' ' . $personal->getLastName();
-            $personalSalaireBase = $this->chargesServices->amountSalaireBrutAndImposable($personal)['salaire_categoriel'];
+            $personalSalaireBase = $personal->getCategorie()->getAmount();
             $amountHoraire = 0;
             $heure_15 = 0;
             $heure15 = 0;
@@ -86,21 +77,22 @@ class HeureSupController extends AbstractController
             $totalHeure = 0;
             if (count($heureSupp) > 0) {
                 foreach ($heureSupp as $item) {
-                    $salaireHoraire = $personalSalaireBase / (double)$item->getTauxHoraire();
+                    $salaireHoraire = ceil($personalSalaireBase / (double)$item->getTauxHoraire());
                     $heure = (int)$item->getTotalHorraire();
                     $jourNormalOrFerie = $item->getTypeDay();
                     $jourOrNuit = $item->getTypeJourOrNuit();
                     $totalHeure += (int)$item->getTotalHorraire();
-
-                    $workTime = $workTimeRepository->findOneBy(['type' => 'MAJORATION_15_PERCENT']);
-                    if ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure <= $workTime->getHourValue()?? 6) {
+                    $workTime = $workTimeRepository->findOneBy(['type' => Status::MAJORATION_15_PERCENT, 'code' => Status::SUPPLEMENTAIRE]);
+                    if ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure <= $workTime->getHourValue()) {
                         $heure_15 += $heure;
                         $heure15 = $heure_15;
-                    } elseif ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure > $workTime->getHourValue()?? 6) {
-                        $heure_6 = 6;
-                        $heure15 += $heure_15;
+
+                    } elseif ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure > $workTime->getHourValue()) {
+                        $heure_6 = $workTime->getHourValue();
+                        $heure15 += $heure_6;
                         $heure_50 += $heure - $heure_6;
                         $heure50 = $heure_50;
+
                     } elseif ($jourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
                         $heure_75_jour += $heure;
                         $heure75Jour = $heure_75_jour;
@@ -111,7 +103,7 @@ class HeureSupController extends AbstractController
                         $heure_100 += $heure;
                         $heure100 = $heure_100;
                     }
-                    $amountHoraire = $amountHoraire + $item->getAmount();
+                    $amountHoraire += $item->getAmount();
                 }
                 $apiHeureSupp[] = [
                     'index' => ++$index,
@@ -173,6 +165,7 @@ class HeureSupController extends AbstractController
 
         return new JsonResponse($apiRequestHeureSupp);
     }
+
     #[Route('/api/heure_supp/pending ', name: 'api_heure_supplementaire_pending', methods: ['GET'])]
     public function apiHeureSuppPending(): JsonResponse
     {
@@ -210,6 +203,7 @@ class HeureSupController extends AbstractController
 
         return new JsonResponse($apiRequestHeureSupp);
     }
+
     #[Route('/api/heure_supp/validated ', name: 'api_heure_supplementaire_validated', methods: ['GET'])]
     public function apiHeureSuppValidate(): JsonResponse
     {
@@ -279,6 +273,10 @@ class HeureSupController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $personal = $form->get('personal')->getData();
             $data = $form->getData();
+            if ($form->get('heureSup')->count() == 0) {
+                flash()->addInfo('Veillez s\'il vous plait ajouter une ligne dans le tableau si-dessous pour continuer.');
+                return $this->redirectToRoute('personal_heure_sup_new', [], Response::HTTP_SEE_OTHER);
+            }
             $supService->heureSupp($data, $personal);
             $this->entityManager->flush();
             flash()->addSuccess('Heure suplementaire ajouté avec succès.');
@@ -315,18 +313,21 @@ class HeureSupController extends AbstractController
             'editing' => true
         ]);
     }
+
     #[Route('/pending', name: 'pending', methods: ['GET'])]
     public function pending(): Response
     {
         return $this->render('dossier_personal/heure_sup/pending.html.twig');
     }
+
     #[Route('/validated', name: 'validated', methods: ['GET'])]
     public function validated(): Response
     {
         return $this->render('dossier_personal/heure_sup/validated.html.twig');
     }
+
     #[Route('/validate', name: 'validate', methods: ['POST'])]
-    public function validate(Request $request ): Response
+    public function validate(Request $request): Response
     {
         if ($request->request->has('heureSupInput') && $request->isMethod('POST')) {
 
@@ -340,13 +341,14 @@ class HeureSupController extends AbstractController
                     if ($heureSup) {
                         $heureSup->setStatus(Status::VALIDATED);
                         $this->entityManager->persist($heureSup);
-                     }
-                     $this->entityManager->flush();
-                     flash()->addSuccess('Heure supplémentaire validé avec succès!');
-                 
+                    }
+                    $this->entityManager->flush();
+                    flash()->addSuccess('Heure supplémentaire validé avec succès!');
+
                 }
             } else {
-                flash()->addWarning('Aucune heure supplementaire sélectionnée');
+                flash()->addWarning('Aucune heure supplementaire sélectionnées');
+                flash()->addInfo('Veillez s\'il vous plait sélectionner au moins une ligne merci !');
                 return $this->redirectToRoute('personal_heure_sup_pending', [], Response::HTTP_SEE_OTHER);
             }
         }

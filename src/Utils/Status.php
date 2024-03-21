@@ -218,4 +218,11 @@ final class Status
     public const COMPTABLE = 'COMPTABLE';
     public const ASSISTANT_COMT = 'ASSISTANT COMPTABLE';
 
+    /** Type heure supplémentaire */
+    public const MAJORATION_15_PERCENT = 'MAJORATION_15_PERCENT';
+    public const MAJORATION_50_PERCENT = 'MAJORATION_50_PERCENT';
+    public const MAJORATION_75_PERCENT = 'MAJORATION_75_PERCENT';
+    public const MAJORATION_100_PERCENT = 'MAJORATION_100_PERCENT';
+
+    public const SUPPLEMENTAIRE = 'SUPPLEMENTAIRE';
 }

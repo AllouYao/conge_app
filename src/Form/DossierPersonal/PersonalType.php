@@ -162,7 +162,7 @@ class PersonalType extends AbstractType
                     new NotBlank()
                 ]
             ])
-            ->add('fonction', TextType::class, [
+            ->add('fonction', ChoiceType::class, [
                 'required' => false,
                 'attr' => [
                     'data-plugin' => 'customselect',
