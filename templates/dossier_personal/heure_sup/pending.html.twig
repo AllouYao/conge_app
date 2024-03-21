@@ -256,9 +256,6 @@
                 // Récupérer les éléments sélectionnés dans la grille de données
                 const selectedKeys = dataGrid.getSelectedRowKeys();
                 const heureSupps = [];
-
-                console.log(selectedKeys);
-
                 selectedKeys.forEach((heureSupp) => {
                     if (heureSupp.hasOwnProperty('id')) {
                         heureSupps.push(heureSupp.id)

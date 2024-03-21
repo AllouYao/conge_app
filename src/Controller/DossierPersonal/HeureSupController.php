@@ -94,11 +94,9 @@ class HeureSupController extends AbstractController
 
                     $workTime = $workTimeRepository->findOneBy(['type' => 'MAJORATION_15_PERCENT']);
                     if ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure <= $workTime->getHourValue()?? 6) {
-
                         $heure_15 += $heure;
                         $heure15 = $heure_15;
                     } elseif ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure > $workTime->getHourValue()?? 6) {
-                         
                         $heure_6 = 6;
                         $heure15 += $heure_15;
                         $heure_50 += $heure - $heure_6;
@@ -223,7 +221,6 @@ class HeureSupController extends AbstractController
             $heursSupps = $this->heureSupRepository->getByStatus($month, $years, Status::VALIDATED);
 
         } else {
-
             $heursSupps = $this->heureSupRepository->findHeureSupByStatusByEmployeRole($month, $years, Status::VALIDATED);
         }
         $apiRequestHeureSupp = [];
@@ -331,11 +328,13 @@ class HeureSupController extends AbstractController
     #[Route('/validate', name: 'validate', methods: ['POST'])]
     public function validate(Request $request ): Response
     {
-
         if ($request->request->has('heureSupInput') && $request->isMethod('POST')) {
+
             $heureSupInput = $request->request->get('heureSupInput');
-            if ($heureSupInput) {
-                $heureSups = json_decode($heureSupInput);
+            $heureSups = json_decode($heureSupInput);
+
+            if ($heureSups) {
+
                 foreach ($heureSups as $heureSupId) {
                     $heureSup = $this->heureSupRepository->findOneBy(['id' => $heureSupId]);
                     if ($heureSup) {
