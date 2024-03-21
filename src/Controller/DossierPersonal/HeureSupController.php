@@ -2,8 +2,10 @@
 
 namespace App\Controller\DossierPersonal;
 
+use App\Entity\DevPaie\WorkTime;
 use App\Entity\DossierPersonal\Personal;
 use App\Form\DossierPersonal\PersonalHeureSupType;
+use App\Repository\DevPaie\WorkTimeRepository;
 use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Service\HeureSupService;
@@ -42,9 +44,10 @@ class HeureSupController extends AbstractController
     }
 
     #[Route('/api/heure_supp_super_book', name: 'api_heure_supp_super_book', methods: ['GET'])]
-    public function apiBookHour(): JsonResponse
+    public function apiBookHour(WorkTimeRepository $workTimeRepository): JsonResponse
     {
 
+        $defaultRate = 100;
         $jourNormalOrFerie = null;
         $jourOrNuit = null;
         $index = 0;
@@ -63,7 +66,6 @@ class HeureSupController extends AbstractController
             $personals = $this->personalRepository->findAllPersonalByEmployeRole();
         }
 
-        dd($personals);
 
         foreach ($personals as $personal) {
             $heureSupp = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
@@ -89,10 +91,14 @@ class HeureSupController extends AbstractController
                     $jourNormalOrFerie = $item->getTypeDay();
                     $jourOrNuit = $item->getTypeJourOrNuit();
                     $totalHeure += (int)$item->getTotalHorraire();
-                    if ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure <= 6) {
+
+                    $workTime = $workTimeRepository->findOneBy(['type' => 'MAJORATION_15_PERCENT']);
+                    if ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure <= $workTime->getHourValue()?? 6) {
+
                         $heure_15 += $heure;
                         $heure15 = $heure_15;
-                    } elseif ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure > 6) {
+                    } elseif ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure > $workTime->getHourValue()?? 6) {
+                         
                         $heure_6 = 6;
                         $heure15 += $heure_15;
                         $heure_50 += $heure - $heure_6;
@@ -145,6 +151,80 @@ class HeureSupController extends AbstractController
         } else {
 
             $heursSupps = $this->heureSupRepository->findHeureSupByEmployeRole($month, $years);
+        }
+        $apiRequestHeureSupp = [];
+        foreach ($heursSupps as $heureSup) {
+            $apiRequestHeureSupp[] = [
+                'id' => $heureSup->getId(),
+                'matricule' => $heureSup->getPersonal()->getMatricule(),
+                'name' => $heureSup->getPersonal()->getFirstName(),
+                'last_name' => $heureSup->getPersonal()->getLastName(),
+                'date_naissance' => $heureSup->getPersonal()->getBirthday() ? date_format($heureSup->getPersonal()->getBirthday(), 'd/m/Y') : '',
+                'categorie_salarie' => '(' . $heureSup->getPersonal()->getCategorie()->getCategorySalarie()->getName() . ')' . '-' . $heureSup->getPersonal()->getCategorie()->getIntitule(),
+                'date_embauche' => date_format($heureSup->getPersonal()->getContract()->getDateEmbauche(), 'd/m/Y'),
+                'date_debut' => date_format($heureSup->getStartedDate(), 'd/m/Y'),
+                'heure_debut' => date_format($heureSup->getStartedHour(), 'H:m'),
+                'date_fin' => date_format($heureSup->getEndedDate(), 'd/m/Y'),
+                'heure_fin' => date_format($heureSup->getEndedHour(), 'H:m'),
+                'total_horaire' => $heureSup->getTotalHorraire(),
+                'date_creation' => date_format($heureSup->getCreatedAt(), 'd/m/Y'),
+                'status' => $heureSup->getStatus(),
+                'modifier' => $this->generateUrl('personal_heure_sup_edit', ['uuid' => $heureSup->getPersonal()->getUuid()])
+            ];
+        }
+
+        return new JsonResponse($apiRequestHeureSupp);
+    }
+    #[Route('/api/heure_supp/pending ', name: 'api_heure_supplementaire_pending', methods: ['GET'])]
+    public function apiHeureSuppPending(): JsonResponse
+    {
+        $today = Carbon::now();
+        $years = $today->year;
+        $month = $today->month;
+        if ($this->isGranted('ROLE_RH')) {
+
+            $heursSupps = $this->heureSupRepository->getByStatus($month, $years, Status::EN_ATTENTE);
+
+        } else {
+
+            $heursSupps = $this->heureSupRepository->findHeureSupByStatusByEmployeRole($month, $years, Status::EN_ATTENTE);
+        }
+        $apiRequestHeureSupp = [];
+        foreach ($heursSupps as $heureSup) {
+            $apiRequestHeureSupp[] = [
+                'id' => $heureSup->getId(),
+                'matricule' => $heureSup->getPersonal()->getMatricule(),
+                'name' => $heureSup->getPersonal()->getFirstName(),
+                'last_name' => $heureSup->getPersonal()->getLastName(),
+                'date_naissance' => $heureSup->getPersonal()->getBirthday() ? date_format($heureSup->getPersonal()->getBirthday(), 'd/m/Y') : '',
+                'categorie_salarie' => '(' . $heureSup->getPersonal()->getCategorie()->getCategorySalarie()->getName() . ')' . '-' . $heureSup->getPersonal()->getCategorie()->getIntitule(),
+                'date_embauche' => date_format($heureSup->getPersonal()->getContract()->getDateEmbauche(), 'd/m/Y'),
+                'date_debut' => date_format($heureSup->getStartedDate(), 'd/m/Y'),
+                'heure_debut' => date_format($heureSup->getStartedHour(), 'H:m'),
+                'date_fin' => date_format($heureSup->getEndedDate(), 'd/m/Y'),
+                'heure_fin' => date_format($heureSup->getEndedHour(), 'H:m'),
+                'total_horaire' => $heureSup->getTotalHorraire(),
+                'date_creation' => date_format($heureSup->getCreatedAt(), 'd/m/Y'),
+                'status' => $heureSup->getStatus(),
+                'modifier' => $this->generateUrl('personal_heure_sup_edit', ['uuid' => $heureSup->getPersonal()->getUuid()])
+            ];
+        }
+
+        return new JsonResponse($apiRequestHeureSupp);
+    }
+    #[Route('/api/heure_supp/validated ', name: 'api_heure_supplementaire_validated', methods: ['GET'])]
+    public function apiHeureSuppValidate(): JsonResponse
+    {
+        $today = Carbon::now();
+        $years = $today->year;
+        $month = $today->month;
+        if ($this->isGranted('ROLE_RH')) {
+
+            $heursSupps = $this->heureSupRepository->getByStatus($month, $years, Status::VALIDATED);
+
+        } else {
+
+            $heursSupps = $this->heureSupRepository->findHeureSupByStatusByEmployeRole($month, $years, Status::VALIDATED);
         }
         $apiRequestHeureSupp = [];
         foreach ($heursSupps as $heureSup) {
@@ -242,6 +322,11 @@ class HeureSupController extends AbstractController
     public function pending(): Response
     {
         return $this->render('dossier_personal/heure_sup/pending.html.twig');
+    }
+    #[Route('/validated', name: 'validated', methods: ['GET'])]
+    public function validated(): Response
+    {
+        return $this->render('dossier_personal/heure_sup/validated.html.twig');
     }
     #[Route('/validate', name: 'validate', methods: ['POST'])]
     public function validate(Request $request ): Response
