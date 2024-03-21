@@ -23,7 +23,7 @@ class ContractType extends AbstractType
                 'choices' => [
                     'CDD' => Status::CDD,
                     'CDI' => Status::CDI,
-                    'CDDI' => Status::CDI,
+                    'CDDI' => Status::CDDI,
                 ],
                 'placeholder' => 'Sélectionner votre type de contrat',
                 'required' => true,

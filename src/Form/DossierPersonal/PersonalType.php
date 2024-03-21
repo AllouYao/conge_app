@@ -164,9 +164,34 @@ class PersonalType extends AbstractType
             ])
             ->add('fonction', TextType::class, [
                 'required' => false,
+                'attr' => [
+                    'data-plugin' => 'customselect',
+                ],
                 'constraints' => [
                     new NotBlank()
-                ]
+                ],
+                'choices' => [
+                    'COMMERCIAL PISTE' => Status::COMMERCIAL_PISTE,
+                    'COMMERCIAL BOUTIQUE' => Status::COMMERCIAL_BOUTIQUE,
+                    'QHM' => Status::QHM,
+                    'SITE MANAGER' => Status::SITE_MANAGER,
+                    'LAVEUR (SE)' => Status::LAVEUR,
+                    'SEA' => Status::SEA,
+                    'OS' => Status::OS,
+                    'RESOURCE HUMAINE' => Status::RH,
+                    'ASSISTANT RH' => Status::ASSISTANT_RH,
+                    'TRESORERIE' => Status::TRESORERIE,
+                    'ASSISTANCE TRESORERIE' => Status::ASSISTANCE_TR,
+                    'GERANTE' => Status::GERANTE,
+                    'RESPONSABLE OPERATION' => Status::RESPONSABLE_SO,
+                    'ASSISTANT SERVICE OPERATION' => Status::ASSISTANT_SO,
+                    'ESCORTE' => Status::ESCORTE,
+                    'SUPERVISEUR' => Status::SUPERVISEUR,
+                    'RESPONSABLE DES MOYENS GENERAUX' => Status::RMG,
+                    'COMPTABLE' => Status::COMPTABLE,
+                    'ASSISTANT COMPTABLE' => Status::ASSISTANT_COMT
+                ],
+                'placeholder' => 'Sélectionner une fonction'
             ])
             ->add('service', ChoiceType::class, [
                 'required' => false,
