@@ -3,6 +3,7 @@
 namespace App\Repository\DevPaie;
 
 use App\Entity\DevPaie\Operation;
+use App\Entity\DossierPersonal\Personal;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -54,5 +55,18 @@ class OperationRepository extends ServiceEntityRepository
             ->setParameter('status', $status)
             ->getQuery()
             ->getResult();
+    }
+
+    public function findOperationByPersonal(string $type, string $status, Personal $personal): ?Operation
+    {
+        return $this->createQueryBuilder('o')
+            ->where('o.personal = :personal')
+            ->andWhere('o.typeOperations = :type_operations')
+            ->andWhere('o.status = :status')
+            ->setParameter('personal', $personal)
+            ->setParameter('type_operations', $type)
+            ->setParameter('status', $status)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

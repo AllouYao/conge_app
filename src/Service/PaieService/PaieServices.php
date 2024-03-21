@@ -4,52 +4,63 @@ namespace App\Service\PaieService;
 
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Campagne;
+use App\Repository\DevPaie\OperationRepository;
+use App\Repository\DossierPersonal\AbsenceRepository;
 use App\Repository\DossierPersonal\DetailRetenueForfetaireRepository;
 use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Repository\DossierPersonal\RetenueForfetaireRepository;
 use App\Repository\Impots\CategoryChargeRepository;
-use App\Service\AbsenceService;
 use App\Utils\Status;
-use DateInterval;
-use DatePeriod;
-use DateTime;
 use Exception;
 
 class PaieServices
 {
-
+    const NR_JOUR_TRAVAILLER = 30;
 
     public function __construct(
         private readonly HeureSupRepository                $heureSupRepository,
-        private readonly AbsenceService                    $absenceService,
         private readonly CategoryChargeRepository          $categoryChargeRepository,
         private readonly RetenueForfetaireRepository       $forfetaireRepository,
-        private readonly DetailRetenueForfetaireRepository $detailRetenueForfetaireRepository
+        private readonly DetailRetenueForfetaireRepository $detailRetenueForfetaireRepository,
+        private readonly OperationRepository               $operationRepository,
+        private readonly AbsenceRepository                 $absenceRepository
     )
     {
     }
 
-
-    /** Obtenir le nombre de jour de présence depuis le premier jour du mois actuel jusqu'au dernier jour du mois
+    /** Montant du brut et du brut imposable provisoire et en fonction des heure d'absence dans la periode de paie
      * @throws Exception
      */
-    public function NbDayOfPresenceByCurrentMonth(Campagne $campagne): float|int|null
+    public function getProvisoireBrutAndBrutImpoCampagne(Personal $personal, Campagne $campagne): array
     {
-        $dateDebut = $campagne->getDateDebut();
-        $anneeDebut = $dateDebut->format('Y');
-        $moisDebut = $dateDebut->format('m');
-        $annee = (int)$anneeDebut;
-        $mois = (int)$moisDebut;
-        $firstDayOfMonth = new DateTime("$annee-$mois-01");
-        $lastDayOfMonth = new DateTime(date('Y-m-t', mktime(0, 0, 0, $mois + 1, 0, $annee)));
-        $interval = new DateInterval('P1D');
-        $periode = new DatePeriod($firstDayOfMonth, $interval, $lastDayOfMonth);
-        $day = [];
-        foreach ($periode as $date) {
-            $day[] = $date;
+        $dayOfPresence = self::NR_JOUR_TRAVAILLER;
+        $date = $campagne->getDateDebut();
+        $month = (int)$date->format('m');
+        $year = (int)$date->format('Y');
+        $actuelCategoriel = (int)$personal->getCategorie()?->getAmount();
+        $absences = $this->absenceRepository->getAbsenceByMonth($personal, $month, $year);
+        $jour = 0;
+        if ($absences) {
+            foreach ($absences as $absence) {
+                $nbAbsence = $absence->getEndedDate()->diff($absence->getStartedDate())->days;
+                $jour += $nbAbsence;
+                $dayOfPresence = $dayOfPresence - $jour;
+            }
+            $salaireCategoriel = ceil($actuelCategoriel * $dayOfPresence / self::NR_JOUR_TRAVAILLER);
+            $salaireBrut = ceil((int)$personal->getSalary()?->getBrutAmount() * $dayOfPresence / self::NR_JOUR_TRAVAILLER);
+            $brutImposable = ceil((int)$personal->getSalary()?->getBrutImposable() * $dayOfPresence / self::NR_JOUR_TRAVAILLER);
+        } else {
+            $salaireCategoriel = $actuelCategoriel * $dayOfPresence / self::NR_JOUR_TRAVAILLER;
+            $salaireBrut = $personal->getSalary()?->getBrutAmount() * $dayOfPresence / self::NR_JOUR_TRAVAILLER;
+            $brutImposable = $personal->getSalary()?->getBrutImposable() * $dayOfPresence / self::NR_JOUR_TRAVAILLER;
         }
-        /** Obtenir le nombre de jours de presence que fait la période */
-        return ceil(count($day) + 1);
+
+        return [
+            'day_of_presence' => $dayOfPresence,
+            'salaire_categoriel' => ceil($salaireCategoriel),
+            'brut_amount' => ceil($salaireBrut),
+            'brut_imposable_amount' => ceil($brutImposable)
+        ];
     }
 
     /** Montant de la majoration des heures supplémentaire dans la periode de campagne */
@@ -62,13 +73,15 @@ class PaieServices
         foreach ($heureSupps as $supp) {
             $majoration += $supp?->getAmount();
         }
-        return $majoration;
+        return ceil($majoration);
     }
 
-    /** Montant de la prime d'ancienneté dans la periode de campagne */
-    public function getPrimeAncienneteCampagne(Personal $personal): float|int
+    /** Montant de la prime d'ancienneté dans la periode de campagne
+     * @throws Exception
+     */
+    public function getPrimeAncienneteCampagne(Personal $personal, Campagne $campagne): float|int
     {
-        $salaireCategoriel = (int)$personal->getCategorie()->getAmount();
+        $salaireCategoriel = (int)$this->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne)['salaire_categoriel'];
         $anciennete = (double)$personal->getOlder();
         if ($anciennete >= 2 && $anciennete < 3) {
             $primeAnciennete = $salaireCategoriel * 2 / 100;
@@ -80,35 +93,11 @@ class PaieServices
         } else {
             $primeAnciennete = 0;
         }
-        return $primeAnciennete;
+        return ceil($primeAnciennete);
     }
 
     /** Montant du congés payés dans la periode de campagne */
     // Ajouter ici la fonction qui nous permet d'obtenir le montant de l'allocation en fonction du mois de campagne.
-
-    /** Montant du brut et du brut imposable provisoire et en fonction des heure d'absence dans la periode de paie */
-    public function getProvisoireBrutAndBrutImpoCampagne(Personal $personal, Campagne $campagne): array
-    {
-        $date = $campagne->getDateDebut();
-        $month = (int)$date->format('m');
-        $year = (int)$date->format('Y');
-        $categorielWithAbsence = $this->absenceService->getAmountByMonth($personal, $month, $year);
-        $actuelCategoriel = (int)$personal->getCategorie()?->getAmount();
-        if ($personal->getAbsences()->count() > 0) {
-            $salaireCategoriel = $categorielWithAbsence;
-            $salaireBrut = $personal->getSalary()?->getBrutAmount() - $actuelCategoriel + $salaireCategoriel;
-            $brutImposable = $personal->getSalary()?->getBrutImposable() - $actuelCategoriel + $categorielWithAbsence;
-        } else {
-            $salaireCategoriel = $actuelCategoriel;
-            $salaireBrut = $personal->getSalary()?->getBrutAmount();
-            $brutImposable = $personal->getSalary()?->getBrutImposable();
-        }
-        return [
-            'salaire_categoriel' => $salaireCategoriel,
-            'brut_amount' => round($salaireBrut, 2),
-            'brut_imposable_amount' => round($brutImposable, 2)
-        ];
-    }
 
     /** Montant du nombre de part pour les salarié de la periode de campagne */
     public function getPartCampagne(Personal $personal): float|int
@@ -159,12 +148,14 @@ class PaieServices
     }
 
 
-    /** Montant de l'impôts brut sur le salaire, charge salarial de la periode de paie */
+    /** Montant de l'impôts brut sur le salaire, charge salarial de la periode de paie
+     * @throws Exception
+     */
     public function amountImpotBrutCampagne(Personal $personal, Campagne $campagne): float|int
     {
         $salaire = $this->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne);
         $majorationHeursSupp = $this->getHeureSuppCampagne($personal, $campagne);
-        $primeAnciennete = $this->getPrimeAncienneteCampagne($personal);
+        $primeAnciennete = $this->getPrimeAncienneteCampagne($personal, $campagne);
         $congesPayes = null; // Ajouter après avoir calculer la fonction qui retourne l'allocation de conges payer.
         $netImposable = $salaire['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
         $tranchesImposition = [
@@ -232,19 +223,21 @@ class PaieServices
         return $creditImpot;
     }
 
-    /** Montant de la retraite générale, charge salarial de la periode de paie */
+    /** Montant de la retraite générale, charge salarial de la periode de paie
+     * @throws Exception
+     */
     public function amountCNPSCampagne(Personal $personal, Campagne $campagne): float|int
     {
         $salaireBrut = $this->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne);
         $majorationHeursSupp = $this->getHeureSuppCampagne($personal, $campagne);
-        $primeAnciennete = $this->getPrimeAncienneteCampagne($personal);
+        $primeAnciennete = $this->getPrimeAncienneteCampagne($personal, $campagne);
         $congesPayes = null; // Ajouter après avoir calculer la fonction qui retourne l'allocation de conges payer.
         $netImposable = $salaireBrut['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
         if ($netImposable > 1647314) {
             $netImposable = 1647314;
         }
         $categoryRate = $this->categoryChargeRepository->findOneBy(['codification' => 'CNPS']);
-        return $netImposable * $categoryRate->getValue() / 100;
+        return ceil($netImposable * $categoryRate->getValue() / 100);
     }
 
     /** Montant de la couverture maladie universelle du salarie, charge salarial de la periode de paie */
@@ -265,64 +258,74 @@ class PaieServices
         return (int)$categoryRate->getValue();
     }
 
-    /** Determiner le montant de la part patronal I.S locaux, charge patronal de la periode de paie */
+    /** Determiner le montant de la part patronal I.S locaux, charge patronal de la periode de paie
+     * @throws Exception
+     */
     public function amountISCampagne(Personal $personal, Campagne $campagne): float|int
     {
         $salaire = $this->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne);
         $majorationHeursSupp = $this->getHeureSuppCampagne($personal, $campagne);
-        $primeAnciennete = $this->getPrimeAncienneteCampagne($personal);
+        $primeAnciennete = $this->getPrimeAncienneteCampagne($personal, $campagne);
         $congesPayes = null; // Ajouter après avoir calculer la fonction qui retourne l'allocation de conges payer.
         $amountBrut = $salaire['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
         $categoryRate = $this->categoryChargeRepository->findOneBy(['codification' => 'IS']);
-        return $amountBrut * $categoryRate?->getValue() / 100;
+        return ceil($amountBrut * $categoryRate?->getValue() / 100);
     }
 
-    /** Montant du taux d'apprentissage, charge patronal de la periode de paie */
+    /** Montant du taux d'apprentissage, charge patronal de la periode de paie
+     * @throws Exception
+     */
     public function amountTACampagne(Personal $personal, Campagne $campagne): float|int
     {
         $salaire = $this->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne);
         $majorationHeursSupp = $this->getHeureSuppCampagne($personal, $campagne);
-        $primeAnciennete = $this->getPrimeAncienneteCampagne($personal);
+        $primeAnciennete = $this->getPrimeAncienneteCampagne($personal, $campagne);
         $congesPayes = null; // Ajouter après avoir calculer la fonction qui retourne l'allocation de conges payer.
         $amountBrut = $salaire['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
         $categoryRateFDFP_TA = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_TA']);
-        return $amountBrut * $categoryRateFDFP_TA->getValue() / 100;
+        return ceil($amountBrut * $categoryRateFDFP_TA->getValue() / 100);
     }
 
-    /** Montant de la FPC, charge patronal de la periode de paie */
+    /** Montant de la FPC, charge patronal de la periode de paie
+     * @throws Exception
+     */
     public function amountFPCCampagne(Personal $personal, Campagne $campagne): float|int
     {
         $salaire = $this->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne);
         $majorationHeursSupp = $this->getHeureSuppCampagne($personal, $campagne);
-        $primeAnciennete = $this->getPrimeAncienneteCampagne($personal);
+        $primeAnciennete = $this->getPrimeAncienneteCampagne($personal, $campagne);
         $congesPayes = null; // Ajouter après avoir calculer la fonction qui retourne l'allocation de conges payer.
         $amountBrut = $salaire['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
         $categoryRateFDFP_FPC = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC']);
-        return $amountBrut * $categoryRateFDFP_FPC->getValue() / 100;
+        return ceil($amountBrut * $categoryRateFDFP_FPC->getValue() / 100);
     }
 
-    /** Montant de la FPC complement annuel de la periode de paie */
+    /** Montant de la FPC complement annuel de la periode de paie
+     * @throws Exception
+     */
     public function amountFPCAnnuelCampagne(Personal $personal, Campagne $campagne): float|int
     {
         $salaire = $this->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne);
         $majorationHeursSupp = $this->getHeureSuppCampagne($personal, $campagne);
-        $primeAnciennete = $this->getPrimeAncienneteCampagne($personal);
+        $primeAnciennete = $this->getPrimeAncienneteCampagne($personal, $campagne);
         $congesPayes = null; // Ajouter après avoir calculer la fonction qui retourne l'allocation de conges payer.
         $amountBrut = $salaire['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
         $categoryRateFDFP_FPC_VER = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC_VER']);
-        return $amountBrut * $categoryRateFDFP_FPC_VER->getValue() / 100;
+        return ceil($amountBrut * $categoryRateFDFP_FPC_VER->getValue() / 100);
     }
 
-    /** Montant de la caisse de retraite du salarie, charge patronal de la periode de paie */
+    /** Montant de la caisse de retraite du salarie, charge patronal de la periode de paie
+     * @throws Exception
+     */
     public function amountCRCampagne(Personal $personal, Campagne $campagne): float|int
     {
         $salaire = $this->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne);
         $majorationHeursSupp = $this->getHeureSuppCampagne($personal, $campagne);
-        $primeAnciennete = $this->getPrimeAncienneteCampagne($personal);
+        $primeAnciennete = $this->getPrimeAncienneteCampagne($personal, $campagne);
         $congesPayes = null; // Ajouter après avoir calculer la fonction qui retourne l'allocation de conges payer.
         $amountBrut = $salaire['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
         $categoryRateRCNPS_CR = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_CR']);
-        return $amountBrut * $categoryRateRCNPS_CR->getValue() / 100;
+        return ceil($amountBrut * $categoryRateRCNPS_CR->getValue() / 100);
     }
 
     /** Montant de la prestation familliale du salarie, charge patronal de la periode de paie */
@@ -330,7 +333,7 @@ class PaieServices
     {
         $smig = (int)$personal->getSalary()->getSmig();
         $categoryRateRCNPS_PF = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_PF']);
-        return $smig * $categoryRateRCNPS_PF->getValue() / 100;
+        return ceil($smig * $categoryRateRCNPS_PF->getValue() / 100);
     }
 
     /** Montant de l'accident de travail du salarie, charge patronal de la periode de paie */
@@ -338,7 +341,7 @@ class PaieServices
     {
         $smig = (int)$personal->getSalary()->getSmig();
         $categoryRateRCNPS_AT = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_AT']);
-        return $smig * $categoryRateRCNPS_AT->getValue() / 100;
+        return ceil($smig * $categoryRateRCNPS_AT->getValue() / 100);
     }
 
     /** Montant de l'assurance sante part salariale et patronale de la periode de paie */
@@ -365,5 +368,28 @@ class PaieServices
         ];
     }
 
+    /** Regularisation retenue ou remboursement pour les salariés */
+    public function getRegulRemboursement(Personal $personal): array
+    {
+        $remboursement = $this->operationRepository->findOperationByPersonal(Status::REMBOURSEMENT, Status::VALIDATED, $personal);
+        $remboursementNet = $remboursement?->getAmountNet();
+        $remboursementBrut = $remboursement?->getAmountBrut();
+
+        return [
+            'remboursement_net' => (int)$remboursementNet,
+            'remboursement_brut' => (int)$remboursementBrut
+        ];
+    }
+
+    public function getRegulRetenue(Personal $personal): array
+    {
+        $retenue = $this->operationRepository->findOperationByPersonal(Status::RETENUES, Status::VALIDATED, $personal);
+        $retenueNet = $retenue?->getAmountNet();
+        $retenueBrut = $retenue?->getAmountBrut();
+        return [
+            'retenue_brut' => (int)$retenueBrut,
+            'retenue_net' => (int)$retenueNet
+        ];
+    }
 
 }

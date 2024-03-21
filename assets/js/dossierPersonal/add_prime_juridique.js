@@ -173,7 +173,7 @@ const calculateSalaireNet = () => {
     let $avantagesImposable = $logements > $amountAventage ? $logements - $amountAventage : 0;
     let $autrePrime = total;
     let $primeJuridique = $amountPrimes;
-    amountBrut = $salaireBase + sursalaire + total + $amountPrimes;
+    amountBrut = $salaireBase + sursalaire + total;
 
     let $amountImposableWithAvantage = $avantagesImposable !== 0 && $amountAventage !== 0 ? amountBrut + $avantagesImposable : amountBrut;
     let $transportImposable = $transport > DEFAULT_TRANSPORT ? $transport - DEFAULT_TRANSPORT : 0;

@@ -3,6 +3,7 @@
 namespace App\Entity\DevPaie;
 
 use App\Entity\DossierPersonal\Personal;
+use App\Entity\Paiement\Campagne;
 use App\Entity\User;
 use App\Repository\DevPaie\OperationRepository;
 use App\Utils\Horodatage;
@@ -41,6 +42,11 @@ class Operation
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $status = null;
+
+    #[ORM\ManyToOne(inversedBy: 'operations')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Campagne $campagne = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -126,6 +132,18 @@ class Operation
     public function setStatus(?string $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getCampagne(): ?Campagne
+    {
+        return $this->campagne;
+    }
+
+    public function setCampagne(?Campagne $campagne): static
+    {
+        $this->campagne = $campagne;
 
         return $this;
     }

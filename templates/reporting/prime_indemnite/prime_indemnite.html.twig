@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}LISTE DU PERSONNEL{% endblock %}
+{% block title %}PRIMES ET INDEMNITES PERSONNELS{% endblock %}
 {% block stylesheets %}
     <style>
         #dataGridPrimeIndemnite {
@@ -36,8 +36,6 @@
         }
 
         $(document).ready(function () {
-            let debut;
-            let fin;
             $("#dataGridPrimeIndemnite").dxDataGrid({
                 dataSource: `{{ url('api_reporting_prime_indemnite') }}`,
                 showBorders: true,
@@ -73,7 +71,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `PRIMES ET INDEMNITES ${debut ?? " "} au ${fin ?? " "}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `PRIMES ET INDEMNITES.xlsx`);
                             });
                         });
                         e.cancel = true;

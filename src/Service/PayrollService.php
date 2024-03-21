@@ -17,6 +17,7 @@ use Exception;
 
 class PayrollService
 {
+    const DAY_IN_MONTH_WORK = 30;
     private EntityManagerInterface $manager;
     private ChargeEmployeurRepository $chargeEmployeurRepository;
     private ChargePersonalsRepository $chargePersonalsRepository;
@@ -53,12 +54,12 @@ class PayrollService
     public function setPayroll(Personal $personal, Campagne $campagne): void
     {
         /** Nombre de jour travailler pendant la periode current de paie */
-        $dayOfCurrentMonth = $this->paieServices->NbDayOfPresenceByCurrentMonth($campagne);
+        $dayOfCurrentMonth = $this->paieServices->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne)['day_of_presence'];
 
         /** Ajouter les Informations utile du salarié */
         $matricule = $personal->getMatricule();
         $service = $personal->getService();
-        $categorie = '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ') -' . $personal->getCategorie()->getIntitule();
+        $categorie = '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ') - ' . $personal->getCategorie()->getIntitule();
         $departement = $personal->getFonction();
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
         $numeroCnps = $personal->getRefCNPS();
@@ -67,21 +68,22 @@ class PayrollService
         /** Ajouter les éléments qui constitue le salaire imposable du salarié */
         $salary = $personal->getSalary();
         $salaire = $this->paieServices->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne);
-        $baseSalaire = round((double)$salaire['salaire_categoriel']);
-        $sursalaire = round((double)$salary->getSursalaire());
-        $majorationHeursSupp = round($this->paieServices->getHeureSuppCampagne($personal, $campagne));
-        $primeAnciennete = round($this->paieServices->getPrimeAncienneteCampagne($personal));
+        $baseSalaire = ceil((double)$salaire['salaire_categoriel']);
+        $sursalaire = ceil((double)$salary->getSursalaire() * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK);
+        $majorationHeursSupp = ceil($this->paieServices->getHeureSuppCampagne($personal, $campagne));
+        $primeAnciennete = ceil($this->paieServices->getPrimeAncienneteCampagne($personal, $campagne));
         $salary->setPrimeAciennete((int)$primeAnciennete); // Enregistrer après récuperation la prime d'anciennete dans la table salary
         $congesPayes = null; // Ajouter ici la fonction qui nous permet d'obtenir le montant de l'allocation en fonction du mois de campagne.
 
 
         /** Ajouter toutes les primes possible  */
-        $primeFonctions = round($this->primeService->getPrimeFonction($personal));
-        $primeLogements = round($this->primeService->getPrimeLogement($personal));
-        $indemniteFonctions = round($this->primeService->getIndemniteFonction($personal));
-        $indemniteLogements = round($this->primeService->getIndemniteLogement($personal));
-        $primeTransportLegal = round($this->primeService->getPrimeTransportLegal());
-        $primeTransportImposable = round(((double)$salary->getPrimeTransport() - $primeTransportLegal));
+        $primeFonctions = ceil($this->primeService->getPrimeFonction($personal) * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK);
+        $primeLogements = ceil($this->primeService->getPrimeLogement($personal) * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK);
+        $indemniteFonctions = ceil($this->primeService->getIndemniteFonction($personal) * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK);
+        $indemniteLogements = ceil($this->primeService->getIndemniteLogement($personal) * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK);
+        $primeTransportLegal = ceil($this->primeService->getPrimeTransportLegal());
+        $primeTransportImposable = ($salary->getPrimeTransport() * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK) >= $primeTransportLegal
+            ? ceil(((double)($salary->getPrimeTransport() * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK) - $primeTransportLegal)) : 0;
         $primePaniers = round($this->primeService->getPrimePanier($personal));
         $primeSalissures = round($this->primeService->getPrimeSalissure($personal));
         $primeTenueTravails = round($this->primeService->getPrimeTT($personal));
@@ -90,7 +92,8 @@ class PayrollService
 
         /** Avantage en nature non imposable */
         $avantageNonImposable = round((double)$salary->getAvantage()?->getTotalAvantage());
-        $avantageNatureImposable = round(((double)$salary?->getAmountAventage() - $avantageNonImposable));
+        $avantageNatureImposable = ($salary?->getAmountAventage() * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK) >= $avantageNonImposable ?
+            round(((double)($salary->getAmountAventage() * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK) - $avantageNonImposable)) : 0;
 
 
         /** Ajouter les charges du salarié ( retenues fiscales et sociales) */
@@ -121,22 +124,26 @@ class PayrollService
         $chargePatronal = round($amountChargFiscalPatronale + $amountChargSocialPatronale);
 
 
+        /** Ajouter les régularisations sur brut imposable, remboursement ou retenue */
+        $remboursementBrut = $this->paieServices->getRegulRemboursement($personal)['remboursement_brut'];
+        $remboursementNet = $this->paieServices->getRegulRemboursement($personal)['remboursement_net'];
+        $retenueBrut = $this->paieServices->getRegulRetenue($personal)['retenue_brut'];
+        $retenueNet = $this->paieServices->getRegulRetenue($personal)['retenue_net'];
+
         /** Ajouter le salaire brut qui constitue l'ensemble des élements de salaire imposable et non imposable */
         $salaireBrut = $baseSalaire + $sursalaire + $majorationHeursSupp + $congesPayes + $primeAnciennete
             + $primeFonctions + $primeLogements + $indemniteFonctions + $indemniteLogements
-            + $primeTransportImposable + $avantageNatureImposable + $primeTransportLegal + $avantageNonImposable
-            + $primeRendement + $primeOutillages + $primePaniers + $primeSalissures + $primeTenueTravails;
+            + $primeTransportImposable + $avantageNatureImposable + $primeTransportLegal + $avantageNonImposable;
 
 
         /** Ajouter le net imposable qui constitue l'ensemble des élements de salaire imposable uniquement */
         $netImposable = $baseSalaire + $sursalaire + $majorationHeursSupp + $congesPayes + $primeAnciennete
             + $primeFonctions + $primeLogements + $indemniteFonctions + $indemniteLogements + $primeTransportImposable
-            + $avantageNatureImposable + $primeRendement + $primeOutillages
-            + $primePaniers + $primeSalissures + $primeTenueTravails;
+            + $avantageNatureImposable + $remboursementBrut - $retenueBrut;
 
 
         /** Ajouter le net à payer, total retenue, indemnité de transport et assurance santé du personnel */
-        $netPayer = round($netImposable + $primeTransportLegal + $avantageNonImposable - $chargeSalarie);
+        $netPayer = round($netImposable + $primeTransportLegal + $avantageNonImposable - $chargeSalarie + $remboursementNet - $retenueNet);
 
         /** Ajouter la masse salariale */
         $masseSalaried = $netPayer + $chargePatronal + $chargeSalarie;
@@ -199,6 +206,11 @@ class PayrollService
             /** Brut et Net imposable du salarié */
             ->setBrutAmount($salaireBrut)
             ->setImposableAmount($netImposable)
+            /** Regularisation sur net ou brut */
+            ->setRemboursBrut($remboursementBrut)
+            ->setRemboursNet($remboursementNet)
+            ->setRemboursBrut($retenueBrut)
+            ->setRetenueNet($retenueNet)
             /** Net à payer et masse salariale du salarié */
             ->setNetPayer($netPayer)
             ->setMasseSalary($masseSalaried);

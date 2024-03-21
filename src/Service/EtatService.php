@@ -21,24 +21,20 @@ class EtatService
     {
         $salaireCategoriel = (int)$personal->getCategorie()->getAmount();
         $anciennete = (double)$personal->getOlder();
-        switch ($anciennete) {
-            case $anciennete >= 2 && $anciennete < 3:
-                $primeAnciennete = $salaireCategoriel * 2 / 100;
-                break;
-            case $anciennete >= 3 && $anciennete <= 25:
-                $primeAnciennete = ($salaireCategoriel * $anciennete) / 100;
-                break;
-            case $anciennete >= 26:
-                $primeAnciennete = ($salaireCategoriel * 25) / 100;
-                break;
-            default:
-                $primeAnciennete = 0;
+        if ($anciennete >= 2 && $anciennete < 3) {
+            $primeAnciennete = $salaireCategoriel * 2 / 100;
+        } elseif ($anciennete >= 3 && $anciennete <= 25) {
+            $primeAnciennete = ($salaireCategoriel * $anciennete) / 100;
+        } elseif ($anciennete >= 26) {
+            $primeAnciennete = ($salaireCategoriel * 25) / 100;
+
+        } else {
+            $primeAnciennete = 0;
         }
-        return $primeAnciennete;
+        return ceil($primeAnciennete);
     }
 
-    public function
-    getGratification(int $personal): float|int
+    public function getGratification(int $personal): float|int
     {
         $anciennete = null;
         $salaireCategoriel = null;

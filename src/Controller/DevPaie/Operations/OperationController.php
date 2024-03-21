@@ -6,6 +6,7 @@ use App\Entity\DevPaie\Operation;
 use App\Entity\User;
 use App\Form\DevPaie\OperationType;
 use App\Repository\DevPaie\OperationRepository;
+use App\Repository\Paiement\CampagneRepository;
 use App\Utils\Status;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,7 +19,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class OperationController extends AbstractController
 {
     public function __construct(
-        private readonly OperationRepository $operationRepository
+        private readonly OperationRepository $operationRepository,
+        private readonly CampagneRepository  $campagneRepository
     )
     {
     }
@@ -61,12 +63,13 @@ class OperationController extends AbstractController
         $form = $this->createForm(OperationType::class, $operation);
         $form->handleRequest($request);
 
+        $lastCampagne = $this->campagneRepository->lastCampagne(true);
         /**
          * @var User $currentUser
          */
         $currentUser = $this->getUser();
         if ($form->isSubmitted() && $form->isValid()) {
-            $operation->setUser($currentUser)->setStatus(Status::EN_ATTENTE);
+            $operation->setUser($currentUser)->setStatus(Status::EN_ATTENTE)->setCampagne($lastCampagne);
             $entityManager->persist($operation);
             $entityManager->flush();
             flash()->addSuccess('Opération de ' . $operation->getTypeOperations() . ' enregistrer avec succès');

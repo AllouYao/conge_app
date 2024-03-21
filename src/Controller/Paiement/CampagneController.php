@@ -8,7 +8,6 @@ use App\Form\Paiement\CampagneExcepType;
 use App\Form\Paiement\CampagneType;
 use App\Repository\DossierPersonal\CongeRepository;
 use App\Repository\DossierPersonal\HeureSupRepository;
-use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Repository\Paiement\CampagneRepository;
 use App\Repository\Paiement\PayrollRepository;
@@ -191,23 +190,20 @@ class CampagneController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $personal = $form->get('personal')->getData();
-
             foreach ($personal as $item) {
                 $dateEmbauche = $item->getContract()->getDateEmbauche();
                 if ($dateEmbauche > $campagne->getDateDebut() && $dateEmbauche <= $campagne->getDateFin()) {
-                    $dataPayroll = $this->payrollService->setProrataPayroll($item, $campagne);
-                    dd($dataPayroll);
-                }else {
-                    $dataPayroll = $this->payrollService->setPayroll($item, $campagne);
+                    $this->payrollService->setProrataPayroll($item, $campagne);
+                } else {
+                    $this->payrollService->setPayroll($item, $campagne);
                 }
-                dd($dataPayroll);
             }
             $campagne
                 ->setActive(true)
                 ->setStatus(Status::EN_COURS)
                 ->setOrdinary(true);
             $manager->persist($campagne);
-            //$manager->flush();
+            $manager->flush();
             flash()->addSuccess('Paie ouverte avec succès.');
             return $this->redirectToRoute('app_home');
         }
@@ -483,6 +479,10 @@ class CampagneController extends AbstractController
                 'amount_prime_rendement' => (double)$payroll->getAmountPrimeRendement(),
                 'debut_exercise' => $payroll->getCampagne()->getDateDebut() ? date_format($payroll->getCampagne()->getDateDebut(), 'd/m/Y') : '',
                 'fin_exercise' => $payroll->getCampagne()->getDateFin() ? date_format($payroll->getCampagne()->getDateFin(), 'd/m/Y') : '',
+                'retenue_net' => $payroll->getRetenueNet(),
+                'retenue_brut' => $payroll->getRetenueBrut(),
+                'remboursement_net' => $payroll->getRemboursNet(),
+                'remboursement_brut' => $payroll->getRemboursBrut()
             ];
         }
 
@@ -632,6 +632,10 @@ class CampagneController extends AbstractController
                 'amount_prime_rendement' => (double)$payroll->getAmountPrimeRendement(),
                 'debut_exercise' => $payroll->getCampagne()->getDateDebut() ? date_format($payroll->getCampagne()->getDateDebut(), 'd/m/Y') : '',
                 'fin_exercise' => $payroll->getCampagne()->getDateFin() ? date_format($payroll->getCampagne()->getDateFin(), 'd/m/Y') : '',
+                'retenue_net' => $payroll->getRetenueNet(),
+                'retenue_brut' => $payroll->getRetenueBrut(),
+                'remboursement_net' => $payroll->getRemboursNet(),
+                'remboursement_brut' => $payroll->getRemboursBrut()
             ];
 
         }

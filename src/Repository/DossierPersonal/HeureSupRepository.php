@@ -5,6 +5,7 @@ namespace App\Repository\DossierPersonal;
 
 use App\Entity\DossierPersonal\HeureSup;
 use App\Entity\DossierPersonal\Personal;
+use App\Utils\Status;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -95,9 +96,11 @@ class HeureSupRepository extends ServiceEntityRepository
             ->andWhere('h.personal = :personal')
             ->andWhere('h.startedDate >= :start_date')
             ->andWhere('h.startedDate <= :end_date')
+            ->andWhere('h.status = :status')
             ->setParameter('personal', $personal)
             ->setParameter('start_date', $startDate)
             ->setParameter('end_date', $endDate)
+            ->setParameter('status', Status::VALIDATED)
             ->orderBy('h.startedDate', 'ASC')
             ->getQuery()
             ->getResult();

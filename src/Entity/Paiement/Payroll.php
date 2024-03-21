@@ -206,6 +206,18 @@ class Payroll
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     private ?string $dayOfPresence = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $remboursNet = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $remboursBrut = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $retenueNet = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $retenueBrut = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -939,6 +951,54 @@ class Payroll
     public function setDayOfPresence(?string $dayOfPresence): static
     {
         $this->dayOfPresence = $dayOfPresence;
+
+        return $this;
+    }
+
+    public function getRemboursNet(): ?string
+    {
+        return $this->remboursNet;
+    }
+
+    public function setRemboursNet(?string $remboursNet): static
+    {
+        $this->remboursNet = $remboursNet;
+
+        return $this;
+    }
+
+    public function getRemboursBrut(): ?string
+    {
+        return $this->remboursBrut;
+    }
+
+    public function setRemboursBrut(?string $remboursBrut): static
+    {
+        $this->remboursBrut = $remboursBrut;
+
+        return $this;
+    }
+
+    public function getRetenueNet(): ?string
+    {
+        return $this->retenueNet;
+    }
+
+    public function setRetenueNet(?string $retenueNet): static
+    {
+        $this->retenueNet = $retenueNet;
+
+        return $this;
+    }
+
+    public function getRetenueBrut(): ?string
+    {
+        return $this->retenueBrut;
+    }
+
+    public function setRetenueBrut(?string $retenueBrut): static
+    {
+        $this->retenueBrut = $retenueBrut;
 
         return $this;
     }

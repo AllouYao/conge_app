@@ -326,66 +326,27 @@
                                             <td></td>
                                         </tr>
                                     {% endif %}
-                                    {% if payrolls.amount_prime_panier %}
+                                    {% if payrolls.remboursement_brut %}
                                         <tr class="small-text sans-bordure no-border-button no-border-top">
-                                            <td>026</td>
-                                            <td>Prime panier</td>
+                                            <td>O28</td>
+                                            <td>Remboursement sur brut (Regul.)</td>
+                                            <td class="text-end"></td>
+                                            <td class="text-end">{{ payrolls.remboursement_brut|number_format(0, ',', ' ') }}</td>
                                             <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td class="text-end">{{ payrolls.amount_prime_panier|number_format(0, ',', ' ') }}</td>
+                                            <td class="text-end">{{ payrolls.remboursement_brut|number_format(0, ',', ' ') }}</td>
                                             <td></td>
                                             <td></td>
                                             <td></td>
                                         </tr>
                                     {% endif %}
-                                    {% if payrolls.amount_prime_salissure %}
+                                    {% if payrolls.retenue_brut %}
                                         <tr class="small-text sans-bordure no-border-button no-border-top">
-                                            <td>027</td>
-                                            <td>Prime salissure</td>
+                                            <td>O29</td>
+                                            <td>Retenue sur brut (Regul.)</td>
+                                            <td class="text-end"></td>
+                                            <td class="text-end">{{ payrolls.retenue_brut|number_format(0, ',', ' ') }}</td>
                                             <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td class="text-end">{{ payrolls.amount_prime_salissure|number_format(0, ',', ' ') }}</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
-                                    {% endif %}
-                                    {% if payrolls.amount_prime_tt %}
-                                        <tr class="small-text sans-bordure no-border-button no-border-top">
-                                            <td>028</td>
-                                            <td>Prime tenue travail</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td class="text-end">{{ payrolls.amount_prime_tt|number_format(0, ',', ' ') }}</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
-                                    {% endif %}
-                                    {% if payrolls.amount_prime_outi %}
-                                        <tr class="small-text sans-bordure no-border-button no-border-top">
-                                            <td>029</td>
-                                            <td>Prime outillage</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td class="text-end">{{ payrolls.amount_prime_outi|number_format(0, ',', ' ') }}</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
-                                    {% endif %}
-                                    {% if payrolls.amount_prime_rendement %}
-                                        <tr class="small-text sans-bordure no-border-button no-border-top">
-                                            <td>030</td>
-                                            <td>Prime rendement</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td class="text-end">{{ payrolls.amount_prime_rendement|number_format(0, ',', ' ') }}</td>
+                                            <td class="text-end">{{ payrolls.retenue_brut|number_format(0, ',', ' ') }}</td>
                                             <td></td>
                                             <td></td>
                                             <td></td>
@@ -405,6 +366,7 @@
                                             <td></td>
                                         </tr>
                                     {% endif %}
+
                                     {% if payrolls.amount_its_salarial %}
                                         <tr class="small-text sans-bordure no-border-button no-border-top">
                                             <td>015</td>
@@ -576,6 +538,72 @@
                                                 style="border-top: solid 1px">{{ payrolls.charge_patronal|number_format(0, ',', ' ') }}</td>
                                         </tr>
                                     {% endif %}
+
+                                    {% if payrolls.amount_prime_panier %}
+                                        <tr class="small-text sans-bordure no-border-button no-border-top">
+                                            <td>026</td>
+                                            <td>Prime panier</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td class="text-end">{{ payrolls.amount_prime_panier|number_format(0, ',', ' ') }}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if payrolls.amount_prime_salissure %}
+                                        <tr class="small-text sans-bordure no-border-button no-border-top">
+                                            <td>027</td>
+                                            <td>Prime salissure</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td class="text-end">{{ payrolls.amount_prime_salissure|number_format(0, ',', ' ') }}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if payrolls.amount_prime_tt %}
+                                        <tr class="small-text sans-bordure no-border-button no-border-top">
+                                            <td>028</td>
+                                            <td>Prime tenue travail</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td class="text-end">{{ payrolls.amount_prime_tt|number_format(0, ',', ' ') }}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if payrolls.amount_prime_outi %}
+                                        <tr class="small-text sans-bordure no-border-button no-border-top">
+                                            <td>029</td>
+                                            <td>Prime outillage</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td class="text-end">{{ payrolls.amount_prime_outi|number_format(0, ',', ' ') }}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if payrolls.amount_prime_rendement %}
+                                        <tr class="small-text sans-bordure no-border-button no-border-top">
+                                            <td>030</td>
+                                            <td>Prime rendement</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td class="text-end">{{ payrolls.amount_prime_rendement|number_format(0, ',', ' ') }}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    {% endif %}
                                     {% if payrolls.prime_transport %}
                                         <tr class="small-text sans-bordure no-border-button no-border-top">
                                             <td>025</td>
@@ -589,6 +617,33 @@
                                             <td></td>
                                         </tr>
                                     {% endif %}
+                                    {% if payrolls.retenue_net %}
+                                        <tr class="small-text sans-bordure no-border-button no-border-top">
+                                            <td>026</td>
+                                            <td>Retenue sur salaire (Regul.)</td>
+                                            <td class="text-end"></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td class="text-end">{{ payrolls.retenue_net|number_format(0, ',', ' ') }}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if payrolls.remboursement_net %}
+                                        <tr class="small-text sans-bordure no-border-button no-border-top">
+                                            <td>027</td>
+                                            <td>Remboursement sur salaire (Regul.)</td>
+                                            <td class="text-end"></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td class="text-end">{{ payrolls.remboursement_net|number_format(0, ',', ' ') }}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    {% endif %}
+
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td></td>
                                         <td></td>
