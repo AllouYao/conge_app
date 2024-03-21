@@ -85,7 +85,7 @@ class OperationController extends AbstractController
     {
         if ($request->request->has('remboursementValidation') && $request->isMethod('POST')) {
             $remboursementInput = $request->request->get('remboursementValidation');
-            if (!empty($remboursementInput)) {
+            if ($remboursementInput != "[]") {
                 $remboursements = json_decode($remboursementInput);
                 foreach ($remboursements as $remboursementId) {
                     $remboursement = $this->operationRepository->findOneBy(['id' => $remboursementId]);
@@ -99,11 +99,38 @@ class OperationController extends AbstractController
                     }
                 }
             } else {
-                flash()->addWarning('Aucun remboursement en attente sélectionner !');
+                flash()->addWarning('Aucun remboursement en attente de validation sélectionner !');
                 return $this->redirectToRoute('reporting_paie_remboursement_salaires');
             }
         }
         return $this->redirectToRoute('reporting_paie_remboursement_salaires');
+    }
+
+    #[Route('/validates_retenue', name: 'validate_retenue', methods: ['POST', 'GET'])]
+    public function validateRetenue(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        if ($request->request->has('retenueSalaireValidation') && $request->isMethod('POST')) {
+            $retenuesInput = $request->request->get('retenueSalaireValidation');
+            if ($retenuesInput != "[]") {
+                $retenuesSalaires = json_decode($retenuesInput);
+                foreach ($retenuesSalaires as $retenueId) {
+                    $retenues = $this->operationRepository->findOneBy(['id' => $retenueId]);
+                    if ($retenues) {
+                        if ($retenues->getStatus() === Status::EN_ATTENTE) {
+                            $retenues->setStatus(Status::VALIDATED);
+                            $entityManager->persist($retenues);
+                            $entityManager->flush();
+                            flash()->addSuccess('Retenue sur salaire validé avec succès!');
+                        }
+                    }
+                }
+            } else {
+                flash()->addWarning('Aucune retenue sur salaire en attente sélectionnées !');
+                return $this->redirectToRoute('reporting_paie_retenue_salaires');
+            }
+
+        }
+        return $this->redirectToRoute('reporting_paie_retenue_salaires');
     }
 
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]

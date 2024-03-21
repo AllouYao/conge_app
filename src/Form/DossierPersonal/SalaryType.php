@@ -7,7 +7,6 @@ use App\Entity\Settings\Avantage;
 use Symfony\Component\Form\FormEvent;
 use App\Entity\DossierPersonal\Salary;
 use Symfony\Component\Form\FormEvents;
-use App\Entity\DossierPersonal\Personal;
 use Symfony\Component\Form\AbstractType;
 use App\Repository\Settings\SmigRepository;
 use App\Repository\Settings\PrimesRepository;

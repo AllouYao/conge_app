@@ -11,6 +11,69 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i data-feather="users"></i>GESTION DU PERSONNEL
+                            <div class="arrow-down"></div>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="topnav-components">
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Dossier du personnel
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <div class="dropdown">
+                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                           aria-expanded="false">
+                                            Fiches de personnel
+                                            <div class="arrow-down"></div>
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                            <a href="{{ path('personal_new') }}"
+                                               class="dropdown-item">Créer</a>
+                                            <a href="{{ path('personal_index') }}"
+                                               class="dropdown-item">Liste des salariés</a>
+                                            <a href="{{ path('import_file_new') }}"
+                                               class="dropdown-item">Importer</a>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown">
+                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                           aria-expanded="false">
+                                            Personne à charge
+                                            <div class="arrow-down"></div>
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                            <a href="{{ path('charge_people_new') }}"
+                                               class="dropdown-item">Créer</a>
+                                            <a href="{{ path('charge_people_index') }}"
+                                               class="dropdown-item">Liste des personnes à charge</a>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown">
+                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                           aria-expanded="false">
+                                            Banque Salarié
+                                            <div class="arrow-down"></div>
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                            <a href="{{ path('personal_account_bank_new') }}"
+                                               class="dropdown-item">Créer</a>
+                                            <a href="{{ path('personal_account_bank_index') }}"
+                                               class="dropdown-item">Liste des banques de salarié</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {# <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Etat des Primes et indemnités</a> #}
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i data-feather="dollar-sign"></i>GESTION DE LA PAIE
                             <div class="arrow-down"></div>
                         </a>
@@ -49,25 +112,6 @@
                             </div>
                         </div>
                     </li>
-
-
-                    {# <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
-                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i data-feather="dollar-sign"></i>EDITION GLOBALE
-                            <div class="arrow-down"></div>
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="topnav-components">
-                            <a href="{{ path('reporting_etat_salaire') }}"
-                               class="dropdown-item">Etat des salaire</a>
-                            <a href="{{ path('reporting_declaration_dgi') }}"
-                               class="dropdown-item">Etat declaration dgi</a>
-                            <a href="{{ path('reporting_declaration_cnps') }}"
-                               class="dropdown-item">Etat declaration cnps</a>
-                            <a href="{{ path('reporting_declaration_fdfp') }}"
-                               class="dropdown-item">Etat declaration fdfp</a>
-                        </div>
-                    </li> #}
                 </ul> <!-- end navbar-->
             </div> <!-- end .collapsed-->
         </nav>

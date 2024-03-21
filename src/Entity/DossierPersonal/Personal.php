@@ -734,7 +734,7 @@ class Personal
         return $this->fonction;
     }
 
-    public function setFonction(string $fonction): static
+    public function setFonction(?string $fonction): static
     {
         $this->fonction = $fonction;
 
@@ -746,7 +746,7 @@ class Personal
         return $this->service;
     }
 
-    public function setService(string $service): static
+    public function setService(?string $service): static
     {
         $this->service = $service;
 
