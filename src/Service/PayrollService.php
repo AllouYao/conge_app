@@ -367,7 +367,6 @@ class PayrollService
             ->setTotalRetenuePatronal($chargePatronal);
 
         /** Enregistrement du livre de paie */
-        dd("");
         $this->manager->persist($payroll);
     }
 

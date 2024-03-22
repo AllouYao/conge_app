@@ -189,17 +189,18 @@ class CampagneController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
             $countPersonal = $form->get('personal')->count();
 
             $personals = $form->get('personal')->getData();
             $countPersonal = count($personals);
 
             
-            if($countPersonal>1){
+            if($countPersonal>0){
 
                 foreach ($personals as $personal) {
                     $dateEmbauche = $personal->getContract()->getDateEmbauche();
-                    if ($dateEmbauche > $campagne->getDateDebut()) {
+                    if ($dateEmbauche > $campagne->getDateDebut() && $dateEmbauche <= $campagne->getDateFin()) {
 
                         $this->payrollService->setProrataPayroll($personal, $campagne);
 

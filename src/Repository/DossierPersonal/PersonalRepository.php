@@ -4,8 +4,10 @@ namespace App\Repository\DossierPersonal;
 
 use App\Entity\DossierPersonal\Personal;
 use App\Utils\Status;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Exception;
 
 /**
  * @extends ServiceEntityRepository<Personal>
@@ -48,13 +50,8 @@ class PersonalRepository extends ServiceEntityRepository
     public function findAllPersonal(): array
     {
         $qb = $this->createQueryBuilder('p')
-            ->join('p.contract', 'contract')
             ->leftJoin('p.departures', 'departures')
             ->where('departures.id IS NULL')
-            ->andWhere('contract.id IS NOT NULL')
-            ->andWhere('contract.typeContrat IN (:type)')
-            ->andWhere('p.active = true')
-            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
             ->getQuery()
             ->getResult();
         return array_map(function ($result) {
@@ -62,21 +59,16 @@ class PersonalRepository extends ServiceEntityRepository
         }, $qb);
     }
 
-    /** Retourne les employer en fonction de la catégorie et par rôle de l'utilisateur */
     public function findAllPersonalByEmployeRole(): array
     {
         $qb = $this->createQueryBuilder('p')
-            ->join('p.contract', 'contract')
             ->join('p.categorie', 'category')
             ->join('category.categorySalarie', 'categorySalarie')
             ->leftJoin('p.departures', 'departures')
             ->where('departures.id IS NULL')
-            ->andWhere('contract.id IS NOT NULL')
-            ->andWhere('categorySalarie.name IN (:name)')
-            ->andWhere('contract.typeContrat IN (:type)')
-            ->andWhere('p.active = true')
-            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
-            ->setParameter('name', [Status::CHAUFFEUR, Status::OUVRIER_EMPLOYE])
+            ->andWhere('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
+            ->setParameter('code_employe', 'OE')
+            ->setParameter('code_chauffeur', 'CH')
             ->getQuery()
             ->getResult();
         return array_map(function ($result) {
@@ -169,8 +161,6 @@ class PersonalRepository extends ServiceEntityRepository
             ->leftJoin('salary.avantage', 'avantage')
             ->leftJoin('p.departures', 'departures')
             ->where('departures.id IS NULL')
-            ->andWhere('contract.typeContrat IN (:type)')
-            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
             ->getQuery()
             ->getResult();
     }
@@ -180,7 +170,7 @@ class PersonalRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('p')
             ->select([
                 'category.intitule as categorie_intitule',
-                'category_salarie.name as categorie_name',
+                'categorie_salary.name as categorie_name',
                 'p.id as personal_id',
                 'p.uuid',
                 'p.older',
@@ -223,18 +213,18 @@ class PersonalRepository extends ServiceEntityRepository
                 'account_banks.numCompte as numero_compte',
                 'account_banks.rib as rib',
             ])
-            ->join('p.categorie', 'category')
-            ->join('category.categorySalarie', 'category_salarie')
-            ->join('p.contract', 'contract')
-            ->join('p.salary', 'salary')
+            ->leftJoin('p.categorie', 'category')
+            ->join('category.categorySalarie', 'categorySalarie')
+            ->leftJoin('p.contract', 'contract')
+            ->leftJoin('p.salary', 'salary')
             ->leftJoin('p.accountBanks', 'account_banks')
+            ->join('category.categorySalarie', 'categorie_salary')
             ->leftJoin('salary.avantage', 'avantage')
             ->leftJoin('p.departures', 'departures')
             ->where('departures.id IS NULL')
-            ->andWhere('category_salarie.name IN (:name)')
-            ->andWhere('contract.typeContrat IN (:type)')
-            ->setParameter('name', [Status::CHAUFFEUR, Status::OUVRIER_EMPLOYE])
-            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
+            ->andWhere('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
+            ->setParameter('code_employe', 'OE')
+            ->setParameter('code_chauffeur', 'CH')
             ->getQuery()
             ->getResult();
     }
@@ -247,11 +237,9 @@ class PersonalRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('p')
             ->join('p.campagnes', 'campagnes')
-            ->join('p.contract', 'contract')
-            ->where('contract.typeContrat IN (:type)')
-            ->andWhere('p.active = true')
+            ->leftJoin('p.contract', 'contract')
+            ->where('contract.id IS NOT NULL')
             ->andWhere('campagnes.id  IS NOT NULL')
-            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
             ->getQuery()
             ->getResult();
     }
@@ -262,12 +250,8 @@ class PersonalRepository extends ServiceEntityRepository
     public function findPersonalWithChargePeaple(): array
     {
         return $this->createQueryBuilder('p')
-            ->leftJoin('p.chargePeople', 'charge_people')
-            ->join('p.contract', 'c')
-            ->where('charge_people.id IS NOT NULL')
-            ->andWhere('p.active = true')
-            ->andWhere('c.typeContrat IN (:type)')
-            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
+            ->join('p.chargePeople', 'charge_people')
+            ->where('charge_people.id is not null')
             ->getQuery()
             ->getResult();
     }
@@ -281,14 +265,10 @@ class PersonalRepository extends ServiceEntityRepository
             ->join('p.categorie', 'category')
             ->join('category.categorySalarie', 'categorySalarie')
             ->join('p.chargePeople', 'charge_people')
-            ->join('p.contract', 'contract')
             ->where('charge_people.id is not null')
             ->andWhere('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
-            ->andWhere('p.active = true')
-            ->andWhere('contract.typeContrat IN (:type)')
             ->setParameter('code_employe', 'OE')
             ->setParameter('code_chauffeur', 'CH')
-            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
             ->getQuery()
             ->getResult();
     }
