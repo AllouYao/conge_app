@@ -51,7 +51,7 @@ class PayrollService
      * @param Campagne $campagne
      * @throws Exception
      */
-    public function setPayroll(Personal $personal, Campagne $campagne): void
+    public function setPayroll(Personal $personal, Campagne $campagne): Payroll
     {
         /** Nombre de jour travailler pendant la periode current de paie */
         $dayOfCurrentMonth = $this->paieServices->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne)['day_of_presence'];
@@ -216,8 +216,11 @@ class PayrollService
             ->setMasseSalary($masseSalaried);
 
         /** Enregistrement du livre de paie */
+
         $this->manager->persist($payroll);
         $this->manager->persist($salary);
+
+        return $payroll;
     }
 
 
@@ -364,6 +367,7 @@ class PayrollService
             ->setTotalRetenuePatronal($chargePatronal);
 
         /** Enregistrement du livre de paie */
+        dd("");
         $this->manager->persist($payroll);
     }
 

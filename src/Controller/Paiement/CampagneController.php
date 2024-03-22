@@ -189,23 +189,44 @@ class CampagneController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $personal = $form->get('personal')->getData();
-            foreach ($personal as $item) {
-                $dateEmbauche = $item->getContract()->getDateEmbauche();
-                if ($dateEmbauche > $campagne->getDateDebut() && $dateEmbauche <= $campagne->getDateFin()) {
-                    $this->payrollService->setProrataPayroll($item, $campagne);
-                } else {
-                    $this->payrollService->setPayroll($item, $campagne);
+            $countPersonal = $form->get('personal')->count();
+
+            $personals = $form->get('personal')->getData();
+            $countPersonal = count($personals);
+
+            
+            if($countPersonal>1){
+
+                foreach ($personals as $personal) {
+                    $dateEmbauche = $personal->getContract()->getDateEmbauche();
+                    if ($dateEmbauche > $campagne->getDateDebut()) {
+
+                        $this->payrollService->setProrataPayroll($personal, $campagne);
+
+                    } else {
+    
+                        $this->payrollService->setPayroll($personal, $campagne);
+    
+                    }
+
                 }
+
+                $campagne
+                    ->setActive(true)
+                    ->setStatus(Status::EN_COURS)
+                    ->setOrdinary(true);
+                $manager->persist($campagne);
+                $manager->flush();
+                flash()->addSuccess('Paie ouverte avec succès.');
+                return $this->redirectToRoute('app_home');
+                
+            }else{
+                
+                flash()->addWarning('Aucun personnel sélectionné!');
+                return $this->redirectToRoute('campagne_open_campagne');
+
             }
-            $campagne
-                ->setActive(true)
-                ->setStatus(Status::EN_COURS)
-                ->setOrdinary(true);
-            $manager->persist($campagne);
-            $manager->flush();
-            flash()->addSuccess('Paie ouverte avec succès.');
-            return $this->redirectToRoute('app_home');
+            
         }
 
         return $this->render('paiement/campagne/open.html.twig', [

@@ -69,6 +69,7 @@ class PaieByPeriodService
     public function getProvisoireBrutAndBrutImpoCampagne(Personal $personal, Campagne $campagne): array
     {
         $dayOfPresence = $this->NbDayOfPresenceByDateEmbauche($personal);
+        dd($dayOfPresence);
         $date = $campagne->getDateDebut();
         $month = (int)$date->format('m');
         $year = (int)$date->format('Y');
@@ -89,6 +90,15 @@ class PaieByPeriodService
             $salaireBrut = ceil((int)$personal->getSalary()?->getBrutAmount() * $dayOfPresence / 30);
             $brutImposable = ceil((int)$personal->getSalary()?->getBrutImposable() * $dayOfPresence / 30);
         }
+
+        
+        dd( [
+            'nb_jour_presence' => $dayOfPresence,
+            'salaire_categoriel' => $salaireCategoriel,
+            'brut_amount' => $salaireBrut,
+            'brut_imposable_amount' => $brutImposable,
+            'personal' => $personal
+        ]);
         return [
             'nb_jour_presence' => $dayOfPresence,
             'salaire_categoriel' => $salaireCategoriel,

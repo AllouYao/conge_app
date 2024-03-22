@@ -39,6 +39,15 @@ class AbsenceService
         // 8 heure par jour de travail
         return $totalAbsenceDay * 8;
     }
+    public function countDays(Absence $absence): float|int
+    {
+        $startedDate = $absence->getStartedDate();
+        $endedDate = $absence->getEndedDate();
+        $diff = $endedDate->diff($startedDate);
+        $totalAbsenceDay = (int)$diff->format('%d');
+        // 8 heure par jour de travail
+        return $totalAbsenceDay;
+    }
 
     /** Retourne le montant que fait des abasence dans le moi */
     public function getAmountByMonth(Personal $personal, int $month, int $year): float
