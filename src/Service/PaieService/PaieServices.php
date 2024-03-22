@@ -10,6 +10,7 @@ use App\Repository\DossierPersonal\DetailRetenueForfetaireRepository;
 use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Repository\DossierPersonal\RetenueForfetaireRepository;
 use App\Repository\Impots\CategoryChargeRepository;
+use App\Service\AbsenceService;
 use App\Utils\Status;
 use Carbon\Carbon;
 use Exception;
@@ -24,7 +25,8 @@ class PaieServices
         private readonly RetenueForfetaireRepository       $forfetaireRepository,
         private readonly DetailRetenueForfetaireRepository $detailRetenueForfetaireRepository,
         private readonly OperationRepository               $operationRepository,
-        private readonly AbsenceRepository                 $absenceRepository
+        private readonly AbsenceRepository                 $absenceRepository,
+        private readonly AbsenceService                 $absenceService
     )
     {
     }
@@ -35,29 +37,32 @@ class PaieServices
     public function getProvisoireBrutAndBrutImpoCampagne(Personal $personal, Campagne $campagne): array
     {
         $dayOfPresence = self::NR_JOUR_TRAVAILLER;
+        $newDayOfPresence = 0;
         $date = $campagne->getDateDebut();
         $month = (int)$date->format('m');
         $year = (int)$date->format('Y');
         $actuelCategoriel = (int)$personal->getCategorie()?->getAmount();
         $absences = $this->absenceRepository->getAbsenceByMonth($personal, $month, $year);
-        $jour = 0;
         if ($absences) {
+            $jour = 0;
             foreach ($absences as $absence) {
-                $nbAbsence = $absence->getEndedDate()->diff($absence->getStartedDate())->days;
+                $nbAbsence = $this->absenceService->countDays($absence);
                 $jour += $nbAbsence;
-                $dayOfPresence = $dayOfPresence - $jour;
             }
-            $salaireCategoriel = ceil($actuelCategoriel * $dayOfPresence / self::NR_JOUR_TRAVAILLER);
-            $salaireBrut = ceil((int)$personal->getSalary()?->getBrutAmount() * $dayOfPresence / self::NR_JOUR_TRAVAILLER);
-            $brutImposable = ceil((int)$personal->getSalary()?->getBrutImposable() * $dayOfPresence / self::NR_JOUR_TRAVAILLER);
-        } else {
-            $salaireCategoriel = $actuelCategoriel * $dayOfPresence / self::NR_JOUR_TRAVAILLER;
-            $salaireBrut = $personal->getSalary()?->getBrutAmount() * $dayOfPresence / self::NR_JOUR_TRAVAILLER;
-            $brutImposable = $personal->getSalary()?->getBrutImposable() * $dayOfPresence / self::NR_JOUR_TRAVAILLER;
-        }
 
+            $newDayOfPresence = $dayOfPresence - $jour;
+            $salaireCategoriel = ceil($actuelCategoriel * $newDayOfPresence / self::NR_JOUR_TRAVAILLER);
+            $salaireBrut = ceil((int)$personal->getSalary()?->getBrutAmount() * $newDayOfPresence / self::NR_JOUR_TRAVAILLER);
+            $brutImposable = ceil((int)$personal->getSalary()?->getBrutImposable() * $newDayOfPresence / self::NR_JOUR_TRAVAILLER);
+        } else {
+            $newDayOfPresence = $dayOfPresence;
+            $salaireCategoriel = $actuelCategoriel * $newDayOfPresence / self::NR_JOUR_TRAVAILLER;
+            $salaireBrut = $personal->getSalary()?->getBrutAmount() * $newDayOfPresence / self::NR_JOUR_TRAVAILLER;
+            $brutImposable = $personal->getSalary()?->getBrutImposable() * $newDayOfPresence / self::NR_JOUR_TRAVAILLER;
+        }
+        
         return [
-            'day_of_presence' => $dayOfPresence,
+            'day_of_presence' => $newDayOfPresence,
             'salaire_categoriel' => ceil($salaireCategoriel),
             'brut_amount' => ceil($salaireBrut),
             'brut_imposable_amount' => ceil($brutImposable)
