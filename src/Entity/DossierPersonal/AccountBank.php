@@ -18,7 +18,7 @@ class AccountBank
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $bankId = null;
 
     #[ORM\Column(length: 255)]
@@ -92,6 +92,7 @@ class AccountBank
 
         return $this;
     }
+
     public function getName(): ?string
     {
         return $this->name;
@@ -103,6 +104,7 @@ class AccountBank
 
         return $this;
     }
+
     public function getCodeAgence(): ?string
     {
         return $this->codeAgence;
@@ -144,5 +146,5 @@ class AccountBank
         return $this;
     }
 
-    
+
 }
