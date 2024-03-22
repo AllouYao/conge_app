@@ -304,4 +304,39 @@ class PersonalController extends AbstractController
         return $this->redirectToRoute('personal_index');
 
     }
+    #[Route('/disable/all', name: 'disable_all', methods: ['POST'])]
+    public function disableAll(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        if ($request->request->has('disableAllInput') && $request->isMethod('POST')) {
+
+            $status = $request->request->get("disableAllInput");
+            if($status == "on"){
+
+                $personals = $this->personalRepository->findAll();
+                foreach($personals as $personal){
+                        $personal->setActive(true);
+                        $entityManager->persist($personal);
+                        $entityManager->flush();
+                }
+
+                flash()->addSuccess('Salariés Activés avec succès.');
+
+            }else{
+
+                $personals = $this->personalRepository->findAll();
+                foreach($personals as $personal){
+                        $personal->setActive(false);
+                        $entityManager->persist($personal);
+                        $entityManager->flush();
+                }
+
+                flash()->addSuccess('Salariés Désactivés avec succès.');
+            }
+            
+            return $this->redirectToRoute('personal_index');
+        }
+
+        return $this->redirectToRoute('personal_index');
+
+    }
 }
