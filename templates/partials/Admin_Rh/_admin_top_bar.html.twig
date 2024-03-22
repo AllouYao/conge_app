@@ -261,6 +261,19 @@
                             </div>
                             {# <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Etat des Primes et indemnités</a> #}
                             <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Primes et indemnités</a>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Prêt & Avance
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('app_paiement_acompte_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('app_paiement_acompte_index') }}"
+                                       class="dropdown-item">Liste prêt & avance</a>
+                                </div>
+                            </div>
                         </div>
                     </li>
 

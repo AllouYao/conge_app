@@ -196,6 +196,9 @@ final class Status
     /** Status Operation */
     public const REMBOURSEMENT = 'REMBOURSEMENT';
     public const RETENUES = 'RETENUES';
+    const PRET = 'PRET';
+    const ACOMPTE = 'ACOMPTE';
+
 
     /** Statut des fonctions */
     public const COMMERCIAL_PISTE = 'COMMERCIAL PISTE';
