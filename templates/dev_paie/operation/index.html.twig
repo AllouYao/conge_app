@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        REMBOURSEMENTS & RETENUES
+                        LISTE DES REMBOURSEMENTS & RETENUES SUR LA PERIODE DE {{ date|upper }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -48,6 +48,13 @@
             $("#dataGridOperation").dxDataGrid({
                 dataSource: `{{ url('dev_paie_operation_api_operation') }}`,
                 showBorders: true,
+                showColumnLines: true,
+                showRowLines: true,
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                rowAlternationEnabled: true,
+                height: 355,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual"
@@ -92,14 +99,9 @@
                     width: 240,
                     placeholder: 'Rechercher...',
                 },
-                showColumnLines: true,
-                showRowLines: true,
                 paging: {
                     pageSize: 10,
                 },
-                allowColumnReordering: true,
-                allowColumnResizing: true,
-                columnAutoWidth: true,
                 columns: [
                     {
                         caption: 'Date Opération',
@@ -109,7 +111,7 @@
                     },
                     {
                         caption: 'Type Opération',
-                        alignment: 'center',
+                        alignment: 'left',
                         dataType: 'string',
                         dataField: 'type_operation',
                     },

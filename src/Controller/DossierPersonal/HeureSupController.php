@@ -135,11 +135,8 @@ class HeureSupController extends AbstractController
         $years = $today->year;
         $month = $today->month;
         if ($this->isGranted('ROLE_RH')) {
-
             $heursSupps = $this->heureSupRepository->getAllByDate($month, $years);
-
         } else {
-
             $heursSupps = $this->heureSupRepository->findHeureSupByEmployeRole($month, $years);
         }
         $apiRequestHeureSupp = [];
@@ -173,11 +170,8 @@ class HeureSupController extends AbstractController
         $years = $today->year;
         $month = $today->month;
         if ($this->isGranted('ROLE_RH')) {
-
             $heursSupps = $this->heureSupRepository->getByStatus($month, $years, Status::EN_ATTENTE);
-
         } else {
-
             $heursSupps = $this->heureSupRepository->findHeureSupByStatusByEmployeRole($month, $years, Status::EN_ATTENTE);
         }
         $apiRequestHeureSupp = [];
@@ -274,7 +268,7 @@ class HeureSupController extends AbstractController
             $personal = $form->get('personal')->getData();
             $data = $form->getData();
             if ($form->get('heureSup')->count() == 0) {
-                flash()->addInfo('Veillez s\'il vous plait ajouter une ligne dans le tableau si-dessous pour continuer.');
+                flash()->addInfo('Veuillez s\'il vous plaît ajouter au moins une ligne pour continuer merci !');
                 return $this->redirectToRoute('personal_heure_sup_new', [], Response::HTTP_SEE_OTHER);
             }
             $supService->heureSupp($data, $personal);

@@ -37,7 +37,7 @@ class ChargePeopleController extends AbstractController
                 'name' => $personal->getFirstName(),
                 'last_name' => $personal->getLastName(),
                 'date_naissance' => $personal->getBirthday() ? date_format($personal->getBirthday(), 'd/m/Y') : '',
-                'categorie_salarie' => '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ')' . '-' . $personal->getCategorie()->getIntitule(),
+                'categorie_salarie' => '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ')' . ' - ' . $personal->getCategorie()->getIntitule(),
                 'date_embauche' => date_format($personal->getContract()->getDateEmbauche(), 'd/m/Y'),
                 'date_creation' => date_format($personal->getCreatedAt(), 'd/m/Y'),
                 'modifier' => $this->generateUrl('charge_people_edit', ['uuid' => $personal->getUuid()])
@@ -68,6 +68,10 @@ class ChargePeopleController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $chargePeople = $form->get('chargePeople')->getData();
             $personal = $form->get('personal')->getData();
+            if ($form->get('chargePeople')->count() == 0) {
+                flash()->addInfo('Veuillez s\'il vous plaît ajouter au moins une ligne pour continuer merci !');
+                return $this->redirectToRoute('charge_people_new');
+            }
             foreach ($chargePeople as $chargePerson) {
                 $chargePerson->setPersonal($personal);
                 $chargePerson->setUser($currentUser);

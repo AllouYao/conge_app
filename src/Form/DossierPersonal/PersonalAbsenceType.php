@@ -30,7 +30,7 @@ class PersonalAbsenceType extends AbstractType
                         ->andWhere('p.active = true')
                         ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI]);
                 },
-                'placeholder' => 'Sélectionner un matricule',
+                'placeholder' => 'Sélectionner un salarié',
                 'attr' => [
                     'data-plugin' => 'customselect',
                 ],

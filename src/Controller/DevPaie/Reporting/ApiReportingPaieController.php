@@ -4,6 +4,7 @@ namespace App\Controller\DevPaie\Reporting;
 
 use App\Repository\DevPaie\OperationRepository;
 use App\Utils\Status;
+use Carbon\Carbon;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -20,7 +21,8 @@ class ApiReportingPaieController extends AbstractController
     #[Route('/remboursement_salaire', name: 'remboursement_salaire', methods: ['GET'])]
     public function remboursementSalaire(): JsonResponse
     {
-        $requestOperationRemboursement = $this->operationRepository->findOperationByTypeAndStatus(Status::REMBOURSEMENT, [Status::EN_ATTENTE]);
+        $today = Carbon::today();
+        $requestOperationRemboursement = $this->operationRepository->findOperationByTypeAndStatus(Status::REMBOURSEMENT, [Status::EN_ATTENTE], $today->month, $today->year);
         $dataRemboursement = [];
         foreach ($requestOperationRemboursement as $ordre => $remboursement) {
             $dataRemboursement[] = [
@@ -44,7 +46,8 @@ class ApiReportingPaieController extends AbstractController
     #[Route('/remboursement_salaire_validate', name: 'remboursement_salaire_validate', methods: ['GET'])]
     public function remboursementSalaireValidate(): JsonResponse
     {
-        $requestOperationRemboursement = $this->operationRepository->findOperationByTypeAndStatus(Status::REMBOURSEMENT, [Status::VALIDATED]);
+        $today = Carbon::today();
+        $requestOperationRemboursement = $this->operationRepository->findOperationByTypeAndStatus(Status::REMBOURSEMENT, [Status::VALIDATED], $today->month, $today->year);
         $dataRemboursementValidate = [];
         foreach ($requestOperationRemboursement as $ordre => $remboursement) {
             $dataRemboursementValidate[] = [
@@ -67,7 +70,8 @@ class ApiReportingPaieController extends AbstractController
     #[Route('/retenue_salaire', name: 'retenue_salaire', methods: ['GET'])]
     public function retenueSalaire(): JsonResponse
     {
-        $requestOperationRetenues = $this->operationRepository->findOperationByTypeAndStatus(Status::RETENUES, [Status::EN_ATTENTE]);
+        $today = Carbon::today();
+        $requestOperationRetenues = $this->operationRepository->findOperationByTypeAndStatus(Status::RETENUES, [Status::EN_ATTENTE], $today->month, $today->year);
         $dataRetenueSalaire = [];
 
         foreach ($requestOperationRetenues as $ordre => $retenue) {
@@ -92,7 +96,8 @@ class ApiReportingPaieController extends AbstractController
     #[Route('/retenue_salaire_validate', 'retenue_salaire_validated', methods: ['GET'])]
     public function retenueSalaireValidate(): JsonResponse
     {
-        $requestOperationRetenues = $this->operationRepository->findOperationByTypeAndStatus(Status::RETENUES, [Status::VALIDATED]);
+        $today = Carbon::today();
+        $requestOperationRetenues = $this->operationRepository->findOperationByTypeAndStatus(Status::RETENUES, [Status::VALIDATED], $today->month, $today->year);
         $dataRetenueSalaire = [];
 
         foreach ($requestOperationRetenues as $ordre => $retenue) {

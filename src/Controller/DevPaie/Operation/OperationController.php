@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Form\DevPaie\OperationType;
 use App\Repository\DevPaie\OperationRepository;
 use App\Utils\Status;
+use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -27,7 +28,8 @@ class OperationController extends AbstractController
     #[Route('/api_operation', name: 'api_operation', methods: ['GET'])]
     public function apiOperations(OperationRepository $operationRepository): JsonResponse
     {
-        $operationRequest = $operationRepository->findOperationByType([Status::REMBOURSEMENT, Status::RETENUES]);
+        $today = Carbon::today();
+        $operationRequest = $operationRepository->findOperationByType([Status::REMBOURSEMENT, Status::RETENUES], $today->month, $today->year);
         if (!$operationRequest) {
             return $this->json(['data' => []]);
         }

@@ -3,6 +3,7 @@
 namespace App\Form\DossierPersonal;
 
 use App\Entity\DossierPersonal\Personal;
+use App\Utils\Status;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -22,10 +23,13 @@ class ChargeType extends AbstractType
                     return $er->createQueryBuilder('p')
                         ->join('p.contract', 'contract')
                         ->leftJoin('p.departures', 'departures')
-                        ->where('departures.id IS NULL');
+                        ->where('departures.id IS NULL')
+                        ->andWhere('p.active = true')
+                        ->andWhere('contract.typeContrat IN (:type)')
+                        ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI]);
                 },
-                'choice_label' => 'matricule',
-                'placeholder' => 'Sélectionner un matricule',
+                'choice_label' => 'firstName',
+                'placeholder' => 'Sélectionner un salarié',
                 'attr' => [
                     'data-plugin' => 'customselect',
                 ],

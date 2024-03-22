@@ -4,6 +4,7 @@ namespace App\Repository\DossierPersonal;
 
 use App\Entity\DossierPersonal\Absence;
 use App\Entity\DossierPersonal\Personal;
+use App\Utils\Status;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -44,11 +45,15 @@ class AbsenceRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
     public function getAbsenceByMonths(int $month, int $year): ?array
     {
         return $this->createQueryBuilder('abs')
+            ->join('abs.personal', 'p')
+            ->join('p.contract', 'contract')
             ->andWhere('YEAR(abs.startedDate) = :year')
             ->andWhere('MONTH(abs.startedDate) = :month')
+            ->andWhere('p.active = true')
             ->setParameter('year', $year)
             ->setParameter('month', $month)
             ->orderBy('abs.startedDate', 'ASC')
@@ -59,17 +64,16 @@ class AbsenceRepository extends ServiceEntityRepository
     public function getAbsenceByMonthsByEmployeRole(int $month, int $year): ?array
     {
         return $this->createQueryBuilder('abs')
-            ->join('abs.personal', 'personal') 
-            ->join('personal.categorie', 'category') 
-            ->join('category.categorySalarie', 'categorySalarie') 
-            ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
+            ->join('abs.personal', 'personal')
+            ->join('personal.categorie', 'category')
+            ->join('category.categorySalarie', 'categorySalarie')
+            ->where('categorySalarie.name IN (:name)')
             ->andWhere('YEAR(abs.startedDate) = :year')
             ->andWhere('MONTH(abs.startedDate) = :month')
             ->andWhere('personal.active = true')
             ->setParameter('year', $year)
             ->setParameter('month', $month)
-            ->setParameter('code_employe', 'OE') 
-            ->setParameter('code_chauffeur', 'CH') 
+            ->setParameter('name', [Status::OUVRIER_EMPLOYE, Status::CHAUFFEUR])
             ->orderBy('abs.startedDate', 'ASC')
             ->getQuery()
             ->getResult();
@@ -78,18 +82,17 @@ class AbsenceRepository extends ServiceEntityRepository
     public function getAbsenceByMonthByEmployeRole(?Personal $personal, int $month, int $year): ?array
     {
         return $this->createQueryBuilder('abs')
-
-            ->join('abs.personal', 'personal') 
-            ->join('personal.categorie', 'category') 
-            ->join('category.categorySalarie', 'categorySalarie') 
+            ->join('abs.personal', 'personal')
+            ->join('personal.categorie', 'category')
+            ->join('category.categorySalarie', 'categorySalarie')
             ->where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
             ->andWhere('YEAR(abs.startedDate) = :year')
             ->andWhere('MONTH(abs.startedDate) = :month')
             ->andWhere('abs.justified = :justified')
             ->andWhere('abs.personal = :personal')
             ->andWhere('personal.active = true')
-            ->setParameter('code_employe', 'OE') 
-            ->setParameter('code_chauffeur', 'CH') 
+            ->setParameter('code_employe', 'OE')
+            ->setParameter('code_chauffeur', 'CH')
             ->setParameter('personal', $personal)
             ->setParameter('year', $year)
             ->setParameter('month', $month)
@@ -98,5 +101,5 @@ class AbsenceRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-    
+
 }

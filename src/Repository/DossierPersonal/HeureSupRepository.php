@@ -66,14 +66,13 @@ class HeureSupRepository extends ServiceEntityRepository
             ->join('h.personal', 'p')
             ->join('p.categorie', 'category')
             ->join('category.categorySalarie', 'categorySalarie')
-            ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
+            ->where('categorySalarie.name IN (:name)')
             ->andWhere('YEAR(h.startedDate) = :year')
             ->andWhere('MONTH(h.startedDate) = :month')
             ->andWhere('p.active = true')
             ->setParameter('year', $year)
             ->setParameter('month', $month)
-            ->setParameter('code_employe', 'OE')
-            ->setParameter('code_chauffeur', 'CH')
+            ->setParameter('name', [Status::CHAUFFEUR, Status::OUVRIER_EMPLOYE])
             ->orderBy('h.startedDate', 'ASC')
             ->getQuery()->getResult();
 

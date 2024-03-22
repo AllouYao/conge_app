@@ -26,13 +26,17 @@ class PersonalHeureSupType extends AbstractType
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('p')
                         ->join('p.contract', 'ct')
+                        ->join('p.categorie', 'category')
+                        ->join('category.categorySalarie', 'category_salarie')
                         ->leftJoin('p.departures', 'departures')
                         ->where('departures.id IS NULL')
+                        ->andWhere('category_salarie.name IN (:name)')
                         ->andWhere('ct.typeContrat IN (:type)')
                         ->andWhere('p.active = true')
-                        ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD]);
+                        ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
+                        ->setParameter('name', [Status::CHAUFFEUR, Status::OUVRIER_EMPLOYE]);
                 },
-                'placeholder' => 'Sélectionner un matricule',
+                'placeholder' => 'Sélectionner un salarié',
                 'attr' => [
                     'data-plugin' => 'customselect',
                 ],

@@ -99,7 +99,7 @@ class AbsenceController extends AbstractController
             $personalAbsence = $form->get('absence')->getData();
             $personal = $form->get('personal')->getData();
             if ($form->get('absence')->count() == 0) {
-                flash()->addInfo('Veillez s\'il vous plait ajouter au moins une ligne pour continuer merci !');
+                flash()->addInfo('Veuillez s\'il vous plaît ajouter au moins une ligne pour continuer merci !');
                 return $this->redirectToRoute('personal_absence_new');
             }
             foreach ($personalAbsence as $absence) {
@@ -117,7 +117,7 @@ class AbsenceController extends AbstractController
 
 
         return $this->render('dossier_personal/absence/new.html.twig', [
-            'form' => $form
+            'form' => $form->createView()
         ]);
     }
 
@@ -149,7 +149,7 @@ class AbsenceController extends AbstractController
 
         return $this->render('dossier_personal/absence/edit.html.twig', [
             'personals' => $personal,
-            'form' => $form,
+            'form' => $form->createView(),
             'editing' => true
         ]);
     }

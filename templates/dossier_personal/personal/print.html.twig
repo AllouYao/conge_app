@@ -22,28 +22,24 @@
                                     <tr style="font-size: x-small; line-height: normal">
                                         <th class="text-center">N° Ordre</th>
                                         <th class="text-center">Nom et prénoms</th>
-                                        <th class="text-center">Date d'embauche</th>
                                         <th class="text-center">Date de naissance</th>
+                                        <th class="text-center">Age (en année)</th>
+                                        <th class="text-center">Site</th>
                                         <th class="text-center">Fonction</th>
-                                        <th class="text-center">Département ou service</th>
-                                        <th class="text-center">Diplôme</th>
-                                        <th class="text-center">Compte banque</th>
                                         <th class="text-center">Nom banque</th>
-                                        <th class="text-center">Grade catégoriel</th>
+                                        <th class="text-center">Compte banque</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     <tr style="font-size: xx-small; line-height: normal">
                                         <td class="text-center">{{ index }}</td>
                                         <td>{{ personals.firstName|upper }} {{ personals.lastName|upper }}</td>
-                                        <td class="text-center">{{ personals.contract.dateEmbauche|date('d/m/Y') }}</td>
                                         <td class="text-center">{{ personals.birthday|date('d/m/Y') }}</td>
-                                        <td>{{ personals.fonction|capitalize }}</td>
+                                        <td class="text-center">{{ age }}</td>
                                         <td>{{ personals.service|capitalize }}</td>
-                                        <td class="text-center">{{ personals.niveauFormation|upper }}</td>
+                                        <td>{{ personals.fonction|capitalize }}</td>
+                                        <td>{{ nom_banque|upper }}</td>
                                         <td class="text-center">{{ accountBanque|upper }}</td>
-                                        <td>{{ '' }}</td>
-                                        <td class="text-center">{{ personals.categorie.intitule }}</td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -51,11 +47,11 @@
                                     <thead>
                                     <tr style="font-size: x-small; line-height: normal">
                                         <th class="text-center">Matricule</th>
-                                        <th class="text-center">Ancienneté (en année)</th>
-                                        <th class="text-center">Age (en année)</th>
                                         <th class="text-center">Catégorie</th>
-                                        <th class="text-center">Adresse</th>
+                                        <th class="text-center">Grade catégoriel</th>
                                         <th class="text-center">Type de contrat</th>
+                                        <th class="text-center">Date d'embauche</th>
+                                        <th class="text-center">Ancienneté (en année)</th>
                                         <th class="text-center">Durée du contrat (en mois)</th>
                                         <th class="text-center">Nature, N° pièce d'identité</th>
                                         <th class="text-center">Etat Civil</th>
@@ -65,11 +61,11 @@
                                     <tbody>
                                     <tr style="font-size: xx-small; line-height: normal">
                                         <td class="text-center">{{ personals.matricule }}</td>
-                                        <td class="text-center">{{ anciennete }}</td>
-                                        <td class="text-center">{{ age }}</td>
+                                        <td class="text-center">{{ personals.categorie.intitule }}</td>
                                         <td>{{ personals.categorie.categorySalarie.name|upper }}</td>
-                                        <td>{{ personals.address|upper }}</td>
                                         <td>{{ personals.contract.typeContrat|upper }}</td>
+                                        <td class="text-center">{{ personals.contract.dateEmbauche|date('d/m/Y') }}</td>
+                                        <td class="text-center">{{ anciennete }}</td>
                                         <td class="text-center">{{ dureeContrat }}</td>
                                         <td class="text-center">{{ personals.piece|upper }}{{ '° ' }}{{ personals.refPiece|upper }}</td>
                                         <td>{{ personals.etatCivil|upper }}</td>

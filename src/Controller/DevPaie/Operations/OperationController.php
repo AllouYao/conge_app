@@ -8,7 +8,9 @@ use App\Form\DevPaie\OperationType;
 use App\Repository\DevPaie\OperationRepository;
 use App\Repository\Paiement\CampagneRepository;
 use App\Utils\Status;
+use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
+use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,7 +30,8 @@ class OperationController extends AbstractController
     #[Route('/api_operation', name: 'api_operation', methods: ['GET'])]
     public function apiOperations(OperationRepository $operationRepository): JsonResponse
     {
-        $operationRequest = $operationRepository->findOperationByType([Status::REMBOURSEMENT, Status::RETENUES]);
+        $today = Carbon::today();
+        $operationRequest = $operationRepository->findOperationByType([Status::REMBOURSEMENT, Status::RETENUES], $today->month, $today->year);
         if (!$operationRequest) {
             return $this->json(['data' => []]);
         }
@@ -49,14 +52,17 @@ class OperationController extends AbstractController
     }
 
     #[Route('/', name: 'index', methods: ['GET'])]
-    // #[IsGranted('ROLE_DEV_PAIE', message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     public function index(): Response
     {
-        return $this->render('dev_paie/operation/index.html.twig');
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, 'MMMM Y');
+        $today = Carbon::now();
+        $date = $formatter->format($today);
+        return $this->render('dev_paie/operation/index.html.twig', [
+            'date' => $date
+        ]);
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    // #[IsGranted('ROLE_DEV_PAIE', message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $operation = new Operation();
@@ -136,7 +142,6 @@ class OperationController extends AbstractController
     }
 
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    // #[IsGranted('ROLE_DEV_PAIE', message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     public function edit(Request $request, Operation $operation, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(OperationType::class, $operation);

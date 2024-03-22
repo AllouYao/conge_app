@@ -38,12 +38,21 @@
         }
 
         $(document).ready(function () {
-            let debut;
-            let fin;
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+
             $("#dataGridHeureSupplementaire").dxDataGrid({
                 dataSource: `{{ url('personal_heure_sup_api_heure_supplementaire') }}`,
                 showBorders: true,
-                height: 300,
+                showColumnLines: true,
+                showRowLines: true,
+                rowAlternationEnabled: true,
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                height: 355,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual"
@@ -74,7 +83,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `HEURES SUPPLEMENTAIRE ${debut ?? " "} - ${fin ?? " "}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `HEURES SUPPLEMENTAIRE ${year}-${month < 10 ? '0' : ''}${month}-${day}.xlsx`);
                             });
                         });
                         e.cancel = true;
@@ -88,14 +97,9 @@
                     width: 240,
                     placeholder: 'Rechercher...',
                 },
-                showColumnLines: true,
-                showRowLines: true,
                 paging: {
                     pageSize: 10,
                 },
-                allowColumnReordering: true,
-                allowColumnResizing: true,
-                columnAutoWidth: true,
                 columns: [
                     {
                         caption: 'Matricule',
@@ -116,49 +120,49 @@
                         dataField: 'last_name',
                     },
                     {
-                        caption: 'Date de naissance',
+                        caption: 'Date Naissance',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_naissance',
                     },
                     {
-                        caption: 'Catégorie salarié',
+                        caption: 'Catégorie Salarié',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'categorie_salarie',
                     },
                     {
-                        caption: 'Date d\'embauche',
+                        caption: 'Date Embauche',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_embauche',
                     },
                     {
-                        caption: 'Date début',
+                        caption: 'Date Début',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_debut',
                     },
                     {
-                        caption: 'Heure début',
+                        caption: 'Heure Début',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'heure_debut',
                     },
                     {
-                        caption: 'Date fin',
+                        caption: 'Date Fin',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_fin',
                     },
                     {
-                        caption: 'Heure fin',
+                        caption: 'Heure Fin',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'heure_fin',
                     },
                     {
-                        caption: 'Total horraire',
+                        caption: 'Total Horraire',
                         alignment: 'center',
                         dataType: 'number',
                         dataField: 'total_horaire',

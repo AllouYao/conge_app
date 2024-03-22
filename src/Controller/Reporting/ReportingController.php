@@ -87,12 +87,11 @@ class ReportingController extends AbstractController
     #[Route('/prime_indemnite', name: 'prime_indemnite', methods: ['GET', 'POST'])]
     public function viewPrimeIndemnitesMensuel(): Response
     {
-        $today = Carbon::today();
-        $month = $today->month;
-        $years = $today->year;
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, 'MMMM Y');
+        $today = Carbon::now();
+        $date = $formatter->format($today);
         return $this->render('reporting/prime_indemnite/prime_indemnite.html.twig', [
-            'mois' => $month,
-            'annee' => $years
+            'date' => $date,
         ]);
     }
 

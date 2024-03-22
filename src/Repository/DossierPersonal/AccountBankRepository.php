@@ -3,6 +3,7 @@
 namespace App\Repository\DossierPersonal;
 
 use App\Entity\DossierPersonal\AccountBank;
+use App\Utils\Status;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -21,42 +22,29 @@ class AccountBankRepository extends ServiceEntityRepository
         parent::__construct($registry, AccountBank::class);
     }
 
-//    /**
-//     * @return AccountBank[] Returns an array of AccountBank objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('a')
-//            ->andWhere('a.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('a.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function findByEmployeRole(): ?array
+    {
+        return $this->createQueryBuilder('acc')
+            ->join('acc.personal', 'p')
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'categorySalarie')
+            ->andWhere('categorySalarie.name IN (:name)')
+            ->andWhere('p.active = true')
+            ->setParameter('name', [Status::CHAUFFEUR, Status::OUVRIER_EMPLOYE])
+            ->getQuery()->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?AccountBank
-//    {
-//        return $this->createQueryBuilder('a')
-//            ->andWhere('a.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
-
-public function findByEmployeRole(): ?array
-{
-    return $this->createQueryBuilder('acc')
-    ->join('acc.personal', 'p') 
-    ->join('p.categorie', 'category') 
-    ->join('category.categorySalarie', 'categorySalarie') 
-    ->andWhere('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
-    ->setParameter('code_employe', 'OE') 
-    ->setParameter('code_chauffeur', 'CH') 
-    ->getQuery()->getResult();
-
-}
+    public function findAccountBank(): ?array
+    {
+        return $this->createQueryBuilder('acc')
+            ->join('acc.personal', 'p')
+            ->join('p.contract', 'contract')
+            ->where('p.modePaiement = :mode_paiement')
+            ->andWhere('p.active = true')
+            ->andWhere('contract.typeContrat IN (:type)')
+            ->setParameter('mode_paiement', Status::VIREMENT)
+            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
+            ->getQuery()->getResult();
+    }
 
 }
