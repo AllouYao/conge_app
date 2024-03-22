@@ -58,6 +58,9 @@ class SalaryType extends AbstractType
                 'required' => false,
                 'attr' => [
                     'class' => 'total-prime separator text-end'
+                ],
+                'constraints' => [
+                    new NotBlank()
                 ]
             ])
             ->add('primeTransport', TextType::class, [
