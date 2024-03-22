@@ -4,6 +4,7 @@
 namespace App\Form\DossierPersonal;
 
 use App\Entity\DossierPersonal\Personal;
+use App\Utils\Status;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -19,14 +20,17 @@ class PersonalAbsenceType extends AbstractType
         $builder
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
-                'choice_label' => 'matricule',
+                'choice_label' => 'firstName',
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('p')
                         ->join('p.contract', 'ct')
                         ->leftJoin('p.departures', 'departures')
-                        ->where('departures.id IS NULL');
+                        ->where('departures.id IS NULL')
+                        ->andWhere('ct.typeContrat IN (:type)')
+                        ->andWhere('p.active = true')
+                        ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI]);
                 },
-                'placeholder' => 'Sélectionner un matricule',
+                'placeholder' => 'Sélectionner un salarié',
                 'attr' => [
                     'data-plugin' => 'customselect',
                 ],

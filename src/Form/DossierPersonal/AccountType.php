@@ -19,16 +19,19 @@ class AccountType extends AbstractType
         $builder
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
-                'choice_label' => 'matricule',
+                'choice_label' => 'firstName',
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('p')
                         ->join('p.contract', 'contract')
                         ->leftJoin('p.departures', 'departures')
                         ->where('p.modePaiement in (:modePaiement)')
                         ->andWhere('departures.id IS NULL')
-                        ->setParameter('modePaiement', [Status::VIREMENT, Status::CHEQUE]);
+                        ->andWhere('p.active = true')
+                        ->andWhere('contract.typeContrat IN (:type)')
+                        ->setParameter('modePaiement', [Status::VIREMENT, Status::CHEQUE])
+                        ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI]);
                 },
-                'placeholder' => 'Sélectionner un matricule',
+                'placeholder' => 'Sélectionner un salarié',
                 'attr' => [
                     'data-plugin' => 'customselect',
                 ],

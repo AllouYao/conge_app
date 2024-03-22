@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        ABSENCES PLANIFIEES SUR LA PERIODE DE {{ date|upper }}
+                        LISTE DES ABSENCES DE SALARIES SUR LA PERIODE DE {{ date|upper }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -44,7 +44,13 @@
             $("#dataGridAbsence").dxDataGrid({
                 dataSource: `{{ url('personal_absence_api_absence') }}`,
                 showBorders: true,
-                height: 300,
+                showColumnLines: true,
+                showRowLines: true,
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                rowAlternationEnabled: true,
+                height: 355,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual"
@@ -75,7 +81,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `ABSENCES PLANIFIEES DU ${year}-${month <10 ? '0':''}${month}-${day}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `ABSENCES PLANIFIEES DU ${year}-${month < 10 ? '0' : ''}${month}-${day}.xlsx`);
                             });
                         });
                         e.cancel = true;
@@ -89,14 +95,9 @@
                     width: 240,
                     placeholder: 'Rechercher...',
                 },
-                showColumnLines: true,
-                showRowLines: true,
                 paging: {
                     pageSize: 10,
                 },
-                allowColumnReordering: true,
-                allowColumnResizing: true,
-                columnAutoWidth: true,
                 columns: [
                     {
                         caption: 'Matricule',
@@ -117,37 +118,37 @@
                         dataField: 'last_name',
                     },
                     {
-                        caption: 'Date de naissance',
+                        caption: 'Date Naissance',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_naissance',
                     },
                     {
-                        caption: 'Catégorie salarié',
+                        caption: 'Catégorie Salarié',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'categorie_salarie',
                     },
                     {
-                        caption: 'Date d\'embauche',
+                        caption: 'Date Embauche',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_embauche',
                     },
                     {
-                        caption: 'Type d\'absence',
+                        caption: 'Type Absence',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'type_absence',
                     },
                     {
-                        caption: 'Date départ',
+                        caption: 'Date Départ',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_depart',
                     },
                     {
-                        caption: 'Date retour',
+                        caption: 'Date Retour',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_retour',
@@ -158,12 +159,12 @@
                         dataType: 'string',
                         dataField: 'status',
                         cellTemplate: function (container, options) {
-                            var status = options.data.status;
-                            var statusText = status === 'OUI' ? 'Apporter' : 'Non apporter';
-                            var labelClass = status === 'OUI' ? 'bg-success' : 'bg-danger';
+                            let status = options.data.status;
+                            let statusText = status === 'OUI' ? 'Apporter' : 'Non apporter';
+                            let labelClass = status === 'OUI' ? 'bg-success' : 'bg-danger';
 
                             // Créer une structure HTML personnalisée pour la cellule
-                            var htmlContent = '<span class="badge ' + labelClass + '">' + statusText + '</span>';
+                            let htmlContent = '<span class="badge ' + labelClass + '">' + statusText + '</span>';
 
                             // Ajouter la structure HTML à la cellule
                             container.append(htmlContent);
@@ -185,19 +186,10 @@
                         },
                     },
                     {
-                        caption: 'Solde déduis',
+                        caption: 'Solde Déduis',
                         alignment: 'center',
                         dataType: 'number',
                         dataField: 'montant_deduit',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                    },
-                    {
-                        caption: 'Nouveau salaire catégoriel',
-                        alignment: 'center',
-                        dataType: 'number',
-                        dataField: 'nouveau_salaire_base',
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },

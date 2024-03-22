@@ -42,10 +42,11 @@ class PersonalController extends AbstractController
         DetailPrimeSalaryRepository $detailPrimeSalaryRepository
     ): Response
     {
-        $accountNumber = null;
+        $accountNumber = $nameBanque =  null;
         $accountBanque = $personal->getAccountBanks();
         foreach ($accountBanque as $value) {
-            $accountNumber = $value->getCode() . ' ' . $value->getNumCompte() . ' ' . $value->getRib();
+            $accountNumber = $value->getCode() . ' ' . $value->getCodeAgence() . ' ' . $value->getNumCompte() . ' ' . $value->getRib();
+            $nameBanque = $value->getName();
         }
         $personalSalaried = $this->getPersonalSalaried()->getContent();
         $index = $personalSalaried[10];
@@ -88,6 +89,7 @@ class PersonalController extends AbstractController
         return $this->render('dossier_personal/personal/print.html.twig', [
             'personals' => $personal,
             'accountBanque' => $accountNumber,
+            'nom_banque' => $nameBanque,
             'index' => $index,
             'anciennete' => $anciennete,
             'age' => $age,
@@ -117,8 +119,6 @@ class PersonalController extends AbstractController
         } else {
             $personal = $this->personalRepository->findPersonalSalariedByEmployeRole();
         }
-
-        // dd($personal);
 
         $personalSalaried = [];
         foreach ($personal as $value => $item) {
@@ -160,14 +160,7 @@ class PersonalController extends AbstractController
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(): Response
     {
-        if ($this->isGranted('ROLE_RH')) {
-            $personal = $this->personalRepository->findPersonalSalaried();
-        } else {
-            $personal = $this->personalRepository->findPersonalSalariedByEmployeRole();
-        }
-        return $this->render('dossier_personal/personal/index.html.twig', [
-            'personals' => $personal
-        ]);
+        return $this->render('dossier_personal/personal/index.html.twig');
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]

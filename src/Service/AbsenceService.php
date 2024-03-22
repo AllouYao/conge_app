@@ -11,10 +11,10 @@ use App\Utils\Status;
 class AbsenceService
 {
     private AbsenceRepository $absenceRepository;
-    private $hourRate;
+    private string|float $hourRate;
 
 
-    public function __construct(AbsenceRepository $absenceRepository,private TauxHoraireRepository $tauxHoraireRepository)
+    public function __construct(AbsenceRepository $absenceRepository,private readonly TauxHoraireRepository $tauxHoraireRepository)
     {
         $this->absenceRepository = $absenceRepository;
         $tauxHorraire = $this->tauxHoraireRepository->findOneBy(['isActive'=>true]);
@@ -49,7 +49,7 @@ class AbsenceService
         return $totalAbsenceDay;
     }
 
-    /** Retourne le montant que fait des abasence dans le moi */
+    /** Retourne le montant que fait des absence dans le moi */
     public function getAmountByMonth(Personal $personal, int $month, int $year): float
     {
         $salaireCategoriel = $personal->getSalary()->getBaseAmount();

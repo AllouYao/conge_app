@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}LISTE DES SALARIES{% endblock %}
+{% block title %}LISTE DU PERSONNEL{% endblock %}
 {% block stylesheets %}
     <style>
         #dataGridPersonal {
@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        LISTE DES SALARIES
+                        LISTE DU PERSONNEL
                     </h5>
                 </div>
                 <div class="card-body">
@@ -29,7 +29,7 @@
         </div>
     </div>
     <form id="personalEnable" method="POST" action="/dossier/personal/enable">
-        <input id="personalEnableInput"  type="hidden" name="personalEnableInput">
+        <input id="personalEnableInput" type="hidden" name="personalEnableInput">
     </form>
     <form id="personalDisable" method="POST" action="/dossier/personal/disable">
         <input id="personalDisableInput" type="hidden" name="personalDisableInput">
@@ -47,11 +47,20 @@
         }
 
         $(document).ready(function () {
-            let debut;
-            let fin;
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+
             $("#dataGridPersonal").dxDataGrid({
                 dataSource: `{{ url('personal_salaried_book') }}`,
                 showBorders: true,
+                showColumnLines: true,
+                showRowLines: true,
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                rowAlternationEnabled: true,
                 height: 355,
                 scrolling: {
                     columnRenderingMode: 'virtual',
@@ -68,7 +77,7 @@
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('Livre des salariés');
+                        const worksheet = workbook.addWorksheet('LISTE DU PERSONNEL');
                         DevExpress.excelExporter.exportDataGrid({
                             component: e.component,
                             worksheet,
@@ -83,7 +92,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `FICHES DU PERSONNEL ${debut ?? " "} - ${fin ?? " "}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `LISTE DU PERSONNEL DU ${year}-${month < 10 ? '0' : ''}${month}-${day}.xlsx`);
                             });
                         });
                         e.cancel = true;
@@ -97,29 +106,15 @@
                     width: 240,
                     placeholder: 'Rechercher...',
                 },
-                showColumnLines: true,
-                showRowLines: true,
                 paging: {
                     pageSize: 10,
                 },
-                allowColumnReordering: true,
-                allowColumnResizing: true,
-                columnAutoWidth: true,
                 columns: [
                     {
                         caption: 'N°Ordre',
                         alignment: 'center',
                         dataType: 'number',
                         dataField: 'index',
-                        width: 80,
-                        fixed: true
-                    },
-                    {
-                        caption: 'Nom et prénoms',
-                        alignment: 'left',
-                        dataType: 'string',
-                        dataField: 'full_name',
-                        width: 120,
                         fixed: true
                     },
                     {
@@ -127,132 +122,102 @@
                         dataType: 'string',
                         dataField: 'matricule',
                         alignment: 'center',
-                        width: 120,
                         fixed: true
                     },
                     {
-                        caption: 'Date d\'embauche ou \n de recrutement',
+                        caption: 'Nom et Prénoms',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'full_name',
+                        fixed: true
+                    },
+                    {
+                        caption: 'Date Naissance',
+                        dataType: 'string',
+                        dataField: 'date_naissance',
+                        alignment: 'center',
+                    },
+                    {
+                        caption: 'Site',
+                        dataType: 'string',
+                        dataField: 'departement',
+                        alignment: 'left',
+                    },
+                    {
+                        caption: 'Fonction',
+                        dataType: 'string',
+                        dataField: 'fonction',
+                        alignment: 'left',
+                    },
+                    {
+                        caption: 'Type Contrat',
+                        dataType: 'string',
+                        dataField: 'type_contract',
+                        alignment: 'center',
+                    },
+                    {
+                        caption: 'Date Embauche',
                         dataType: 'string',
                         dataField: 'date_embauche',
                         alignment: 'center',
                         width: 120
                     },
                     {
-                        caption: 'Fonction',
-                        dataType: 'string',
-                        dataField: 'fonction',
-                        alignment: 'center',
-                        width: 120
-                    },
-                    {
-                        caption: 'Département ou \n service',
-                        dataType: 'string',
-                        dataField: 'departement',
-                        alignment: 'center',
-                        width: 120
-                    },
-                    {
-                        caption: 'Catégorie',
-                        dataType: 'string',
-                        dataField: 'category',
-                        alignment: 'center',
-                        width: 120
-                    },
-                    {
-                        caption: 'Date de naissance',
-                        dataType: 'string',
-                        dataField: 'date_naissance',
-                        alignment: 'center',
-                        width: 120
-                    },
-                    {
-                        caption: 'Adresse',
-                        dataType: 'string',
-                        dataField: 'adresse',
-                        alignment: 'center',
-                        width: 120
-                    },
-                    {
-                        caption: 'Diplôme',
-                        dataType: 'string',
-                        dataField: 'niveau_etude',
-                        alignment: 'center',
-                        width: 120
-                    },
-                    {
-                        caption: 'N° Compte banque',
-                        dataType: 'string',
-                        dataField: 'compte_banque',
-                        alignment: 'center',
-                        width: 120
-                    },
-                    {
-                        caption: 'Salaire de base',
-                        dataType: 'number',
-                        dataField: 'salaire_base',
-                        alignment: 'right',
-                        width: 120,
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                    },
-                    {
-                        caption: 'Type de contrat',
-                        dataType: 'string',
-                        dataField: 'type_contract',
-                        alignment: 'center',
-                        width: 120
-                    },
-                    {
-                        caption: 'Durée du contrat \n (en mois)',
+                        caption: 'Durée Contrat (en mois)',
                         dataType: 'number',
                         dataField: 'anciennete_mois',
                         alignment: 'center',
-                        width: 120
-                    },
-                    {
-                        caption: 'Nom de la banque',
-                        dataType: 'string',
-                        dataField: 'nom_banque',
-                        alignment: 'left',
-                        width: 120
-                    },
-                    {
-                        caption: 'Grade catégoriel',
-                        dataType: 'string',
-                        dataField: 'category_grade',
-                        alignment: 'center',
-                        width: 120
-                    },
-                    {
-                        caption: 'Nature et N° de la pièce \n d\'identité',
-                        dataType: 'string',
-                        dataField: 'nature_piece',
-                        alignment: 'center',
-                        width: 120
                     },
                     {
                         caption: 'Numéro CNPS',
                         dataType: 'string',
                         dataField: 'numero_cnps',
+                        alignment: 'left',
+                    },
+                    {
+                        caption: 'Catégorie',
+                        dataType: 'string',
+                        dataField: 'category',
+                        alignment: 'left',
+                    },
+                    {
+                        caption: 'Grade Catégoriel',
+                        dataType: 'string',
+                        dataField: 'category_grade',
                         alignment: 'center',
-                        width: 120
+                    },
+                    {
+                        caption: 'Salaire Catégoriel (Fcfa)',
+                        dataType: 'number',
+                        dataField: 'salaire_base',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
                     },
                     {
                         caption: 'Actions',
                         alignment: 'center',
-                        columns:[
+                        columns: [
                             {
-                                dataField: 'action',
-                                caption: 'Imprimer',
+                                dataField: 'active',
+                                caption: 'Activer/Desactiver',
                                 alignment: 'center',
                                 cellTemplate: function (container, options) {
-                                    $("<a>")
-                                        .html('<i data-feather="printer" style="color: #0b0b0f"></i>')
-                                        .attr("href", options.data.action)
-                                        .attr("target", '_blank')
-                                        .appendTo(container);
-                                    feather.replace();
+                                    if (options.data.active === true) {
+
+                                        $(`<div class="form-check form-switch mx-5">`)
+                                            .html(`<input class="form-check-input toggle-disable " type="checkbox" id="disablePersonal${options.data.personal_id}" checked="checked" value="${options.data.personal_id}"> <label class="form-check-label" for="disablePersonal${options.data.personal_id}"></label> </div>`)
+                                            .appendTo(container);
+                                        feather.replace();
+                                    } else {
+
+                                        $(`<div class="form-check form-switch mx-5">`)
+                                            .html(`<input class="form-check-input toggle-enable" type="checkbox" id="enablePersonal${options.data.personal_id}" value="${options.data.personal_id}"> <label class="form-check-label" for="enablePersonal${options.data.personal_id}"></label> </div>`)
+                                            .appendTo(container);
+                                        feather.replace();
+                                    }
+
                                 }
                             },
                             {
@@ -268,24 +233,16 @@
                                 }
                             },
                             {
-                                dataField: 'active',
-                                caption: 'Activer/Desactiver',
+                                dataField: 'action',
+                                caption: 'Imprimer',
                                 alignment: 'center',
-                                cellTemplate: function (container, options) { 
-                                    if (options.data.active === true) {
-
-                                        $(`<div class="form-check form-switch" >`)
-                                                .html(`<input class="form-check-input toggle-disable" type="checkbox" id="disablePersonal${options.data.personal_id}" checked="checked" value="${options.data.personal_id}"> <label class="form-check-label" for="disablePersonal${options.data.personal_id}"></label> </div>`)
-                                                .appendTo(container);
-                                            feather.replace();
-                                    } else{
-
-                                        $(`<div class="form-check form-switch">`)
-                                                .html(`<input class="form-check-input toggle-enable" type="checkbox" id="enablePersonal${options.data.personal_id}" value="${options.data.personal_id}"> <label class="form-check-label" for="enablePersonal${options.data.personal_id}"></label> </div>`)
-                                                .appendTo(container);
-                                            feather.replace();
-                                    }
-                                    
+                                cellTemplate: function (container, options) {
+                                    $("<a>")
+                                        .html('<i data-feather="printer" style="color: #0b0b0f"></i>')
+                                        .attr("href", options.data.action)
+                                        .attr("target", '_blank')
+                                        .appendTo(container);
+                                    feather.replace();
                                 }
                             },
                         ],
@@ -295,7 +252,7 @@
             })
         })
 
-        function bonjour(){
+        function bonjour() {
             console.log('click');
         }
     </script>

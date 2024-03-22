@@ -38,12 +38,20 @@
         }
 
         $(document).ready(function () {
-            let debut = null;
-            let fin = null;
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
             $("#dataGridSupp").dxDataGrid({
                 dataSource: `{{ url('personal_heure_sup_api_heure_supp_super_book') }}`,
                 showBorders: true,
-                height: 300,
+                rowAlternationEnabled: true,
+                showColumnLines: true,
+                showRowLines: true,
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                height: 355,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual"
@@ -74,7 +82,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `RECAPITULATIF DE MAJORATION DES HEURES SUPP ${debut ?? " "} - ${fin ?? " "}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `RECAPITULATIF DE MAJORATION DES HEURES SUPP ${year}-${month < 10 ? '0' : ''}${month}-${day}.xlsx`);
                             });
                         });
                         e.cancel = true;
@@ -88,14 +96,9 @@
                     width: 240,
                     placeholder: 'Rechercher...',
                 },
-                showColumnLines: true,
-                showRowLines: true,
                 paging: {
                     pageSize: 10,
                 },
-                allowColumnReordering: true,
-                allowColumnResizing: true,
-                columnAutoWidth: true,
                 columns: [
                     {
                         caption: 'N°Ordre',
@@ -106,7 +109,7 @@
                         fixed: true
                     },
                     {
-                        caption: 'Nom et prénoms',
+                        caption: 'Nom et Prénoms',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'full_name',
@@ -114,14 +117,14 @@
                         fixed: true
                     },
                     {
-                        caption: 'Heures normales',
+                        caption: 'Heures Normales',
                         dataType: 'number',
                         dataField: 'heure_normal',
                         alignment: 'center',
                         width: 120,
                     },
                     {
-                        caption: 'Total heures',
+                        caption: 'Total Heures',
                         dataType: 'number',
                         dataField: 'total_heure',
                         alignment: 'center',
@@ -163,7 +166,7 @@
                         width: 120,
                     },
                     {
-                        caption: 'Salaire horaire',
+                        caption: 'Salaire Horaire',
                         dataType: 'number',
                         dataField: 'taux_horaire',
                         alignment: 'right',
@@ -173,7 +176,7 @@
                         },
                     },
                     {
-                        caption: 'Montant majoration',
+                        caption: 'Montant Majoration',
                         dataType: 'number',
                         dataField: 'montant_heure_supp',
                         alignment: 'right',
@@ -190,6 +193,23 @@
                         width: 120,
                     },
                 ],
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'taux_horaire',
+                            customizeText() {
+                                return 'Total Majoration :'
+                            }
+                        },
+                        {
+                            column: 'montant_heure_supp'
+                            , summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        }
+                    ]
+                }
             })
         })
     </script>

@@ -22,18 +22,23 @@ class OperationRepository extends ServiceEntityRepository
         parent::__construct($registry, Operation::class);
     }
 
-    public function findOperationByType(?array $types): ?array
+    public function findOperationByType(?array $types, int $month, int $year): ?array
     {
         return $this->createQueryBuilder('o')
             ->join('o.personal', 'personal')
             ->where('o.typeOperations IN (:types)')
+            ->andWhere('YEAR(o.dateOperation) = :year')
+            ->andWhere('MONTH(o.dateOperation) = :month')
+            ->andWhere('personal.active = true')
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
             ->setParameter('types', $types)
             ->orderBy('o.typeOperations')
             ->getQuery()
             ->getResult();
     }
 
-    public function findOperationByTypeAndStatus(string $type, ?array $status): ?array
+    public function findOperationByTypeAndStatus(string $type, ?array $status, int $month, int $year): ?array
     {
         return $this->createQueryBuilder('o')
             ->select([
@@ -51,18 +56,26 @@ class OperationRepository extends ServiceEntityRepository
             ->join('o.personal', 'personal')
             ->where('o.typeOperations =:types')
             ->andWhere('o.status IN (:status)')
+            ->andWhere('YEAR(o.dateOperation) = :year')
+            ->andWhere('MONTH(o.dateOperation) = :month')
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
             ->setParameter('types', $type)
             ->setParameter('status', $status)
             ->getQuery()
             ->getResult();
     }
 
-    public function findOperationByPersonal(string $type, string $status, Personal $personal): ?Operation
+    public function findOperationByPersonal(string $type, string $status, Personal $personal, int $month, int $year): ?Operation
     {
         return $this->createQueryBuilder('o')
             ->where('o.personal = :personal')
             ->andWhere('o.typeOperations = :type_operations')
             ->andWhere('o.status = :status')
+            ->andWhere('YEAR(o.dateOperation) = :year')
+            ->andWhere('MONTH(o.dateOperation) = :month')
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
             ->setParameter('personal', $personal)
             ->setParameter('type_operations', $type)
             ->setParameter('status', $status)

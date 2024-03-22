@@ -65,8 +65,8 @@ class ChargesServices
         }
         return [
             'salaire_categoriel' => $salaireCategoriel,
-            'brut_amount' => round($salaireBrut, 2),
-            'brut_imposable_amount' => round($brutImposable, 2)
+            'brut_amount' => ceil($salaireBrut),
+            'brut_imposable_amount' => ceil($brutImposable)
         ];
     }
 

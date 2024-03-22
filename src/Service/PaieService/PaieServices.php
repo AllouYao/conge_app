@@ -12,6 +12,7 @@ use App\Repository\DossierPersonal\RetenueForfetaireRepository;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Service\AbsenceService;
 use App\Utils\Status;
+use Carbon\Carbon;
 use Exception;
 
 class PaieServices
@@ -376,7 +377,8 @@ class PaieServices
     /** Regularisation retenue ou remboursement pour les salariés */
     public function getRegulRemboursement(Personal $personal): array
     {
-        $remboursement = $this->operationRepository->findOperationByPersonal(Status::REMBOURSEMENT, Status::VALIDATED, $personal);
+        $today = Carbon::today();
+        $remboursement = $this->operationRepository->findOperationByPersonal(Status::REMBOURSEMENT, Status::VALIDATED, $personal, $today->month, $today->year);
         $remboursementNet = $remboursement?->getAmountNet();
         $remboursementBrut = $remboursement?->getAmountBrut();
 
@@ -388,7 +390,8 @@ class PaieServices
 
     public function getRegulRetenue(Personal $personal): array
     {
-        $retenue = $this->operationRepository->findOperationByPersonal(Status::RETENUES, Status::VALIDATED, $personal);
+        $today = Carbon::today();
+        $retenue = $this->operationRepository->findOperationByPersonal(Status::RETENUES, Status::VALIDATED, $personal, $today->month, $today->year);
         $retenueNet = $retenue?->getAmountNet();
         $retenueBrut = $retenue?->getAmountBrut();
         return [

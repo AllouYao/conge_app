@@ -20,20 +20,18 @@ class HeureSupService
     private PersonalRepository $personalRepository;
     private TauxHoraireRepository $horaireRepository;
     private EntityManagerInterface $manager;
-    private  $tokenStorage;
-    private $defaultRate = 100;
-
-
+    private TokenStorageInterface $tokenStorage;
+    private int $defaultRate = 100;
 
 
     public function __construct(
-        HeureSupRepository     $heureSupRepository,
-        PersonalRepository     $personalRepository,
-        TauxHoraireRepository  $horaireRepository,
-        EntityManagerInterface $manager,
-        TokenStorageInterface $tokenStorage,
+        HeureSupRepository         $heureSupRepository,
+        PersonalRepository         $personalRepository,
+        TauxHoraireRepository      $horaireRepository,
+        EntityManagerInterface     $manager,
+        TokenStorageInterface      $tokenStorage,
         private WorkTimeRepository $workTimeRepository
-        
+
     )
     {
         $this->heureSupRepository = $heureSupRepository;
@@ -60,9 +58,9 @@ class HeureSupService
         }
 
         $tauxHoraire = $this->horaireRepository->active();
-        
+
         $heureSups = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
-        $salaireHoraire = $salaireBase / (double)$tauxHoraire?->getAmount() ;
+        $salaireHoraire = $salaireBase / (double)$tauxHoraire?->getAmount();
         $amountHeureSup = 0;
 
         foreach ($heureSups as $sup) {
@@ -73,31 +71,33 @@ class HeureSupService
             $jourOrNuit = $sup->getTypeJourOrNuit(); // Jour/nuit
             $diffHours = $startedHour->diff($endedHour);
             $totalHorraire = $diffHours->format('%h');
-            $workTime = $this->workTimeRepository->findOneBy(['type' => 'MAJORATION_15_PERCENT']);
-
-            if ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire <= $workTime->getHourValue()?? 6) {
+            $workTime = $this->workTimeRepository->findOneBy(['type' => Status::MAJORATION_15_PERCENT, 'code' => Status::SUPPLEMENTAIRE]);
+            if ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire <= $workTime->getHourValue()) {
                 // 15% jour normal ~ 115%
-                $amountHeureSup = $amountHeureSup + ($salaireHoraire * ($workTime->getRateValue()+$this->defaultRate)/100 ?? 115/100) * $totalHorraire;
-            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire > $workTime->getHourValue()?? 6) {
+                $amountHeureSup = ceil(($salaireHoraire * ($workTime->getRateValue() + $this->defaultRate) / 100) * $totalHorraire);
+            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire > $workTime->getHourValue()) {
                 // 50% jour normal ~ 150%
-                $workTime = $this->workTimeRepository->findOneBy(['type' => 'MAJORATION_50_PERCENT']);
-
-                $amountHeureSup = $amountHeureSup + ($salaireHoraire * ($workTime->getRateValue()+$this->defaultRate)/100 ?? 150/100) * $totalHorraire;
+                $workTime = $this->workTimeRepository->findOneBy(['type' => Status::MAJORATION_50_PERCENT, 'code' => Status::SUPPLEMENTAIRE]);
+                $workTime15 = $this->workTimeRepository->findOneBy(['type' => Status::MAJORATION_15_PERCENT, 'code' => Status::SUPPLEMENTAIRE]);
+                $heure15 = $workTime15->getHourValue();
+                $heure50 = $totalHorraire - $heure15;
+                $amountHeure15 = ($salaireHoraire * ($workTime15->getRateValue() + $this->defaultRate) / 100) * $heure15;
+                $amountHeureSup = ceil($amountHeure15 + ($salaireHoraire * ($workTime->getRateValue() + $this->defaultRate) / 100) * $heure50);
             } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
                 // 75% jour ferié or dimanche nuit ~ 175%
-                $workTime = $this->workTimeRepository->findOneBy(['type' => 'MAJORATION_75_PERCENT']);
+                $workTime = $this->workTimeRepository->findOneBy(['type' => Status::MAJORATION_75_PERCENT, 'code' => Status::SUPPLEMENTAIRE]);
+                $amountHeureSup = ($salaireHoraire * ($workTime->getRateValue() + $this->defaultRate) / 100) * $totalHorraire;
 
-                $amountHeureSup = $amountHeureSup + ($salaireHoraire * ($workTime->getRateValue()+$this->defaultRate)/100 ?? 175/100) * $totalHorraire;
             } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::NUIT) {
                 // 75% jour ferié or dimanche nuit ~ 175%
-                $workTime = $this->workTimeRepository->findOneBy(['type' => 'MAJORATION_75_PERCENT']);
+                $workTime = $this->workTimeRepository->findOneBy(['type' => Status::MAJORATION_75_PERCENT, 'code' => Status::SUPPLEMENTAIRE]);
+                $amountHeureSup = ($salaireHoraire * ($workTime->getRateValue() + $this->defaultRate) / 100) * $totalHorraire;
 
-                $amountHeureSup = $amountHeureSup + ($salaireHoraire * ($workTime->getRateValue()+$this->defaultRate)/100 ?? 175/100) * $totalHorraire;
             } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::NUIT) {
                 // 75% jour ferié or dimanche nuit ~ 200%
+                $workTime = $this->workTimeRepository->findOneBy(['type' => Status::MAJORATION_100_PERCENT, 'code' => Status::SUPPLEMENTAIRE]);
+                $amountHeureSup = ($salaireHoraire * ($workTime->getRateValue() + $this->defaultRate) / 100) * $totalHorraire;
 
-                $workTime = $this->workTimeRepository->findOneBy(['type' => 'MAJORATION_100_PERCENT']);
-                $amountHeureSup = $amountHeureSup + ($salaireHoraire * ($workTime->getRateValue()+$this->defaultRate)/100 ?? 200/100) * $totalHorraire;
             }
         }
         return $amountHeureSup;
@@ -105,14 +105,13 @@ class HeureSupService
 
     public function heureSupp(array $data, Personal $personal): void
     {
-        
+
         $heureSupps = $data['heureSup'];
         /** @var HeureSup $heureSupps */
-        foreach ($heureSupps as $heureSupp) { 
+        foreach ($heureSupps as $heureSupp) {
             $tauxHoraire = (double)$heureSupp->getTauxHoraire();
             $salaireBase = (int)$personal->getCategorie()->getAmount();
-            $salaireHoraire = $salaireBase / $tauxHoraire;
-
+            $salaireHoraire = ceil($salaireBase / $tauxHoraire);
             // Heure de debut
             $StartedfullDate = $heureSupp->getStartedDate();
             $StartedfullTime = $heureSupp->getStartedHour();
@@ -136,37 +135,39 @@ class HeureSupService
             $totalHorraire = (int)$heureSupp->getTotalHorraire();
             $amountHeureSup = 0;
 
-            $workTime = $this->workTimeRepository->findOneBy(['type' => 'MAJORATION_15_PERCENT']);
-
-            if ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire <= $workTime->getHourValue()?? 6) {
+            $workTime = $this->workTimeRepository->findOneBy(['type' => Status::MAJORATION_15_PERCENT, 'code' => Status::SUPPLEMENTAIRE]);
+            if ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire <= $workTime->getHourValue()) {
                 // 15% jour normal ~ 115%
-                $amountHeureSup = $amountHeureSup + ($salaireHoraire * ($workTime->getRateValue()+$this->defaultRate)/100 ?? 115/100) * $totalHorraire;
-            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire > $workTime->getHourValue()?? 6) {
+                $amountHeureSup = ceil(($salaireHoraire * ($workTime->getRateValue() + $this->defaultRate) / 100) * $totalHorraire);
+            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $totalHorraire > $workTime->getHourValue()) {
                 // 50% jour normal ~ 150%
-                $workTime = $this->workTimeRepository->findOneBy(['type' => 'MAJORATION_50_PERCENT']);
-
-                $amountHeureSup = $amountHeureSup + ($salaireHoraire * ($workTime->getRateValue()+$this->defaultRate)/100 ?? 150/100) * $totalHorraire;
+                $workTime = $this->workTimeRepository->findOneBy(['type' => Status::MAJORATION_50_PERCENT, 'code' => Status::SUPPLEMENTAIRE]);
+                $workTime15 = $this->workTimeRepository->findOneBy(['type' => Status::MAJORATION_15_PERCENT, 'code' => Status::SUPPLEMENTAIRE]);
+                $heure15 = $workTime15->getHourValue();
+                $heure50 = $totalHorraire - $heure15;
+                $amountHeure15 = ($salaireHoraire * ($workTime15->getRateValue() + $this->defaultRate) / 100) * $heure15;
+                $amountHeureSup = ceil($amountHeure15 + ($salaireHoraire * ($workTime->getRateValue() + $this->defaultRate) / 100) * $heure50);
             } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
                 // 75% jour ferié or dimanche nuit ~ 175%
-                $workTime = $this->workTimeRepository->findOneBy(['type' => 'MAJORATION_75_PERCENT']);
+                $workTime = $this->workTimeRepository->findOneBy(['type' => Status::MAJORATION_75_PERCENT, 'code' => Status::SUPPLEMENTAIRE]);
+                $amountHeureSup = ($salaireHoraire * ($workTime->getRateValue() + $this->defaultRate) / 100) * $totalHorraire;
 
-                $amountHeureSup = $amountHeureSup + ($salaireHoraire * ($workTime->getRateValue()+$this->defaultRate)/100 ?? 175/100) * $totalHorraire;
             } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::NUIT) {
                 // 75% jour ferié or dimanche nuit ~ 175%
-                $workTime = $this->workTimeRepository->findOneBy(['type' => 'MAJORATION_75_PERCENT']);
+                $workTime = $this->workTimeRepository->findOneBy(['type' => Status::MAJORATION_75_PERCENT, 'code' => Status::SUPPLEMENTAIRE]);
+                $amountHeureSup = ($salaireHoraire * ($workTime->getRateValue() + $this->defaultRate) / 100) * $totalHorraire;
 
-                $amountHeureSup = $amountHeureSup + ($salaireHoraire * ($workTime->getRateValue()+$this->defaultRate)/100 ?? 175/100) * $totalHorraire;
             } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::NUIT) {
                 // 75% jour ferié or dimanche nuit ~ 200%
+                $workTime = $this->workTimeRepository->findOneBy(['type' => Status::MAJORATION_100_PERCENT, 'code' => Status::SUPPLEMENTAIRE]);
+                $amountHeureSup = ($salaireHoraire * ($workTime->getRateValue() + $this->defaultRate) / 100) * $totalHorraire;
 
-                $workTime = $this->workTimeRepository->findOneBy(['type' => 'MAJORATION_100_PERCENT']);
-                $amountHeureSup = $amountHeureSup + ($salaireHoraire * ($workTime->getRateValue()+$this->defaultRate)/100 ?? 200/100) * $totalHorraire;
             }
 
             $heureSupp
-                ->setStatus(Status::EN_ATTENTE) 
+                ->setStatus(Status::EN_ATTENTE)
                 ->setPersonal($personal)
-                ->setAmount((int)$amountHeureSup)
+                ->setAmount(ceil($amountHeureSup))
                 ->setUser($this->tokenStorage->getToken()->getUser());
             $this->manager->persist($heureSupp);
         }

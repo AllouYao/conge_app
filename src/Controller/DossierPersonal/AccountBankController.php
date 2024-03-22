@@ -20,12 +20,9 @@ class AccountBankController extends AbstractController
     #[Route('/api_account_bank', name: 'api_account_bank', methods: ['GET'])]
     public function apiAccountBank(AccountBankRepository $accountBankRepository): JsonResponse
     {
-        if ($this->isGranted('ROLE_RH')){
-
-            $accountBanks = $accountBankRepository->findAll();
-
-        }else{
-
+        if ($this->isGranted('ROLE_RH')) {
+            $accountBanks = $accountBankRepository->findAccountBank();
+        } else {
             $accountBanks = $accountBankRepository->findByEmployeRole();
         }
         $apiAccountBank = [];
@@ -40,6 +37,7 @@ class AccountBankController extends AbstractController
                     . '-' . $accountBank->getPersonal()->getCategorie()->getIntitule(),
                 'date_embauche' => date_format($accountBank->getPersonal()->getContract()->getDateEmbauche(), 'd/m/Y'),
                 'number_compte' => $accountBank->getNumCompte(),
+                'code_agence' => $accountBank->getCodeAgence(),
                 'code_banque' => $accountBank->getCode(),
                 'nom_banque' => $accountBank->getName(),
                 'rib' => $accountBank->getRib(),
@@ -72,6 +70,10 @@ class AccountBankController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $accountBanks = $form->get('accountBanks')->getData();
             $personal = $form->get('personal')->getData();
+            if ($form->get('accountBanks')->count() == 0) {
+                flash()->addInfo('Veuillez s\'il vous plaît ajouter au moins une ligne pour continuer merci !');
+                return $this->redirectToRoute('personal_account_bank_new');
+            }
             foreach ($accountBanks as $accountBank) {
                 $accountBank->setPersonal($personal);
                 $accountBank->setUser($currentUser);
@@ -82,7 +84,7 @@ class AccountBankController extends AbstractController
             return $this->redirectToRoute('personal_account_bank_index');
         }
         return $this->render('dossier_personal/account_bank/new.html.twig', [
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -107,7 +109,7 @@ class AccountBankController extends AbstractController
 
         return $this->render('dossier_personal/account_bank/edit.html.twig', [
             'personal' => $accountBank->getPersonal(),
-            'form' => $form,
+            'form' => $form->createView(),
             'editing' => true
         ]);
     }

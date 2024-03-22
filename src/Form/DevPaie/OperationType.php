@@ -69,7 +69,7 @@ class OperationType extends AbstractType
                         ->andWhere('p.active = true')
                         ->setParameter('type', [Status::CDI, Status::CDD, Status::CDDI]);
                 },
-                'placeholder' => 'Sélectionner un matricule',
+                'placeholder' => 'Sélectionner un salarié',
                 'attr' => [
                     'class' => 'form-select form-select-sm',
                     'data-plugin' => 'customselect',

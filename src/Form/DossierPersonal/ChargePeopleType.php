@@ -29,10 +29,7 @@ class ChargePeopleType extends AbstractType
                 ],
                 'placeholder' => 'Sélectionner un genre'
             ])
-            ->add('numPiece')
-            ->add('contact', TextType::class, [
-                'required' => false
-            ]);
+            ->add('numPiece');
     }
 
     public function configureOptions(OptionsResolver $resolver): void

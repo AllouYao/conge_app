@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        BANQUE DES SALARIES
+                        LISTE COMPTE EN BANQUE PAR SALARIES
                     </h5>
                 </div>
                 <div class="card-body">
@@ -38,12 +38,21 @@
         }
 
         $(document).ready(function () {
-            let debut;
-            let fin;
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+
             $("#dataGridAccountBank").dxDataGrid({
                 dataSource: `{{ url('personal_account_bank_api_account_bank') }}`,
                 showBorders: true,
-                height: 295,
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                showColumnLines: true,
+                showRowLines: true,
+                rowAlternationEnabled: true,
+                height: 355,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual"
@@ -74,7 +83,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `BANQUE SALARIE ${debut ?? " "} - ${fin ?? " "}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `BANQUE SALARIE ${year}-${month < 10 ? '0' : ''}${month}-${day}.xlsx`);
                             });
                         });
                         e.cancel = true;
@@ -88,14 +97,9 @@
                     width: 240,
                     placeholder: 'Rechercher...',
                 },
-                showColumnLines: true,
-                showRowLines: true,
                 paging: {
                     pageSize: 10,
                 },
-                allowColumnReordering: true,
-                allowColumnResizing: true,
-                columnAutoWidth: true,
                 columns: [
                     {
                         caption: 'Matricule',
@@ -116,37 +120,43 @@
                         dataField: 'last_name',
                     },
                     {
-                        caption: 'Date de naissance',
+                        caption: 'Date Naissance',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_naissance',
                     },
                     {
-                        caption: 'Catégorie salarié',
+                        caption: 'Catégorie Salarié',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'categorie_salarie',
                     },
                     {
-                        caption: 'Date d\'embauche',
+                        caption: 'Date Embauche',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_embauche',
                     },
                     {
-                        caption: 'Intitulé  banque',
+                        caption: 'Intitulé  Banque',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'nom_banque',
                     },
                     {
-                        caption: 'Code banque',
+                        caption: 'Code Banque',
                         alignment: 'left',
-                        dataType: 'center',
+                        dataType: 'string',
                         dataField: 'code_banque',
                     },
                     {
-                        caption: 'N° compte',
+                        caption: 'Code Agence',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'code_agence',
+                    },
+                    {
+                        caption: 'N° Compte',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'number_compte',

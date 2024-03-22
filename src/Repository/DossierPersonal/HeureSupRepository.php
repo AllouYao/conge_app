@@ -66,26 +66,28 @@ class HeureSupRepository extends ServiceEntityRepository
             ->join('h.personal', 'p')
             ->join('p.categorie', 'category')
             ->join('category.categorySalarie', 'categorySalarie')
-            ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
+            ->where('categorySalarie.name IN (:name)')
             ->andWhere('YEAR(h.startedDate) = :year')
             ->andWhere('MONTH(h.startedDate) = :month')
+            ->andWhere('p.active = true')
             ->setParameter('year', $year)
             ->setParameter('month', $month)
-            ->setParameter('code_employe', 'OE')
-            ->setParameter('code_chauffeur', 'CH')
+            ->setParameter('name', [Status::CHAUFFEUR, Status::OUVRIER_EMPLOYE])
             ->orderBy('h.startedDate', 'ASC')
             ->getQuery()->getResult();
 
     }
-    public function findHeureSupByStatusByEmployeRole(int $month, int $year,$status): ?array
+
+    public function findHeureSupByStatusByEmployeRole(int $month, int $year, $status): ?array
     {
         return $this->createQueryBuilder('h')
             ->join('h.personal', 'p')
             ->join('p.categorie', 'category')
             ->join('category.categorySalarie', 'categorySalarie')
-            ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
+            ->where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
             ->andWhere('YEAR(h.startedDate) = :year')
             ->andWhere('MONTH(h.startedDate) = :month')
+            ->andWhere('p.active = true')
             ->andWhere('h.status = :status')
             ->setParameter('year', $year)
             ->setParameter('month', $month)
@@ -109,10 +111,10 @@ class HeureSupRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function getByStatus(int $month, int $year,$status): array
+    public function getByStatus(int $month, int $year, $status): array
     {
         return $this->createQueryBuilder('h')
-            ->Where('YEAR(h.startedDate) = :year')
+            ->where('YEAR(h.startedDate) = :year')
             ->andWhere('MONTH(h.startedDate) = :month')
             ->andWhere('h.status = :status')
             ->setParameter('year', $year)
