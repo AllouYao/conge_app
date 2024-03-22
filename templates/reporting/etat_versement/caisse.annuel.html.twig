@@ -4,7 +4,6 @@
 {% block stylesheets %}
     <style>
         #dataGridVirementCaisseAnnuels {
-            height: 368px;
             border-width: 50px;
         }
     </style>
@@ -18,7 +17,7 @@
                     <div class="card-header">
                         <h5 class="card-title-custom" style="color: white">
                             <i data-feather="list"></i>
-                            RECHERCHE
+                            ETAT DES PAIEMENTS ESPECES
                         </h5>
                     </div>
                     <div class="card-body">
@@ -65,13 +64,19 @@
 
             $('#head').html(`du ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')} `);
 
-            function formatNumber(num) {
-                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-            }
-
             $('#dataGridVirementCaisseAnnuels').dxDataGrid({
                 dataSource: `{{ url('api_reporting_etat_versement_caisse_annuel') }}?${$data}`,
                 showBorders: true,
+                showColumnLines: true,
+                showRowLines: true,
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                rowAlternationEnabled: true,
+                height: 355,
+                selection: {
+                    mode: "multiple", selectAllMode: true, showCheckBoxesMode: "always"
+                },
                 scrolling: {
                     mode: 'virtual',
                     columnRenderingMode: 'virtual'
@@ -92,14 +97,9 @@
                     width: 240,
                     placeholder: 'Rechercher...',
                 },
-                showColumnLines: true,
-                showRowLines: true,
                 paging: {
                     pageSize: 10,
                 },
-                allowColumnReordering: true,
-                allowColumnResizing: true,
-                columnAutoWidth: true,
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
@@ -124,32 +124,32 @@
                         dataField: 'ordre'
                     },
                     {
-                        caption: 'EMMOLUMENTS',
+                        caption: 'Emolument',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'emmolution'
                     },
                     {
-                        caption: 'NOM',
+                        caption: 'Nom',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'name_salaried'
                     },
                     {
-                        caption: 'STATIONS',
+                        caption: 'Site',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'stations'
                     },
                     {
-                        caption: 'MONTANT',
+                        caption: 'Montant',
                         alignment: 'right',
                         dataType: 'number',
                         dataField: 'salaire_net',
 
                     },
                     {
-                        caption: 'PERIODE',
+                        caption: 'Periode Paie',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'periode'
@@ -169,7 +169,9 @@
                             }
                         },
                         {
-                            column: 'salaire_net', summaryType: 'sum',
+                            column: 'salaire_net', summaryType: 'sum', customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
 
                         },
                     ],

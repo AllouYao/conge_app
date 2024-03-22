@@ -17,7 +17,7 @@
                     <div class="card-header">
                         <h5 class="card-title-custom" style="color: white">
                             <i data-feather="list"></i>
-                            RECHERCHE
+                            ETAT DES ORDRES DE VIREMENTS
                         </h5>
                     </div>
                     <div class="card-body">
@@ -36,7 +36,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        ETAT DES ORDRE DE VIREMENTS
+                        ETAT DES ORDRES DE VIREMENTS
                     </h5>
                 </div>
                 <div class="card-body">
@@ -181,7 +181,9 @@
                             }
                         },
                         {
-                            column: 'salaire_net', summaryType: 'sum',
+                            column: 'salaire_net', summaryType: 'sum', customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
 
                         },
                     ],

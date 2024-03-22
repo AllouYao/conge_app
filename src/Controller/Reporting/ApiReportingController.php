@@ -541,11 +541,21 @@ class ApiReportingController extends AbstractController
         return new JsonResponse($dataCaisse);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route('/etat_virements_annuel', name: 'etat_virements_annuel', methods: ['GET'])]
     public function etatVirementAnnuel(Request $request): JsonResponse
     {
-        $startAt = $request->get('start_at');
-        $endAt = $request->get('end_at');
+        $dateRequest = $request->get('dateDebut');
+        $startAt = $endAt = null;
+        if ($dateRequest) {
+            $dateRequestObj = DateTime::createFromFormat('Y-m', $dateRequest);
+            $dateDebut = $dateRequestObj->format('Y-m-01');
+            $dateFin = $dateRequestObj->format('Y-m-t');
+            $startAt = new DateTime($dateDebut);
+            $endAt = new DateTime($dateFin);
+        }
         $personalID = (int)$request->get('personalsId');
 
         if (!$request->isXmlHttpRequest()) {
@@ -572,11 +582,21 @@ class ApiReportingController extends AbstractController
         return new JsonResponse($data);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route('/etat_caisse_annuel', name: 'etat_versement_caisse_annuel', methods: ['GET'])]
     public function etatVersementCaisseAnnel(Request $request): JsonResponse
     {
-        $startAt = $request->get('start_at');
-        $endAt = $request->get('end_at');
+        $dateRequest = $request->get('dateDebut');
+        $startAt = $endAt = null;
+        if ($dateRequest) {
+            $dateRequestObj = DateTime::createFromFormat('Y-m', $dateRequest);
+            $dateDebut = $dateRequestObj->format('Y-m-01');
+            $dateFin = $dateRequestObj->format('Y-m-t');
+            $startAt = new DateTime($dateDebut);
+            $endAt = new DateTime($dateFin);
+        }
         $personalID = (int)$request->get('personalsId');
 
         if (!$request->isXmlHttpRequest()) {
