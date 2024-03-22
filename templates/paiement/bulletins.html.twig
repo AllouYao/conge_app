@@ -136,7 +136,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO1</td>
                                         <td>Salaire de base</td>
-                                        <td class="text-end">{{ payrolls.nombre_jour_travailler|number_format(2, ',', ' ') }} </td>
+                                        <td class="text-end">{{ payrolls.nombre_jour_travailler }} </td>
                                         <td class="text-end">{{ payrolls.salaire_base|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.salaire_base|number_format(0, ',', ' ') }}</td>
@@ -145,11 +145,11 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.sursalaire %}
+                                {% if payrolls.sursalaire and payrolls.sursalaire > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO2</td>
                                         <td>Sursalaire</td>
-                                        <td class="text-end">{{ payrolls.nombre_jour_travailler|number_format(2, ',', ' ') }} </td>
+                                        <td class="text-end">{{ payrolls.nombre_jour_travailler }} </td>
                                         <td class="text-end">{{ payrolls.sursalaire|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.sursalaire|number_format(0, ',', ' ') }}</td>
@@ -158,7 +158,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.majoration_heure_sup_15 %}
+                                {% if payrolls.majoration_heure_sup_15 and payrolls.majoration_heure_sup_15 > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO3</td>
                                         <td>Majoration H.S à 15%</td>
@@ -171,7 +171,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.majoration_heure_sup_50 %}
+                                {% if payrolls.majoration_heure_sup_50 and payrolls.majoration_heure_sup_50 > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO4</td>
                                         <td>Majoration H.S à 50%</td>
@@ -184,7 +184,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.majoration_heure_sup_75_A %}
+                                {% if payrolls.majoration_heure_sup_75_A and payrolls.majoration_heure_sup_75_A > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO5</td>
                                         <td>Majoration H.S à 75% (ferié/dimanche jrs)</td>
@@ -197,7 +197,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.majoration_heure_sup_75_B %}
+                                {% if payrolls.majoration_heure_sup_75_B and payrolls.majoration_heure_sup_75_B > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO6</td>
                                         <td>Majoration H.S à 75% (normal/dimanche nuit)</td>
@@ -210,7 +210,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.majoration_heure_sup_100 %}
+                                {% if payrolls.majoration_heure_sup_100 and payrolls.majoration_heure_sup_100 > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO7</td>
                                         <td>Majoration H.S à 75% (normal/dimanche jrs)</td>
@@ -223,7 +223,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.transport_imposable %}
+                                {% if payrolls.transport_imposable and payrolls.transport_imposable > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO8</td>
                                         <td>Prime transport Imp</td>
@@ -236,7 +236,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.avantage_imposable %}
+                                {% if payrolls.avantage_imposable and payrolls.avantage_imposable > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>OO9</td>
                                         <td>Aventage nature Imp</td>
@@ -249,7 +249,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.prime_fonction %}
+                                {% if payrolls.prime_fonction and payrolls.prime_fonction > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>O10</td>
                                         <td>Prime fonction</td>
@@ -262,7 +262,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.prime_logement %}
+                                {% if payrolls.prime_logement and payrolls.prime_logement > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>O11</td>
                                         <td>Prime logement</td>
@@ -275,7 +275,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.indemnite_fonction %}
+                                {% if payrolls.indemnite_fonction and payrolls.indemnite_fonction > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>O12</td>
                                         <td>Indemnite fonction</td>
@@ -288,7 +288,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.indemnite_logement %}
+                                {% if payrolls.indemnite_logement and payrolls.indemnite_logement > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>O13</td>
                                         <td>Indemnite logement</td>
@@ -301,11 +301,11 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.prime_anciennete %}
+                                {% if payrolls.prime_anciennete and payrolls.prime_anciennete > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>O14</td>
                                         <td>Prime d'ancienneté</td>
-                                        <td class="text-end">{{ payrolls.nombre_jour_travailler|number_format(2, ',', ' ') }} </td>
+                                        <td class="text-end">{{ payrolls.nombre_jour_travailler }} </td>
                                         <td class="text-end">{{ payrolls.prime_anciennete|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.prime_anciennete|number_format(0, ',', ' ') }}</td>
@@ -314,7 +314,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.remboursement_brut %}
+                                {% if payrolls.remboursement_brut != 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>O28</td>
                                         <td>Remboursement sur brut (Regul.)</td>
@@ -327,7 +327,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.retenue_brut %}
+                                {% if payrolls.retenue_brut != 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>O29</td>
                                         <td>Retenue sur brut (Regul.)</td>
@@ -356,7 +356,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.amount_its_salarial %}
+                                {% if payrolls.amount_its_salarial and payrolls.amount_its_salarial > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>015</td>
                                         <td>ITS</td>
@@ -369,7 +369,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.amount_cnps_salarial %}
+                                {% if payrolls.amount_cnps_salarial and payrolls.amount_cnps_salarial > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>016</td>
                                         <td>Retenue CNPS</td>
@@ -382,7 +382,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.assurance_salariale %}
+                                {% if payrolls.assurance_salariale and payrolls.assurance_salariale > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>031</td>
                                         <td>Assurance</td>
@@ -395,7 +395,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.amount_cr_employeur %}
+                                {% if payrolls.amount_cr_employeur and payrolls.amount_cr_employeur > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>017</td>
                                         <td>Retenue Générale CNPS</td>
@@ -408,7 +408,7 @@
                                         <td class="text-end">{{ payrolls.amount_cr_employeur|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.amount_pf_employeur %}
+                                {% if payrolls.amount_pf_employeur and payrolls.amount_pf_employeur > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>018</td>
                                         <td>Prestations Familiales</td>
@@ -421,7 +421,7 @@
                                         <td class="text-end">{{ payrolls.amount_pf_employeur|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.amount_at_employeur %}
+                                {% if payrolls.amount_at_employeur and payrolls.amount_at_employeur > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>019</td>
                                         <td>Accident du travail</td>
@@ -434,7 +434,7 @@
                                         <td class="text-end">{{ payrolls.amount_at_employeur|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.amount_is_employeur %}
+                                {% if payrolls.amount_is_employeur and payrolls.amount_is_employeur > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>020</td>
                                         <td>Part patronale I.S local</td>
@@ -447,7 +447,7 @@
                                         <td class="text-end">{{ payrolls.amount_is_employeur|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.amount_ta_employeur %}
+                                {% if payrolls.amount_ta_employeur and payrolls.amount_ta_employeur > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>021</td>
                                         <td>Taux D'apprentissage</td>
@@ -460,7 +460,7 @@
                                         <td class="text-end">{{ payrolls.amount_ta_employeur|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.amount_fpc_employeur %}
+                                {% if payrolls.amount_fpc_employeur and payrolls.amount_fpc_employeur > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>022</td>
                                         <td>FPC</td>
@@ -473,7 +473,7 @@
                                         <td class="text-end">{{ payrolls.amount_fpc_employeur|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.amount_fpc_annuel_employeur %}
+                                {% if payrolls.amount_fpc_annuel_employeur and payrolls.amount_fpc_annuel_employeur > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>023</td>
                                         <td>FPC REGUL</td>
@@ -499,7 +499,7 @@
                                         <td class="text-end">{{ payrolls.amount_cmu_patronal|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.assurance_patronales %}
+                                {% if payrolls.assurance_patronales and payrolls.assurance_patronales %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>031</td>
                                         <td>Assurance part patronale</td>
@@ -528,7 +528,7 @@
                                     </tr>
                                 {% endif %}
 
-                                {% if payrolls.amount_prime_panier %}
+                                {% if payrolls.amount_prime_panier and payrolls.amount_prime_panier > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>026</td>
                                         <td>Prime panier</td>
@@ -541,7 +541,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.amount_prime_salissure %}
+                                {% if payrolls.amount_prime_salissure and payrolls.amount_prime_salissure > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>027</td>
                                         <td>Prime salissure</td>
@@ -554,7 +554,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.amount_prime_tt %}
+                                {% if payrolls.amount_prime_tt and payrolls.amount_prime_tt > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>028</td>
                                         <td>Prime tenue travail</td>
@@ -567,7 +567,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.amount_prime_outi %}
+                                {% if payrolls.amount_prime_outi and payrolls.amount_prime_outi > 0%}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>029</td>
                                         <td>Prime outillage</td>
@@ -580,7 +580,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.amount_prime_rendement %}
+                                {% if payrolls.amount_prime_rendement and payrolls.amount_prime_rendement > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>030</td>
                                         <td>Prime rendement</td>
@@ -597,7 +597,7 @@
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>025</td>
                                         <td>Prime transport NI</td>
-                                        <td class="text-end">{{ payrolls.nombre_jour_travailler|number_format(2, ',', ' ') }} </td>
+                                        <td class="text-end">{{ payrolls.nombre_jour_travailler }} </td>
                                         <td></td>
                                         <td></td>
                                         <td class="text-end">{{ payrolls.prime_transport|number_format(0, ',', ' ') }}</td>
@@ -606,7 +606,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.retenue_net %}
+                                {% if payrolls.retenue_net != 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>026</td>
                                         <td>Retenue sur salaire (Regul.)</td>
@@ -619,7 +619,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.remboursement_net %}
+                                {% if payrolls.remboursement_net != 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>027</td>
                                         <td>Remboursement sur salaire (Regul.)</td>

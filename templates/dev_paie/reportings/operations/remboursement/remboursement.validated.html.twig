@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        REVERSEMENT VALIDES
+                        REVERSEMENT SUR SALAIRE VALIDES
                     </h5>
                 </div>
                 <div class="card-body">
@@ -44,14 +44,21 @@
             $("#dataGridOperationValider").dxDataGrid({
                 dataSource: `{{ url('api_reporting_paie_remboursement_salaire_validate') }}`,
                 showBorders: true,
-                height: 400,
+                showColumnLines: true,
+                showRowLines: true,
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                rowAlternationEnabled: true,
+                height: 355,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual",
                 },
                 selection: {
                     mode: 'multiple',
-                    showCheckBoxesMode: 'always'
+                    showCheckBoxesMode: 'always',
+                    allowSelectAll: true
                 },
                 groupPanel: {
                     visible: true
@@ -93,14 +100,9 @@
                     width: 240,
                     placeholder: 'Rechercher...',
                 },
-                showColumnLines: true,
-                showRowLines: true,
                 paging: {
                     pageSize: 10,
                 },
-                allowColumnReordering: true,
-                allowColumnResizing: true,
-                columnAutoWidth: true,
                 columns: [
                     {
                         caption: 'S/N',
@@ -109,7 +111,7 @@
                         dataField: 'ordre'
                     },
                     {
-                        caption: 'Date opération',
+                        caption: 'Date Opération',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_remboursement'
@@ -139,19 +141,19 @@
                         dataField: 'prenom_salarie'
                     },
                     {
-                        caption: 'Stations',
+                        caption: 'Site',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'station_salarie'
                     },
                     {
-                        caption: 'Remboursement en brut',
+                        caption: 'Remboursement sur Brut',
                         alignment: 'right',
                         dataType: 'number',
                         dataField: 'remboursement_montant_brut'
                     },
                     {
-                        caption: 'Remboursement en net',
+                        caption: 'Remboursement sur Net',
                         alignment: 'right',
                         dataType: 'number',
                         dataField: 'remboursement_montant_net'

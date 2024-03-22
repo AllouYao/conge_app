@@ -5,7 +5,6 @@
     <style>
         #dataGridRetenueSalaire {
             border-width: 50px;
-            height: 350px;
         }
     </style>
 {% endblock %}
@@ -17,7 +16,7 @@
                     <div class="card-header">
                         <h5 class="card-title-custom" style="color: white" id="date">
                             <i data-feather="list"></i>
-                            RETENUE SUR SALAIRE EN ATTENTE
+                            RETENUE SUR SALAIRE EN ATTENTE DE VALIDATION
                         </h5>
                     </div>
                     <div class="card-body">
@@ -34,7 +33,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        Êtes-vous sûr de vouloir valider les retenues sur salaire sélectionnées ?
+                                        <p>Êtes-vous sûr de vouloir valider les informations ci-dessous, après quoi vous ne pourriez plus les modifiés ?</p>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annuler
@@ -71,6 +70,10 @@
                 showColumnLines: true,
                 showRowLines: true,
                 rowAlternationEnabled: true,
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                height: 355,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: 'virtual'
@@ -80,44 +83,11 @@
                 },
                 selection: {
                     mode: 'multiple',
-                    showCheckBoxesMode: 'always'
+                    showCheckBoxesMode: 'always',
+                    allowSelectAll: true
                 },
                 groupPanel: {
                     visible: true
-                },
-                export: {
-                    enabled: true,
-                    allowExportSelectedData: true,
-                    formats: ['xlsx']
-                },
-                onExporting(e) {
-                    if (e.format === 'xlsx') {
-                        const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('RETENUE SUR SALAIRE');
-                        DevExpress.excelExporter.exportDataGrid({
-                            component: e.component,
-                            worksheet,
-                            autoFilterEnabled: true,
-                            customizeCell: function (options) {
-                                const {gridCell, excelCell} = options;
-                                if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
-                                    excelCell.text = formatNumber(gridCell.value);
-                                    excelCell.font = {size: 9};
-                                    excelCell.alignment = {horizontal: 'left'};
-                                }
-                            }
-                        }).then(() => {
-                            const date = new Date();
-                            const year = date.getFullYear();
-                            const month = date.getMonth() + 1;
-                            const day = date.getDate();
-                            const dateFormat = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
-                            workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `RETENUE SUR SALAIRE ${dateFormat}.xlsx`);
-                            });
-                        });
-                        e.cancel = true;
-                    }
                 },
                 grouping: {
                     autoExpandAll: true
@@ -130,9 +100,6 @@
                 paging: {
                     pageSize: 10
                 },
-                allowColumnReordering: true,
-                allowColumnResizing: true,
-                columnAutoWidth: true,
                 columns: [
                     {
                         caption: 'S/N',
@@ -141,7 +108,7 @@
                         dataField: 'ordre'
                     },
                     {
-                        caption: 'Date opération',
+                        caption: 'Date Opération',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_retenue'
@@ -171,19 +138,19 @@
                         dataField: 'prenom_salarie'
                     },
                     {
-                        caption: 'Stations',
+                        caption: 'Site',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'station_salarie'
                     },
                     {
-                        caption: 'Remboursement en brut',
+                        caption: 'Remboursement sur Brut',
                         alignment: 'right',
                         dataType: 'number',
                         dataField: 'retenue_montant_brut'
                     },
                     {
-                        caption: 'Remboursement en net',
+                        caption: 'Remboursement sur Net',
                         alignment: 'right',
                         dataType: 'number',
                         dataField: 'retenue_montant_net'

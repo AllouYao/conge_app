@@ -42,7 +42,18 @@
             $("#dataGridHeureSupplementaire").dxDataGrid({
                 dataSource: `{{ url('personal_heure_sup_api_heure_supplementaire_validated') }}`,
                 showBorders: true,
-                height: 325,
+                showColumnLines: true,
+                showRowLines: true,
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                rowAlternationEnabled: true,
+                height: 355,
+                selection: {
+                  mode: "multiple",
+                  allowSelectAll: true,
+                  showCheckBoxesMode: "always"
+                },
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual"
@@ -87,14 +98,9 @@
                     width: 240,
                     placeholder: 'Rechercher...',
                 },
-                showColumnLines: true,
-                showRowLines: true,
                 paging: {
                     pageSize: 10,
                 },
-                allowColumnReordering: true,
-                allowColumnResizing: true,
-                columnAutoWidth: true,
                 columns: [
                     {
                         caption: 'Matricule',
@@ -115,49 +121,49 @@
                         dataField: 'last_name',
                     },
                     {
-                        caption: 'Date de naissance',
+                        caption: 'Date Naissance',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_naissance',
                     },
                     {
-                        caption: 'Catégorie salarié',
+                        caption: 'Catégorie Salarié',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'categorie_salarie',
                     },
                     {
-                        caption: 'Date d\'embauche',
+                        caption: 'Date Embauche',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_embauche',
                     },
                     {
-                        caption: 'Date début',
+                        caption: 'Date Début',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_debut',
                     },
                     {
-                        caption: 'Heure début',
+                        caption: 'Heure Début',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'heure_debut',
                     },
                     {
-                        caption: 'Date fin',
+                        caption: 'Date Fin',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_fin',
                     },
                     {
-                        caption: 'Heure fin',
+                        caption: 'Heure Fin',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'heure_fin',
                     },
                     {
-                        caption: 'Total horraire',
+                        caption: 'Total Horraire',
                         alignment: 'center',
                         dataType: 'number',
                         dataField: 'total_horaire',

@@ -4,9 +4,7 @@
 {% block stylesheets %}
     <style>
         #dataGridEtatSalaire {
-            height: 500px;
             border-width: 50px;
-
         }
     </style>
 {% endblock %}
@@ -19,7 +17,7 @@
                     <div class="card-header">
                         <h5 class="card-title-custom" style="color: white">
                             <i data-feather="list"></i>
-                            RECHERCHE
+                            ETAT DES SALAIRES
                         </h5>
                     </div>
                     <div class="card-body">
@@ -64,14 +62,21 @@
             const fin = tab2_fin[1];
 
             $('#head').html(`du ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')} `);
-
-            function formatNumber(num) {
-                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-            }
-
             $('#dataGridEtatSalaire').dxDataGrid({
                 dataSource: `{{ url('api_reporting_etat_salaire') }}?${$data}`,
                 showBorders: true,
+                showColumnLines: true,
+                showRowLines: true,
+                rowAlternationEnabled: true,
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                height: 355,
+                selection: {
+                    mode: "multiple",
+                    allowSelectAll: true,
+                    showCheckBoxesMode: "always"
+                },
                 scrolling: {
                     mode: 'virtual',
                     columnRenderingMode: 'virtual'
@@ -92,14 +97,9 @@
                     width: 240,
                     placeholder: 'Rechercher...',
                 },
-                showColumnLines: true,
-                showRowLines: true,
                 paging: {
                     pageSize: 10,
                 },
-                allowColumnReordering: true,
-                allowColumnResizing: true,
-                columnAutoWidth: true,
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
@@ -120,177 +120,132 @@
                     {
                         dataField: "index",
                         dataType: "number",
-                        caption: "N°",
+                        caption: "N° Ordre",
                         alignment: "center",
                         fixed: true,
-                        width: 120
                     },
                     {
                         dataField: "dateCreation",
                         dataType: "date",
-                        caption: "DATE CREATION",
+                        caption: "Date",
                         alignment: "center",
                         fixed: true,
-                        width: 120
                     },
                     {
                         dataField: "periode",
                         dataType: "string",
-                        caption: "PERIODE DE PAIE",
+                        caption: "Periode de Paie",
                         alignment: "center",
                         fixed: true,
-                        width: 120
                     },
                     {
-                        dataField: 'type_campagne',
+                        dataField: 'nom_salarie',
                         dataType: 'string',
-                        caption: 'TYPE',
+                        caption: 'Nom',
                         alignment: 'left',
                         fixed: true,
-                        width: 120
-                    },
-                    {
-                        dataField: 'nom',
-                        dataType: 'string',
-                        caption: 'NOM',
-                        alignment: 'left',
-                        fixed: true,
-                        width: 120
-                    },
-                    {
-                        dataField: 'prenoms',
-                        dataType: 'string',
-                        caption: 'PRENOMS',
-                        alignment: 'left',
-                        fixed: true,
-                        width: 120
-                    },
-                    {
-                        dataField: 'matricule',
-                        dataType: 'string',
-                        caption: 'MATRICULE',
-                        alignment: 'center',
-                        fixed: true,
-                        width: 120
                     },
                     {
                         dataField: "service",
-                        caption: "SITE DE TRAVAIL ",
+                        caption: "Site",
                         dataType: "string",
                         alignment: "left",
-                        width: 120
+                    },
+                    {
+                        dataField: 'nb_part',
+                        dataType: 'number',
+                        caption: 'Nombre Part',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'day_of_presence',
+                        dataType: 'number',
+                        caption: 'Nb Jour Travailler',
+                        alignment: 'center',
                     },
                     {
                         dataField: "salaireBase",
                         dataType: 'number',
-                        caption: 'SALAIRE CATEGORIEL',
+                        caption: 'Salaire Catégoriel',
                         alignment: 'right',
-                        width: 120
                     },
                     {
                         dataField: 'sursalaire_salaried',
-                        caption: 'SURSALAIRE',
+                        caption: 'Sursalaire',
                         dataType: 'number',
                         alignment: 'right',
-                        width: 120
                     },
                     {
                         dataField: "primeAnciennete",
                         dataType: 'number',
-                        caption: "PRIME ANCIENNETE",
+                        caption: "Prime Ancienneté",
                         alignment: 'right',
-                        width: 120
-                    },
-                    {
-                        dataField: "prime_tenue_travail",
-                        dataType: 'number',
-                        caption: "PRIME TENUE TRAVAIL",
-                        alignment: 'right',
-                        width: 120
-                    },
-                    {
-                        dataField: "prime_salissure",
-                        dataType: 'number',
-                        caption: "PRIME SALISSURE",
-                        alignment: 'right',
-                        width: 120
                     },
                     {
                         dataField: "amountHeureSupp",
                         dataType: 'number',
-                        caption: "MAJORATION H.S",
+                        caption: "Majoration H.S",
                         alignment: 'right',
-
-                        width: 120
                     },
                     {
                         dataField: "salaireImposable",
                         dataType: 'number',
-                        caption: "NET IMPOSABLE",
+                        caption: "Brut Imposable",
                         alignment: 'right',
-                        width: 120
                     },
                     {
                         caption: "CHARGES SALARIALES",
                         alignment: 'center',
                         columns: [
                             {
-                                caption: 'ITS',
+                                caption: 'Its',
                                 dataField: 'its_salaried',
                                 dataType: 'number',
                                 alignment: 'right',
-                                width: 120
                             },
                             {
-                                caption: 'TOTAL RETENUE FISCALE',
+                                caption: 'Total Retenue Fiscale',
                                 dataField: 'fixcale_salariale',
                                 dataType: 'number',
                                 alignment: 'right',
-                                width: 120
                             },
                             {
-                                caption: 'CNPS',
+                                caption: 'Cnps',
                                 dataField: 'cnps_salaried',
                                 dataType: 'number',
                                 alignment: 'right',
-                                width: 120
                             },
                             {
-                                caption: 'CMU',
+                                caption: 'Cmu',
                                 dataField: 'cmu_salaried',
                                 dataType: 'number',
                                 alignment: 'right',
-                                width: 120
                             },
                             {
-                                caption: 'TOTAL RETENUE',
+                                caption: 'Total Retenue',
                                 dataField: 'charge_salarial',
                                 dataType: 'number',
                                 alignment: 'right',
-                                width: 120
                             },
                         ]
                     },
                     {
-                        dataField: 'prime_transport_legal',
-                        caption: 'INDEMNITE DE TRANSPORT',
+                        dataField: 'assurance_salariale',
+                        caption: 'Assurance',
                         dataType: 'number',
                         alignment: 'right',
-                        width: 120
                     },
                     {
-                        dataField: 'assurance_salariale',
-                        caption: 'ASSURANCE',
+                        dataField: 'prime_transport_legal',
+                        caption: 'Indemnite Transport',
                         dataType: 'number',
                         alignment: 'right',
-                        width: 120
                     },
                     {
                         dataField: 'net_payer_salaried',
-                        caption: 'NET A PAYER',
+                        caption: 'Net Payer',
                         dataType: 'number',
                         alignment: 'right',
-                        width: 120
                     },
                     {
                         caption: 'CHARGES FISCALES PATRONALES',
@@ -298,17 +253,15 @@
                         columns: [
                             {
                                 dataField: 'employer_is',
-                                caption: 'ITS',
+                                caption: 'Its',
                                 dataType: 'number',
                                 alignment: 'right',
-                                width: 150
                             },
                             {
                                 dataField: 'amount_fdfp',
-                                caption: 'FDFP',
+                                caption: 'Fdfp',
                                 dataType: 'number',
                                 alignment: 'right',
-                                width: 150
                             }
                         ]
                     },
@@ -318,63 +271,53 @@
                         columns: [
                             {
                                 dataField: 'employer_cr',
-                                caption: 'CAISSE DE RETRAITE',
+                                caption: 'Caisse Retraite',
                                 dataType: 'number',
                                 alignment: 'right',
-                                width: 120
 
                             },
                             {
                                 dataField: 'employer_cmu',
-                                caption: 'CMU',
+                                caption: 'Cmu',
                                 dataType: 'number',
                                 alignment: 'right',
-                                width: 120
-
                             },
                             {
                                 dataField: 'employer_pr',
-                                caption: 'PRESTATION FAMILIALE',
+                                caption: 'Prestation Familiale',
                                 dataType: 'number',
                                 alignment: 'right',
-                                width: 120
 
                             },
                             {
                                 dataField: 'employer_at',
-                                caption: 'ACCIDENT DE TRAVAIL',
+                                caption: 'Accident Travail',
                                 dataType: 'number',
                                 alignment: 'right',
-                                width: 120
-
                             },
                         ]
                     },
                     {
-                        dataField: 'assurance_patronales',
-                        caption: 'ASSURANCE PART PATRONALE',
+                        dataField: 'charge_patronal',
+                        caption: 'Total Charges Patronales',
                         dataType: 'number',
                         alignment: 'right',
-                        width: 120
-
                     },
                     {
-                        dataField: 'charge_patronal',
-                        caption: 'TOTAL CHARGES PATRONALES',
+                        dataField: 'assurance_patronales',
+                        caption: 'Assurance Part Patronale',
                         dataType: 'number',
                         alignment: 'right',
-                        width: 120
                     },
                     {
                         dataField: 'masse_salariale',
-                        caption: 'MASSE SALARIALE',
+                        caption: 'Masse Salariale',
                         dataType: 'number',
                         alignment: 'right',
-                        width: 120
                     },
                     {
                         dataField: 'print_bulletin',
-                        caption: 'Imprimer bulletin',
+                        caption: 'Imprimer Bulletin',
                         alignment: 'center',
                         cellTemplate: function (container, options) {
                             $("<a>")

@@ -87,6 +87,7 @@ class PayrollRepository extends ServiceEntityRepository
                 'personal.uuid as personal_uuid',
                 'YEAR(personal.birthday) as personal_birthday',
                 'payroll.matricule',
+                'payroll.dayOfPresence',
                 'payroll.baseAmount',
                 'payroll.sursalaire',
                 'payroll.AncienneteAmount',
@@ -136,6 +137,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->join('payroll.campagne', 'campagnes')
             ->join('payroll.personal', 'personal')
             ->where('campagnes.active = false')
+            ->andWhere('personal.active = true')
             ->andWhere('campagnes.dateDebut BETWEEN ?1 AND ?2');
         $qb->setParameters(['1' => $mouth1, '2' => $mouth2]);
         if ($personalId) {

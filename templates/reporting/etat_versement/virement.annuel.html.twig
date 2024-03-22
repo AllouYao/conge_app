@@ -4,7 +4,6 @@
 {% block stylesheets %}
     <style>
         #dataGridVirementAnnuels {
-            height: 368px;
             border-width: 50px;
         }
     </style>
@@ -65,13 +64,19 @@
 
             $('#head').html(`du ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')} `);
 
-            function formatNumber(num) {
-                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-            }
-
             $('#dataGridVirementAnnuels').dxDataGrid({
                 dataSource: `{{ url('api_reporting_etat_virements_annuel') }}?${$data}`,
                 showBorders: true,
+                showColumnLines: true,
+                showRowLines: true,
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                rowAlternationEnabled: true,
+                selection: {
+                    mode: "multiple", showCheckBoxesMode: "always", selectAllMode: true
+                },
+                height: 355,
                 scrolling: {
                     mode: 'virtual',
                     columnRenderingMode: 'virtual'
@@ -92,14 +97,9 @@
                     width: 240,
                     placeholder: 'Rechercher...',
                 },
-                showColumnLines: true,
-                showRowLines: true,
                 paging: {
                     pageSize: 10,
                 },
-                allowColumnReordering: true,
-                allowColumnResizing: true,
-                columnAutoWidth: true,
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
@@ -118,50 +118,50 @@
                 },
                 columns: [
                     {
-                        caption: 'NOM ET PRENOM BENEFICIAIRE',
+                        caption: 'Nom & Prénoms Bénéficiaire',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'name_salaried'
                     },
                     {
-                        caption: 'NOM BANQUE BENEFICIAIRE',
+                        caption: 'Intitulé Banque Bénéficiaire',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'nom_banque'
                     },
                     {
-                        caption: 'CODE BANQUE BENEFICIAIRE',
+                        caption: 'Code Banque Bénéficiaire',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'code_banque'
                     },
                     {
-                        caption: 'CODE AGENCE BENEFICIAIRE',
+                        caption: 'Code agence Bénéficiaire',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'code_agence'
                     },
                     {
-                        caption: 'NUMERO COMPTE (12 CARACTERES)',
+                        caption: 'Numero Compte (12 caractères)',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'comptes'
                     },
                     {
-                        caption: 'CLE RIB BENEFICIAIRE',
+                        caption: 'Clé Rib Bénéficiaire',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'cles'
                     },
                     {
-                        caption: 'MONTANT',
+                        caption: 'Montant',
                         alignment: 'right',
                         dataType: 'number',
                         dataField: 'salaire_net',
 
                     },
                     {
-                        caption: 'PERIODE',
+                        caption: 'Période Paie',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'periode'

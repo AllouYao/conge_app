@@ -1,11 +1,10 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Heures supplémentaires {% endblock %}
+{% block title %}Heures supplémentaires en attente {% endblock %}
 {% block stylesheets %}
     <style>
         #dataGridSup {
             border-width: 50px;
-            height: 350px;
         }
     </style>
 {% endblock %}
@@ -17,7 +16,7 @@
                     <div class="card-header">
                         <h5 class="card-title-custom" style="color: white" id="date">
                             <i data-feather="list"></i>
-                            HEURES SUPPLEMENTAIRES EN ATTENTE
+                            HEURES SUPPLEMENTAIRES EN ATTENTE DE VALIDATION
                         </h5>
                     </div>
                     <div class="card-body">
@@ -34,7 +33,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        Êtes-vous sûr de vouloir valider les remboursement sélectionnés ?
+                                        <p>Êtes-vous sûr de vouloir valider les informations ci-dessous, après quoi vous ne pourriez plus les modifiés ?</p>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annuler
@@ -69,6 +68,10 @@
                 showColumnLines: true,
                 showRowLines: true,
                 rowAlternationEnabled: true,
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                height: 355,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: 'virtual'
@@ -83,40 +86,6 @@
                 groupPanel: {
                     visible: true
                 },
-                export: {
-                    enabled: true,
-                    allowExportSelectedData: true,
-                    formats: ['xlsx']
-                },
-                onExporting(e) {
-                    if (e.format === 'xlsx') {
-                        const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('Heures supplémentaires');
-                        DevExpress.excelExporter.exportDataGrid({
-                            component: e.component,
-                            worksheet,
-                            autoFilterEnabled: true,
-                            customizeCell: function (options) {
-                                const {gridCell, excelCell} = options;
-                                if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
-                                    excelCell.text = formatNumber(gridCell.value);
-                                    excelCell.font = {size: 9};
-                                    excelCell.alignment = {horizontal: 'left'};
-                                }
-                            }
-                        }).then(() => {
-                            const date = new Date();
-                            const year = date.getFullYear();
-                            const month = date.getMonth() + 1;
-                            const day = date.getDate();
-                            const dateFormat = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
-                            workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `HEURE_SUPPLEMENTAIRE${dateFormat}.xlsx`);
-                            });
-                        });
-                        e.cancel = true;
-                    }
-                },
                 grouping: {
                     autoExpandAll: true
                 },
@@ -128,9 +97,6 @@
                 paging: {
                     pageSize: 10
                 },
-                allowColumnReordering: true,
-                allowColumnResizing: true,
-                columnAutoWidth: true,
                 columns: [
                     {
                         caption: 'Matricule',
@@ -151,49 +117,49 @@
                         dataField: 'last_name',
                     },
                     {
-                        caption: 'Date de naissance',
+                        caption: 'Date Naissance',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_naissance',
                     },
                     {
-                        caption: 'Catégorie salarié',
+                        caption: 'Catégorie Salarié',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'categorie_salarie',
                     },
                     {
-                        caption: 'Date d\'embauche',
+                        caption: 'Date Embauche',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_embauche',
                     },
                     {
-                        caption: 'Date début',
+                        caption: 'Date Début',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_debut',
                     },
                     {
-                        caption: 'Heure début',
+                        caption: 'Heure Début',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'heure_debut',
                     },
                     {
-                        caption: 'Date fin',
+                        caption: 'Date Fin',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_fin',
                     },
                     {
-                        caption: 'Heure fin',
+                        caption: 'Heure Fin',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'heure_fin',
                     },
                     {
-                        caption: 'Total horraire',
+                        caption: 'Total Horraire',
                         alignment: 'center',
                         dataType: 'number',
                         dataField: 'total_horaire',
@@ -228,7 +194,7 @@
                             location: 'after',
                             widget: 'dxButton',
                             options: {
-                                text: 'Valider les supplementaires',
+                                text: 'Valider les heures suppl.',
                                 icon: 'bi bi-journal-check',
                                 disabled: false,
                                 onClick() {

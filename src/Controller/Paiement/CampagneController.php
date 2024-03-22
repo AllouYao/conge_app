@@ -798,7 +798,7 @@ class CampagneController extends AbstractController
             $dataPayroll = [
                 /** Information de congés */
                 'date_dernier_conges' => $dernierRetour,
-                'nombre_jour_travailler' => $payroll->getDayOfPresence(),
+                'nombre_jour_travailler' => (int)$payroll->getDayOfPresence(),
                 /** Element en rapport avec le personal */
                 'matricule' => $payroll->getMatricule(),
                 'service' => $payroll->getService(),
@@ -872,6 +872,10 @@ class CampagneController extends AbstractController
                 'amount_prime_rendement' => (double)$payroll->getAmountPrimeRendement(),
                 'debut_exercise' => $payroll->getCampagne()->getDateDebut() ? date_format($payroll->getCampagne()->getDateDebut(), 'd/m/Y') : '',
                 'fin_exercise' => $payroll->getCampagne()->getDateFin() ? date_format($payroll->getCampagne()->getDateFin(), 'd/m/Y') : '',
+                'retenue_net' => $payroll->getRetenueNet(),
+                'retenue_brut' => $payroll->getRetenueBrut(),
+                'remboursement_net' => $payroll->getRemboursNet(),
+                'remboursement_brut' => $payroll->getRemboursBrut()
             ];
         }
 

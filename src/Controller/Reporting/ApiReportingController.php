@@ -14,7 +14,9 @@ use App\Service\EtatService;
 use App\Service\HeureSupService;
 use App\Utils\Status;
 use Carbon\Carbon;
+use DateTime;
 use Doctrine\ORM\NonUniqueResultException;
+use Exception;
 use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -113,11 +115,21 @@ class ApiReportingController extends AbstractController
     }
 
 
+    /**
+     * @throws Exception
+     */
     #[Route('/etat_salaire_globale', name: 'etat_salaire', methods: ['GET'])]
     public function etatSalarialeGlobale(Request $request): JsonResponse
     {
-        $startAt = $request->get('start_at');
-        $endAt = $request->get('end_at');
+        $dateRequest = $request->get('dateDebut');
+        $startAt = $endAt = null;
+        if ($dateRequest) {
+            $dateRequestObj = DateTime::createFromFormat('Y-m', $dateRequest);
+            $dateDebut = $dateRequestObj->format('Y-m-01');
+            $dateFin = $dateRequestObj->format('Y-m-t');
+            $startAt = new DateTime($dateDebut);
+            $endAt = new DateTime($dateFin);
+        }
         $personalID = (int)$request->get('personalsId');
 
         if (!$request->isXmlHttpRequest()) {
@@ -131,14 +143,14 @@ class ApiReportingController extends AbstractController
             $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
             $date = $salary['periode_debut'];
             $periode = $formatter->format($date);
-            $type = $salary['ordinary'] ? 'ORDINAIRE' : 'EXEPTIONNEL';
+            $nbJourTravailler = $salary['dayOfPresence'];
             $data[] = [
                 'index' => ++$index,
                 'dateCreation' => date_format($salary['startedAt'], 'd/m/Y'),
-                'type_campagne' => $type,
+                'day_of_presence' => $nbJourTravailler,
+                'nb_part' => $salary['numberPart'],
                 'periode' => $periode,
-                'nom' => $salary['nom'],
-                'prenoms' => $salary['prenoms'],
+                'nom_salarie' => $salary['nom'] . ' ' . $salary['prenoms'],
                 'matricule' => $salary['matricule'],
                 'service' => $salary['station'],
                 'salaireBase' => (int)$salary['baseAmount'],

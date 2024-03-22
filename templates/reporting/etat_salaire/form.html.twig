@@ -1,20 +1,13 @@
 <div class="mb-2 row">
-    <label class="col-md-1 control-label" for="start_at">Mois de debut <span
-                class="text-danger">*</span></label>
-    <div class="col-md-3">
-        <input type="date" name="start_at" id="start_at" class="form-control form-control-sm"
+    <label class="col-md-2 col-form-label" for="example-month">Période de paie</label>
+    <div class="col-md-4">
+        <input class="form-control form-control-sm" id="example-month" type="month" name="dateDebut"
                required>
     </div>
-    <label class="col-md-1 control-label" for="end_at">Mois de fin <span
-                class="text-danger">*</span></label>
-    <div class="col-md-3 clearfix">
-        <input type="date" name="end_at" id="end_at" class="form-control form-control-sm"
-               required>
-    </div>
-    <label class="col-md-1 control-label" for="personalsId">Personnel </label>
-    <div class="col-md-3">
-        <select name="personalsId" id="personalsId" placeholder="Sélectionner personal"
-                class="form-select form-select-sm full-width-fix">
+    <label class="col-md-2 control-label" for="personalsId">Personnel </label>
+    <div class="col-md-4">
+        <select name="personalsId" id="personalsId" placeholder="Sélectionner un salarier"
+                class="form-select form-select-sm full-width-fix" data-placeholder="Sélectionner un salarier" data-plugin="customselect">
             <option value="" selected></option>
             <option value="">Tous</option>
             {% for p in personals %}
