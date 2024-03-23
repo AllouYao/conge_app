@@ -10,3 +10,9 @@ $(document).on('click', '.toggle-disable', function() {
     $('#personalDisableInput').val(personalId);
     $('#personalDisable').submit();
 }); 
+
+$(document).on('click', '.toggle-disable-all ', function() {
+    const personalId = $(this).val();
+    $('#disableAllInput').val(personalId);
+    $('#disableALL').submit();
+}); 

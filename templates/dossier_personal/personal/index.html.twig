@@ -34,6 +34,9 @@
     <form id="personalDisable" method="POST" action="/dossier/personal/disable">
         <input id="personalDisableInput" type="hidden" name="personalDisableInput">
     </form>
+    <form id="disableALL" method="POST" action="/dossier/personal/disable/all">
+        <input id="disableAllInput" type="hidden" name="disableAllInput">
+    </form>
 
 
 
@@ -83,6 +86,7 @@
                             worksheet,
                             autoFilterEnabled: true,
                             customizeCell: function (options) {
+                                
                                 const {gridCell, excelCell} = options;
                                 if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
                                     excelCell.text = formatNumber(gridCell.value)
@@ -200,25 +204,28 @@
                         alignment: 'center',
                         columns: [
                             {
-                                dataField: 'active',
-                                caption: 'Activer/Desactiver',
-                                alignment: 'center',
-                                cellTemplate: function (container, options) {
-                                    if (options.data.active === true) {
+                                headerCellTemplate: $('<div class="form-check form-switch mx-5"><input class="form-check-input toggle-disable-all " type="checkbox" id="disableAllPersonal" > <label class="form-check-label" for="disableAllPersonal"></label> </div>'),
+                                columns: [
+                                    {
+                                        dataField: 'active',
+                                        caption: 'Activer/Desactiver',
+                                        alignment: 'center',
+                                        cellTemplate: function (container, options) {
+                                            if (options.data.active === true) {
+                                                $(`<div class="form-check form-switch mx-5">`)
+                                                    .html(`<input class="form-check-input toggle-disable " type="checkbox" id="disablePersonal${options.data.personal_id}" checked="checked" value="${options.data.personal_id}"> <label class="form-check-label" for="disablePersonal${options.data.personal_id}"></label> </div>`)
+                                                    .appendTo(container);
+                                                feather.replace();
+                                            } else {
+                                                $(`<div class="form-check form-switch mx-5">`)
+                                                    .html(`<input class="form-check-input toggle-enable" type="checkbox" id="enablePersonal${options.data.personal_id}" value="${options.data.personal_id}"> <label class="form-check-label" for="enablePersonal${options.data.personal_id}"></label> </div>`)
+                                                    .appendTo(container);
+                                                feather.replace();
+                                            }
 
-                                        $(`<div class="form-check form-switch mx-5">`)
-                                            .html(`<input class="form-check-input toggle-disable " type="checkbox" id="disablePersonal${options.data.personal_id}" checked="checked" value="${options.data.personal_id}"> <label class="form-check-label" for="disablePersonal${options.data.personal_id}"></label> </div>`)
-                                            .appendTo(container);
-                                        feather.replace();
-                                    } else {
-
-                                        $(`<div class="form-check form-switch mx-5">`)
-                                            .html(`<input class="form-check-input toggle-enable" type="checkbox" id="enablePersonal${options.data.personal_id}" value="${options.data.personal_id}"> <label class="form-check-label" for="enablePersonal${options.data.personal_id}"></label> </div>`)
-                                            .appendTo(container);
-                                        feather.replace();
+                                        }
                                     }
-
-                                }
+                                ]
                             },
                             {
                                 dataField: 'modifier',
@@ -246,15 +253,13 @@
                                 }
                             },
                         ],
+                        
                         width: 120
                     }
                 ],
             })
         })
 
-        function bonjour() {
-            console.log('click');
-        }
     </script>
 
 {% endblock %}
