@@ -193,7 +193,7 @@ class PaieServices
     }
 
     /** Montant du crédit d'impôt à déduit sur l'impôts brut, charge salarial de la periode de paie */
-    function amountCreditImpotCampagne(Personal $personal): float|int
+    public function amountCreditImpotCampagne(Personal $personal): float|int
     {
         $nbrePart = $this->getPartCampagne($personal);
         $creditImpot = null;

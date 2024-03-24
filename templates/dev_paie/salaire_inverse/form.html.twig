@@ -1,0 +1,96 @@
+<div class="row mb-3">
+    <label for="salaire_net" class="col-md-1 col-form-label">Salaire net <span class="text-danger">*</span></label>
+    <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm separator text-end" id="salaire_net" name="salaire_net"
+               placeholder="Entrer le salaire net" required value="{{ app.request.query.get('salaire_net') }}">
+    </div>
+    <label for="nombre_part" class="col-md-1 col-form-label">Nombre part <span class="text-danger">*</span></label>
+    <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm text-end" id="nombre_part" name="nombre_part"
+               placeholder="Entrer le nombre de part" required value="{{ app.request.query.get('nombre_part') }}">
+    </div>
+    <label for="transport_legal" class="col-md-1 col-form-label">Transport Légal <span
+                class="text-danger">*</span></label>
+    <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm separator text-end" id="transport_legal" name="transport_legal"
+               placeholder="Prime transport légal" required value="{{ app.request.query.get('transport_legal') }}">
+    </div>
+</div>
+<div class="row mb-3">
+    <label class="col-md-1 col-form-label" for="categorie_salarial">Catégor. Salaire <span class="text-danger">*</span></label>
+    <div class="col-md-3">
+        <select name="categorie_salarial" id="categorie_salarial" placeholder="Sélectionner une catégorie de salaire"
+                class="" data-placeholder="Sélectionner une catégorie de salaire" data-plugin="customselect" required>
+            <option value="" selected></option>
+            {% for cat in categorie_salaires %}
+                <option value="{{ cat.id }}" {% if app.request.query.get('categorie_salaire') == cat.id %} selected {% endif %}>{{ cat.intitule|upper }} - {{ cat.categorySalarie.code|capitalize }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <label class="col-md-1 col-form-label" for="prime_juridique">Primes</label>
+    <div class="col-md-3">
+        <select name="prime_juridique[]" id="prime_juridique" placeholder="Sélectionner une prime à valeur de remboursement de frais"
+                class="" data-placeholder="Sélectionner une prime à valeur de remboursement de frais" data-plugin="customselect" multiple>
+            {% for prime in primes %}
+                <option value="{{ prime.value }}" {% if prime.value in selectionsPrime %} selected {% endif %}>{{ prime.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <label class="col-md-1 col-form-label" for="">Assurance <span class="text-danger">*</span></label>
+    <div style="display: flex" class="col-md-3 text-center">
+        <div class="form-check">
+            <input type="radio" id="assures" name="assurance" class="form-check-input" value="{{ 1250 }} " {% if app.request.query.get('assurance') == 1250 %} checked {% endif %}">
+            <label class="form-check-label" for="assures">Famille</label>
+        </div>
+        <div class="form-check" style="margin-left: 10px">
+            <input type="radio" id="non_assures" name="assurance" class="form-check-input" value="{{ 3000 }}" {% if app.request.query.get('assurance') == 3000 %} checked {% endif %}>
+            <label class="form-check-label" for="non_assures">Classique</label>
+        </div>
+    </div>
+</div>
+<div class="row mb-3">
+    <label for="amount_prime" class="col-md-1 col-form-label">Total prime <span class="text-danger">*</span></label>
+    <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm separator text-end" id="amount_prime" readonly value="{{  app.request.query.get('prime_amount')  }}">
+    </div>
+    <label for="amount_prime" class="col-md-1 col-form-label">Montant Assur. <span class="text-danger">*</span></label>
+    <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm separator text-end" id="amount_prime" readonly value="{{  app.request.query.get('assurance')  }}">
+    </div>
+    <label for="cnps" class="col-md-1 col-form-label">CNPS (6,3 %) <span class="text-danger">*</span></label>
+    <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm separator text-end" id="cnps" readonly value="{{ app.request.query.get('cnps')  }}">
+    </div>
+
+</div>
+<div class="row mb-3">
+    <label for="its" class="col-md-1 col-form-label">ITS (0% à 32%) <span class="text-danger">*</span></label>
+    <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm separator text-end" id="its" readonly value="{{ app.request.query.get('impot_brut') }}">
+    </div>
+    <label for="credit_impot" class="col-md-1 col-form-label">Crédit Impôt <span class="text-danger">*</span></label>
+    <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm separator text-end" id="credit_impot" readonly value="{{  app.request.query.get('credit_impot')  }}">
+    </div>
+    <label for="its_net" class="col-md-1 col-form-label">ITS net <span class="text-danger">*</span></label>
+    <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm separator text-end" id="its_net" readonly value="{{  app.request.query.get('impot_net')  }}">
+    </div>
+</div>
+<div class="row mb-3">
+    <label for="salaire_categoriel" class="col-md-1 col-form-label">Salaire Cat. <span class="text-danger">*</span></label>
+    <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm separator text-end" id="salaire_categoriel" readonly value="{{  app.request.query.get('salaire_catégoriel')  }}">
+    </div>
+    <label for="sursalaire" class="col-md-1 col-form-label">Sursalaire <span class="text-danger">*</span></label>
+    <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm separator text-end" id="sursalaire" readonly value="{{  app.request.query.get('sursalaire')  }}">
+    </div>
+    <label for="salaire_brut" class="col-md-1 col-form-label">Salaire Brut <span class="text-danger">*</span></label>
+    <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm separator text-end" id="salaire_brut" readonly value="{{  app.request.query.get('amount_brut')  }}">
+    </div>
+</div>
+
