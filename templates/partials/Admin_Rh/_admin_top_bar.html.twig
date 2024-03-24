@@ -18,6 +18,19 @@
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Sociétés
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('admin_society_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('admin_society_show') }}"
+                                       class="dropdown-item">Modifer</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Utilisateurs
                                     <div class="arrow-down"></div>
                                 </a>
@@ -31,36 +44,27 @@
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Smig légal
-                                    <div class="arrow-down"></div>
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                    <a href="{{ path('settings_smig_index') }}"
-                                       class="dropdown-item">Liste smig</a>
-                                </div>
-                            </div>
-                            <div class="dropdown">
-                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Taux horaire légal
-                                    <div class="arrow-down"></div>
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                    <a href="{{ path('settings_taux_horaire_index') }}"
-                                       class="dropdown-item">Liste taux horaire</a>
-                                </div>
-                            </div>
-                            <div class="dropdown">
-                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Catégories prof.
+                                    Categories prof.
                                     <div class="arrow-down"></div>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
                                     <a href="{{ path('settings_category_salarie_new') }}"
                                        class="dropdown-item">Créer</a>
                                     <a href="{{ path('settings_category_salarie_index') }}"
-                                       class="dropdown-item">Liste catégories prof.</a>
+                                       class="dropdown-item">Liste categories</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Smig légal
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('settings_smig_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('settings_smig_index') }}"
+                                       class="dropdown-item">Liste smig</a>
                                 </div>
                             </div>
                             <div class="dropdown">
@@ -86,9 +90,9 @@
                                     <a href="{{ path('impot_category_charge_new') }}"
                                        class="dropdown-item">Créer</a>
                                     <a href="{{ path('impot_category_charge_index_fixcale') }}"
-                                       class="dropdown-item">Charges fiscales</a>
+                                       class="dropdown-item">Liste Charges fiscales</a>
                                     <a href="{{ path('impot_category_charge_index_sociale') }}"
-                                       class="dropdown-item">Charges sociales</a>
+                                       class="dropdown-item">Liste Charges sociales</a>
                                 </div>
                             </div>
                             <div class="dropdown">
@@ -102,7 +106,6 @@
                                        class="dropdown-item">Créer</a>
                                     <a href="{{ path('settings_prime_index') }}"
                                        class="dropdown-item">Liste primes</a>
-
                                 </div>
                             </div>
                             <div class="dropdown">
@@ -115,7 +118,59 @@
                                     <a href="{{ path('settings_retenue_forfetaire_new') }}"
                                        class="dropdown-item">Créer</a>
                                     <a href="{{ path('settings_retenue_forfetaire_index') }}"
-                                       class="dropdown-item">Liste retenue forf.</a>
+                                       class="dropdown-item">Liste retenues forfaitaire</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Heure de travail
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <div class="dropdown">
+                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                           aria-expanded="false">
+                                            Normal
+                                            <div class="arrow-down"></div>
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                            <a href="{{ path('work_time_normal_new') }}"
+                                               class="dropdown-item">Créer</a>
+                                            <a href="{{ path('work_time_normal_index') }}"
+                                               class="dropdown-item">Liste des heures normales</a>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown">
+                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                           aria-expanded="false">
+                                            Supplémentaires
+                                            <div class="arrow-down"></div>
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                            <a href="{{ path('work_time_supplementaire_new') }}"
+                                               class="dropdown-item">Créer</a>
+                                            <a href="{{ path('work_time_supplementaire_index') }}"
+                                               class="dropdown-item">Liste des heures supplémentaires</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Gestion du temps de travail
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('personal_heure_sup_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('personal_heure_sup_index') }}"
+                                       class="dropdown-item">Liste des heures suppl.</a>
+                                    <a href="{{ path('personal_heure_sup_supp_book') }}"
+                                       class="dropdown-item">Majorations des heure suppl.</a>
                                 </div>
                             </div>
                         </div>
