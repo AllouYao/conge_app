@@ -260,7 +260,8 @@
                                 </div>
                             </div>
                             {# <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Etat des Primes et indemnités</a> #}
-                            <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Primes et indemnités</a>
+                            <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Primes et
+                                indemnités</a>
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -270,7 +271,7 @@
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
                                     <a href="{{ path('app_paiement_acompte_new') }}"
                                        class="dropdown-item">Créer</a>
-                                    <a href="{{ path('app_paiement_acompte_index') }}"
+                                    <a href="{{ path('app_paiement_acompte_list') }}"
                                        class="dropdown-item">Liste prêt & avance</a>
                                 </div>
                             </div>
@@ -284,7 +285,7 @@
                             <div class="arrow-down"></div>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="topnav-components">
-                        <div class="dropdown">
+                            <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Heures supplémentaires
@@ -293,8 +294,21 @@
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
                                     <a href="{{ path('personal_heure_sup_pending') }}"
                                        class="dropdown-item">Heures suppl en attente.</a>
-                                       <a href="{{ path('personal_heure_sup_validated') }}"
+                                    <a href="{{ path('personal_heure_sup_validated') }}"
                                        class="dropdown-item">Heures suppl validées.</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Prêt / Avance
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('app_paiement_acompte_index') }}"
+                                       class="dropdown-item">En attente</a>
+                                    <a href="{{ path('app_paiement_acompte_validated') }}"
+                                       class="dropdown-item">Validée</a>
                                 </div>
                             </div>
                             <div class="dropdown">

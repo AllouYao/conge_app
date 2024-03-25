@@ -180,11 +180,8 @@ class HeureSupController extends AbstractController
         $years = $today->year;
         $month = $today->month;
         if ($this->isGranted('ROLE_RH')) {
-
             $heursSupps = $this->heureSupRepository->getByStatus($month, $years, Status::EN_ATTENTE);
-
         } else {
-
             $heursSupps = $this->heureSupRepository->findHeureSupByStatusByEmployeRole($month, $years, Status::EN_ATTENTE);
         }
         $apiRequestHeureSupp = [];
@@ -207,7 +204,6 @@ class HeureSupController extends AbstractController
                 'modifier' => $this->generateUrl('personal_heure_sup_edit', ['uuid' => $heureSup->getPersonal()->getUuid()])
             ];
         }
-
         return new JsonResponse($apiRequestHeureSupp);
     }
     #[Route('/api/heure_supp/validated ', name: 'api_heure_supplementaire_validated', methods: ['GET'])]

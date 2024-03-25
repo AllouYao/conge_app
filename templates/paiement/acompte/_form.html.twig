@@ -1,0 +1,58 @@
+<fieldset>
+    <legend>Information du salarié</legend>
+    <div class="mb-2 row">
+        <label class="col-md-2 col-form-label">Matricule <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.personal) }}
+        </div>
+        <label class="col-md-2 col-form-label">Nom & Prénom(s) <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.name) }}
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label class="col-md-2 col-form-label">Date d'embauche <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.hireDate) }}
+        </div>
+        <label class="col-md-2 col-form-label">Catégorie salarié<span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.category) }}
+        </div>
+    </div>
+</fieldset>
+<br>
+<fieldset>
+    <legend>Détail prêt / acompte</legend>
+    <div class="mb-2 row">
+        <label class="col-md-2 col-form-label">Date opération <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.dateOperation) }}
+            {{ form_errors(form.typeOperations) }}
+        </div>
+        <label class="col-md-2 col-form-label">Type opération <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.typeOperations) }}
+            {{ form_errors(form.typeOperations) }}
+        </div>
+    </div>
+    <div class="mb-2 row">
+        <label class="col-md-2 col-form-label">Montant<span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.amount) }}
+            {{ form_errors(form.amount) }}
+        </div>
+        <label class="col-md-2 col-form-label nb-month">Nombre de mensualité <span class="text-danger">*</span></label>
+        <div class="col-md-4 nb-month">
+            {{ form_widget(form.nbMensualite) }}
+            {{ form_errors(form.nbMensualite) }}
+        </div>
+    </div>
+    <div class="mb-2 row amount-month">
+        <label class="col-md-2 col-form-label">Montant mensuel<span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.amountMensualite) }}
+            {{ form_errors(form.amountMensualite) }}
+        </div>
+    </div>
+</fieldset>
