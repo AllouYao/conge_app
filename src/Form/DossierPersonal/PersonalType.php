@@ -57,7 +57,9 @@ class PersonalType extends AbstractType
             ->add('lieuNaissance', TextType::class, [
                 'required' => false
             ])
-            ->add('refCNPS')
+            ->add('refCNPS', TextType::class, [
+                'required' => false
+            ])
             ->add('piece', ChoiceType::class, [
                 'attr' => [
                     'data-plugin' => 'customselect',

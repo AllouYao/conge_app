@@ -171,9 +171,9 @@ class PersonalController extends AbstractController
     ): Response
     {
         $matricule = $matriculeGenerator->generateMatricule();
-        $numCNPS = $matriculeGenerator->generateNumCnps();
+        //$numCNPS = $matriculeGenerator->generateNumCnps();
         $numContract = $matriculeGenerator->generateNumContract();
-        $personal = (new Personal())->setMatricule($matricule)->setRefCNPS($numCNPS);
+        $personal = (new Personal())->setMatricule($matricule);
         $salaire = (new Salary());
         $contract = (new Contract())->setRefContract($numContract);
         $personal
