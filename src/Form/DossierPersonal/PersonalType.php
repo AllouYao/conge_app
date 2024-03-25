@@ -217,7 +217,8 @@ class PersonalType extends AbstractType
                     'SS RO GABON' => status::SS_RO_GABON,
                     'SS LAGUNAIRE' => status::SS_LAGUNAIRE,
                     'STATION SHELL ADZOPE' => status::STATION_SHELL_ADZOPE,
-                    'BOUTIQUE  PO LOCODJORO' => status::BOUTIQUE_PO_LOCODJORO,
+                    'BOUTIQUE PO LOCCODJORO' => status::BOUTIQUE_PO_LOCODJORO,
+                    'SEA TOURNANT-ABIDJAN SUD' => Status::SEA_TOURNANT_ABIDJAN_SUD,
 
 
                 ],
