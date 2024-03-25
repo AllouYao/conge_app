@@ -185,6 +185,7 @@ final class Status
     public const STATION_SHELL_ADZOPE = 'STATION SHELL ADZOPE';
     public const SS_LAGUNAIRE = 'SS LAGUNAIRE';
     public const BOUTIQUE_PO_LOCODJORO = 'BOUTIQUE  PO LOCODJORO';
+    public const SEA_TOURNANT_ABIDJAN_SUD = 'SEA TOURNANT-ABIDJAN SUD';
 
 
     /** Status de campagne */

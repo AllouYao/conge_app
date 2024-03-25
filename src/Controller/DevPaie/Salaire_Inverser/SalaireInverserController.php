@@ -61,7 +61,6 @@ class SalaireInverserController extends AbstractController
             $salaireBrut = $salaireNet - $transportLegal - $amountPrime + $impotNet + $amountCnps + $assurance;
             $sursalaire = $salaireBrut > $amountCategoriel ? $salaireBrut - $amountCategoriel : 0;
 
-
             $smig = $this->smigRepository->active();
             if ($salaireBrut < $smig->getAmount()) {
                 flash()->addInfo('le salaire brut ne peut être inférieur au salaire catégoriel. Veuillez faire une autre manipulation merci !');
@@ -98,6 +97,7 @@ class SalaireInverserController extends AbstractController
                     'sursalaire' => $sursalaire
                 ]);
             }
+
         }
 
         return $this->render('dev_paie/salaire_inverse/inverse_net.html.twig', [
