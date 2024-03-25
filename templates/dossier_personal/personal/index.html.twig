@@ -34,9 +34,12 @@
     <form id="personalDisable" method="POST" action="/dossier/personal/disable">
         <input id="personalDisableInput" type="hidden" name="personalDisableInput">
     </form>
-    <form id="disableALL" method="POST" action="/dossier/personal/disable/all">
-        <input id="disableAllInput" type="hidden" name="disableAllInput">
+    <form id="toggleAll" method="POST" action="/dossier/personal/toggle/all">
+        <input id="toggleAllInput" type="hidden" name="toggleAllInput">
     </form>
+  
+    <input id="statusPersonnal" type="hidden" name="statusPersonnal" value="{{status}}">
+
 
 
 
@@ -204,7 +207,8 @@
                         alignment: 'center',
                         columns: [
                             {
-                                headerCellTemplate: $('<div class="form-check form-switch mx-5"><input class="form-check-input toggle-disable-all " type="checkbox" id="disableAllPersonal" > <label class="form-check-label" for="disableAllPersonal"></label> </div>'),
+                                headerCellTemplate: $('#statusPersonnal').val()?  $('<div class="form-check form-switch mx-5"><input class="form-check-input toggle-personal-all" type="checkbox" id="toggleAllPersonals" checked value="off"> <label class="form-check-label" for="toggleAllPersonal"></label> </div>'):$('<div class="form-check form-switch mx-5"><input class="form-check-input toggle-personal-all" type="checkbox" id="toggleAllPersonals" value="on"> <label class="form-check-label" for="toggleAllPersonal"></label> </div>'),
+
                                 columns: [
                                     {
                                         dataField: 'active',
@@ -259,7 +263,14 @@
                 ],
             })
         })
+    
 
+    $(document).ready(function(){
+
+        $data = $('#toggleAllPersonals').val();
+        console.log("data:"+$data);
+
+    });
     </script>
 
-{% endblock %}
+{% endblock %} 
