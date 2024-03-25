@@ -209,7 +209,7 @@ class PayrollService
             /** Regularisation sur net ou brut */
             ->setRemboursBrut($remboursementBrut)
             ->setRemboursNet($remboursementNet)
-            ->setRemboursBrut($retenueBrut)
+            ->setRetenueBrut($retenueBrut)
             ->setRetenueNet($retenueNet)
             /** Net à payer et masse salariale du salarié */
             ->setNetPayer($netPayer)
