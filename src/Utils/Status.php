@@ -225,4 +225,6 @@ final class Status
     public const MAJORATION_100_PERCENT = 'MAJORATION_100_PERCENT';
 
     public const SUPPLEMENTAIRE = 'SUPPLEMENTAIRE';
+    public const PAYE = 'PAYE';
+
 }

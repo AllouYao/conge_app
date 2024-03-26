@@ -12,6 +12,7 @@ use App\Service\CasExeptionel\DepartureCampagneService;
 use App\Service\PaieService\PaieByPeriodService;
 use App\Service\PaieService\PaieServices;
 use App\Service\Personal\PrimeService;
+use App\Utils\Status;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
@@ -213,7 +214,9 @@ class PayrollService
             ->setRetenueNet($retenueNet)
             /** Net à payer et masse salariale du salarié */
             ->setNetPayer($netPayer)
-            ->setMasseSalary($masseSalaried);
+            ->setMasseSalary($masseSalaried)
+            ->setStatus(Status::PAYE);
+
 
         /** Enregistrement du livre de paie */
 
@@ -233,7 +236,7 @@ class PayrollService
         $dayOfPresence = $this->paieByPeriodService->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne)['nb_jour_presence'];
 
         /** Ajouter les Informations utile du salarié */
-        $matricule = $personal->getMatricule();
+        $matricule = $personal->getMatricule();  
         $service = $personal->getService();
         $categorie = '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ') - ' . $personal->getCategorie()->getIntitule();
         $departement = $personal->getFonction();
@@ -364,26 +367,27 @@ class PayrollService
             ->setEmployeurSante($assuranceSantePatronale)
             ->setFixcalAmountEmployeur($amountChargFiscalPatronale)
             ->setSocialAmountEmployeur($amountChargSocialPatronale)
-            ->setTotalRetenuePatronal($chargePatronal);
-
+            ->setTotalRetenuePatronal($chargePatronal)
+            ->setStatus(Status::PAYE);
         /** Enregistrement du livre de paie */
         $this->manager->persist($payroll);
     }
-
-    /**
-     * @throws Exception
-     */
-    public function setExeptionnelPayroll(Departure $departure, Campagne $campagne): void
+    public function setExtraMonthPayroll(Personal $personal, Campagne $campagne): Payroll
     {
-        /** Nombre de jour travailler pendant la periode current de paie */
-        $dayOfPresence = $this->departureCampagneService->NbDayOfPresenceBeforeDeparture($departure);
-        $dayOfCurrentMonth = $this->departureCampagneService->NbDayOfPresenceByCurrentMonth($departure);
+        $lastWorkDay = $personal->getContract()->getDateEmbauche();
 
+        $lastWorkDay = $lastWorkDay->format('d');
+        $lastWorkDay = self::DAY_IN_MONTH_WORK - $lastWorkDay;
+
+        //Nombre de jour pour le mois passé
+
+        /** Nombre de jour travailler pendant la periode current de paie */
+        $dayOfCurrentMonth = $this->paieServices->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne)['day_of_presence'];
+        $dayOfCurrentMonth =  $dayOfCurrentMonth+$lastWorkDay;
         /** Ajouter les Informations utile du salarié */
-        $personal = $departure->getPersonal();
         $matricule = $personal->getMatricule();
         $service = $personal->getService();
-        $categorie = '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ') -' . $personal->getCategorie()->getIntitule();
+        $categorie = '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ') - ' . $personal->getCategorie()->getIntitule();
         $departement = $personal->getFonction();
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
         $numeroCnps = $personal->getRefCNPS();
@@ -391,21 +395,23 @@ class PayrollService
 
         /** Ajouter les éléments qui constitue le salaire imposable du salarié */
         $salary = $personal->getSalary();
-        $baseSalaire = round($this->departureCampagneService->baseAmountByNbDayOfPresence($departure));
-        $sursalaire = round((double)$salary->getSursalaire() * ($dayOfPresence / $dayOfCurrentMonth));
-        $majorationHeursSupp = round($this->departureCampagneService->amountHeureSuppByCampagneAndDeparture($departure, $campagne));
-        $primeAnciennete = round($this->departureCampagneService->amountPrimeAncienneteCampagneByDeparture($departure));
-        $salary->setPrimeAciennete((int)$primeAnciennete); // Enregistrer après récuperation la prime d'anciennete dans la table salary.
+        $salaire = $this->paieServices->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne);
+        $baseSalaire = ceil((double)$salaire['salaire_categoriel']);
+        $sursalaire = ceil((double)$salary->getSursalaire() * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK);
+        $majorationHeursSupp = ceil($this->paieServices->getHeureSuppCampagne($personal, $campagne));
+        $primeAnciennete = ceil($this->paieServices->getPrimeAncienneteCampagne($personal, $campagne));
+        $salary->setPrimeAciennete((int)$primeAnciennete); // Enregistrer après récuperation la prime d'anciennete dans la table salary
         $congesPayes = null; // Ajouter ici la fonction qui nous permet d'obtenir le montant de l'allocation en fonction du mois de campagne.
 
 
         /** Ajouter toutes les primes possible  */
-        $primeFonctions = round($this->primeService->getPrimeFonction($personal));
-        $primeLogements = round($this->primeService->getPrimeLogement($personal));
-        $indemniteFonctions = round($this->primeService->getIndemniteFonction($personal));
-        $indemniteLogements = round($this->primeService->getIndemniteLogement($personal));
-        $primeTransportLegal = round($this->primeService->getPrimeTransportLegal() * ($dayOfPresence / $dayOfCurrentMonth));
-        $primeTransportImposable = round(((double)$salary->getPrimeTransport() - $primeTransportLegal));
+        $primeFonctions = ceil($this->primeService->getPrimeFonction($personal) * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK);
+        $primeLogements = ceil($this->primeService->getPrimeLogement($personal) * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK);
+        $indemniteFonctions = ceil($this->primeService->getIndemniteFonction($personal) * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK);
+        $indemniteLogements = ceil($this->primeService->getIndemniteLogement($personal) * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK);
+        $primeTransportLegal = ceil($this->primeService->getPrimeTransportLegal());
+        $primeTransportImposable = ($salary->getPrimeTransport() * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK) >= $primeTransportLegal
+            ? ceil(((double)($salary->getPrimeTransport() * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK) - $primeTransportLegal)) : 0;
         $primePaniers = round($this->primeService->getPrimePanier($personal));
         $primeSalissures = round($this->primeService->getPrimeSalissure($personal));
         $primeTenueTravails = round($this->primeService->getPrimeTT($personal));
@@ -414,7 +420,8 @@ class PayrollService
 
         /** Avantage en nature non imposable */
         $avantageNonImposable = round((double)$salary->getAvantage()?->getTotalAvantage());
-        $avantageNatureImposable = round(((double)$salary?->getAmountAventage() - $avantageNonImposable));
+        $avantageNatureImposable = ($salary?->getAmountAventage() * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK) >= $avantageNonImposable ?
+            round(((double)($salary->getAmountAventage() * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK) - $avantageNonImposable)) : 0;
 
 
         /** Ajouter les charges du salarié ( retenues fiscales et sociales) */
@@ -423,7 +430,7 @@ class PayrollService
         $salaryIts = round($chargePersonal?->getAmountIts());
         $salaryCnps = round($chargePersonal?->getAmountCNPS());
         $salaryCmu = round($chargePersonal?->getAmountCMU());
-        $assuranceSanteSalariale = $this->departureCampagneService->amountAssuranceSanteByDeparture($personal->getDepartures())['assurance_salariale'];
+        $assuranceSanteSalariale = $this->paieServices->amountAssuranceSante($personal)['assurance_salariale'];
         $amountChargFiscalPersonal = $salaryIts;
         $amountChargSocialPersonal = $salaryCnps + $salaryCmu + $assuranceSanteSalariale;
         $chargeSalarie = round($amountChargFiscalPersonal + $amountChargSocialPersonal);
@@ -439,29 +446,37 @@ class PayrollService
         $employeurCR = round($chargeEmployeur?->getAmountCR());
         $employeurPF = round($chargeEmployeur?->getAmountPF());
         $employeurAT = round($chargeEmployeur?->getAmountAT());
-        $assuranceSantePatronale = $this->departureCampagneService->amountAssuranceSanteByDeparture($personal->getDepartures())['assurance_patronale'];
+        $assuranceSantePatronale = $this->paieServices->amountAssuranceSante($personal)['assurance_patronale'];
         $amountChargFiscalPatronale = $employeurIS + $employeurFPC + $employeurFPCAnnuel + $employeurTA;
         $amountChargSocialPatronale = $employeurCMU + $employeurCR + $employeurAT + $employeurPF + $assuranceSantePatronale;
         $chargePatronal = round($amountChargFiscalPatronale + $amountChargSocialPatronale);
 
 
-        $brutImposable = $this->departureCampagneService->netImposableByNbDayOfPresence($departure);
+        /** Ajouter les régularisations sur brut imposable, remboursement ou retenue */
+        $remboursementBrut = $this->paieServices->getRegulRemboursement($personal)['remboursement_brut'];
+        $remboursementNet = $this->paieServices->getRegulRemboursement($personal)['remboursement_net'];
+        $retenueBrut = $this->paieServices->getRegulRetenue($personal)['retenue_brut'];
+        $retenueNet = $this->paieServices->getRegulRetenue($personal)['retenue_net'];
+
         /** Ajouter le salaire brut qui constitue l'ensemble des élements de salaire imposable et non imposable */
-        $salaireBrut = $brutImposable + $majorationHeursSupp + $congesPayes + $primeAnciennete + $primeTransportLegal;
+        $salaireBrut = $baseSalaire + $sursalaire + $majorationHeursSupp + $congesPayes + $primeAnciennete
+            + $primeFonctions + $primeLogements + $indemniteFonctions + $indemniteLogements
+            + $primeTransportImposable + $avantageNatureImposable + $primeTransportLegal + $avantageNonImposable;
 
 
         /** Ajouter le net imposable qui constitue l'ensemble des élements de salaire imposable uniquement */
-        $netImposable = $brutImposable + $majorationHeursSupp + $congesPayes + $primeAnciennete;
+        $netImposable = $baseSalaire + $sursalaire + $majorationHeursSupp + $congesPayes + $primeAnciennete
+            + $primeFonctions + $primeLogements + $indemniteFonctions + $indemniteLogements + $primeTransportImposable
+            + $avantageNatureImposable + $remboursementBrut - $retenueBrut;
 
 
         /** Ajouter le net à payer, total retenue, indemnité de transport et assurance santé du personnel */
-        $netPayer = round($netImposable + $primeTransportLegal + $avantageNonImposable - $chargeSalarie);
-
+        $netPayer = round($netImposable + $primeTransportLegal + $avantageNonImposable - $chargeSalarie + $remboursementNet - $retenueNet);
 
         /** Ajouter la masse salariale */
         $masseSalaried = $netPayer + $chargePatronal + $chargeSalarie;
         $payroll = (new Payroll())
-            ->setDayOfPresence($dayOfPresence)
+            ->setDayOfPresence($dayOfCurrentMonth)
             /** Info personal et campagne */
             ->setPersonal($personal)
             ->setCampagne($campagne)
@@ -519,12 +534,24 @@ class PayrollService
             /** Brut et Net imposable du salarié */
             ->setBrutAmount($salaireBrut)
             ->setImposableAmount($netImposable)
+            /** Regularisation sur net ou brut */
+            ->setRemboursBrut($remboursementBrut)
+            ->setRemboursNet($remboursementNet)
+            ->setRemboursBrut($retenueBrut)
+            ->setRetenueNet($retenueNet)
             /** Net à payer et masse salariale du salarié */
             ->setNetPayer($netPayer)
-            ->setMasseSalary($masseSalaried);
+            ->setMasseSalary($masseSalaried)
+            ->setStatus(Status::PAYE);
+
+
         /** Enregistrement du livre de paie */
+
         $this->manager->persist($payroll);
         $this->manager->persist($salary);
+
+        return $payroll;
+    
     }
 
     public function setPayrollOfDeparture(Personal $personal, Campagne $campagne): void
