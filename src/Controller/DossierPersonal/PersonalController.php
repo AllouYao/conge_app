@@ -149,7 +149,8 @@ class PersonalController extends AbstractController
                 'action' => $this->generateUrl('personal_print_salary_info', ['uuid' => $item['uuid']]),
                 'modifier' => $this->generateUrl('personal_edit', ['uuid' => $item['uuid']]),
                 'active' => $item['active'],
-                'personal_id' => $item['personal_id']
+                'personal_id' => $item['personal_id'],
+                'all_enable' => $this->personalRepository->areAllUsersActivated()
 
 
             ];
@@ -160,7 +161,12 @@ class PersonalController extends AbstractController
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(): Response
     {
-        return $this->render('dossier_personal/personal/index.html.twig');
+        $status  = $this->personalRepository->areAllUsersActivated();
+
+        //dd(['staus'=>$status]);
+        return $this->render('dossier_personal/personal/index.html.twig',[
+            'status'=>$status
+        ]);
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
@@ -304,12 +310,13 @@ class PersonalController extends AbstractController
         return $this->redirectToRoute('personal_index');
 
     }
-    #[Route('/disable/all', name: 'disable_all', methods: ['POST'])]
+    #[Route('/toggle/all', name: 'toggle_all', methods: ['POST'])]
     public function disableAll(Request $request, EntityManagerInterface $entityManager): Response
     {
-        if ($request->request->has('disableAllInput') && $request->isMethod('POST')) {
+        if ($request->request->has('toggleAllInput') && $request->isMethod('POST')) {
 
-            $status = $request->request->get("disableAllInput");
+            $status = $request->request->get("toggleAllInput");
+
             if($status == "on"){
 
                 $personals = $this->personalRepository->findAll();
@@ -339,4 +346,5 @@ class PersonalController extends AbstractController
         return $this->redirectToRoute('personal_index');
 
     }
+   
 }

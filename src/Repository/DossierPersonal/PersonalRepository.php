@@ -294,4 +294,21 @@ class PersonalRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    public function areAllUsersActivated(): bool
+    {
+        $countActivatedUsers = $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.active = :isActive')
+            ->setParameter('isActive', true)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $countAllUsers = $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $countActivatedUsers == $countAllUsers;
+    }
+   
 }

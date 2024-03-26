@@ -16,3 +16,11 @@ $(document).on('click', '.toggle-disable-all ', function() {
     $('#disableAllInput').val(personalId);
     $('#disableALL').submit();
 }); 
+$(document).on('click', '#toggleAllPersonals', function() {
+    $('#toggleAllInput').val($(this).val());
+    $('#toggleAll').submit();
+}); 
+
+$(document).ready(function(){
+    //alert()
+});
