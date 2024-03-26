@@ -217,6 +217,9 @@ class Payroll
 
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $retenueBrut = null;
+    
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $status = null;
 
     public function getId(): ?int
     {
@@ -999,6 +1002,17 @@ class Payroll
     public function setRetenueBrut(?string $retenueBrut): static
     {
         $this->retenueBrut = $retenueBrut;
+
+        return $this;
+    }
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?string $status): static
+    {
+        $this->status = $status;
 
         return $this;
     }

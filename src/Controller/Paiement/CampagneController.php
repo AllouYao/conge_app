@@ -190,6 +190,17 @@ class CampagneController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
+            $fullDate = new DateTime();
+
+            $day = 1;
+            $month = $fullDate->format('m');
+            $year = $fullDate->format('Y');
+
+            $dateOfMonth = new DateTime($day.'-'.''.$month.'-'.$year);
+
+            $previousCampagne = $this->campagneRepository->findLast();
+
+
             $countPersonal = $form->get('personal')->count();
 
             $personals = $form->get('personal')->getData();
@@ -199,13 +210,23 @@ class CampagneController extends AbstractController
             if($countPersonal>0){
 
                 foreach ($personals as $personal) {
+                    
                     $dateEmbauche = $personal->getContract()->getDateEmbauche();
-                    if ($dateEmbauche > $campagne->getDateDebut() && $dateEmbauche <= $campagne->getDateFin()) {
+
+                    //personnel arrivé avant le debut de la campagne passée
+
+                    if( ($dateEmbauche > $previousCampagne?->getStartedAt()) && $previousCampagne){
+
+                        $this->payrollService->setExtraMonthPayroll($personal, $campagne);
+
+                    //personnel arrivé entre le debut de la campagne en cour
+                    }elseif ( ($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt()) {
 
                         $this->payrollService->setProrataPayroll($personal, $campagne);
 
                     } else {
-    
+                    //personnel normal 
+
                         $this->payrollService->setPayroll($personal, $campagne);
     
                     }
