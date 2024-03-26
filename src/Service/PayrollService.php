@@ -303,7 +303,7 @@ class PayrollService
 
 
         /** Ajouter le net à payer, total retenue, indemnité de transport et assurance santé du personnel */
-        $netPayer = ceil($netImposable + $primeTransportLegal + $avantageNonImposable - $chargeSalarie);
+        $netPayer = ceil($netImposable + $primeTransportLegal + $avantageNonImposable - $chargeSalarie + $primeTenueTravails + $primeSalissures + $primeOutillages + $primeRendement + $primePaniers);
 
         /** Ajouter la masse salariale */
         $masseSalaried = $netPayer + $chargePatronal + $chargeSalarie;
