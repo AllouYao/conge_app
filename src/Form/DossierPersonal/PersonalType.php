@@ -191,7 +191,7 @@ class PersonalType extends AbstractType
                     'SUPERVISEUR' => Status::SUPERVISEUR,
                     'RESPONSABLE DES MOYENS GENERAUX' => Status::RMG,
                     'COMPTABLE' => Status::COMPTABLE,
-                    'ASSISTANT COMPTABLE' => Status::ASSISTANT_COMT
+                    'ASSISTANT COMPTABLE' => Status::ASSISTANT_COMT,
                 ],
                 'placeholder' => 'Sélectionner une fonction'
             ])

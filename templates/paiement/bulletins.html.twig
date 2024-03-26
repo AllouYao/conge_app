@@ -317,7 +317,7 @@
                                 {% if payrolls.remboursement_brut != 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>O28</td>
-                                        <td>Remboursement sur brut (Regul.)</td>
+                                        <td>Remboursement sur brut (Moins perçus)</td>
                                         <td class="text-end"></td>
                                         <td class="text-end">{{ payrolls.remboursement_brut|number_format(0, ',', ' ') }}</td>
                                         <td></td>
@@ -330,12 +330,12 @@
                                 {% if payrolls.retenue_brut != 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>O29</td>
-                                        <td>Retenue sur brut (Regul.)</td>
+                                        <td>Retenue sur brut (Moins perçus)</td>
                                         <td class="text-end"></td>
                                         <td class="text-end">{{ payrolls.retenue_brut|number_format(0, ',', ' ') }}</td>
                                         <td></td>
-                                        <td class="text-end">{{ payrolls.retenue_brut|number_format(0, ',', ' ') }}</td>
                                         <td></td>
+                                        <td class="text-end">{{ payrolls.retenue_brut|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td></td>
                                     </tr>
@@ -609,12 +609,12 @@
                                 {% if payrolls.retenue_net != 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>026</td>
-                                        <td>Retenue sur salaire (Regul.)</td>
+                                        <td>Retenue sur salaire (Trop perçus)</td>
                                         <td class="text-end"></td>
                                         <td></td>
                                         <td></td>
-                                        <td class="text-end">{{ payrolls.retenue_net|number_format(0, ',', ' ') }}</td>
                                         <td></td>
+                                        <td class="text-end">{{ payrolls.retenue_net|number_format(0, ',', ' ') }}</td>
                                         <td></td>
                                         <td></td>
                                     </tr>
@@ -622,7 +622,7 @@
                                 {% if payrolls.remboursement_net != 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>027</td>
-                                        <td>Remboursement sur salaire (Regul.)</td>
+                                        <td>Remboursement sur salaire (Moins perçus)</td>
                                         <td class="text-end"></td>
                                         <td></td>
                                         <td></td>
@@ -705,6 +705,7 @@
                             </table>
                         </div>
                         <div class="col-md-12" style="display: flex">
+                            {#
                             <div class="col-md-8" style="margin-right: 5px">
                                 <table class="table table-bordered table-sm" style="border: #0b0b0f solid 1px">
                                     <tbody>
@@ -731,6 +732,8 @@
                                     </tbody>
                                 </table>
                             </div>
+
+                            #}
                             <div class="col-md-4">
                                 <table class="table table-borderless table-sm">
                                     <tbody>
