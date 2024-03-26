@@ -49,6 +49,7 @@ class PayrollService
     /**
      * @param Personal $personal
      * @param Campagne $campagne
+     * @return Payroll
      * @throws Exception
      */
     public function setPayroll(Personal $personal, Campagne $campagne): Payroll
@@ -143,7 +144,7 @@ class PayrollService
 
 
         /** Ajouter le net à payer, total retenue, indemnité de transport et assurance santé du personnel */
-        $netPayer = round($netImposable + $primeTransportLegal + $avantageNonImposable - $chargeSalarie + $remboursementNet - $retenueNet);
+        $netPayer = round($netImposable + $primeTransportLegal + $avantageNonImposable - $chargeSalarie + $remboursementNet - $retenueNet + $primePaniers + $primeRendement + $primeOutillages + $primeSalissures + $primeTenueTravails);
 
         /** Ajouter la masse salariale */
         $masseSalaried = $netPayer + $chargePatronal + $chargeSalarie;

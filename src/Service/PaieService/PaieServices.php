@@ -37,7 +37,6 @@ class PaieServices
     public function getProvisoireBrutAndBrutImpoCampagne(Personal $personal, Campagne $campagne): array
     {
         $dayOfPresence = self::NR_JOUR_TRAVAILLER;
-        $newDayOfPresence = 0;
         $date = $campagne->getDateDebut();
         $month = (int)$date->format('m');
         $year = (int)$date->format('Y');
