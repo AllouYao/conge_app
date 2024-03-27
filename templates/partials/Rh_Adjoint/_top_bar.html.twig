@@ -68,7 +68,8 @@
                                     </div>
                                 </div>
                             </div>
-                            {# <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Etat des Primes et indemnités</a> #}
+                            <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Primes et indemnités</a>
+                            {# #}
                         </div>
                     </li>
                     <li class="nav-item dropdown">
@@ -85,6 +86,20 @@
                                     <div class="arrow-down"></div>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <div class="dropdown">
+                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                           aria-expanded="false">
+                                            Régularisations
+                                            <div class="arrow-down"></div>
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                            <a href="{{ path('reporting_paie_validated_remboursement') }}"
+                                               class="dropdown-item">Reversement (Moins perçus)</a>
+                                            <a href="{{ path('reporting_paie_validated_retenue_salaires') }}"
+                                               class="dropdown-item">Retenue (Trop perçus)</a>
+                                        </div>
+                                    </div>
                                     <a href="{{ path('campagne_livre') }}"
                                        class="dropdown-item">Livre de paie de la periode</a>
                                     <a href="{{ path('campagne_print_all_bulletin') }}"
