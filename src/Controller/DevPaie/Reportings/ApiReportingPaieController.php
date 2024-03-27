@@ -35,7 +35,7 @@ class ApiReportingPaieController extends AbstractController
                 'prenom_salarie' => $remboursement['lastname_personal'],
                 'station_salarie' => $remboursement['stations_personal'],
                 'remboursement_montant_brut' => (int)$remboursement['montant_brut'] ?? 0,
-                'remboursement_montant-net' => (int)$remboursement['montant_net'] ?? 0,
+                'remboursement_montant_net' => (int)$remboursement['montant_net'] ?? 0,
                 'remboursement_status' => $remboursement['status_operation']
             ];
         }
@@ -60,7 +60,7 @@ class ApiReportingPaieController extends AbstractController
                 'prenom_salarie' => $remboursement['lastname_personal'],
                 'station_salarie' => $remboursement['stations_personal'],
                 'remboursement_montant_brut' => (int)$remboursement['montant_brut'] ?? 0,
-                'remboursement_montant-net' => (int)$remboursement['montant_net'] ?? 0,
+                'remboursement_montant_net' => (int)$remboursement['montant_net'] ?? 0,
                 'remboursement_status' => $remboursement['status_operation']
             ];
         }
