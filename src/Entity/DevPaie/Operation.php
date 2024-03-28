@@ -9,6 +9,7 @@ use App\Repository\DevPaie\OperationRepository;
 use App\Utils\Horodatage;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: OperationRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -44,8 +45,29 @@ class Operation
     private ?string $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'operations')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Campagne $campagne = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 3, nullable: true)]
+    private ?string $amount = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 3, nullable: true)]
+    private ?string $amountMensualite = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\Range(
+        min: 1
+    )]
+    private ?int $nbMensualite = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 3, nullable: true)]
+    private ?string $remaining = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $statusPay = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 3, nullable: true)]
+    private ?string $amountRefund = null;
 
     public function getId(): ?int
     {
@@ -144,6 +166,78 @@ class Operation
     public function setCampagne(?Campagne $campagne): static
     {
         $this->campagne = $campagne;
+
+        return $this;
+    }
+
+    public function getAmount(): ?string
+    {
+        return $this->amount;
+    }
+
+    public function setAmount(?string $amount): static
+    {
+        $this->amount = $amount;
+
+        return $this;
+    }
+
+    public function getAmountMensualite(): ?string
+    {
+        return $this->amountMensualite;
+    }
+
+    public function setAmountMensualite(?string $amountMensualite): static
+    {
+        $this->amountMensualite = $amountMensualite;
+
+        return $this;
+    }
+
+    public function getNbMensualite(): ?int
+    {
+        return $this->nbMensualite;
+    }
+
+    public function setNbMensualite(?int $nbMensualite): static
+    {
+        $this->nbMensualite = $nbMensualite;
+
+        return $this;
+    }
+
+    public function getRemaining(): ?string
+    {
+        return $this->remaining;
+    }
+
+    public function setRemaining(?string $remaining): static
+    {
+        $this->remaining = $remaining;
+
+        return $this;
+    }
+
+    public function getStatusPay(): ?string
+    {
+        return $this->statusPay;
+    }
+
+    public function setStatusPay(?string $statusPay): static
+    {
+        $this->statusPay = $statusPay;
+
+        return $this;
+    }
+
+    public function getAmountRefund(): ?string
+    {
+        return $this->amountRefund;
+    }
+
+    public function setAmountRefund(?string $amountRefund): static
+    {
+        $this->amountRefund = $amountRefund;
 
         return $this;
     }
