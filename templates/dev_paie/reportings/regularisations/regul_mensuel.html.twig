@@ -202,18 +202,30 @@
                         {
                             column: 'net_payer_avant_regularisation',
                             summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
                         },
                         {
                             column: 'regul_moins_percus',
                             summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
                         },
                         {
                             column: 'regul_plus_percus',
                             summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
                         },
                         {
                             column: 'net_payer_apres_regularisation',
                             summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
                         },
 
                     ]
