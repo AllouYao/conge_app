@@ -1,0 +1,225 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Etat des régularisations{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridRegularisation {
+            border-width: 50px;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        ETAT DES REGULARISATIONS DU MOIS DE {{ date|upper }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="card-body">
+                        <div id="dataGridRegularisation"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        $(document).ready(function () {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+
+            $("#dataGridRegularisation").dxDataGrid({
+                dataSource: `{{ url('api_reporting_paie_regularisation_mensuel') }}`,
+                showBorders: true,
+                showColumnLines: true,
+                showRowLines: true,
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                rowAlternationEnabled: true,
+                height: 355,
+                scrolling: {
+                    columnRenderingMode: 'virtual',
+                    mode: "virtual",
+                },
+                selection: {
+                    mode: 'multiple',
+                    showCheckBoxesMode: 'always',
+                    allowSelectAll: true
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('ETAT DES REGULARISATIONS');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                            customizeCell: function (options) {
+                                const {gridCell, excelCell} = options;
+                                if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
+                                    excelCell.text = formatNumber(gridCell.value)
+                                    excelCell.font = {size: 9};
+                                    excelCell.alignment = {horizontal: 'left'};
+                                }
+                            }
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then(function (buffer) {
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `Etat des régularisations ${year}-${month < 10 ? '0' : ''}${month}-${day}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                paging: {
+                    pageSize: 10,
+                },
+                columns: [
+                    {
+                        caption: 'S/N',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'ordre'
+                    },
+                    {
+                        caption: 'Date Opération',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_operations'
+                    },
+                    {
+                        caption: 'Emolument',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'type_operations'
+                    },
+                    {
+                        caption: 'Matricule',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'matricule_salarie'
+                    },
+                    {
+                        caption: 'Nom & Prénoms',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'full_name_salaried'
+                    },
+                    {
+                        caption: 'Site',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'station_salarie'
+                    },
+                    {
+                        caption: 'Salaire net avant régul.',
+                        alignment: 'right',
+                        dataType: 'number',
+                        dataField: 'net_payer_avant_regularisation'
+                    },
+                    {
+                        caption: 'Régularisations sur salaire',
+                        alignment: 'center',
+                        columns: [
+                            {
+                                caption: 'Moins perçus',
+                                alignment: 'right',
+                                dataType: 'number',
+                                dataField: 'regul_moins_percus'
+                            },
+                            {
+                                caption: 'Plus perçus',
+                                alignment: 'right',
+                                dataType: 'number',
+                                dataField: 'regul_plus_percus'
+                            },
+                        ]
+
+                    },
+                    {
+                        caption: 'Salaire net après régul.',
+                        alignment: 'right',
+                        dataType: 'number',
+                        dataField: 'net_payer_apres_regularisation'
+                    },
+                    {
+                        caption: 'Statut',
+                        alignment: 'center',
+                        dataType: 'object',
+                        dataField: 'retenue_status',
+                        cellTemplate: function (container, options) {
+                            const status = options.value;
+                            let badgeClass = 'badge badge-soft-success';
+                            $("<span>")
+                                .addClass(badgeClass)
+                                .text(status)
+                                .appendTo(container);
+                        }
+                    }
+                ],
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'ordre',
+                            summaryType: 'count',
+                            displayFormat: 'Salariés : {0}'
+                        },
+                        {
+                            column: 'full_name_salaried',
+                            customizeText() {
+                                return 'CUMUL ';
+                            }
+                        },
+                        {
+                            column: 'net_payer_avant_regularisation',
+                            summaryType: 'sum',
+                        },
+                        {
+                            column: 'regul_moins_percus',
+                            summaryType: 'sum',
+                        },
+                        {
+                            column: 'regul_plus_percus',
+                            summaryType: 'sum',
+                        },
+                        {
+                            column: 'net_payer_apres_regularisation',
+                            summaryType: 'sum',
+                        },
+
+                    ]
+                },
+            })
+        })
+    </script>
+
+{% endblock %}

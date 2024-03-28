@@ -3,6 +3,7 @@
 namespace App\Controller\DevPaie\Reporting;
 
 use App\Repository\DevPaie\OperationRepository;
+use App\Repository\Paiement\PayrollRepository;
 use App\Utils\Status;
 use Carbon\Carbon;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,7 +14,8 @@ use Symfony\Component\Routing\Annotation\Route;
 class ApiReportingPaieController extends AbstractController
 {
     public function __construct(
-        private readonly OperationRepository $operationRepository
+        private readonly OperationRepository $operationRepository,
+        private readonly PayrollRepository   $payrollRepository
     )
     {
     }
@@ -117,5 +119,33 @@ class ApiReportingPaieController extends AbstractController
         }
 
         return new JsonResponse($dataRetenueSalaire);
+    }
+
+    #[Route('/regularisation_mensuel', 'regularisation_mensuel', methods: ['GET'])]
+    public function regulSalaire(): JsonResponse
+    {
+        $today = Carbon::today();
+        $requestOperationRegularisation = $this->payrollRepository->findOperationByPayroll([Status::RETENUES, Status::REMBOURSEMENT], Status::VALIDATED, $today->month, $today->year);
+        $dataRegularisation = [];
+
+        foreach ($requestOperationRegularisation as $ordre => $regularisation) {
+            $regulMoins= (int)$regularisation['remboursement_net'];
+            $regulPlus =  (int)$regularisation['retenue_net'];
+            $dataRegularisation[] = [
+                'ordre' => ++$ordre,
+                'date_operations' => $regularisation['date_operation'],
+                'type_operations' => $regularisation['type_operations'],
+                'matricule_salarie' => $regularisation['matricule_personal'],
+                'full_name_salaried' => $regularisation['name_personal'] . ' ' . $regularisation['lastname_personal'],
+                'station_salarie' => $regularisation['stations_personal'],
+                'regul_moins_percus' => $regulMoins,
+                'regul_plus_percus' => $regulPlus,
+                'net_payer_apres_regularisation' => (int)$regularisation['net_payer'] ?? 0,
+                'net_payer_avant_regularisation' => (int)$regularisation['net_payer'] - $regulMoins + $regulPlus,
+                'retenue_status' => $regularisation['status_operation']
+            ];
+        }
+
+        return new JsonResponse($dataRegularisation);
     }
 }

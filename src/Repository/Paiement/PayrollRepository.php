@@ -427,4 +427,37 @@ class PayrollRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    public function findOperationByPayroll(array $type, string $status, int $month, int $year): ?array
+    {
+        return $this->createQueryBuilder('payroll')
+            ->select([
+                'DATE(op.dateOperation) as date_operation',
+                'op.typeOperations as type_operations',
+                'personal.matricule as matricule_personal',
+                'personal.firstName as name_personal',
+                'personal.lastName as lastname_personal',
+                'personal.service as stations_personal',
+                'payroll.remboursNet as remboursement_net',
+                'payroll.remboursBrut as remboursement_brut',
+                'payroll.retenueNet as retenue_net',
+                'payroll.retenueBrut as retenue_brut',
+                'op.status as status_operation',
+                'op.id as operation_id',
+                'payroll.netPayer as net_payer'
+            ])
+            ->join('payroll.personal', 'personal')
+            ->join('personal.operations', 'op')
+            ->where('op.typeOperations IN (:types)')
+            ->andWhere('op.status IN (:status)')
+            ->andWhere('YEAR(op.dateOperation) = :year')
+            ->andWhere('MONTH(op.dateOperation) = :month')
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
+            ->setParameter('types', $type)
+            ->setParameter('status', $status)
+            ->orderBy('op.typeOperations')
+            ->getQuery()
+            ->getResult();
+    }
+
 }
