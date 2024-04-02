@@ -104,6 +104,7 @@ class CampagneController extends AbstractController
                 'matricule' => $item->getMatricule(),
                 'full_name_salaried' => $item->getPersonal()->getFirstName() . ' ' . $item->getPersonal()->getLastName(),
                 'service' => $item->getService(),
+                'poste' => $item->getDepartement(),
                 'category_salaried' => $item->getCategories(),
                 'number_part_salaried' => $item->getNumberPart(),
                 'date_embauche' => date_format($item->getDateEmbauche(), 'd/m/Y'),
