@@ -11,7 +11,6 @@ use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Repository\Paiement\CampagneRepository;
 use App\Repository\Paiement\PayrollRepository;
-use App\Service\PaieService\PaieByPeriodService;
 use App\Service\PayrollService;
 use App\Utils\Status;
 use DateTime;
@@ -160,7 +159,7 @@ class CampagneController extends AbstractController
      * @throws Exception
      */
     #[Route('/paiement/campagne/open', name: 'open_campagne', methods: ['GET', 'POST'])]
-    public function openCompleteExercice(Request $request, EntityManagerInterface $manager, PaieByPeriodService $paieByPeriodService): Response
+    public function openCompleteExercice(Request $request, EntityManagerInterface $manager): Response
     {
 
         $ordinaryCampagne = $this->campagneRepository->getOrdinaryCampagne();
@@ -197,39 +196,39 @@ class CampagneController extends AbstractController
             $month = $fullDate->format('m');
             $year = $fullDate->format('Y');
 
-            $dateOfMonth = new DateTime($day.'-'.''.$month.'-'.$year);
+            $dateOfMonth = new DateTime($day . '-' . $month . '-' . $year);
 
             $previousCampagne = $this->campagneRepository->findLast();
 
 
-            $countPersonal = $form->get('personal')->count();
+            //$countPersonal = $form->get('personal')->count();
 
             $personals = $form->get('personal')->getData();
             $countPersonal = count($personals);
 
-            
-            if($countPersonal>0){
+
+            if ($countPersonal > 0) {
 
                 foreach ($personals as $personal) {
-                    
+
                     $dateEmbauche = $personal->getContract()->getDateEmbauche();
 
                     //personnel arrivé avant le debut de la campagne passée
 
-                    if( ($dateEmbauche > $previousCampagne?->getStartedAt()) && $previousCampagne){
+                    if (($dateEmbauche > $previousCampagne?->getStartedAt()) && $previousCampagne) {
 
                         $this->payrollService->setExtraMonthPayroll($personal, $campagne);
 
-                    //personnel arrivé entre le debut de la campagne en cour
-                    }elseif ( ($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt()) {
+                        //personnel arrivé entre le debut de la campagne en cour
+                    } elseif (($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt()) {
 
                         $this->payrollService->setProrataPayroll($personal, $campagne);
 
                     } else {
-                    //personnel normal 
+                        //personnel normal
 
                         $this->payrollService->setPayroll($personal, $campagne);
-    
+
                     }
 
                 }
@@ -242,14 +241,14 @@ class CampagneController extends AbstractController
                 $manager->flush();
                 flash()->addSuccess('Paie ouverte avec succès.');
                 return $this->redirectToRoute('app_home');
-                
-            }else{
-                
+
+            } else {
+
                 flash()->addWarning('Aucun personnel sélectionné!');
                 return $this->redirectToRoute('campagne_open_campagne');
 
             }
-            
+
         }
 
         return $this->render('paiement/campagne/open.html.twig', [

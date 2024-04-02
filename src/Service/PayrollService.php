@@ -2,13 +2,11 @@
 
 namespace App\Service;
 
-use App\Entity\DossierPersonal\Departure;
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Campagne;
 use App\Entity\Paiement\Payroll;
 use App\Repository\Impots\ChargeEmployeurRepository;
 use App\Repository\Impots\ChargePersonalsRepository;
-use App\Service\CasExeptionel\DepartureCampagneService;
 use App\Service\PaieService\PaieByPeriodService;
 use App\Service\PaieService\PaieServices;
 use App\Service\Personal\PrimeService;
@@ -24,7 +22,6 @@ class PayrollService
     private ChargePersonalsRepository $chargePersonalsRepository;
     private PrimeService $primeService;
     private PaieServices $paieServices;
-    private DepartureCampagneService $departureCampagneService;
     private PaieByPeriodService $paieByPeriodService;
 
 
@@ -34,7 +31,6 @@ class PayrollService
         ChargePersonalsRepository $chargePersonalsRepository,
         PrimeService              $primeService,
         PaieServices              $paieServices,
-        DepartureCampagneService  $departureCampagneService,
         PaieByPeriodService       $paieByPeriodService
     )
     {
@@ -43,7 +39,6 @@ class PayrollService
         $this->chargePersonalsRepository = $chargePersonalsRepository;
         $this->primeService = $primeService;
         $this->paieServices = $paieServices;
-        $this->departureCampagneService = $departureCampagneService;
         $this->paieByPeriodService = $paieByPeriodService;
     }
 
@@ -145,7 +140,7 @@ class PayrollService
 
 
         /** Ajouter le net à payer, total retenue, indemnité de transport et assurance santé du personnel */
-        $netPayer = ceil($netImposable + $primeTransportLegal + $avantageNonImposable - $chargeSalarie + $remboursementNet - $retenueNet + $primePaniers + $primeRendement + $primeOutillages + $primeSalissures + $primeTenueTravails);
+        $netPayer = ceil($netImposable + $primeTransportLegal + $avantageNonImposable + $primePaniers + $primeRendement + $primeOutillages + $primeSalissures + $primeTenueTravails + $remboursementNet - ($chargeSalarie + $retenueNet));
 
         /** Ajouter la masse salariale */
         $masseSalaried = $netPayer + $chargePatronal + $chargeSalarie;
@@ -237,7 +232,7 @@ class PayrollService
         $dayOfPresence = $this->paieByPeriodService->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne)['nb_jour_presence'];
 
         /** Ajouter les Informations utile du salarié */
-        $matricule = $personal->getMatricule();  
+        $matricule = $personal->getMatricule();
         $service = $personal->getService();
         $categorie = '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ') - ' . $personal->getCategorie()->getIntitule();
         $departement = $personal->getFonction();
@@ -306,7 +301,7 @@ class PayrollService
 
 
         /** Ajouter le net à payer, total retenue, indemnité de transport et assurance santé du personnel */
-        $netPayer = ceil($netImposable + $primeTransportLegal + $avantageNonImposable - $chargeSalarie + $primeTenueTravails + $primeSalissures + $primeOutillages + $primeRendement + $primePaniers);
+        $netPayer = ceil(($netImposable + $primeTransportLegal + $avantageNonImposable + $primeTenueTravails + $primeSalissures + $primeOutillages + $primeRendement + $primePaniers) - $chargeSalarie);
 
         /** Ajouter la masse salariale */
         $masseSalaried = $netPayer + $chargePatronal + $chargeSalarie;
@@ -373,6 +368,10 @@ class PayrollService
         /** Enregistrement du livre de paie */
         $this->manager->persist($payroll);
     }
+
+    /**
+     * @throws Exception
+     */
     public function setExtraMonthPayroll(Personal $personal, Campagne $campagne): Payroll
     {
         $lastWorkDay = $personal->getContract()->getDateEmbauche();
@@ -384,7 +383,7 @@ class PayrollService
 
         /** Nombre de jour travailler pendant la periode current de paie */
         $dayOfCurrentMonth = $this->paieServices->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne)['day_of_presence'];
-        $dayOfCurrentMonth =  $dayOfCurrentMonth+$lastWorkDay;
+        $dayOfCurrentMonth = $dayOfCurrentMonth + $lastWorkDay;
         /** Ajouter les Informations utile du salarié */
         $matricule = $personal->getMatricule();
         $service = $personal->getService();
@@ -552,7 +551,7 @@ class PayrollService
         $this->manager->persist($salary);
 
         return $payroll;
-    
+
     }
 
     public function setPayrollOfDeparture(Personal $personal, Campagne $campagne): void

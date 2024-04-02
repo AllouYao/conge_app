@@ -2,6 +2,7 @@
 
 namespace App\Controller\DevPaie\Reporting;
 
+use App\Repository\DossierPersonal\PersonalRepository;
 use Carbon\Carbon;
 use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -43,6 +44,14 @@ class ReportingPaieController extends AbstractController
         $date = $formatter->format($today);
         return $this->render('dev_paie/reportings/regularisations/regul_mensuel.html.twig', [
             'date' => $date,
+        ]);
+    }
+
+    #[Route('/regularisation_salaire_periodique', name: 'regularisation_salaire_periodique', methods: ['POST', 'GET'])]
+    public function viewEtatPeriodiqueRegularisation(PersonalRepository $personalRepository): Response
+    {
+        return $this->render('dev_paie/reportings/regularisations/regul_periodique.html.twig', [
+            'personals' => $personalRepository->findAllPersonalOnCampain()
         ]);
     }
 }
