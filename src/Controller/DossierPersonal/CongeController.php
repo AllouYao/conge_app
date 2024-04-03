@@ -106,6 +106,7 @@ class CongeController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
 
             $personal = $conge->getPersonal();
+            dd($personal);
             $lastConge = $congeRepository->getLastCongeByID($personal->getId(), false);
             $lastDateReturn = !$lastConge ? $conge->getDateRetour() : $lastConge->getDateDernierRetour();
             /** Verifier si le salarié sélectionner est déjà en congés */
@@ -137,7 +138,7 @@ class CongeController extends AbstractController
                 ->setIsConge(true)
                 ->setUser($currentUser);
 
-            if($conge->getTypeConge()=="Partiel"){ 
+            if($conge->getTypeConge()=="Partiel"){  
                  
                 $partialLeave = new CongePartiel();
                 $partialLeave->setDateDepart($conge->getDateDepart())

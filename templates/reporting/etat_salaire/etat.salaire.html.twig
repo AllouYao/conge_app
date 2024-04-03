@@ -24,7 +24,7 @@
                         {{ include('reporting/etat_salaire/form.html.twig') }}
                     </div>
                     <div class="card-footer">
-                        <button class="btn btn-primary float-end">Rechercher</button>
+                        <button id="btn_reporting_etat_salaire" class="btn btn-primary float-end">Rechercher</button>
                     </div>
                 </div>
             </form>
@@ -42,6 +42,13 @@
                 <div class="card-body">
                     <div id="dataGridEtatSalaire">Cliquer sur recherche pour afficher le tableau</div>
                 </div>
+                <div class="card-footer">
+                    <div id="normal-contained" class="float-end"></div>
+                </div>
+                <form method="POST" action="{{ path('campagne_print_bulletin_etat_salaire') }}" id="formPrintEtatSalaire">
+                    <input type="hidden" id="printEtatSalaireInput" name="printEtatSalaireInput">
+                    <input type="hidden" id="personalsIdInput" name="personalsIdInput">
+                </form>
             </div>
         </div>
     </div>
@@ -62,7 +69,7 @@
             const fin = tab2_fin[1];
 
             $('#head').html(`du ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')} `);
-            $('#dataGridEtatSalaire').dxDataGrid({
+              const dataGrid = $('#dataGridEtatSalaire').dxDataGrid({
                 dataSource: `{{ url('api_reporting_etat_salaire') }}?${$data}`,
                 showBorders: true,
                 showColumnLines: true,
@@ -116,6 +123,7 @@
                         e.cancel = true;
                     }
                 },
+              
                 columns: [
                     {
                         dataField: "index",
@@ -510,6 +518,15 @@
                         },
 
                     ]
+                }
+            }).dxDataGrid('instance');
+            $("#normal-contained").dxButton({
+                stylingMode: 'contained',
+                text: 'Imprimer bulletins',
+                type: 'default',
+                width: 120,
+                onClick() {
+                    $("#formPrintEtatSalaire").submit();
                 }
             });
         });

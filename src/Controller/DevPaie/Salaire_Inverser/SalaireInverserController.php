@@ -2,13 +2,14 @@
 
 namespace App\Controller\DevPaie\Salaire_Inverser;
 
-use App\Repository\Impots\CategoryChargeRepository;
-use App\Repository\Settings\CategoryRepository;
+use App\Utils\Status;
 use App\Repository\Settings\SmigRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Repository\Settings\CategoryRepository;
+use App\Repository\Impots\CategoryChargeRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/salaire_inverser', name: 'salaire_inverse_')]
 class SalaireInverserController extends AbstractController
@@ -25,18 +26,24 @@ class SalaireInverserController extends AbstractController
     public function makeInverseSalary(Request $request): Response
     {
 
-        $impotBrut = $creditImpot = $impotNet = $amountCnps = $salaireBrut = $sursalaire = null;
+        $salaireNetInput = $salaireNet = $impotBrut = $creditImpot = $impotNet = $amountCnps = $salaireBrut = $sursalaire = $transport= 0;
+
+
+
         // $salaireNet = $nbPart = $transportLegal = $categorySalary = $amountCategoriel = $amountPrime = $assurance
         // Options pour le champ prime_juridique
+
         $primes = [
             ['id' => 1, 'value' => 1298, 'label' => 'Prime de panier'],
             ['id' => 2, 'value' => 5625, 'label' => 'Prime de salissure'],
             ['id' => 3, 'value' => 3029, 'label' => 'Prime de tenue travail'],
             ['id' => 4, 'value' => 4237, 'label' => 'Prime de outillage']
         ];
+
         $selectionsPrime = [];
         if ($request->isMethod('POST')) {
             $salaireNet = (int)$request->get('salaire_net');
+            $salaireNetInput = $salaireNet;
             $nbPart = (double)$request->get('nombre_part');
             $transportLegal = (int)$request->get('transport_legal');
             $categorySalary = $request->get('categorie_salarial');
@@ -46,26 +53,28 @@ class SalaireInverserController extends AbstractController
             foreach ($selectionsPrime as $selection) {
                 $amountPrime += (int)$selection;
             }
-            $assurance = (int)$request->get('assurance');
-
-            // calculer l'ITS net la cnps
+            //calcul
+            $transport = $transportLegal - 30000;
+            $salaireNet = $salaireNet + $transport - $transportLegal;
+            $salaireNet -= $amountPrime;
             $impotBrut = $this->amountImpotBrutInverse($salaireNet);
             $creditImpot = $this->amountCreditImpotInverse($nbPart);
-            $impotNet = $impotBrut - $creditImpot;
+            $impotNet = $impotBrut - $creditImpot; 
             if ($impotNet < 0) {
                 $impotNet = 0;
             }
+            $assurance = (int)$request->get('assurance');
             $amountCnps = $this->amountCNPSInverse($salaireNet);
 
             // Determination du brut inverser et le sursalaire
-            $salaireBrut = $salaireNet - $transportLegal - $amountPrime + $impotNet + $amountCnps + $assurance;
+            $salaireBrut = $salaireNet + $impotNet + $amountCnps + $assurance + $transportLegal;
             $sursalaire = $salaireBrut > $amountCategoriel ? $salaireBrut - $amountCategoriel : 0;
 
             $smig = $this->smigRepository->active();
             if ($salaireBrut < $smig->getAmount()) {
                 flash()->addInfo('le salaire brut ne peut être inférieur au salaire catégoriel. Veuillez faire une autre manipulation merci !');
                 return $this->redirectToRoute('salaire_inverse_net_inverser', [
-                    'salaire_net' => $salaireNet,
+                    'salaire_net' => $salaireNetInput,
                     'nombre_part' => $nbPart,
                     'transport_legal' => $transportLegal,
                     'categorie_salaire' => $categorySalary,
@@ -82,7 +91,7 @@ class SalaireInverserController extends AbstractController
             } else {
                 flash()->addSuccess('Salaire brut obtenue avec sussès .');
                 return $this->redirectToRoute('salaire_inverse_net_inverser', [
-                    'salaire_net' => $salaireNet,
+                    'salaire_net' => $salaireNetInput,
                     'nombre_part' => $nbPart,
                     'transport_legal' => $transportLegal,
                     'categorie_salaire' => $categorySalary,
@@ -107,7 +116,7 @@ class SalaireInverserController extends AbstractController
         ]);
     }
 
-    public function amountImpotBrutInverse(int $netSalary): float|int
+    private function amountImpotBrutInverse(int $netSalary): float|int
     {
 
         $netImposable = $netSalary;
@@ -139,7 +148,7 @@ class SalaireInverserController extends AbstractController
         return $impotBrut;
     }
 
-    public function amountCreditImpotInverse(float $nbPart): float|int
+    private function amountCreditImpotInverse(float $nbPart): float|int
     {
         $nbrePart = $nbPart;
         $creditImpot = null;
@@ -175,13 +184,14 @@ class SalaireInverserController extends AbstractController
         return $creditImpot;
     }
 
-    public function amountCNPSInverse(float $netSalary): float|int
+    private function amountCNPSInverse(float $netSalary): float|int
     {
-        $netImposable = $netSalary;
-        if ($netImposable > 1647314) {
-            $netImposable = 1647314;
-        }
         $categoryRate = $this->categoryChargeRepository->findOneBy(['codification' => 'CNPS']);
-        return ceil($netImposable * $categoryRate->getValue() / 100);
+        $rate = ($categoryRate->getValue() / 100);
+        $amountCNPS = ($rate)*$netSalary;
+        if ($netSalary > 1647314) {
+            $amountCNPS = 1647314;
+        }
+        return ceil($amountCNPS);
     }
 }
