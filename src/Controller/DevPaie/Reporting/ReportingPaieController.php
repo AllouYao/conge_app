@@ -2,6 +2,9 @@
 
 namespace App\Controller\DevPaie\Reporting;
 
+use App\Repository\DossierPersonal\PersonalRepository;
+use Carbon\Carbon;
+use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -31,5 +34,24 @@ class ReportingPaieController extends AbstractController
     public function viewValidateRetenueSalaire(): Response
     {
         return $this->render('dev_paie/reportings/operations/retenue_salaire/retenue.validated.html.twig');
+    }
+
+    #[Route('/regularisation_salaire', name: 'regularisation_salaire', methods: ['POST', 'GET'])]
+    public function viewEtatMensuelRegularisation(): Response
+    {
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, 'MMMM Y');
+        $today = Carbon::now();
+        $date = $formatter->format($today);
+        return $this->render('dev_paie/reportings/regularisations/regul_mensuel.html.twig', [
+            'date' => $date,
+        ]);
+    }
+
+    #[Route('/regularisation_salaire_periodique', name: 'regularisation_salaire_periodique', methods: ['POST', 'GET'])]
+    public function viewEtatPeriodiqueRegularisation(PersonalRepository $personalRepository): Response
+    {
+        return $this->render('dev_paie/reportings/regularisations/regul_periodique.html.twig', [
+            'personals' => $personalRepository->findAllPersonalOnCampain()
+        ]);
     }
 }

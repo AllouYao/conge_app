@@ -68,7 +68,8 @@
                                     </div>
                                 </div>
                             </div>
-                            {# <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Etat des Primes et indemnités</a> #}
+                            <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Primes et indemnités</a>
+                            {# #}
                         </div>
                     </li>
                     <li class="nav-item dropdown">
@@ -85,6 +86,20 @@
                                     <div class="arrow-down"></div>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <div class="dropdown">
+                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                           aria-expanded="false">
+                                            Régularisations
+                                            <div class="arrow-down"></div>
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                            <a href="{{ path('reporting_paie_validated_remboursement') }}"
+                                               class="dropdown-item">Reversement (Moins perçus)</a>
+                                            <a href="{{ path('reporting_paie_validated_retenue_salaires') }}"
+                                               class="dropdown-item">Retenue (Trop perçus)</a>
+                                        </div>
+                                    </div>
                                     <a href="{{ path('campagne_livre') }}"
                                        class="dropdown-item">Livre de paie de la periode</a>
                                     <a href="{{ path('campagne_print_all_bulletin') }}"
@@ -93,6 +108,8 @@
                                        class="dropdown-item">Etat des virements</a>
                                     <a href="{{ path('reporting_etat_versement_caisse') }}"
                                        class="dropdown-item">Etat des paiements espèces</a>
+                                    <a href="{{ path('reporting_paie_regularisation_salaire') }}"
+                                       class="dropdown-item">Etat des régularisations</a>
                                 </div>
                             </div>
                             <div class="dropdown">
@@ -103,11 +120,13 @@
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
                                     <a href="{{ path('reporting_etat_salaire') }}"
-                                       class="dropdown-item">Etat des salaires</a>
+                                       class="dropdown-item">Etat periodique des salaires</a>
                                     <a href="{{ path('reporting_etat_versement_annuel') }}"
-                                       class="dropdown-item">Etat des virements</a>
+                                       class="dropdown-item">Etat periodique des virements</a>
                                     <a href="{{ path('reporting_etat_versement_caisse_annuel') }}"
-                                       class="dropdown-item">Etat des paiements espèces</a>
+                                       class="dropdown-item">Etat periodique des paiements espèces</a>
+                                    <a href="{{ path('reporting_paie_regularisation_salaire_periodique') }}"
+                                       class="dropdown-item">Etat periodique des regularisations </a>
                                 </div>
                             </div>
                         </div>

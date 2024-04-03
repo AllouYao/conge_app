@@ -3,17 +3,22 @@
 namespace App\Controller\DevPaie\Reporting;
 
 use App\Repository\DevPaie\OperationRepository;
+use App\Repository\Paiement\PayrollRepository;
 use App\Utils\Status;
 use Carbon\Carbon;
+use DateTime;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api_reporting_paie', name: 'api_reporting_paie_', methods: ['GET'])]
 class ApiReportingPaieController extends AbstractController
 {
     public function __construct(
-        private readonly OperationRepository $operationRepository
+        private readonly OperationRepository $operationRepository,
+        private readonly PayrollRepository   $payrollRepository
     )
     {
     }
@@ -117,5 +122,78 @@ class ApiReportingPaieController extends AbstractController
         }
 
         return new JsonResponse($dataRetenueSalaire);
+    }
+
+    #[Route('/regularisation_mensuel', 'regularisation_mensuel', methods: ['GET'])]
+    public function regulSalaire(): JsonResponse
+    {
+        $today = Carbon::today();
+        $requestOperationRegularisation = $this->payrollRepository->findOperationByPayroll([Status::RETENUES, Status::REMBOURSEMENT], Status::VALIDATED, $today->month, $today->year);
+        $dataRegularisation = [];
+
+        foreach ($requestOperationRegularisation as $ordre => $regularisation) {
+            $regulMoins = (int)$regularisation['remboursement_net'];
+            $regulPlus = (int)$regularisation['retenue_net'];
+            $dataRegularisation[] = [
+                'ordre' => ++$ordre,
+                'date_operations' => $regularisation['date_operation'],
+                'type_operations' => $regularisation['type_operations'],
+                'matricule_salarie' => $regularisation['matricule_personal'],
+                'full_name_salaried' => $regularisation['name_personal'] . ' ' . $regularisation['lastname_personal'],
+                'station_salarie' => $regularisation['stations_personal'],
+                'regul_moins_percus' => $regulMoins,
+                'regul_plus_percus' => $regulPlus,
+                'net_payer_apres_regularisation' => (int)$regularisation['net_payer'] ?? 0,
+                'net_payer_avant_regularisation' => (int)$regularisation['net_payer'] - $regulMoins + $regulPlus,
+                'retenue_status' => $regularisation['status_operation']
+            ];
+        }
+
+        return new JsonResponse($dataRegularisation);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Route('/regularisation_periodique', 'regularisation_periodique', methods: ['GET'])]
+    public function regulSalairePeriodique(Request $request): JsonResponse
+    {
+        $dateRequest = $request->get('dateDebut');
+        $startAt = $endAt = null;
+        if ($dateRequest) {
+            $dateRequestObj = DateTime::createFromFormat('Y-m', $dateRequest);
+            $dateDebut = $dateRequestObj->format('Y-m-01');
+            $dateFin = $dateRequestObj->format('Y-m-t');
+            $startAt = new DateTime($dateDebut);
+            $endAt = new DateTime($dateFin);
+        }
+        $personalID = (int)$request->get('personalsId');
+
+        if (!$request->isXmlHttpRequest()) {
+            return $this->json(['data' => []]);
+        }
+
+        $requestOperationRegularisation = $this->payrollRepository->findOperationByPeriode($startAt, $endAt, $personalID);
+        $dataRegularisationPeriodique = [];
+
+        foreach ($requestOperationRegularisation as $ordre => $regularisation) {
+            $regulMoins = (int)$regularisation['remboursement_net'];
+            $regulPlus = (int)$regularisation['retenue_net'];
+            $dataRegularisationPeriodique[] = [
+                'ordre' => ++$ordre,
+                'date_operations' => $regularisation['date_operation'],
+                'type_operations' => $regularisation['type_operations'],
+                'matricule_salarie' => $regularisation['matricule_personal'],
+                'full_name_salaried' => $regularisation['name_personal'] . ' ' . $regularisation['lastname_personal'],
+                'station_salarie' => $regularisation['stations_personal'],
+                'regul_moins_percus' => $regulMoins,
+                'regul_plus_percus' => $regulPlus,
+                'net_payer_apres_regularisation' => (int)$regularisation['net_payer'] ?? 0,
+                'net_payer_avant_regularisation' => (int)$regularisation['net_payer'] - $regulMoins + $regulPlus,
+                'retenue_status' => $regularisation['status_operation']
+            ];
+        }
+
+        return new JsonResponse($dataRegularisationPeriodique);
     }
 }
