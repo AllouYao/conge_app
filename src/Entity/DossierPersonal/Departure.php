@@ -72,6 +72,9 @@ class Departure
     #[ORM\ManyToOne(inversedBy: 'user')]
     private ?User $user = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $dayOfPresence = null;
+
     public function __construct()
     {
         $this->chargePersonals = new ArrayCollection();
@@ -307,6 +310,18 @@ class Departure
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getDayOfPresence(): ?string
+    {
+        return $this->dayOfPresence;
+    }
+
+    public function setDayOfPresence(?string $dayOfPresence): static
+    {
+        $this->dayOfPresence = $dayOfPresence;
 
         return $this;
     }

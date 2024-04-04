@@ -11,6 +11,7 @@ use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Repository\Paiement\CampagneRepository;
 use App\Repository\Paiement\PayrollRepository;
+use App\Service\PaieService\PaieProrataService;
 use App\Service\PayrollService;
 use App\Utils\Status;
 use DateTime;
@@ -45,12 +46,13 @@ class CampagneController extends AbstractController
      * @param CongeRepository $congeRepository
      */
     public function __construct(
-        PayrollService           $payrollService,
-        PayrollRepository        $payrollRepository,
-        CampagneRepository       $campagneRepository,
-        CategoryChargeRepository $categoryChargeRepository,
-        HeureSupRepository       $heureSupRepository,
-        CongeRepository          $congeRepository,
+        PayrollService                      $payrollService,
+        PayrollRepository                   $payrollRepository,
+        CampagneRepository                  $campagneRepository,
+        CategoryChargeRepository            $categoryChargeRepository,
+        HeureSupRepository                  $heureSupRepository,
+        CongeRepository                     $congeRepository,
+        private readonly PaieProrataService $paieProrataService
     )
     {
         $this->payrollService = $payrollService;
@@ -165,7 +167,7 @@ class CampagneController extends AbstractController
         $ordinaryCampagne = $this->campagneRepository->getOrdinaryCampagne();
         if ($ordinaryCampagne) {
             $this->addFlash('error', 'Une paie est déjà en cours d\'exécution. Merci de bien vouloir terminer ce procéssuce!');
-            return $this->redirectToRoute('campagne_livre');
+            return $this->redirectToRoute('app_home');
         }
 
         $campagne = new Campagne();
@@ -189,74 +191,63 @@ class CampagneController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $fullDate = new DateTime();
-
             $day = 1;
             $month = $fullDate->format('m');
             $year = $fullDate->format('Y');
-
             $dateOfMonth = new DateTime($day . '-' . $month . '-' . $year);
-
             $previousCampagne = $this->campagneRepository->findLast();
-
-
-            //$countPersonal = $form->get('personal')->count();
-
             $personals = $form->get('personal')->getData();
             $countPersonal = count($personals);
 
-
             if ($countPersonal > 0) {
-
                 foreach ($personals as $personal) {
-
                     $dateEmbauche = $personal->getContract()->getDateEmbauche();
-
                     //personnel arrivé avant le debut de la campagne passée
-
                     if (($dateEmbauche > $previousCampagne?->getStartedAt()) && $previousCampagne) {
-
-                        $this->payrollService->setExtraMonthPayroll($personal, $campagne);
-
-                        //personnel arrivé entre le debut de la campagne en cour
+                        $payrolls = $this->paieProrataService->amountAcompt($personal, $campagne);
+                        $payroll = $this->payrollService->setExtraMonthPayroll($personal, $campagne);
+                        dd($payrolls, $payroll);
+                        flash()->addSuccess('personnel arrivé avant le debut de la campagne passée');
+                        //personnel arrivé au milieu de le du mois de la campagne en cours
                     } elseif (($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt()) {
-
                         $this->payrollService->setProrataPayroll($personal, $campagne);
-
-                    } else {
+                        flash()->addSuccess('personnel arrivé au milieu de le du mois de la campagne en cours');
+                    } elseif (!($dateEmbauche > $campagne->getStartedAt())) {
                         //personnel normal
-
+                        flash()->addSuccess('personal normal');
                         $this->payrollService->setPayroll($personal, $campagne);
 
+                    } else {
+                        flash()->addInfo('Aucune personne est eligible');
                     }
-
                 }
-
                 $campagne
                     ->setActive(true)
-                    ->setStatus(Status::EN_COURS)
+                    ->setStatus(Status::PENDING)
                     ->setOrdinary(true);
                 $manager->persist($campagne);
-                $manager->flush();
+                //$manager->flush();
                 flash()->addSuccess('Paie ouverte avec succès.');
                 return $this->redirectToRoute('app_home');
-
             } else {
-
                 flash()->addWarning('Aucun personnel sélectionné!');
                 return $this->redirectToRoute('campagne_open_campagne');
-
             }
-
         }
 
         return $this->render('paiement/campagne/open.html.twig', [
             'form' => $form->createView(),
             'campagne' => $campagne,
             'lastCampagne' => $lastCampagne,
-            'periode_paie' => $date
+            'periode_paie' => $date,
+            'today' => new DateTime()
         ]);
+
+    }
+
+    public function validateCompleteExercice(): void
+    {
 
     }
 

@@ -4,11 +4,10 @@ namespace App\Repository\Paiement;
 
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Campagne;
-use DateTime;
+use App\Utils\Status;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
-use Exception;
 
 /**
  * @extends ServiceEntityRepository<Campagne>
@@ -78,11 +77,11 @@ class CampagneRepository extends ServiceEntityRepository
     public function lastCampagne(bool $isOrdinaire): ?Campagne
     {
         return $this->createQueryBuilder('c')
-            ->join('c.personal', 'p')
-            ->leftJoin('p.chargePersonals', 'ch')
             ->where("c.active = false")
             ->andWhere("c.ordinary = :value")
+            ->andWhere("c.status = :statut")
             ->setParameter('value', $isOrdinaire)
+            ->setParameter('statut', Status::VALIDATE)
             ->orderBy("c.id", "DESC")
             ->setMaxResults(1)
             ->getQuery()
@@ -126,6 +125,8 @@ class CampagneRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('c')
             ->where('c.ordinary = true')
+            ->andWhere('c.status = :status')
+            ->setParameter('status', Status::TERMINER)
             ->orderBy('c.id', 'DESC')
             ->setMaxResults(1)
             ->getQuery()

@@ -82,4 +82,17 @@ class OperationRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    public function findOperationPretByPersonal(string $type, Personal $personal): ?Operation
+    {
+        return $this->createQueryBuilder('o')
+            ->where('o.personal = :personal')
+            ->andWhere('o.typeOperations = :type_operations')
+            ->andWhere("o.statusPay is null OR o.statusPay != 'REFUND'")
+            ->andWhere("o.status = 'VALIDEE'")
+            ->setParameter('personal', $personal)
+            ->setParameter('type_operations', $type)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
