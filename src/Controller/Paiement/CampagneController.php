@@ -2,19 +2,11 @@
 
 namespace App\Controller\Paiement;
 
-use DateTime;
 use Exception;
 use Carbon\Carbon;
-use App\Utils\Status;
 use IntlDateFormatter;
-use App\Service\PayrollService;
 use App\Entity\Paiement\Campagne;
 use App\Form\Paiement\CampagneType;
-use App\Repository\DossierPersonal\CongeRepository;
-use App\Repository\DossierPersonal\HeureSupRepository;
-use App\Repository\Impots\CategoryChargeRepository;
-use App\Repository\Paiement\CampagneRepository;
-use App\Repository\Paiement\PayrollRepository;
 use App\Service\PaieService\PaieProrataService;
 use App\Service\PayrollService;
 use App\Utils\Status;
@@ -28,7 +20,6 @@ use App\Repository\Paiement\PayrollRepository;
 use Symfony\Component\HttpFoundation\Response;
 use App\Repository\Paiement\CampagneRepository;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Service\PaieService\PaieByPeriodService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Repository\DossierPersonal\CongeRepository;
 use App\Repository\Impots\CategoryChargeRepository;
@@ -62,7 +53,8 @@ class CampagneController extends AbstractController
         CategoryChargeRepository            $categoryChargeRepository,
         HeureSupRepository                  $heureSupRepository,
         CongeRepository                     $congeRepository,
-        private readonly PaieProrataService $paieProrataService
+        private readonly PaieProrataService $paieProrataService,
+        private EntityManagerInterface $manager
     )
     {
         $this->payrollService = $payrollService;
@@ -931,5 +923,33 @@ class CampagneController extends AbstractController
             'virement' => Status::VIREMENT
         ]);
 
+    }
+    #[Route('/validated', name: 'validated', methods: ['GET'])]
+    public function ValidatedCampagne(): RedirectResponse
+    {
+        $campagne = $this->campagneRepository->getOrdinaryCampagne();
+        $campagne
+            ->setActive(true)
+            ->setStatus(Status::VALIDATED)
+            ->setOrdinary(true);
+        $this->manager->persist($campagne);
+        $this->manager->flush();
+
+        $this->addFlash('success', 'Campagne validée avec succès');
+        return $this->redirectToRoute('app_home');
+    }
+    #[Route('/canceled', name: 'canceled', methods: ['GET'])]
+    public function canceledCampagne(): RedirectResponse
+    {
+        $campagne = $this->campagneRepository->getOrdinaryCampagne();
+        $campagne
+            ->setActive(true)
+            ->setStatus(Status::VALIDATED)
+            ->setOrdinary(true);
+        $this->manager->persist($campagne);
+        $this->manager->flush();
+
+        $this->addFlash('success', 'Campagne annulée avec succès');
+        return $this->redirectToRoute('app_home');
     }
 }
