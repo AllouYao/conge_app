@@ -38,7 +38,8 @@ class CampagneType extends AbstractType
                 ],
                 'html5' => true,
                 'widget' => 'single_text',
-                'required' => true
+                'required' => true,
+                'data' => new \DateTime()
             ]);
 
         $formModifier = static function (FormInterface $form) {

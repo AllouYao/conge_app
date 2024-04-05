@@ -30,7 +30,7 @@
                     </div>
                     <div class="float-end">
                         <h5 class="card-title-custom" style="color: white; margin-left: 1030px">
-                           PERIODE DU  {{ date_debut }}  AU  {{ date_fin }}
+                            PERIODE DU {{ date_debut }} AU {{ date_fin }}
                         </h5>
                     </div>
                 </div>
@@ -129,6 +129,14 @@
                         width: 150
                     },
                     {
+                        caption: 'DATE EMBAUCHE',
+                        dataField: 'date_embauche',
+                        dataType: 'string',
+                        alignment: 'center',
+                        fixed: true,
+                        width: 150
+                    },
+                    {
                         caption: 'CATEGORIE AGENT',
                         dataField: 'category_salaried',
                         dataType: 'string',
@@ -138,6 +146,13 @@
                     {
                         caption: "SITE DE TRAVAIL ",
                         dataField: "service",
+                        dataType: "string",
+                        alignment: "left",
+                        width: 150
+                    },
+                    {
+                        caption: "POSTE",
+                        dataField: "poste",
                         dataType: "string",
                         alignment: "left",
                         width: 150

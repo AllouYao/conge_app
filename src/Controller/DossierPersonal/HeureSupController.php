@@ -194,7 +194,6 @@ class HeureSupController extends AbstractController
                 'modifier' => $this->generateUrl('personal_heure_sup_edit', ['uuid' => $heureSup->getPersonal()->getUuid()])
             ];
         }
-
         return new JsonResponse($apiRequestHeureSupp);
     }
 

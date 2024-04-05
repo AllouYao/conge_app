@@ -197,6 +197,9 @@ final class Status
     /** Status Operation */
     public const REMBOURSEMENT = 'REMBOURSEMENT';
     public const RETENUES = 'RETENUES';
+    const PRET = 'PRET';
+    const ACOMPTE = 'ACOMPTE';
+
 
     /** Statut des fonctions */
     public const COMMERCIAL_PISTE = 'COMMERCIAL PISTE';
@@ -227,5 +230,9 @@ final class Status
 
     public const SUPPLEMENTAIRE = 'SUPPLEMENTAIRE';
     public const PAYE = 'PAYE';
+    public const PENDING = 'BROULLION';
+    public const VALIDATE = 'VALIDER';
+    public const REFUND = 'REFUND';
+
 
 }

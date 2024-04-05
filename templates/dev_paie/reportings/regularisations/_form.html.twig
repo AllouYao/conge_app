@@ -1,0 +1,17 @@
+<div class="mb-2 row">
+    <label class="col-md-2 col-form-label" for="example-month">Période de regularisation</label>
+    <div class="col-md-4">
+        <input class="form-control form-control-sm" id="example-month" type="month" name="dateDebut"
+               required>
+    </div>
+    <label class="col-md-2 col-form-label" for="personalsId">Personnel </label>
+    <div class="col-md-4">
+        <select name="personalsId" id="personalsId" placeholder="Sélectionner un salarier"
+                class="" data-placeholder="Sélectionner un salarier" data-plugin="customselect">
+            <option value="" selected></option>
+            {% for p in personals %}
+                <option value="{{ p.id }}">{{ p.firstName|capitalize }} {{ p.lastName|capitalize }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>

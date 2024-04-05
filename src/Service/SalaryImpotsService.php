@@ -10,8 +10,10 @@ use App\Entity\Impots\ChargePersonals;
 use App\Entity\Paiement\Campagne;
 use App\Repository\Impots\ChargeEmployeurRepository;
 use App\Repository\Impots\ChargePersonalsRepository;
+use App\Repository\Paiement\CampagneRepository;
 use App\Service\CasExeptionel\DepartureCampagneService;
 use App\Service\PaieService\PaieByPeriodService;
+use App\Service\PaieService\PaieProrataService;
 use App\Service\PaieService\PaieServices;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -31,7 +33,9 @@ class SalaryImpotsService implements SalaryInterface
         ChargeEmployeurRepository            $chargeEmployeurRepository,
         PaieServices                         $paieServices,
         DepartureCampagneService             $departureCampagneService,
-        private readonly PaieByPeriodService $paieByPeriodService
+        private readonly PaieByPeriodService $paieByPeriodService,
+        private readonly CampagneRepository  $campagneRepository,
+        private readonly PaieProrataService  $paieProrataService
     )
     {
         $this->manager = $manager;
@@ -46,6 +50,7 @@ class SalaryImpotsService implements SalaryInterface
      */
     public function chargePersonal(Personal $personal, Campagne $campagne): void
     {
+        $previousCampagne = $this->campagneRepository->findLast();
         if ($personal->getContract()->getDateEmbauche() > $campagne->getDateDebut() && $personal->getContract()->getDateEmbauche() <= $campagne->getDateFin()) {
             $part = $this->paieByPeriodService->getPartCampagne($personal);
             $impotBrut = $this->paieByPeriodService->amountImpotBrutCampagne($personal, $campagne);
@@ -59,6 +64,19 @@ class SalaryImpotsService implements SalaryInterface
             }
             $amountCNPS = $this->paieByPeriodService->amountCNPSCampagne($personal, $campagne);
             $amountCMU = $this->paieByPeriodService->amountCMUCampagne($personal);
+        } elseif (($personal->getContract()->getDateEmbauche() > $previousCampagne?->getStartedAt()) && $previousCampagne) {
+            $part = $this->paieProrataService->nombrePart($personal);
+            $impotBrut = $this->paieProrataService->amountImpotBrut($personal, $campagne);
+            $creditImpot = $this->paieProrataService->amountCreditImpot($personal);
+            $salaire = $this->paieProrataService->amountBrutAndAmountImposableAndAmountCategoriel($personal, $campagne);
+            $majorationHeursSupp = $this->paieProrataService->amountHeureSupplementaire($personal, $campagne);
+            $netImposable = $salaire['brut_imposable_amount'] + $majorationHeursSupp;
+            $impotNet = $impotBrut - $creditImpot;
+            if ($netImposable <= 75000 || $impotNet < 0) {
+                $impotNet = 0;
+            }
+            $amountCNPS = $this->paieProrataService->amountCNPS($personal, $campagne);
+            $amountCMU = $this->paieProrataService->amountCMU($personal);
         } else {
             $part = $this->paieServices->getPartCampagne($personal);
             $impotBrut = $this->paieServices->amountImpotBrutCampagne($personal, $campagne);
@@ -106,6 +124,7 @@ class SalaryImpotsService implements SalaryInterface
      */
     public function chargeEmployeur(Personal $personal, Campagne $campagne): void
     {
+        $previousCampagne = $this->campagneRepository->findLast();
         if ($personal->getContract()->getDateEmbauche() > $campagne->getDateDebut() && $personal->getContract()->getDateEmbauche() <= $campagne->getDateFin()) {
             $montantIs = $this->paieByPeriodService->amountISCampagne($personal, $campagne);
             $montantFPC = $this->paieByPeriodService->amountFPCCampagne($personal, $campagne);
@@ -115,6 +134,15 @@ class SalaryImpotsService implements SalaryInterface
             $montantPF = $this->paieByPeriodService->amountPFCampagne($personal);
             $montantAT = $this->paieByPeriodService->amountATCampagne($personal);
             $montantCMU = $this->paieByPeriodService->amountCMUEmpCampagne();
+        } elseif (($personal->getContract()->getDateEmbauche() > $previousCampagne?->getStartedAt()) && $previousCampagne) {
+            $montantIs = $this->paieProrataService->amountIS($personal, $campagne);
+            $montantTA = $this->paieProrataService->amountTA($personal, $campagne);
+            $montantFPC = $this->paieProrataService->amountFPC($personal, $campagne);
+            $montantFPCAnnuel = $this->paieProrataService->amountFPCAnnuel($personal, $campagne);
+            $montantCR = $this->paieProrataService->amountCR($personal, $campagne);
+            $montantPF = $this->paieProrataService->amountPF($personal);
+            $montantAT = $this->paieProrataService->amountAT($personal);
+            $montantCMU = $this->paieProrataService->amountCMUEmp();
         } else {
             $montantIs = $this->paieServices->amountISCampagne($personal, $campagne);
             $montantFPC = $this->paieServices->amountFPCCampagne($personal, $campagne);
