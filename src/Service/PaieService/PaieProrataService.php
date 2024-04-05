@@ -11,7 +11,6 @@ use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Repository\DossierPersonal\RetenueForfetaireRepository;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Service\AbsenceService;
-use App\Service\Personal\PrimeService;
 use App\Utils\Status;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,7 +29,7 @@ class PaieProrataService
         private readonly OperationRepository               $operationRepository,
         private readonly AbsenceRepository                 $absenceRepository,
         private readonly AbsenceService                    $absenceService,
-        private readonly PrimeService                      $primeService,
+        //private readonly PrimeService                      $primeService,
         private readonly EntityManagerInterface            $manager
 
     )
@@ -275,12 +274,12 @@ class PaieProrataService
     {
         $salaire = $this->amountBrutAndAmountImposableAndAmountCategoriel($personal, $campagne);
         $majorationHeursSupp = $this->amountHeureSupplementaire($personal, $campagne);
-        $primePaniers = round($this->primeService->getPrimePanier($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeSalissures = round($this->primeService->getPrimeSalissure($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeTenueTravails = round($this->primeService->getPrimeTT($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeOutillages = round($this->primeService->getPrimeOutil($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeRendement = round($this->primeService->getPrimeRendement($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $amountBrut = $salaire['brut_amount'] + $majorationHeursSupp + $primeSalissures + $primeTenueTravails + $primeOutillages + $primePaniers + $primeRendement;
+        //$primePaniers = round($this->primeService->getPrimePanier($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        //$primeSalissures = round($this->primeService->getPrimeSalissure($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        //$primeTenueTravails = round($this->primeService->getPrimeTT($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        //$primeOutillages = round($this->primeService->getPrimeOutil($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        // $primeRendement = round($this->primeService->getPrimeRendement($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        $amountBrut = $salaire['brut_imposable_amount'] + $majorationHeursSupp;
         $categoryRate = $this->categoryChargeRepository->findOneBy(['codification' => 'IS']);
         return ceil($amountBrut * $categoryRate?->getValue() / 100);
     }
@@ -292,12 +291,12 @@ class PaieProrataService
     {
         $salaire = $this->amountBrutAndAmountImposableAndAmountCategoriel($personal, $campagne);
         $majorationHeursSupp = $this->amountHeureSupplementaire($personal, $campagne);
-        $primePaniers = round($this->primeService->getPrimePanier($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeSalissures = round($this->primeService->getPrimeSalissure($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeTenueTravails = round($this->primeService->getPrimeTT($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeOutillages = round($this->primeService->getPrimeOutil($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeRendement = round($this->primeService->getPrimeRendement($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $amountBrut = $salaire['brut_amount'] + $majorationHeursSupp + $primeSalissures + $primeTenueTravails + $primeOutillages + $primePaniers + $primeRendement;
+        //$primePaniers = round($this->primeService->getPrimePanier($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        //$primeSalissures = round($this->primeService->getPrimeSalissure($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        //$primeTenueTravails = round($this->primeService->getPrimeTT($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        //$primeOutillages = round($this->primeService->getPrimeOutil($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        // $primeRendement = round($this->primeService->getPrimeRendement($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        $amountBrut = $salaire['brut_imposable_amount'] + $majorationHeursSupp;
         $categoryRateFDFP_TA = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_TA']);
         return ceil($amountBrut * $categoryRateFDFP_TA->getValue() / 100);
     }
@@ -309,12 +308,12 @@ class PaieProrataService
     {
         $salaire = $this->amountBrutAndAmountImposableAndAmountCategoriel($personal, $campagne);
         $majorationHeursSupp = $this->amountHeureSupplementaire($personal, $campagne);
-        $primePaniers = round($this->primeService->getPrimePanier($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeSalissures = round($this->primeService->getPrimeSalissure($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeTenueTravails = round($this->primeService->getPrimeTT($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeOutillages = round($this->primeService->getPrimeOutil($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeRendement = round($this->primeService->getPrimeRendement($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $amountBrut = $salaire['brut_amount'] + $majorationHeursSupp + $primeSalissures + $primeTenueTravails + $primeOutillages + $primePaniers + $primeRendement;
+        //$primePaniers = round($this->primeService->getPrimePanier($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        //$primeSalissures = round($this->primeService->getPrimeSalissure($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        //$primeTenueTravails = round($this->primeService->getPrimeTT($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        //$primeOutillages = round($this->primeService->getPrimeOutil($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        // $primeRendement = round($this->primeService->getPrimeRendement($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        $amountBrut = $salaire['brut_imposable_amount'] + $majorationHeursSupp;
         $categoryRateFDFP_FPC = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC']);
         return ceil($amountBrut * $categoryRateFDFP_FPC->getValue() / 100);
     }
@@ -326,12 +325,12 @@ class PaieProrataService
     {
         $salaire = $this->amountBrutAndAmountImposableAndAmountCategoriel($personal, $campagne);
         $majorationHeursSupp = $this->amountHeureSupplementaire($personal, $campagne);
-        $primePaniers = round($this->primeService->getPrimePanier($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeSalissures = round($this->primeService->getPrimeSalissure($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeTenueTravails = round($this->primeService->getPrimeTT($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeOutillages = round($this->primeService->getPrimeOutil($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeRendement = round($this->primeService->getPrimeRendement($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $amountBrut = $salaire['brut_amount'] + $majorationHeursSupp + $primeSalissures + $primeTenueTravails + $primeOutillages + $primePaniers + $primeRendement;
+        //$primePaniers = round($this->primeService->getPrimePanier($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        //$primeSalissures = round($this->primeService->getPrimeSalissure($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        //$primeTenueTravails = round($this->primeService->getPrimeTT($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        //$primeOutillages = round($this->primeService->getPrimeOutil($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        // $primeRendement = round($this->primeService->getPrimeRendement($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        $amountBrut = $salaire['brut_imposable_amount'] + $majorationHeursSupp;
         $categoryRateFDFP_FPC_VER = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC_VER']);
         return ceil($amountBrut * $categoryRateFDFP_FPC_VER->getValue() / 100);
     }
@@ -343,12 +342,12 @@ class PaieProrataService
     {
         $salaire = $this->amountBrutAndAmountImposableAndAmountCategoriel($personal, $campagne);
         $majorationHeursSupp = $this->amountHeureSupplementaire($personal, $campagne);
-        $primePaniers = round($this->primeService->getPrimePanier($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeSalissures = round($this->primeService->getPrimeSalissure($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeTenueTravails = round($this->primeService->getPrimeTT($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeOutillages = round($this->primeService->getPrimeOutil($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $primeRendement = round($this->primeService->getPrimeRendement($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
-        $amountBrut = $salaire['brut_amount'] + $majorationHeursSupp + $primeSalissures + $primeTenueTravails + $primeOutillages + $primePaniers + $primeRendement;
+        //$primePaniers = round($this->primeService->getPrimePanier($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        //$primeSalissures = round($this->primeService->getPrimeSalissure($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        //$primeTenueTravails = round($this->primeService->getPrimeTT($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        //$primeOutillages = round($this->primeService->getPrimeOutil($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        // $primeRendement = round($this->primeService->getPrimeRendement($personal) * $salaire['day_of_presence'] / self::NR_JOUR_TRAVAILLER);
+        $amountBrut = $salaire['brut_imposable_amount'] + $majorationHeursSupp;
         $categoryRateRCNPS_CR = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_CR']);
         return ceil($amountBrut * $categoryRateRCNPS_CR->getValue() / 100);
     }
@@ -398,12 +397,12 @@ class PaieProrataService
         $operationPret = $this->operationRepository->findOperationPretByPersonal(Status::PRET, $personal);
         $amountMensuality = null;
         if ($operationPret) {
-            $amountTotalPret = $operationPret?->getAmount();
-            $amountMensuality = $operationPret?->getAmountMensualite();
+            $amountTotalPret = $operationPret->getAmount();
+            $amountMensuality = $operationPret->getAmountMensualite();
             $restAmountPret = $amountTotalPret - $amountMensuality;
-            $operationPret?->setRemaining($restAmountPret);
+            $operationPret->setRemaining($restAmountPret);
             if ($restAmountPret == 0) {
-                $operationPret?->setStatusPay(Status::REFUND);
+                $operationPret->setStatusPay(Status::REFUND);
             }
             $this->manager->persist($operationPret);
         }
@@ -411,11 +410,19 @@ class PaieProrataService
         return (int)$amountMensuality;
     }
 
-    public function amountAcompt(Personal $personal): void
+    public function amountAcompt(Personal $personal): int|null
     {
         $today = Carbon::today();
         $operationAcompt = $this->operationRepository->findOperationByPersonal(Status::ACOMPTE, Status::VALIDATED, $personal, $today->month, $today->year);
-        dd($operationAcompt);
+        $amountTotalAcompt = null;
+        if ($operationAcompt) {
+            $amountTotalAcompt = $operationAcompt->getAmount();
+            $operationAcompt->setRemaining(0);
+            $operationAcompt->setStatusPay(Status::REFUND);
+            $this->manager->persist($operationAcompt);
+        }
+
+        return (int)$amountTotalAcompt;
     }
 
 }

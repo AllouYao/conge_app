@@ -142,9 +142,13 @@ class PayrollService
             + $primeFonctions + $primeLogements + $indemniteFonctions + $indemniteLogements + $primeTransportImposable
             + $avantageNatureImposable + $remboursementBrut - $retenueBrut;
 
+        /** Ajouter les prêt et account qui constitue des retenues sur salaire net */
+        $amountMensualityPret = $this->paieServices->amountPretCampagne($personal);
+        $amountMensuelAcompt = $this->paieServices->amountAcomptCampagne($personal);
+
 
         /** Ajouter le net à payer, total retenue, indemnité de transport et assurance santé du personnel */
-        $netPayer = ceil($netImposable + $primeTransportLegal + $avantageNonImposable - $chargeSalarie + $remboursementNet - $retenueNet + $primePaniers + $primeRendement + $primeOutillages + $primeSalissures + $primeTenueTravails);
+        $netPayer = ceil($netImposable + $primeTransportLegal + $avantageNonImposable + $remboursementNet + $primePaniers + $primeRendement + $primeOutillages + $primeSalissures + $primeTenueTravails - ($chargeSalarie + $retenueNet + $amountMensualityPret + $amountMensuelAcompt));
 
         /** Ajouter la masse salariale */
         $masseSalaried = $netPayer + $chargePatronal + $chargeSalarie;
@@ -214,6 +218,8 @@ class PayrollService
             ->setRetenueNet($retenueNet)
             /** Net à payer et masse salariale du salarié */
             ->setNetPayer($netPayer)
+            ->setAmountMensualityPret($amountMensualityPret)
+            ->setAmountMensuelAcompt($amountMensuelAcompt)
             ->setMasseSalary($masseSalaried)
             ->setStatus(Status::EN_ATTENTE);
 
@@ -230,7 +236,7 @@ class PayrollService
     /** Remplire le dictionnaire de paie pour les salariées dont la date d'embauche est inclus dans la periode de paie
      * @throws Exception
      */
-    public function setProrataPayroll(Personal $personal, Campagne $campagne): void
+    public function setProrataPayroll(Personal $personal, Campagne $campagne): Payroll
     {
         /** Nombre de jour travailler pendant la periode current de paie */
         $dayOfPresence = $this->paieByPeriodService->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne)['nb_jour_presence'];
@@ -304,8 +310,12 @@ class PayrollService
             + $indemniteFonctions + $indemniteLogements + $primeTransportImposable + $avantageNatureImposable;
 
 
+        /** Ajouter les prêt et account qui constitue des retenues sur salaire net */
+        $amountMensualityPret = $this->paieByPeriodService->amountPretCampagne($personal);
+        $amountMensuelAcompt = $this->paieByPeriodService->amountAcomptCampagne($personal);
+
         /** Ajouter le net à payer, total retenue, indemnité de transport et assurance santé du personnel */
-        $netPayer = ceil(($netImposable + $primeTransportLegal + $avantageNonImposable + $primeTenueTravails + $primeSalissures + $primeOutillages + $primeRendement + $primePaniers) - $chargeSalarie);
+        $netPayer = ceil(($netImposable + $primeTransportLegal + $avantageNonImposable + $primeTenueTravails + $primeSalissures + $primeOutillages + $primeRendement + $primePaniers) - ($chargeSalarie + $amountMensuelAcompt + $amountMensualityPret));
 
         /** Ajouter la masse salariale */
         $masseSalaried = $netPayer + $chargePatronal + $chargeSalarie;
@@ -368,9 +378,13 @@ class PayrollService
             ->setFixcalAmountEmployeur($amountChargFiscalPatronale)
             ->setSocialAmountEmployeur($amountChargSocialPatronale)
             ->setTotalRetenuePatronal($chargePatronal)
+            ->setAmountMensualityPret($amountMensualityPret)
+            ->setAmountMensuelAcompt($amountMensuelAcompt)
             ->setStatus(Status::EN_ATTENTE);
         /** Enregistrement du livre de paie */
         $this->manager->persist($payroll);
+
+        return $payroll;
     }
 
     /**
@@ -459,9 +473,10 @@ class PayrollService
 
         /** Ajouter les prêt et account qui constitue des retenues sur salaire net */
         $amountMensualityPret = $this->paieProrataService->amountPret($personal);
+        $amountMensuelAcompt = $this->paieProrataService->amountAcompt($personal);
 
         /** Ajouter le net à payer, total retenue, indemnité de transport et assurance santé du personnel */
-        $netPayer = ceil(($netImposable + $primeTransportLegal + $avantageNonImposable + $primePaniers + $primeRendement + $primeOutillages + $primeSalissures + $primeTenueTravails) - ($chargeSalarie + $amountMensualityPret));
+        $netPayer = ceil(($netImposable + $primeTransportLegal + $avantageNonImposable + $primePaniers + $primeRendement + $primeOutillages + $primeSalissures + $primeTenueTravails) - ($chargeSalarie + $amountMensualityPret + $amountMensuelAcompt));
 
         /** Ajouter la masse salariale */
         $masseSalaried = $netPayer + $chargePatronal + $chargeSalarie;
@@ -525,6 +540,7 @@ class PayrollService
             ->setImposableAmount($netImposable)
             /** Mensualiter du pret et acompt */
             ->setAmountMensualityPret($amountMensualityPret)
+            ->setAmountMensuelAcompt($amountMensuelAcompt)
             /** Net à payer et masse salariale du salarié */
             ->setNetPayer($netPayer)
             ->setMasseSalary($masseSalaried)

@@ -119,7 +119,7 @@
                         fixed: true,
                     },
                     {
-                        caption: 'NOM ET PRENOMS',
+                        caption: 'Nom & prénoms',
                         dataField: 'full_name_salaried',
                         dataType: 'string',
                         alignment: 'left',
@@ -127,7 +127,7 @@
                         width: 150
                     },
                     {
-                        caption: 'DATE EMBAUCHE',
+                        caption: 'Date Embauche',
                         dataField: 'date_embauche',
                         dataType: 'string',
                         alignment: 'center',
@@ -135,28 +135,28 @@
                         width: 150
                     },
                     {
-                        caption: 'CATEGORIE AGENT',
+                        caption: 'Catégorie Agent',
                         dataField: 'category_salaried',
                         dataType: 'string',
                         alignment: 'center',
                         width: 150
                     },
                     {
-                        caption: "SITE DE TRAVAIL ",
+                        caption: "Site Travail ",
                         dataField: "service",
                         dataType: "string",
                         alignment: "left",
                         width: 150
                     },
                     {
-                        caption: "POSTE",
+                        caption: "Poste",
                         dataField: "poste",
                         dataType: "string",
                         alignment: "left",
                         width: 150
                     },
                     {
-                        caption: 'NOMBRE DE PART',
+                        caption: 'Nombre Part',
                         dataField: 'number_part_salaried',
                         dataType: 'string',
                         alignment: 'center',
@@ -166,7 +166,7 @@
                         width: 150
                     },
                     {
-                        caption: 'NOMBRE DE JOUR TRAVAILLER',
+                        caption: 'Nombre Jour Travailler',
                         dataField: 'day_of_presence',
                         dataType: 'string',
                         alignment: 'center',
@@ -176,21 +176,21 @@
                         width: 150
                     },
                     {
-                        caption: 'SALAIRE DE BASE',
+                        caption: 'Salaire Catégoriel',
                         dataField: 'salaire_base_salaried',
                         dataType: 'number',
                         alignment: 'right',
                         width: 150
                     },
                     {
-                        caption: 'SURSALAIRE',
+                        caption: 'Sursalaire',
                         dataField: 'sursalaire_salaried',
                         dataType: 'number',
                         alignment: 'right',
                         width: 150
                     },
                     {
-                        caption: 'PRIME ANCIENNETE',
+                        caption: 'Prime Ancienneté',
                         dataField: 'prime_anciennete',
                         dataType: 'number',
                         alignment: 'right',
@@ -198,7 +198,7 @@
 
                     },
                     {
-                        caption: 'PRIME DE TENUE',
+                        caption: 'Prime tenue',
                         dataField: 'prime_de_tenue',
                         dataType: 'number',
                         alignment: 'right',
@@ -206,53 +206,53 @@
 
                     },
                     {
-                        caption: 'PRIME DE SALISSURE',
+                        caption: 'Prime Salissure',
                         dataField: 'prime_de_salissure',
                         dataType: 'number',
                         alignment: 'right',
                         width: 150
                     },
                     {
-                        caption: 'BRUT IMPOSABLE',
+                        caption: 'Brut Imposable',
                         dataField: 'salaire_imposable_salaried',
                         dataType: 'number',
                         alignment: 'right',
                         width: 150
                     },
                     {
-                        caption: "CHARGES SALARIALES",
+                        caption: "Charges Salariale",
                         alignment: 'center',
                         columns: [
                             {
-                                caption: 'ITS',
+                                caption: 'Its',
                                 dataField: 'its_salaried',
                                 dataType: 'number',
                                 alignment: 'right',
                                 width: 150
                             },
                             {
-                                caption: 'TOTAL RETENUE FISCALE',
+                                caption: 'Total Retenue Fiscale',
                                 dataField: 'fixcale_salariale',
                                 dataType: 'number',
                                 alignment: 'right',
                                 width: 150
                             },
                             {
-                                caption: 'CNPS',
+                                caption: 'Cnps',
                                 dataField: 'cnps_salaried',
                                 dataType: 'number',
                                 alignment: 'right',
-                                width: 120
+                                width: 150
                             },
                             {
-                                caption: 'CMU',
+                                caption: 'Cmu',
                                 dataField: 'cmu_salaried',
                                 dataType: 'number',
                                 alignment: 'right',
                                 width: 150
                             },
                             {
-                                caption: 'TOTAL RETENUE',
+                                caption: 'Total Retenue',
                                 dataField: 'charge_salarial',
                                 dataType: 'number',
                                 alignment: 'right',
@@ -261,39 +261,79 @@
                         ]
                     },
                     {
-                        caption: 'INDEMNITE DE TRANSPORT',
+                        caption: 'Indemnité Transport',
                         dataField: 'prime_transport_legal',
                         dataType: 'number',
                         alignment: 'right',
                         width: 150
                     },
                     {
-                        caption: 'ASSURANCE',
+                        caption: 'Assurance',
                         dataField: 'assurance_salariale',
                         dataType: 'number',
                         alignment: 'right',
                         width: 150
                     },
                     {
-                        caption: 'NET A PAYER',
+                        caption: 'Régularisations',
+                        alignment: "center",
+                        columns: [
+                            {
+                                dataType: "number",
+                                dataField: "regul_moins_percus",
+                                caption: "Moins Perçus",
+                                alignment: "right",
+                                width: 150
+                            },
+                            {
+                                dataType: "number",
+                                dataField: "regul_plus_percus",
+                                caption: "Plus Perçus",
+                                alignment: "right",
+                                width: 150
+                            }
+                        ]
+                    },
+                    {
+                        caption: 'Net à Payer',
                         dataField: 'net_payer_salaried',
                         dataType: 'number',
                         alignment: 'right',
                         width: 150
                     },
                     {
-                        caption: 'CHARGES FISCALES PATRONALES',
+                        caption: "Acompts & Prêts",
+                        alignment: "center",
+                        columns: [
+                            {
+                                dataType: "number",
+                                dataField: "amount_acompte_mensuel",
+                                caption: "Acompt",
+                                alignment: "right",
+                                width: 150
+                            },
+                            {
+                                dataType: "number",
+                                dataField: "amount_pret_mensuel",
+                                caption: "Prêt",
+                                alignment: "right",
+                                width: 150
+                            },
+                        ]
+                    },
+                    {
+                        caption: 'Charges Fiscales Patronales',
                         alignment: 'center',
                         columns: [
                             {
-                                caption: 'ITS',
+                                caption: 'Its',
                                 dataField: 'employer_is',
                                 dataType: 'number',
                                 alignment: 'right',
                                 width: 150
                             },
                             {
-                                caption: 'FDFP',
+                                caption: 'Fdfp',
                                 dataField: 'amount_fdfp',
                                 dataType: 'number',
                                 alignment: 'right',
@@ -302,11 +342,11 @@
                         ]
                     },
                     {
-                        caption: 'CHARGES SOCIALES PATRONALES',
+                        caption: 'Charges Sociales Patronale',
                         alignment: 'center',
                         columns: [
                             {
-                                caption: 'CAISSE DE RETRAITE',
+                                caption: 'Caisse Retraite',
                                 dataField: 'employer_cr',
                                 dataType: 'number',
                                 alignment: 'right',
@@ -314,7 +354,7 @@
 
                             },
                             {
-                                caption: 'CMU',
+                                caption: 'Cmu',
                                 dataField: 'employer_cmu',
                                 dataType: 'number',
                                 alignment: 'right',
@@ -322,7 +362,7 @@
 
                             },
                             {
-                                caption: 'PRESTATION FAMILIALE',
+                                caption: 'Prestation Familiale',
                                 dataField: 'employer_pr',
                                 dataType: 'number',
                                 alignment: 'right',
@@ -330,7 +370,7 @@
 
                             },
                             {
-                                caption: 'ACCIDENT DE TRAVAIL',
+                                caption: 'Accident Travail',
                                 dataField: 'employer_at',
                                 dataType: 'number',
                                 alignment: 'right',
@@ -340,7 +380,7 @@
                         ]
                     },
                     {
-                        caption: 'ASSURANCE PART PATRONALE',
+                        caption: 'Assurance Part Patronale',
                         dataField: 'assurance_patronales',
                         dataType: 'number',
                         alignment: 'right',
@@ -348,14 +388,14 @@
 
                     },
                     {
-                        caption: 'TOTAL CHARGES PATRONALES',
+                        caption: 'Total Charge Patronale',
                         dataField: 'charge_patronal',
                         dataType: 'number',
                         alignment: 'right',
                         width: 150
                     },
                     {
-                        caption: 'MASSE SALARIALE',
+                        caption: 'Masse Salariale',
                         dataField: 'masse_salariale',
                         dataType: 'number',
                         alignment: 'right',
@@ -363,7 +403,7 @@
                     },
                     {
                         dataField: 'print_bulletin',
-                        caption: 'Imprimer bulletin',
+                        caption: 'Imprimer Bulletin',
                         alignment: 'center',
                         cellTemplate: function (container, options) {
                             $("<a>")
