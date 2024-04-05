@@ -38,7 +38,9 @@
                     <div id="dataGridPayBook"></div>
                 </div>
                 <div class="card-footer">
-                    <div id="normal-contained" class="float-end"></div>
+                    <div id="print-contained" class="float-end mx-1"></div>
+                    <div id="validated-contained" class="float-end mx-1"></div>
+                    <div id="canceled-contained" class="float-end mx-1"></div>  
                 </div>
             </div>
         </div>
@@ -536,13 +538,31 @@
                     ]
                 }
             })
-            $("#normal-contained").dxButton({
+            $("#print-contained").dxButton({
                 stylingMode: 'contained',
                 text: 'Imprimer bulletins',
                 type: 'default',
                 width: 120,
                 onClick() {
                     window.location.href = '/campagne/bulletin/all_print';
+                }
+            })
+            $("#canceled-contained").dxButton({
+                stylingMode: 'contained',
+                text: 'Annuler',
+                type: 'default',
+                width: 120,
+                onClick() {
+                    window.location.href = '/campagne/canceled';
+                }
+            }) 
+            $("#validated-contained").dxButton({
+                stylingMode: 'contained',
+                text: 'Valider',
+                type: 'default',
+                width: 120,
+                onClick() {
+                    window.location.href = '/campagne/validated'; 
                 }
             })
         });

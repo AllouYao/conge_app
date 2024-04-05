@@ -97,16 +97,14 @@ class CongeController extends AbstractController
         /**
          * @var User $currentUser
          */
+
         $currentUser = $this->getUser();
-
-
         $conge = new Conge();
         $form = $this->createForm(CongeType::class, $conge);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
 
             $personal = $conge->getPersonal();
-            dd($personal);
             $lastConge = $congeRepository->getLastCongeByID($personal->getId(), false);
             $lastDateReturn = !$lastConge ? $conge->getDateRetour() : $lastConge->getDateDernierRetour();
             /** Verifier si le salarié sélectionner est déjà en congés */
@@ -133,20 +131,11 @@ class CongeController extends AbstractController
                     flash()->addInfo($congeService->messages);
                     return $this->redirectToRoute('conge_new');
                 }
+            
             $conge
                 ->setDateDernierRetour($lastDateReturn)
                 ->setIsConge(true)
                 ->setUser($currentUser);
-
-            if($conge->getTypeConge()=="Partiel"){  
-                 
-                $partialLeave = new CongePartiel();
-                $partialLeave->setDateDepart($conge->getDateDepart())
-                             ->setDateRetour($conge->getDateRetour())
-                             ->setConge($conge);
-                
-                $entityManager->persist($partialLeave);
-            }
 
             $entityManager->persist($conge);
             $entityManager->flush();

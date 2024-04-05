@@ -80,14 +80,14 @@ class CongeService
         $totalDayCgs = $dayCalandaireCgs + $drCongeSupp1 + $drCongeSupp2;
 
         /** Durée total de congés pris par le salarié */
-        $dayCgsExploiter = $dateRetourCgs->diff($dateDepartCgs)->days;
+        $dayCgsExploiter = $dateRetourCgs?->diff($dateDepartCgs)->days;
 
         /** Determiner le nombre de jours restant après expiration des jours de congés exploités */
         $remainingVacation = round($totalDayCgs - $dayCgsExploiter, 2);
 
         if ($worksMonths >= 12) {
             $conge
-                ->setWorkMonths($worksMonths)
+                ->setWorkMonths($worksMonths) 
                 ->setSalaireMoyen($smm)
                 ->setDaysPlus($drCongeSupp1 + $drCongeSupp2)
                 ->setTotalDays($totalDayCgs)
@@ -149,7 +149,7 @@ class CongeService
         $totalDayCgs = $dayCalandaireCgs + $drCongeSupp1 + $drCongeSupp2;
 
         /** Durée total de congés pris par le salarié */
-        $dayCgsExploiter = $dateRetourCgs->diff($dateDepartCgs)->days;
+        $dayCgsExploiter = $dateRetourCgs?->diff($dateDepartCgs)->days;
 
         /** Determiner le nombre de jours restant après expiration des jours de congés exploités */
         $remainingVacation = round($totalDayCgs - $dayCgsExploiter, 2);

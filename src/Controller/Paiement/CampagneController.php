@@ -53,6 +53,7 @@ class CampagneController extends AbstractController
         CategoryChargeRepository $categoryChargeRepository,
         HeureSupRepository       $heureSupRepository,
         CongeRepository          $congeRepository,
+        private EntityManagerInterface $manager
     )
     {
         $this->payrollService = $payrollService;
@@ -96,6 +97,7 @@ class CampagneController extends AbstractController
         foreach ($payroll as $index => $item) {
             $url = $this->generateUrl('campagne_bulletin_ordinaire', ['uuid' => $item->getPersonal()->getUuid()]);
             $payBookData[] = [
+                'campagn_id' =>$item->getMatricule(),
                 'index' => ++$index,
                 'type_campagne' => $item->getCampagne()->isOrdinary() ? 'Ordinaire' : 'Exceptionnelle',
                 'day_of_presence' => $item->getDayOfPresence(),
@@ -1094,5 +1096,33 @@ class CampagneController extends AbstractController
             'caisse' => Status::CAISSE,
             'virement' => Status::VIREMENT
         ]);
+    }
+    #[Route('/validated', name: 'validated', methods: ['GET'])]
+    public function ValidatedCampagne(): RedirectResponse
+    {
+        $campagne = $this->campagneRepository->getOrdinaryCampagne();
+        $campagne
+            ->setActive(true)
+            ->setStatus(Status::VALIDATED)
+            ->setOrdinary(true);
+        $this->manager->persist($campagne);
+        $this->manager->flush();
+
+        $this->addFlash('success', 'Campagne validée avec succès');
+        return $this->redirectToRoute('app_home');
+    }
+    #[Route('/canceled', name: 'canceled', methods: ['GET'])]
+    public function canceledCampagne(): RedirectResponse
+    {
+        $campagne = $this->campagneRepository->getOrdinaryCampagne();
+        $campagne
+            ->setActive(true)
+            ->setStatus(Status::VALIDATED)
+            ->setOrdinary(true);
+        $this->manager->persist($campagne);
+        $this->manager->flush();
+
+        $this->addFlash('success', 'Campagne annulée avec succès');
+        return $this->redirectToRoute('app_home');
     }
 }
