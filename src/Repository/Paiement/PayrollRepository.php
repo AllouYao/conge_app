@@ -58,6 +58,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->setParameter('active', $active)
             ->getQuery()->getResult();
     }
+  
 
     public function findPayrollByCampaignEmploye(bool $active): ?array
     {
@@ -72,7 +73,6 @@ class PayrollRepository extends ServiceEntityRepository
             ->setParameter('code_employe', 'OE')
             ->setParameter('code_chauffeur', 'CH')
             ->getQuery()->getResult();
-
     }
 
     public function findEtatSalaire(mixed $mouth1, mixed $mouth2, ?int $personalId): array
@@ -147,6 +147,22 @@ class PayrollRepository extends ServiceEntityRepository
         }
         return $qb->getQuery()->getResult();
     }
+    public function findByPeriode(mixed $mouth1, mixed $mouth2, ?int $personalId): array
+    {
+        $qb = $this->createQueryBuilder('payroll');
+        $qb
+            ->select()
+            ->join('payroll.campagne', 'campagnes')
+            ->join('payroll.personal', 'personal')
+            ->where('campagnes.active = false')
+            ->andWhere('personal.active = true')
+            ->andWhere('campagnes.dateDebut BETWEEN ?1 AND ?2');
+        $qb->setParameters(['1' => $mouth1, '2' => $mouth2]);
+        if ($personalId) {
+            $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
+        }
+        return $qb->getQuery()->getResult();
+    }
 
     public function findSalarialeCampagne(bool $campagne, mixed $years, mixed $month): array
     {
@@ -159,6 +175,7 @@ class PayrollRepository extends ServiceEntityRepository
                 'personal.refCNPS',
                 'personal.older',
                 'YEAR(personal.birthday) as personal_birthday',
+                'payroll.id',
                 'payroll.matricule',
                 'payroll.baseAmount',
                 'payroll.AncienneteAmount',
