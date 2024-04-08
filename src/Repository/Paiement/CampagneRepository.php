@@ -72,6 +72,29 @@ class CampagneRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    public function findCampagnActive(): ?Campagne
+    {
+        return $this->createQueryBuilder('c')
+            ->Where('c.active = :active')
+            ->andWhere('c.status = :status')
+            ->setParameter('active', true)
+            ->setParameter('status', Status::PENDING)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+    public function findCampagnActiveAndPending(): ?Campagne
+    {
+        return $this->createQueryBuilder('c')
+            ->Where('c.active = :active')
+            ->andWhere('c.status = :status_pending OR c.status = :status_validated')
+            ->setParameter('active', true)
+            ->setParameter('status_pending', Status::PENDING)
+            ->setParameter('status_validated', Status::VALIDATED)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 
 
     public function lastCampagne(bool $isOrdinaire): ?Campagne

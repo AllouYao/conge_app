@@ -18,33 +18,93 @@
     </style>
 {% endblock %}
 {% block body %}
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div style="display: flex" class="card-header">
-                    <div>
-                        <h5 class="card-title-custom" style="color: white">
-                            <i data-feather="list"></i>
-                            LIVRE DE PAIE
-                        </h5>
-                    </div>
-                    <div class="float-end">
-                        <h5 class="card-title-custom" style="color: white; margin-left: 1030px">
-                            PERIODE DU {{ date_debut }} AU {{ date_fin }}
-                        </h5>
-                    </div>
+<form method="POST" action="{{ path('campagne_validated') }}" id="formCampagnevalidated">
+    <div class="modal fade" id="validationConfirmationModal" tabindex="-1" role="dialog"
+        aria-labelledby="validationConfirmationModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="validationConfirmationModal">Confirmation de
+                        validation</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <div class="card-body">
-                    <div id="dataGridPayBook"></div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir valider les informations ci-dessous, après quoi vous ne pourriez plus les modifiés ?</p>
                 </div>
-                <div class="card-footer">
-                    <div id="print-contained" class="float-end mx-1"></div>
-                    <div id="validated-contained" class="float-end mx-1"></div>
-                    <div id="canceled-contained" class="float-end mx-1"></div>  
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annuler
+                    </button>
+                    <button type="submit" class="btn btn-success confirm" name="confirm"
+                            id="confirmValidationButton">
+                        Confirmer
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+</form>
+
+<form method="POST" action="{{ path('campagne_canceled') }}" id="formCampagneCanceled">
+    <div class="modal fade" id="validationCancelModal" tabindex="-1" role="dialog"
+        aria-labelledby="validationConfirmationModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="validationCancelModal">Confirmation de
+                        validation</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir annulé ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annuler
+                    </button>
+                    <button type="submit" class="btn btn-success confirm" name="confirm"
+                            id="confirmValidationButton">
+                        Confirmer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div style="display: flex" class="card-header">
+                <div>
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        LIVRE DE PAIE
+                    </h5>
+                </div>
+                <div class="float-end">
+                    <h5 class="card-title-custom" style="color: white; margin-left: 1030px">
+                        PERIODE DU {{ date_debut }} AU {{ date_fin }}
+                    </h5>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="dataGridPayBook"></div>
+            </div>
+            <div class="card-footer">
+                {% if campagne %}
+                    {% if campagne.status == "VALIDEE" %}
+                        <div id="print-contained" class="float-end mx-1"></div>
+                    {% else %}
+                        <div id="validated-contained" class="float-end mx-1"></div>
+                       <div id="canceled-contained" class="float-end mx-1"></div>  
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block javascripts %}
@@ -565,19 +625,19 @@
             $("#canceled-contained").dxButton({
                 stylingMode: 'contained',
                 text: 'Annuler',
-                type: 'default',
+                type: 'danger',
                 width: 120,
                 onClick() {
-                    window.location.href = '/campagne/canceled';
+                    $('#validationCancelModal').modal('show');
                 }
             }) 
             $("#validated-contained").dxButton({
                 stylingMode: 'contained',
                 text: 'Valider',
-                type: 'default',
+                type: 'success',
                 width: 120,
                 onClick() {
-                    window.location.href = '/campagne/validated'; 
+                    $('#validationConfirmationModal').modal('show');
                 }
             })
         });

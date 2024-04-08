@@ -3,6 +3,7 @@
 namespace App\Repository\Paiement;
 
 use App\Entity\DossierPersonal\Personal;
+use App\Entity\Paiement\Campagne;
 use App\Entity\Paiement\Payroll;
 use App\Utils\Status;
 use DateTime;
@@ -57,6 +58,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->setParameter('active', $active)
             ->getQuery()->getResult();
     }
+  
 
     public function findPayrollByCampaignEmploye(bool $active): ?array
     {
@@ -71,7 +73,6 @@ class PayrollRepository extends ServiceEntityRepository
             ->setParameter('code_employe', 'OE')
             ->setParameter('code_chauffeur', 'CH')
             ->getQuery()->getResult();
-
     }
 
     public function findEtatSalaire(mixed $mouth1, mixed $mouth2, ?int $personalId): array

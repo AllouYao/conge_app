@@ -70,19 +70,30 @@ class CampagneController extends AbstractController
     {
         $dateDebut = null;
         $dateFin = null;
+
         if ($this->isGranted('ROLE_RH')) {
+
             $payBooks = $this->payrollRepository->findPayrollByCampaign(true);
+
         } else {
+
             $payBooks = $this->payrollRepository->findPayrollByCampaignEmploye(true);
+
         }
+
         foreach ($payBooks as $book) {
+
             $dateDebut = $book->getCampagne()->getDateDebut();
             $dateFin = $book->getCampagne()->getDateFin();
+
         }
+       $campagne = $this->campagneRepository->findCampagnActiveAndPending();
+
         return $this->render('paiement/campagne/pay_book.html.twig', [
-            'payBooks' => $payBooks,
             'date_debut' => $dateDebut ? date_format($dateDebut, 'd/m/Y') : ' ',
             'date_fin' => $dateFin ? date_format($dateFin, 'd/m/Y') : ' ',
+            'campagne' => $campagne
+
         ]);
     }
 
@@ -170,7 +181,7 @@ class CampagneController extends AbstractController
         $ordinaryCampagne = $this->campagneRepository->getOrdinaryCampagne();
         if ($ordinaryCampagne) {
             $this->addFlash('error', 'Une paie est déjà en cours d\'exécution. Merci de bien vouloir terminer ce procéssuce!');
-            return $this->redirectToRoute('app_home');
+            return $this->redirectToRoute('campagne_livre');
         }
 
         $campagne = new Campagne();
@@ -230,9 +241,10 @@ class CampagneController extends AbstractController
                     ->setStatus(Status::PENDING)
                     ->setOrdinary(true);
                 $manager->persist($campagne);
-                //$manager->flush();
+                $manager->flush();
                 flash()->addSuccess('Paie ouverte avec succès.');
-                return $this->redirectToRoute('app_home');
+                return $this->redirectToRoute('campagne_livre');
+
             } else {
                 flash()->addWarning('Aucun personnel sélectionné!');
                 return $this->redirectToRoute('campagne_open_campagne');
@@ -264,6 +276,7 @@ class CampagneController extends AbstractController
 
         $exceptionalCampagne = $this->campagneRepository->getExceptionalCampagne();
         if ($exceptionalCampagne) {
+
             $this->addFlash('error', 'Une campagne exceptionnelle est déjà en cours !');
             return $this->redirectToRoute('campagne_livre');
         }
@@ -296,7 +309,7 @@ class CampagneController extends AbstractController
     }
 
     public function getDetailOfLastCampagne(Campagne $campagne, bool $isOrdinaire): array
-    {
+    { 
         $nbPersonal = 0;
         $masseSalarie = 0;
         $totalChargePersonal = 0;
@@ -924,32 +937,41 @@ class CampagneController extends AbstractController
         ]);
 
     }
-    #[Route('/validated', name: 'validated', methods: ['GET'])]
+    #[Route('/validated', name: 'validated', methods: ['POST'])]
     public function ValidatedCampagne(): RedirectResponse
     {
-        $campagne = $this->campagneRepository->getOrdinaryCampagne();
-        $campagne
-            ->setActive(true)
-            ->setStatus(Status::VALIDATED)
-            ->setOrdinary(true);
-        $this->manager->persist($campagne);
-        $this->manager->flush();
+        $campagne = $this->campagneRepository->findCampagnActiveAndPending();
 
-        $this->addFlash('success', 'Campagne validée avec succès');
-        return $this->redirectToRoute('app_home');
+        if($campagne){
+            $campagne
+            ->setStatus(Status::VALIDATED);
+            $this->manager->persist($campagne);
+            $this->manager->flush();  
+
+            $this->addFlash('success', 'Campagne Validée avec succès');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $this->addFlash('error', "Erreur lors de la validation de la Campagne!");
+        return $this->redirectToRoute('campagne_livre');
     }
-    #[Route('/canceled', name: 'canceled', methods: ['GET'])]
+    #[Route('/canceled', name: 'canceled', methods: ['POST'])]
     public function canceledCampagne(): RedirectResponse
     {
-        $campagne = $this->campagneRepository->getOrdinaryCampagne();
-        $campagne
-            ->setActive(true)
-            ->setStatus(Status::VALIDATED)
-            ->setOrdinary(true);
-        $this->manager->persist($campagne);
-        $this->manager->flush();
+        $campagne = $this->campagneRepository->findCampagnActiveAndPending();
 
-        $this->addFlash('success', 'Campagne annulée avec succès');
-        return $this->redirectToRoute('app_home');
+        if($campagne){
+            $campagne
+            ->setActive(false)
+            ->setStatus(Status::CANCELED);
+            $this->manager->persist($campagne);
+            $this->manager->flush();  
+
+            $this->addFlash('success', 'Campagne annulée avec succès');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $this->addFlash('error', "Erreur lors de l'annualation de la Campagne!");
+        return $this->redirectToRoute('campagne_livre');
     }
 }
