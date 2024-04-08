@@ -108,24 +108,38 @@ class CampagneRepository extends ServiceEntityRepository
             ->getQuery()->getScalarResult();
     }
 
-    /** Retourne l'avant dernière campagne ordinaire*/
-    public function findBeforeLast()
-    {
-        return $this->createQueryBuilder('c')
-            ->where('c.ordinary = true')
-            ->orderBy('c.id', 'DESC')
-            ->setFirstResult(1)
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
-    }
-
     /** Retourne la dernière campagne ordinaire */
     public function findLast(): ?Campagne
     {
         return $this->createQueryBuilder('c')
             ->where('c.ordinary = true')
             ->andWhere('c.status = :status')
+            ->setParameter('status', Status::TERMINER)
+            ->orderBy('c.id', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /** Retourne la dernière campagne ordinaire */
+    public function findLastCampagneForRecap(): ?Campagne
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.ordinary = true')
+            ->andWhere('c.status IN (:status)')
+            ->setParameter('status', [Status::PENDING, Status::VALIDATE])
+            ->orderBy('c.id', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /** Retourne l'avant dernière campagne ordinaire*/
+    public function findBeforeLast(): ?Campagne
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.ordinary = true')
+            ->andWhere("c.status = :status")
             ->setParameter('status', Status::TERMINER)
             ->orderBy('c.id', 'DESC')
             ->setMaxResults(1)

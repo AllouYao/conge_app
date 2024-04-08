@@ -3,6 +3,7 @@
 namespace App\Repository\Paiement;
 
 use App\Entity\DossierPersonal\Personal;
+use App\Entity\Paiement\Campagne;
 use App\Entity\Paiement\Payroll;
 use App\Utils\Status;
 use DateTime;
@@ -345,6 +346,14 @@ class PayrollRepository extends ServiceEntityRepository
     public function findPayrollByCampainId(?int $campainId): ?array
     {
         return $this->createQueryBuilder('pr')
+            ->select([
+                'p.id as personal_id',
+                'p.matricule as matricule',
+                'p.firstName as first_name',
+                'p.lastName as last_name',
+                'pr.brutAmount as brut_amount',
+                'pr.netPayer as net_payer',
+            ])
             ->join('pr.personal', 'p')
             ->join('pr.campagne', 'c')
             ->where('c.ordinary = true')
@@ -491,6 +500,19 @@ class PayrollRepository extends ServiceEntityRepository
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
         }
         return $qb->getQuery()->getResult();
+    }
+
+    public function findOnePayroll(?Campagne $campagne, ?Personal $personal): ?Payroll
+    {
+        return $this->createQueryBuilder('pr')
+            ->where('pr.campagne = :campagne')
+            ->andWhere('pr.personal = :personal')
+            ->andWhere('pr.status IN (:status)')
+            ->setParameter('personal', $personal)
+            ->setParameter('campagne', $campagne)
+            ->setParameter('status', [Status::PAYE, Status::EN_ATTENTE])
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
 }

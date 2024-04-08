@@ -76,6 +76,32 @@
                         e.cancel = true;
                     }
                 },
+                onCellPrepared: function (e) {
+                    if (e.rowType === "data") {
+                        if (e.column.dataField === "ecart_brut_amount" && e.data.ecart_brut_amount < 0) {
+                            e.cellElement.css({"color": "red"});
+                        }
+                        if (e.column.dataField === "ecart_brut_amount" && e.data.ecart_brut_amount === 0) {
+                            e.cellElement.css({"color": ""});
+                        }
+                        if (e.column.dataField === "ecart_brut_amount" && e.data.ecart_brut_amount !== e.data.last_brut_amount && e.data.ecart_brut_amount > 0) {
+                            e.cellElement.css({"color": "green"});
+                        }
+
+                        if (e.column.dataField === "ecart_net_amount" && e.data.ecart_net_amount < 0) {
+                            e.cellElement.css({"color": "red"});
+                        }
+
+                        if (e.column.dataField === "ecart_net_amount" && e.data.ecart_net_amount === 0) {
+                            e.cellElement.css({"color": ""});
+                        }
+
+                        if (e.column.dataField === "ecart_net_amount" && e.data.ecart_net_amount !== e.data.last_net_amount && e.data.ecart_net_amount > 0) {
+                            e.cellElement.css({"color": "green"});
+                        }
+                    }
+
+                },
                 grouping: {
                     autoExpandAll: true,
                 },
@@ -92,16 +118,17 @@
                 allowColumnReordering: true,
                 allowColumnResizing: true,
                 columnAutoWidth: true,
+                rowAlternationEnabled: true,
                 columns: [
                     {
-                        caption: 'MATRICULE',
+                        caption: 'Matricule',
                         alignment: 'center',
                         dataType: 'number',
                         dataField: 'matricule',
                         fixed: true
                     },
                     {
-                        caption: 'NOMS & PRENOMS',
+                        caption: 'Nom & Prénoms',
                         alignment: 'center',
                         columns: [
                             {
@@ -118,7 +145,7 @@
                     },
 
                     {
-                        caption: 'TOTAL SALAIRES BRUTS PAYES',
+                        caption: 'Total Salaires Brut Payés',
                         alignment: 'center',
                         columns: [
                             {
@@ -152,7 +179,7 @@
                     },
 
                     {
-                        caption: 'TOTAL SALAIRES NETS PAYES',
+                        caption: 'Total Salaires Net Payés',
                         alignment: 'center',
                         columns: [
                             {

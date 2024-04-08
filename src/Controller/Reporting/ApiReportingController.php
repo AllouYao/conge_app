@@ -47,7 +47,7 @@ class ApiReportingController extends AbstractController
         DetailSalaryRepository      $detailSalaryRepository,
         PersonalRepository          $personalRepository,
         DetailPrimeSalaryRepository $detailPrimeSalaryRepository,
-        CampagneRepository          $campagneRepository
+        CampagneRepository          $campagneRepository,
     )
     {
         $this->payrollRepository = $payrollRepository;
@@ -456,38 +456,39 @@ class ApiReportingController extends AbstractController
     {
         $dataElementVariable = [];
         $campainBefore = $this->campagneRepository->findBeforeLast();
-        $campainLast = $this->campagneRepository->findLast();
+        $campainLast = $this->campagneRepository->findLastCampagneForRecap();
 
-        $payrollBefore = $this->payrollRepository->findPayrollByCampainId($campainBefore?->getId());
-        $payrollLast = $this->payrollRepository->findPayrollByCampainId($campainLast?->getId());
+        $personals = $campainLast->getPersonal();
 
-        if (!$payrollBefore && !$payrollLast) {
-            return $this->json(['data' => []]);
-        }
+        foreach ($personals as $index => $personal) {
+            $payrollBefore = $this->payrollRepository->findOnePayroll($campainBefore, $personal);
+            $payrollLast = $this->payrollRepository->findOnePayroll($campainLast, $personal);
 
+            if (!$payrollBefore && !$payrollLast) {
+                return $this->json(['data' => []]);
+            }
 
-        foreach ($payrollLast as $x => $last) {
-            $personal = $last->getPersonal();
+            $amountBrutBefore = $payrollBefore?->getBrutAmount();
+            $amountBrutLast = $payrollLast?->getBrutAmount();
+            $amountNetBefore = $payrollBefore?->getNetPayer();
+            $amountNetLast = $payrollLast?->getNetPayer();
+            $amountEcartBrut = $amountBrutLast - $amountBrutBefore;
+            $amountEcartNet = $amountNetLast - $amountNetBefore;
 
-            $dataElementVariable[$x] = [
-                'matricule' => $last->getMatricule(),
+            $dataElementVariable[] = [
+                'index' => ++$index,
+                'matricule' => $personal->getMatricule(),
                 'nom' => $personal->getFirstName(),
                 'prenoms' => $personal->getLastName(),
-                'last_brut_amount' => $last->getBrutAmount(),
-                'last_net_amount' => $last->getNetPayer(),
-                'before_brut_amount' => 0,
-                'before_net_amount' => 0,
-                'ecart_brut_amount' => $last->getBrutAmount(),
-                'ecart_net_amount' => $last->getNetPayer()
+                'before_brut_amount' => (int)$amountBrutBefore,
+                'last_brut_amount' => (int)$amountBrutLast,
+                'before_net_amount' => (int)$amountNetBefore,
+                'last_net_amount' => (int)$amountNetLast,
+                'ecart_brut_amount' => (int)$amountEcartBrut,
+                'ecart_net_amount' => (int)$amountEcartNet
             ];
         }
 
-        foreach ($payrollBefore as $y => $before) {
-            $dataElementVariable[$y]['before_brut_amount'] = $before->getBrutAmount();
-            $dataElementVariable[$y]['before_net_amount'] = $before->getNetPayer();
-            $dataElementVariable[$y]['ecart_brut_amount'] = $before->getBrutAmount() - $dataElementVariable[$y]['ecart_brut_amount'];
-            $dataElementVariable[$y]['ecart_net_amount'] = $before->getNetPayer() - $dataElementVariable[$y]['ecart_net_amount'];
-        }
         return new  JsonResponse($dataElementVariable);
     }
 
