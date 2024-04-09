@@ -240,6 +240,8 @@ class PersonalRepository extends ServiceEntityRepository
             ->leftJoin('p.contract', 'contract')
             ->where('contract.id IS NOT NULL')
             ->andWhere('campagnes.id  IS NOT NULL')
+            ->andWhere('campagnes.status = :status')
+            ->setParameter('status', Status::VALIDATED)
             ->getQuery()
             ->getResult();
     }

@@ -132,9 +132,10 @@ class ApiReportingController extends AbstractController
         }
         $personalID = (int)$request->get('personalsId');
 
-        if (!$request->isXmlHttpRequest()) {
+        /* if (!$request->isXmlHttpRequest()) {
             return $this->json(['data' => []]);
-        }
+        } */
+
 
         $data = [];
         $salaries = $this->payrollRepository->findEtatSalaire($startAt, $endAt, $personalID);
