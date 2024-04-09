@@ -45,7 +45,6 @@ class CampagneController extends AbstractController
      * @param CategoryChargeRepository $categoryChargeRepository
      * @param HeureSupRepository $heureSupRepository
      * @param CongeRepository $congeRepository
-     * @param PaieProrataService $paieProrataService
      * @param EntityManagerInterface $manager
      */
     public function __construct(
@@ -55,8 +54,7 @@ class CampagneController extends AbstractController
         CategoryChargeRepository            $categoryChargeRepository,
         HeureSupRepository                  $heureSupRepository,
         CongeRepository                     $congeRepository,
-        private readonly PaieProrataService $paieProrataService,
-        private EntityManagerInterface $manager
+        private readonly EntityManagerInterface $manager
     )
     {
         $this->payrollService = $payrollService;
