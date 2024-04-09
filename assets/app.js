@@ -739,6 +739,7 @@ import './js/dossierPersonal/salary'
 import './js/dossierPersonal/enableDisablePersonal'
 import './js/dossierPersonal/acompte'
 import './js/dossierPersonal/conge'
+import './js/dossierPersonal/etat_salaire'
 
 
 

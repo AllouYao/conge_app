@@ -58,7 +58,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->setParameter('active', $active)
             ->getQuery()->getResult();
     }
-  
+
 
     public function findPayrollByCampaignEmploye(bool $active): ?array
     {
@@ -140,8 +140,9 @@ class PayrollRepository extends ServiceEntityRepository
             ->join('payroll.personal', 'personal')
             ->where('campagnes.active = false')
             ->andWhere('personal.active = true')
+            ->andWhere('campagnes.status = :status')
             ->andWhere('campagnes.dateDebut BETWEEN ?1 AND ?2');
-        $qb->setParameters(['1' => $mouth1, '2' => $mouth2]);
+        $qb->setParameters(['1' => $mouth1, '2' => $mouth2, 'status' => Status::TERMINER]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
         }
@@ -405,8 +406,10 @@ class PayrollRepository extends ServiceEntityRepository
             ->leftJoin('p.accountBanks', 'ac')
             ->where('c.ordinary = :type')
             ->andWhere('c.active = :active')
+            ->andWhere('c.status = :status')
             ->andWhere('p.modePaiement = :type_versement')
             ->setParameter('type_versement', $typeVersement)
+            ->setParameter('status', Status::VALIDATED)
             ->setParameter('type', $type)
             ->setParameter('active', $active)
             ->getQuery()
@@ -442,9 +445,11 @@ class PayrollRepository extends ServiceEntityRepository
             ->andWhere('c.active = :active')
             ->andWhere('p.modePaiement = :type_versement')
             ->andWhere('c.dateDebut >= :date_debut')
-            ->andWhere('c.dateFin <= :date_fin');
+            ->andWhere('c.dateFin <= :date_fin')
+            ->andWhere('c.status <= :status');
         $qb->setParameter('type', $type)
             ->setParameter('active', $active)
+            ->setParameter('status', Status::VALIDATED)
             ->setParameter('type_versement', $typeVersement)
             ->setParameter('date_debut', $debut)
             ->setParameter('date_fin', $fin);
@@ -474,14 +479,17 @@ class PayrollRepository extends ServiceEntityRepository
             ])
             ->join('payroll.personal', 'personal')
             ->join('personal.operations', 'op')
+            ->join('payroll.campagne', 'campagne')
             ->where('op.typeOperations IN (:types)')
             ->andWhere('op.status IN (:status)')
             ->andWhere('YEAR(op.dateOperation) = :year')
             ->andWhere('MONTH(op.dateOperation) = :month')
+            ->andWhere('campagne.status =:campagne_status')
             ->setParameter('year', $year)
             ->setParameter('month', $month)
             ->setParameter('types', $type)
             ->setParameter('status', $status)
+            ->setParameter('campagne_status', Status::VALIDATED)
             ->orderBy('op.typeOperations')
             ->getQuery()
             ->getResult();
@@ -531,5 +539,4 @@ class PayrollRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
-
 }

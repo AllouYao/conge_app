@@ -231,7 +231,6 @@ final class Status
     public const SUPPLEMENTAIRE = 'SUPPLEMENTAIRE';
     public const PAYE = 'PAYE';
     public const PENDING = 'PENDING';
-    public const VALIDATE = 'VALIDATED';
     public const CANCELED = 'CANCELED';
     public const REFUND = 'REFUND';
 
