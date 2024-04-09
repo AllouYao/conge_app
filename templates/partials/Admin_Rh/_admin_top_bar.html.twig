@@ -176,6 +176,7 @@
                         </div>
                     </li>
 
+                    {# DEBUT GESTION DU PERSONNEL #}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -254,7 +255,7 @@
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Congés / Absences
+                                    Congés & Absences
                                     <div class="arrow-down"></div>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
@@ -288,19 +289,22 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="dropdown">
-                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Départs personnel
-                                    <div class="arrow-down"></div>
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                    <a href="{{ path('departure_new') }}"
-                                       class="dropdown-item">Créer</a>
-                                    <a href="{{ path('departure_index') }}"
-                                       class="dropdown-item">Liste des cessations de contrat </a>
-                                </div>
-                            </div>
+                            <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Primes &
+                                Indemnités</a>
+                            <a href="{{ path('salaire_inverse_net_inverser') }}" class="dropdown-item">Salaire
+                                Inverse</a>
+                        </div>
+                    </li>
+                    {# FIN GESTION DU PERSONNEL #}
+
+                    {# DEBUT REGULARISATION #}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i data-feather="rotate-cw"></i>REGULARISATIONS SALAIRES
+                            <div class="arrow-down"></div>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="topnav-components">
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -314,13 +318,6 @@
                                        class="dropdown-item">Liste retenues & Remboursement</a>
                                 </div>
                             </div>
-                            <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Primes &
-                                Indemnités</a>
-                            <a href="{{ path('salaire_inverse_net_inverser') }}" class="dropdown-item">Salaire
-                                Inverse</a>
-                            {# <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Etat des Primes et indemnités</a> #}
-                            <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Primes et
-                                indemnités</a>
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -336,7 +333,9 @@
                             </div>
                         </div>
                     </li>
+                    {# FIN REGULARISATION #}
 
+                    {# DEBUT GESTION DE LA  PAIE #}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -423,7 +422,34 @@
                                class="dropdown-item">Fermeture campagnes</a>
                         </div>
                     </li>
+                    {# FIN GESTION DE LA PAIE #}
 
+                    {# DEBUT CESSATION TRAVAIL #}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i data-feather="user-minus"></i>CESSATION CONTRAT
+                            <div class="arrow-down"></div>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="topnav-components">
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Départs personnel
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('departure_new') }}"
+                                       class="dropdown-item">Créer</a>
+                                    <a href="{{ path('departure_index') }}"
+                                       class="dropdown-item">Liste des cessations de contrat </a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    {# FIN CESSATION TRAVAIL #}
+
+                    {# DEBUT EDITION #}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -441,6 +467,7 @@
                                class="dropdown-item">Etat periodique des regularisations </a>
                         </div>
                     </li>
+                    {# FIN EDITION #}
                 </ul>
             </div>
         </nav>
