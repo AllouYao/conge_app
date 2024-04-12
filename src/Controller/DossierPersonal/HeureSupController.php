@@ -52,7 +52,7 @@ class HeureSupController extends AbstractController
         $salaireHoraire = 0;
 
         if ($this->isGranted('ROLE_RH')) {
-            $personals = $this->personalRepository->findAllPersonal();
+            $personals = $this->personalRepository->findAllPersonalOnCampain();
         } else {
             $personals = $this->personalRepository->findAllPersonalByEmployeRole();
         }

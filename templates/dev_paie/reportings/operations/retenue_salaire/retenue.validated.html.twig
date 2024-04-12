@@ -50,7 +50,7 @@
                 allowColumnResizing: true,
                 columnAutoWidth: true,
                 rowAlternationEnabled: true,
-                height: 355,
+                height: 350,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual",
@@ -181,20 +181,26 @@
                             displayFormat: 'Salariés : {0}'
                         },
                         {
-                            column: 'nom_salarie',
+                            column: 'station_salarie',
                             customizeText() {
-                                return 'CUMUL DES RETENUES SUR SALAIRE ';
+                                return 'CUMUL :';
                             }
                         },
                         {
                             column: 'retenue_montant_brut',
                             summaryType: 'sum',
-                            displayFormat: 'Sur le Brut : {0}'
+                            displayFormat: '{0}',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
                         },
                         {
                             column: 'retenue_montant_net',
                             summaryType: 'sum',
-                            displayFormat: 'Sur le Net : {0}'
+                            displayFormat: '{0}',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
                         }
                     ]
                 },

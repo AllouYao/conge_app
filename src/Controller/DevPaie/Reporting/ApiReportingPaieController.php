@@ -128,7 +128,11 @@ class ApiReportingPaieController extends AbstractController
     public function regulSalaire(): JsonResponse
     {
         $today = Carbon::today();
-        $requestOperationRegularisation = $this->payrollRepository->findOperationByPayroll([Status::RETENUES, Status::REMBOURSEMENT], Status::VALIDATED, $today->month, $today->year);
+        if ($this->isGranted('ROLE_RH')) {
+            $requestOperationRegularisation = $this->payrollRepository->findOperationByPayroll([Status::RETENUES, Status::REMBOURSEMENT], Status::VALIDATED, $today->month, $today->year);
+        } else {
+            $requestOperationRegularisation = $this->payrollRepository->findOperationByPayrollByRoleEmployer([Status::RETENUES, Status::REMBOURSEMENT], Status::VALIDATED, $today->month, $today->year);
+        }
         $dataRegularisation = [];
 
         foreach ($requestOperationRegularisation as $ordre => $regularisation) {
@@ -173,7 +177,11 @@ class ApiReportingPaieController extends AbstractController
             return $this->json(['data' => []]);
         }
 
-        $requestOperationRegularisation = $this->payrollRepository->findOperationByPeriode($startAt, $endAt, $personalID);
+        if ($this->isGranted('ROLE_RH')) {
+            $requestOperationRegularisation = $this->payrollRepository->findOperationByPeriode($startAt, $endAt, $personalID);
+        } else {
+            $requestOperationRegularisation = $this->payrollRepository->findOperationByPeriodeByRoleEmployer($startAt, $endAt, $personalID);
+        }
         $dataRegularisationPeriodique = [];
 
         foreach ($requestOperationRegularisation as $ordre => $regularisation) {

@@ -2,22 +2,20 @@
 
 namespace App\Controller\DossierPersonal;
 
-use App\Entity\DevPaie\CongePartiel;
-use Exception;
-use Carbon\Carbon;
-use App\Entity\User;
-use App\Utils\Status;
-use IntlDateFormatter;
-use App\Service\CongeService;
 use App\Entity\DossierPersonal\Conge;
+use App\Entity\User;
 use App\Form\DossierPersonal\CongeType;
+use App\Repository\DossierPersonal\CongeRepository;
+use App\Service\CongeService;
+use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use IntlDateFormatter;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Repository\DossierPersonal\CongeRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/dossier/personal/conge', name: 'conge_')]
 class CongeController extends AbstractController
@@ -37,14 +35,14 @@ class CongeController extends AbstractController
     public function getCongesSalaried(): JsonResponse
     {
 
-       // if ($this->isGranted('ROLE_RH')){
-            
-            $conges = $this->congeRepository->findConge();
+        // if ($this->isGranted('ROLE_RH')){
+
+        $conges = $this->congeRepository->findConge();
 
         //}else{
 
         //    $conges = $this->congeRepository->findCongeByEmployeRole(Status::CONGE_GLOBAL);
-       // }
+        // }
 
 
         $congeSalaried = [];
@@ -114,10 +112,10 @@ class CongeController extends AbstractController
                 est actuellement en congés n\'est donc pas éligible pour une acquisition de congés.');
                 return $this->redirectToRoute('conge_index');
             }
-            if ($lastConge){
+            if ($lastConge) {
                 $congeService->congesPayerByLast($conge);
 
-                if(!$congeService->success){
+                if (!$congeService->success) {
 
                     flash()->addInfo($congeService->messages);
                     return $this->redirectToRoute('conge_new');
@@ -125,13 +123,13 @@ class CongeController extends AbstractController
 
             }
             $congeService->congesPayerByFirst($conge);
-            
-            if(!$congeService->success){
-                    
-                    flash()->addInfo($congeService->messages);
-                    return $this->redirectToRoute('conge_new');
-                }
-            
+
+            if (!$congeService->success) {
+
+                flash()->addInfo($congeService->messages);
+                return $this->redirectToRoute('conge_new');
+            }
+
             $conge
                 ->setDateDernierRetour($lastDateReturn)
                 ->setIsConge(true)
@@ -163,7 +161,7 @@ class CongeController extends AbstractController
         CongeRepository        $congeRepository
     ): Response
     {
-         /**
+        /**
          * @var User $currentUser
          */
         $currentUser = $this->getUser();

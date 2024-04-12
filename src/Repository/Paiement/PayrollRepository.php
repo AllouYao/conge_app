@@ -148,6 +148,7 @@ class PayrollRepository extends ServiceEntityRepository
         }
         return $qb->getQuery()->getResult();
     }
+
     public function findByPeriode(mixed $mouth1, mixed $mouth2, ?int $personalId): array
     {
         $qb = $this->createQueryBuilder('payroll');
@@ -494,6 +495,45 @@ class PayrollRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    public function findOperationByPayrollByRoleEmployer(array $type, string $status, int $month, int $year): ?array
+    {
+        return $this->createQueryBuilder('payroll')
+            ->select([
+                'DATE(op.dateOperation) as date_operation',
+                'op.typeOperations as type_operations',
+                'personal.matricule as matricule_personal',
+                'personal.firstName as name_personal',
+                'personal.lastName as lastname_personal',
+                'personal.service as stations_personal',
+                'payroll.remboursNet as remboursement_net',
+                'payroll.remboursBrut as remboursement_brut',
+                'payroll.retenueNet as retenue_net',
+                'payroll.retenueBrut as retenue_brut',
+                'op.status as status_operation',
+                'op.id as operation_id',
+                'payroll.netPayer as net_payer'
+            ])
+            ->join('payroll.personal', 'personal')
+            ->join('personal.operations', 'op')
+            ->join('payroll.campagne', 'campagne')
+            ->join('personal.categorie', 'category')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->where('op.typeOperations IN (:types)')
+            ->andWhere('op.status IN (:status)')
+            ->andWhere('YEAR(op.dateOperation) = :year')
+            ->andWhere('MONTH(op.dateOperation) = :month')
+            ->andWhere('campagne.status =:campagne_status')
+            ->andWhere("category_salarie.code IN (:code)")
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
+            ->setParameter('types', $type)
+            ->setParameter('status', $status)
+            ->setParameter('campagne_status', Status::VALIDATED)
+            ->setParameter('code', ['OUVRIER / EMPLOYES', 'CHAUFFEURS'])
+            ->orderBy('op.typeOperations')
+            ->getQuery()
+            ->getResult();
+    }
 
     public function findOperationByPeriode(mixed $start, mixed $end, ?int $personalId): array
     {
@@ -521,6 +561,40 @@ class PayrollRepository extends ServiceEntityRepository
             ->andWhere('op.dateOperation BETWEEN ?1 AND ?2 ')
             ->orderBy('op.typeOperations');
         $qb->setParameters(['1' => $start, '2' => $end, 'types' => [Status::REMBOURSEMENT, Status::RETENUES], 'status' => Status::VALIDATED]);
+        if ($personalId) {
+            $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
+        }
+        return $qb->getQuery()->getResult();
+    }
+    public function findOperationByPeriodeByRoleEmployer(mixed $start, mixed $end, ?int $personalId): array
+    {
+        $qb = $this->createQueryBuilder('payroll');
+        $qb
+            ->select([
+                'DATE(op.dateOperation) as date_operation',
+                'op.typeOperations as type_operations',
+                'personal.matricule as matricule_personal',
+                'personal.firstName as name_personal',
+                'personal.lastName as lastname_personal',
+                'personal.service as stations_personal',
+                'payroll.remboursNet as remboursement_net',
+                'payroll.remboursBrut as remboursement_brut',
+                'payroll.retenueNet as retenue_net',
+                'payroll.retenueBrut as retenue_brut',
+                'op.status as status_operation',
+                'op.id as operation_id',
+                'payroll.netPayer as net_payer'
+            ])
+            ->join('payroll.personal', 'personal')
+            ->join('personal.operations', 'op')
+            ->join('personal.categorie', 'category')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->where('op.typeOperations IN (:types)')
+            ->andWhere('op.status IN (:status)')
+            ->andWhere('op.dateOperation BETWEEN ?1 AND ?2 ')
+            ->andWhere("category_salarie.code IN (:code)")
+            ->orderBy('op.typeOperations');
+        $qb->setParameters(['1' => $start, '2' => $end, 'types' => [Status::REMBOURSEMENT, Status::RETENUES], 'status' => Status::VALIDATED, 'code' => ['OUVRIER / EMPLOYES', 'CHAUFFEURS']]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
         }

@@ -17,7 +17,7 @@
                     <div class="card-header">
                         <h5 class="card-title-custom" style="color: white" id="date">
                             <i data-feather="list"></i>
-                            PRET / ACOMPTE
+                            PRET & ACOMPTE SUR LA PERIODE DE {{ date|upper }}
                         </h5>
                     </div>
                     <div class="card-body">
@@ -41,12 +41,6 @@
         }
 
         $(document).ready(function () {
-
-            const date = new Date();
-            // const year = date.getFullYear();
-            // const month = date.getMonth() + 1;
-            //  const day = date.getDate();
-
             $("#dataGridAcompte").dxDataGrid({
                 dataSource: '{{ url("app_paiement_acompte_api_acompte") }}',
                 showBorders: true,
@@ -117,7 +111,7 @@
                 columnAutoWidth: true,
                 columns: [
                     {
-                        caption: 'Date d\'opération',
+                        caption: 'Date Opération',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date',
@@ -129,13 +123,13 @@
                         dataField: 'matricule',
                     },
                     {
-                        caption: 'Nom & prénom(s)',
+                        caption: 'Nom & Prénom(s)',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'nom_prenom',
                     },
                     {
-                        caption: 'Type d\'opération',
+                        caption: 'Type Opération',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'type',
@@ -147,7 +141,7 @@
                         dataField: 'amount',
                     },
                     {
-                        caption: 'Montant remboursé',
+                        caption: 'Montant Remboursé',
                         alignment: 'right',
                         dataType: 'number',
                         dataField: 'amount_refund',
@@ -163,14 +157,13 @@
                         alignment: 'center',
                         cellTemplate: function (container, options) {
                             const status = options.data.status;
-                            if(status === 'EN ATTENTE')
-                            {
+                            if (status === 'EN ATTENTE') {
                                 $("<a title='modifier'>")
                                     .html('<i data-feather="edit" style="color: #C9971C"></i>')
                                     .attr("href", options.data.modifier)
                                     .appendTo(container);
                                 feather.replace();
-                            }else {
+                            } else {
 
                             }
 
@@ -180,20 +173,39 @@
                 summary: {
                     totalItems: [
                         {
-                            column: 'ordre',
+                            column: 'matricule',
                             summaryType: 'count',
                             displayFormat: 'Salariés : {0}'
                         },
                         {
-                            column: 'nom_salarie',
+                            column: 'type',
                             customizeText() {
-                                return 'CUMUL DES RETENUES SUR SALAIRE';
+                                return 'CUMUL ';
                             }
                         },
                         {
-                            column: 'retenue_montant_brut',
+                            column: 'amount',
                             summaryType: 'sum',
-                            displayFormat: 'Sur le Brut : {0}'
+                            displayFormat: '{0}',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'amount_refund',
+                            summaryType: 'sum',
+                            displayFormat: '{0}',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'remaining',
+                            summaryType: 'sum',
+                            displayFormat: '{0}',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
                         },
                     ]
                 },

@@ -4,25 +4,29 @@ namespace App\Form\Paiement;
 
 use App\Entity\DevPaie\Operation;
 use App\Entity\DossierPersonal\Personal;
-use App\Entity\Paiement\Campagne;
-use App\Entity\User;
 use App\Form\CustomType\DateCustomType;
 use App\Utils\Status;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class AcompteType extends AbstractType
 {
+    public function __construct(
+        private readonly AuthorizationCheckerInterface $authorizationChecker
+    )
+    {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('typeOperations',ChoiceType::class,[
+            ->add('typeOperations', ChoiceType::class, [
                 'choices' => [
                     'Prêt' => Status::PRET,
                     'Acompte' => Status::ACOMPTE
@@ -32,7 +36,7 @@ class AcompteType extends AbstractType
                 ],
                 'placeholder' => 'Sélectionner un type'
             ])
-            ->add('amountMensualite', TextType::class,[
+            ->add('amountMensualite', TextType::class, [
                 'attr' => [
                     'class' => 'text-end separator',
                     'readonly' => true
@@ -40,7 +44,7 @@ class AcompteType extends AbstractType
             ])
             ->add('nbMensualite')
             ->add('dateOperation', DateCustomType::class)
-            ->add('amount', TextType::class,[
+            ->add('amount', TextType::class, [
                 'attr' => [
                     'class' => 'text-end separator'
                 ]
@@ -65,12 +69,30 @@ class AcompteType extends AbstractType
             ])
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
-                'choice_label' => 'matricule',
                 'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('p')
-                        ->join('p.contract', 'ct')
-                        ->leftJoin('p.departures', 'departures')
-                        ->where('departures.id IS NULL');
+                    if ($this->authorizationChecker->isGranted('ROLE_RH')) {
+                        return $er->createQueryBuilder('p')
+                            ->join('p.contract', 'contract')
+                            ->leftJoin('p.departures', 'departures')
+                            ->where('departures.id IS NULL')
+                            ->andWhere('p.active = true')
+                            ->andWhere('contract.typeContrat IN (:type)')
+                            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
+                            ->orderBy('p.matricule', 'ASC');
+                    } else {
+                        return $er->createQueryBuilder('p')
+                            ->join('p.contract', 'contract')
+                            ->join('p.categorie', 'category')
+                            ->join('category.categorySalarie', 'category_salarie')
+                            ->leftJoin('p.departures', 'departures')
+                            ->where('departures.id IS NULL')
+                            ->andWhere('p.active = true')
+                            ->andWhere('contract.typeContrat IN (:type)')
+                            ->andWhere("category_salarie.code IN (:code)")
+                            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
+                            ->setParameter('code', ['OUVRIER / EMPLOYES', 'CHAUFFEURS'])
+                            ->orderBy('p.matricule', 'ASC');
+                    }
                 },
                 'placeholder' => 'Sélectionner un matricule',
                 'attr' => [

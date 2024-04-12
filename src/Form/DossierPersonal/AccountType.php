@@ -11,25 +11,49 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class AccountType extends AbstractType
 {
+
+
+    public function __construct(private readonly AuthorizationCheckerInterface $authorizationChecker)
+    {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
-                'choice_label' => 'firstName',
                 'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('p')
-                        ->join('p.contract', 'contract')
-                        ->leftJoin('p.departures', 'departures')
-                        ->where('p.modePaiement in (:modePaiement)')
-                        ->andWhere('departures.id IS NULL')
-                        ->andWhere('p.active = true')
-                        ->andWhere('contract.typeContrat IN (:type)')
-                        ->setParameter('modePaiement', [Status::VIREMENT, Status::CHEQUE])
-                        ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI]);
+                    if ($this->authorizationChecker->isGranted('ROLE_RH')) {
+                        return $er->createQueryBuilder('p')
+                            ->join('p.contract', 'contract')
+                            ->leftJoin('p.departures', 'departures')
+                            ->where('p.modePaiement in (:modePaiement)')
+                            ->andWhere('departures.id IS NULL')
+                            ->andWhere('p.active = true')
+                            ->andWhere('contract.typeContrat IN (:type)')
+                            ->setParameter('modePaiement', [Status::VIREMENT, Status::CHEQUE])
+                            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
+                            ->orderBy('p.matricule', 'ASC');
+                    } else {
+                        return $er->createQueryBuilder('p')
+                            ->join('p.contract', 'contract')
+                            ->join('p.categorie', 'category')
+                            ->join('category.categorySalarie', 'category_salarie')
+                            ->leftJoin('p.departures', 'departures')
+                            ->where('p.modePaiement in (:modePaiement)')
+                            ->andWhere('departures.id IS NULL')
+                            ->andWhere('p.active = true')
+                            ->andWhere('contract.typeContrat IN (:type)')
+                            ->andWhere("category_salarie.code IN (:code)")
+                            ->setParameter('modePaiement', [Status::VIREMENT, Status::CHEQUE])
+                            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
+                            ->setParameter('code', ['OUVRIER / EMPLOYES', 'CHAUFFEURS'])
+                            ->orderBy('p.matricule', 'ASC');
+                    }
                 },
                 'placeholder' => 'Sélectionner un salarié',
                 'attr' => [

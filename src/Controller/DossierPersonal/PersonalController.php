@@ -52,12 +52,10 @@ class PersonalController extends AbstractController
         $index = $personalSalaried[10];
 
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
-        $dateFin = $personal->getContract()->getDateFin();
-        $typeContrat = $personal->getContract()->getTypeContrat();
         $today = new DateTime();
         $anciennete = (int)$personal->getOlder();
         $age = $personal->getBirthday() ? $personal->getBirthday()->diff($today)->y : '';
-        $dureeContrat = $typeContrat === Status::CDD ? round(($dateFin->diff($dateEmbauche)->days) / 30) : round(($today->diff($dateEmbauche)->days) / 30);
+        $dureeContrat = round(($today->diff($dateEmbauche)->days) / 30);
 
         $numberEnfant = $personal->getChargePeople()->count();
 
@@ -163,7 +161,6 @@ class PersonalController extends AbstractController
     {
         $status  = $this->personalRepository->areAllUsersActivated();
 
-        //dd(['staus'=>$status]);
         return $this->render('dossier_personal/personal/index.html.twig',[
             'status'=>$status
         ]);
@@ -177,7 +174,6 @@ class PersonalController extends AbstractController
     ): Response
     {
         $matricule = $matriculeGenerator->generateMatricule();
-        //$numCNPS = $matriculeGenerator->generateNumCnps();
         $numContract = $matriculeGenerator->generateNumContract();
         $personal = (new Personal())->setMatricule($matricule);
         $salaire = (new Salary());
@@ -339,12 +335,12 @@ class PersonalController extends AbstractController
 
                 flash()->addSuccess('Salariés Désactivés avec succès.');
             }
-            
+
             return $this->redirectToRoute('personal_index');
         }
 
         return $this->redirectToRoute('personal_index');
 
     }
-   
+
 }
