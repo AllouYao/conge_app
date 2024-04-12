@@ -8,6 +8,7 @@ use App\Utils\Status;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
+use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -185,6 +186,8 @@ class ApiReportingPaieController extends AbstractController
         $dataRegularisationPeriodique = [];
 
         foreach ($requestOperationRegularisation as $ordre => $regularisation) {
+            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+            $lastPeriode = $formatter->format($regularisation['last_campagne_date_debut']);
             $regulMoins = (int)$regularisation['remboursement_net'];
             $regulPlus = (int)$regularisation['retenue_net'];
             $dataRegularisationPeriodique[] = [
@@ -198,7 +201,8 @@ class ApiReportingPaieController extends AbstractController
                 'regul_plus_percus' => $regulPlus,
                 'net_payer_apres_regularisation' => (int)$regularisation['net_payer'] ?? 0,
                 'net_payer_avant_regularisation' => (int)$regularisation['net_payer'] - $regulMoins + $regulPlus,
-                'retenue_status' => $regularisation['status_operation']
+                'retenue_status' => $regularisation['status_operation'],
+                'periode_regulariser' => $lastPeriode
             ];
         }
 

@@ -75,6 +75,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->getQuery()->getResult();
     }
 
+    /** Etat des salaire periodique en fonction des rôles */
     public function findEtatSalaire(mixed $mouth1, mixed $mouth2, ?int $personalId): array
     {
         $qb = $this->createQueryBuilder('payroll');
@@ -141,8 +142,87 @@ class PayrollRepository extends ServiceEntityRepository
             ->where('campagnes.active = false')
             ->andWhere('personal.active = true')
             ->andWhere('campagnes.status = :status')
+            ->andWhere('payroll.status = :payroll_status')
             ->andWhere('campagnes.dateDebut BETWEEN ?1 AND ?2');
-        $qb->setParameters(['1' => $mouth1, '2' => $mouth2, 'status' => Status::TERMINER]);
+        $qb->setParameters(['1' => $mouth1, '2' => $mouth2, 'status' => Status::TERMINER, 'payroll_status' => Status::PAYE]);
+        if ($personalId) {
+            $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
+        }
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findEtatSalaireByRoleEmployer(mixed $mouth1, mixed $mouth2, ?int $personalId): array
+    {
+        $qb = $this->createQueryBuilder('payroll');
+        $qb
+            ->select([
+                'personal.id as personal_id',
+                'personal.firstName as nom',
+                'personal.lastName as prenoms',
+                'personal.refCNPS',
+                'personal.older',
+                'personal.service as station',
+                'personal.uuid as personal_uuid',
+                'YEAR(personal.birthday) as personal_birthday',
+                'payroll.matricule',
+                'payroll.dayOfPresence',
+                'payroll.baseAmount',
+                'payroll.sursalaire',
+                'payroll.AncienneteAmount',
+                'payroll.primeFonctionAmount',
+                'payroll.primeLogementAmount',
+                'payroll.indemniteFonctionAmount',
+                'payroll.indemniteLogementAmount',
+                'payroll.majorationAmount',
+                'payroll.congesPayesAmount',
+                'payroll.brutAmount',
+                'payroll.imposableAmount',
+                'payroll.salaryCnps',
+                'payroll.salaryIts',
+                'payroll.fixcalAmount',
+                'payroll.salaryCmu',
+                'payroll.salarySante',
+                'payroll.totalRetenueSalarie',
+                'payroll.netPayer',
+                'payroll.employeurCr',
+                'payroll.employeurIs',
+                'payroll.employeurCmu',
+                'payroll.amountTA',
+                'payroll.amountFPC',
+                'payroll.employeurFdfp',
+                'payroll.employeurAt',
+                'payroll.employeurPf',
+                'payroll.employeurSante',
+                'payroll.totalRetenuePatronal',
+                'payroll.masseSalary',
+                'payroll.salaryTransport',
+                'payroll.amountPrimePanier',
+                'payroll.amountPrimeSalissure',
+                'payroll.amountPrimeOutillage',
+                'payroll.amountPrimeTenueTrav',
+                'payroll.amountPrimeRendement',
+                'payroll.amountPrimeRendement',
+                'payroll.aventageNonImposable',
+                'payroll.numberPart',
+                'payroll.numCnps',
+                'payroll.dateEmbauche',
+                'payroll.createdAt',
+                'campagnes.startedAt',
+                'campagnes.dateDebut as periode_debut',
+                'campagnes.dateFin as periode_fin',
+                'campagnes.ordinary'
+            ])
+            ->join('payroll.campagne', 'campagnes')
+            ->join('payroll.personal', 'personal')
+            ->join('personal.categorie', 'category')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->where('campagnes.active = false')
+            ->andWhere('personal.active = true')
+            ->andWhere('campagnes.status = :status')
+            ->andWhere('payroll.status = :payroll_status')
+            ->andWhere('category_salarie.code = :code')
+            ->andWhere('campagnes.dateDebut BETWEEN ?1 AND ?2');
+        $qb->setParameters(['1' => $mouth1, '2' => $mouth2, 'status' => Status::TERMINER, 'payroll_status' => Status::PAYE, 'code' => ['OUVRIER / EMPLOYES', 'CHAUFFEURS']]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
         }
@@ -417,6 +497,43 @@ class PayrollRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function getPayrollVirementByRoleEmployeur(?string $typeVersement, bool $active, bool $type): ?array
+    {
+        return $this->createQueryBuilder('pr')
+            ->select([
+                'p.firstName as nom_salaried',
+                'p.lastName as prenoms_salaried',
+                'ac.bankId as banque',
+                'ac.name as name_banque',
+                'ac.codeAgence as code_agence',
+                'ac.code as code_compte',
+                'ac.numCompte as num_compte',
+                'ac.rib as rib_compte',
+                'pr.netPayer as net_payes',
+                'p.modePaiement as mode_paiement',
+                'c.dateDebut as debut',
+                'c.dateFin as fin',
+                'p.service as station'
+            ])
+            ->join('pr.personal', 'p')
+            ->join('pr.campagne', 'c')
+            ->leftJoin('p.accountBanks', 'ac')
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->where('c.ordinary = :type')
+            ->andWhere('c.active = :active')
+            ->andWhere('c.status = :status')
+            ->andWhere('p.modePaiement = :type_versement')
+            ->andWhere("category_salarie.code IN (:code)")
+            ->setParameter('type_versement', $typeVersement)
+            ->setParameter('status', Status::VALIDATED)
+            ->setParameter('type', $type)
+            ->setParameter('active', $active)
+            ->setParameter('code', ['OUVRIER / EMPLOYES', 'CHAUFFEURS'])
+            ->getQuery()
+            ->getResult();
+    }
+
     /** Retourner les elements pour l'etat des virement par periode */
     public function findPayrollVirementAnnuel(?string $typeVersement, bool $active, bool $type, mixed $debut, mixed $fin, ?int $personalId): array
     {
@@ -447,13 +564,63 @@ class PayrollRepository extends ServiceEntityRepository
             ->andWhere('p.modePaiement = :type_versement')
             ->andWhere('c.dateDebut >= :date_debut')
             ->andWhere('c.dateFin <= :date_fin')
-            ->andWhere('c.status <= :status');
+            ->andWhere('c.status = :status')
+            ->andWhere('pr.status = :payrol_statut');
         $qb->setParameter('type', $type)
             ->setParameter('active', $active)
             ->setParameter('status', Status::VALIDATED)
+            ->setParameter('payrol_statut', Status::PAYE)
             ->setParameter('type_versement', $typeVersement)
             ->setParameter('date_debut', $debut)
             ->setParameter('date_fin', $fin);
+        if ($personalId) {
+            $qb->andWhere($qb->expr()->eq('p.id', $personalId));
+        }
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findPayrollVirementAnnuelByRoleEmployeur(?string $typeVersement, bool $active, bool $type, mixed $debut, mixed $fin, ?int $personalId): array
+    {
+        $qb = $this->createQueryBuilder('pr');
+        $qb
+            ->select([
+                'p.firstName as nom_salaried',
+                'p.lastName as prenoms_salaried',
+                'ac.bankId as banque',
+                'ac.name as name_banque',
+                'ac.codeAgence as code_agence',
+                'ac.code as code_compte',
+                'ac.numCompte as num_compte',
+                'ac.rib as rib_compte',
+                'pr.netPayer as net_payes',
+                'p.modePaiement as mode_paiement',
+                'c.dateDebut as debut',
+                'c.dateFin as fin',
+                'p.service as station',
+                'MONTH(c.dateDebut) as start_month',
+                'MONTH(c.dateFin) as end_month',
+            ])
+            ->join('pr.personal', 'p')
+            ->join('pr.campagne', 'c')
+            ->leftJoin('p.accountBanks', 'ac')
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->where('c.ordinary = :type')
+            ->andWhere('c.active = :active')
+            ->andWhere('p.modePaiement = :type_versement')
+            ->andWhere('c.dateDebut >= :date_debut')
+            ->andWhere('c.dateFin <= :date_fin')
+            ->andWhere('c.status = :status')
+            ->andWhere('pr.status = :payrol_statut')
+            ->andWhere("category_salarie.code IN (:code)");
+        $qb->setParameter('type', $type)
+            ->setParameter('active', $active)
+            ->setParameter('status', Status::TERMINER)
+            ->setParameter('payrol_statut', Status::PAYE)
+            ->setParameter('type_versement', $typeVersement)
+            ->setParameter('date_debut', $debut)
+            ->setParameter('date_fin', $fin)
+            ->setParameter('code', ['OUVRIER / EMPLOYES', 'CHAUFFEURS']);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('p.id', $personalId));
         }
@@ -495,6 +662,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
     public function findOperationByPayrollByRoleEmployer(array $type, string $status, int $month, int $year): ?array
     {
         return $this->createQueryBuilder('payroll')
@@ -552,20 +720,25 @@ class PayrollRepository extends ServiceEntityRepository
                 'payroll.retenueBrut as retenue_brut',
                 'op.status as status_operation',
                 'op.id as operation_id',
-                'payroll.netPayer as net_payer'
+                'payroll.netPayer as net_payer',
+                'lastCampagne.dateDebut as last_campagne_date_debut',
             ])
             ->join('payroll.personal', 'personal')
             ->join('personal.operations', 'op')
+            ->join('payroll.campagne', 'campagne')
+            ->join('op.campagne', 'lastCampagne')
             ->where('op.typeOperations IN (:types)')
             ->andWhere('op.status IN (:status)')
+            ->andWhere('campagne.status =:campagne_status')
             ->andWhere('op.dateOperation BETWEEN ?1 AND ?2 ')
             ->orderBy('op.typeOperations');
-        $qb->setParameters(['1' => $start, '2' => $end, 'types' => [Status::REMBOURSEMENT, Status::RETENUES], 'status' => Status::VALIDATED]);
+        $qb->setParameters(['1' => $start, '2' => $end, 'types' => [Status::REMBOURSEMENT, Status::RETENUES], 'status' => Status::VALIDATED, 'campagne_status' => Status::TERMINER]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
         }
         return $qb->getQuery()->getResult();
     }
+
     public function findOperationByPeriodeByRoleEmployer(mixed $start, mixed $end, ?int $personalId): array
     {
         $qb = $this->createQueryBuilder('payroll');
@@ -583,9 +756,12 @@ class PayrollRepository extends ServiceEntityRepository
                 'payroll.retenueBrut as retenue_brut',
                 'op.status as status_operation',
                 'op.id as operation_id',
-                'payroll.netPayer as net_payer'
+                'payroll.netPayer as net_payer',
+                'lastCampagne.dateDebut as last_campagne_date_debut',
             ])
             ->join('payroll.personal', 'personal')
+            ->join('payroll.campagne', 'campagne')
+            ->join('op.campagne', 'lastCampagne')
             ->join('personal.operations', 'op')
             ->join('personal.categorie', 'category')
             ->join('category.categorySalarie', 'category_salarie')
@@ -593,8 +769,9 @@ class PayrollRepository extends ServiceEntityRepository
             ->andWhere('op.status IN (:status)')
             ->andWhere('op.dateOperation BETWEEN ?1 AND ?2 ')
             ->andWhere("category_salarie.code IN (:code)")
+            ->andWhere('campagne.status =:campagne_status')
             ->orderBy('op.typeOperations');
-        $qb->setParameters(['1' => $start, '2' => $end, 'types' => [Status::REMBOURSEMENT, Status::RETENUES], 'status' => Status::VALIDATED, 'code' => ['OUVRIER / EMPLOYES', 'CHAUFFEURS']]);
+        $qb->setParameters(['1' => $start, '2' => $end, 'types' => [Status::REMBOURSEMENT, Status::RETENUES], 'status' => Status::VALIDATED, 'code' => ['OUVRIER / EMPLOYES', 'CHAUFFEURS'], 'campagne_status' => Status::TERMINER]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
         }

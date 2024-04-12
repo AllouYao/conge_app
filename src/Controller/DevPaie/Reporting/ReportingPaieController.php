@@ -3,7 +3,7 @@
 namespace App\Controller\DevPaie\Reporting;
 
 use App\Repository\DossierPersonal\PersonalRepository;
-use Carbon\Carbon;
+use App\Repository\Paiement\CampagneRepository;
 use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,11 +37,12 @@ class ReportingPaieController extends AbstractController
     }
 
     #[Route('/regularisation_salaire', name: 'regularisation_salaire', methods: ['POST', 'GET'])]
-    public function viewEtatMensuelRegularisation(): Response
+    public function viewEtatMensuelRegularisation(CampagneRepository $campagneRepository): Response
     {
-        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, 'MMMM Y');
-        $today = Carbon::now();
-        $date = $formatter->format($today);
+        $campagne = $campagneRepository->active();
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+        $date = $campagne ? $formatter->format($campagne->getDateDebut()) : ' ';
+
         return $this->render('dev_paie/reportings/regularisations/regul_mensuel.html.twig', [
             'date' => $date,
         ]);
@@ -50,8 +51,13 @@ class ReportingPaieController extends AbstractController
     #[Route('/regularisation_salaire_periodique', name: 'regularisation_salaire_periodique', methods: ['POST', 'GET'])]
     public function viewEtatPeriodiqueRegularisation(PersonalRepository $personalRepository): Response
     {
+        if ($this->isGranted('ROLE_RH')) {
+            $personals = $personalRepository->findAllPersonalOnCampain();
+        } else {
+            $personals = $personalRepository->findAllPersonalByEmployeRole();
+        }
         return $this->render('dev_paie/reportings/regularisations/regul_periodique.html.twig', [
-            'personals' => $personalRepository->findAllPersonalOnCampain()
+            'personals' => $personals
         ]);
     }
 }
