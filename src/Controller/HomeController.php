@@ -37,7 +37,6 @@ class HomeController extends AbstractController
             $this->manager->flush();
             flash()->addInfo('le salarié ' . $enCour->getPersonal()->getFirstName() . ' ' . $enCour->getPersonal()->getLastName() . ' est de retour de congé.');
         }
-        
         return $this->render('home/index.html.twig');
     }
 }
