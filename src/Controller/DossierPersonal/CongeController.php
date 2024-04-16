@@ -34,17 +34,7 @@ class CongeController extends AbstractController
     #[Route('/api/conge_book/', name: 'api_book', methods: ['GET'])]
     public function getCongesSalaried(): JsonResponse
     {
-
-        // if ($this->isGranted('ROLE_RH')){
-
         $conges = $this->congeRepository->findConge();
-
-        //}else{
-
-        //    $conges = $this->congeRepository->findCongeByEmployeRole(Status::CONGE_GLOBAL);
-        // }
-
-
         $congeSalaried = [];
         foreach ($conges as $conge => $item) {
             $link = $this->generateUrl('conge_edit', ['uuid' => $item['uuid']]);
@@ -114,13 +104,10 @@ class CongeController extends AbstractController
             }
             if ($lastConge) {
                 $congeService->congesPayerByLast($conge);
-
                 if (!$congeService->success) {
-
                     flash()->addInfo($congeService->messages);
                     return $this->redirectToRoute('conge_new');
                 }
-
             }
             $congeService->congesPayerByFirst($conge);
 

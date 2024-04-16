@@ -51,6 +51,11 @@
                     columnRenderingMode: 'virtual',
                     mode: "virtual",
                 },
+                selection: {
+                    mode: "multiple",
+                    allowSelectAll: true,
+                    showCheckBoxesMode: "always"
+                },
                 groupPanel: {
                     visible: true
                 },
@@ -145,13 +150,20 @@
                 summary: {
                     totalItems: [
                         {
-                            column: 'name_salaried',
+                            column: 'ordre',
+                            summaryType: 'count',
+                            displayFormat: 'Salariés : {0}'
+                        },
+                        {
+                            column: 'stations',
                             customizeText() {
-                                return 'CUMUL DES SALAIRE '
+                                return 'Cumul : '
                             }
                         },
                         {
-                            column: 'salaire_net', summaryType: 'sum',
+                            column: 'salaire_net', summaryType: 'sum', customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
 
                         },
                     ],

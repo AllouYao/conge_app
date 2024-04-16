@@ -4,6 +4,7 @@ namespace App\Repository\DossierPersonal;
 
 use App\Entity\DossierPersonal\Conge;
 use App\Entity\DossierPersonal\Personal;
+use App\Utils\Status;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
@@ -50,7 +51,7 @@ class CongeRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
 
-            
+
     }
 
     public function findCongeByEmployeRole(string $typeConges): array
@@ -71,18 +72,18 @@ class CongeRepository extends ServiceEntityRepository
                 'co.remainingVacation',
             ])
             ->join('co.personal', 'p')
-            ->join('p.categorie', 'category') 
-            ->join('category.categorySalarie', 'categorySalarie') 
-            ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'categorySalarie')
+            ->where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
             ->andWhere('co.personal is not null')
             ->andWhere('co.typeConge = :type_conge')
-            ->setParameter('code_employe', 'OE') 
-            ->setParameter('code_chauffeur', 'CH') 
+            ->setParameter('code_employe', 'OE')
+            ->setParameter('code_chauffeur', 'CH')
             ->setParameter('type_conge', $typeConges)
             ->orderBy('co.dateDernierRetour', 'DESC')
             ->getQuery()
             ->getResult();
-        
+
     }
 
     public function getLastCongeByID(int $personal, bool $active): ?Conge
@@ -155,5 +156,33 @@ class CongeRepository extends ServiceEntityRepository
             ->setParameter('endDate', $endDate)
             ->getQuery()
             ->getResult();
+    }
+
+    public function findCongeByPersonal(int $personal): ?Conge
+    {
+        return $this->createQueryBuilder('co')
+            ->join('co.personal', 'personal')
+            ->where('personal.id = :personal')
+            ->setMaxResults(1)
+            ->setParameter('personal', $personal)
+            ->orderBy('co.id', 'DESC')
+            ->getQuery()->getOneOrNullResult();
+    }
+
+    public function findCongeByPeriode(mixed $start, mixed $end, int $personal_id): ?Conge
+    {
+        return $this->createQueryBuilder('co')
+            ->join('co.personal', 'personal')
+            ->where('personal.id = :personal_id')
+            ->andWhere('co.dateDepart >= :startDate')
+            ->andWhere('co.dateDepart <= :endDate')
+            ->andWhere('co.status IN (:status)')
+            ->setParameter('personal_id', $personal_id)
+            ->setParameter('startDate', $start)
+            ->setParameter('endDate', $end)
+            ->setMaxResults(1)
+            ->setParameter('status', [Status::PAYE, Status::IMPAYEE])
+            ->orderBy('co.id', 'DESC')
+            ->getQuery()->getOneOrNullResult();
     }
 }

@@ -83,8 +83,8 @@ class HeureSupRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('h')
             ->join('h.personal', 'p')
             ->join('p.categorie', 'category')
-            ->join('category.categorySalarie', 'categorySalarie')
-            ->where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->where('category_salarie.code IN (:code)')
             ->andWhere('YEAR(h.startedDate) = :year')
             ->andWhere('MONTH(h.startedDate) = :month')
             ->andWhere('p.active = true')
@@ -92,8 +92,7 @@ class HeureSupRepository extends ServiceEntityRepository
             ->setParameter('year', $year)
             ->setParameter('month', $month)
             ->setParameter('status', $status)
-            ->setParameter('code_employe', 'OE')
-            ->setParameter('code_chauffeur', 'CH')
+            ->setParameter('code', ['OUVRIERS / EMPLOYES', 'CHAUFFEURS'])
             ->orderBy('h.startedDate', 'ASC')
             ->getQuery()->getResult();
 
@@ -140,6 +139,4 @@ class HeureSupRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-
-
 }

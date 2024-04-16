@@ -187,7 +187,11 @@ class ApiReportingController extends AbstractController
                 'assurance_patronales' => (int)$salary['employeurSante'],
                 'charge_patronal' => (int)$salary['totalRetenuePatronal'],
                 'masse_salariale' => (int)$salary['masseSalary'],
-                'print_bulletin' => $url
+                'print_bulletin' => $url,
+                'regul_moins_percus' => (int)$salary['remboursNet'] + (int)$salary['remboursBrut'],
+                'regul_plus_percus' => (int)$salary['retenueNet'] + $salary['retenueBrut'],
+                'amount_pret_mensuel' => (int)$salary['amountMensualityPret'],
+                'amount_acompte_mensuel' => (int)$salary['amountMensuelAcompt']
             ];
         }
         return new JsonResponse($data);

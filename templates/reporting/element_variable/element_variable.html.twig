@@ -221,15 +221,12 @@
                         {
                             column: 'matricule',
                             summaryType: 'count',
-                            customizeText: (data) => {
-                                return new Intl.NumberFormat('fr-FR').format(data.value)
-                            }
+                            displayFormat : 'Salariés : {0}'
                         },
                         {
-                            column: 'nom',
-                            summaryType: 'count',
+                            column: 'prenoms',
                             customizeText() {
-                                return 'Total:'
+                                return 'Cumul :'
                             }
                         },
                         {

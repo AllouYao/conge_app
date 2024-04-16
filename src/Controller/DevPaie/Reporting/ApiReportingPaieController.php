@@ -3,6 +3,7 @@
 namespace App\Controller\DevPaie\Reporting;
 
 use App\Repository\DevPaie\OperationRepository;
+use App\Repository\Paiement\CampagneRepository;
 use App\Repository\Paiement\PayrollRepository;
 use App\Utils\Status;
 use Carbon\Carbon;
@@ -19,7 +20,8 @@ class ApiReportingPaieController extends AbstractController
 {
     public function __construct(
         private readonly OperationRepository $operationRepository,
-        private readonly PayrollRepository   $payrollRepository
+        private readonly PayrollRepository   $payrollRepository,
+        private readonly CampagneRepository $campagneRepository
     )
     {
     }
@@ -128,11 +130,13 @@ class ApiReportingPaieController extends AbstractController
     #[Route('/regularisation_mensuel', 'regularisation_mensuel', methods: ['GET'])]
     public function regulSalaire(): JsonResponse
     {
-        $today = Carbon::today();
+        $campagneActive = $this->campagneRepository->active();
+        $month = (int)$campagneActive->getDateDebut()->format('m');
+        $years = (int)$campagneActive->getDateDebut()->format('Y');
         if ($this->isGranted('ROLE_RH')) {
-            $requestOperationRegularisation = $this->payrollRepository->findOperationByPayroll([Status::RETENUES, Status::REMBOURSEMENT], Status::VALIDATED, $today->month, $today->year);
+            $requestOperationRegularisation = $this->payrollRepository->findOperationByPayroll([Status::RETENUES, Status::REMBOURSEMENT], Status::VALIDATED, $month, $years);
         } else {
-            $requestOperationRegularisation = $this->payrollRepository->findOperationByPayrollByRoleEmployer([Status::RETENUES, Status::REMBOURSEMENT], Status::VALIDATED, $today->month, $today->year);
+            $requestOperationRegularisation = $this->payrollRepository->findOperationByPayrollByRoleEmployer([Status::RETENUES, Status::REMBOURSEMENT], Status::VALIDATED, $month, $years);
         }
         $dataRegularisation = [];
 

@@ -44,6 +44,7 @@ class OperationRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
     public function findOperationByTypeAndEmployerRole(?array $types, int $month, int $year): ?array
     {
         return $this->createQueryBuilder('o')
@@ -97,6 +98,7 @@ class OperationRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
     public function findOperationByTypeAndStatusByEmployerRole(string $type, ?array $status, int $month, int $year): ?array
     {
         return $this->createQueryBuilder('o')
@@ -188,6 +190,7 @@ class OperationRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
     public function findAcomptAndPretByStatusAndEmployerRole(?array $types, string $status, int $month, int $year): ?array
     {
         return $this->createQueryBuilder('o')
@@ -214,5 +217,41 @@ class OperationRepository extends ServiceEntityRepository
             ->orderBy('personal.matricule', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    public function findOperationRegullByPeriode(mixed $start, mixed $end, int $personal_id): ?Operation
+    {
+        return $this->createQueryBuilder('o')
+            ->join('o.personal', 'personal')
+            ->where('personal.id = :personal_id')
+            ->andWhere('o.dateOperation >= :start_date')
+            ->andWhere('o.dateOperation <= :end_date')
+            ->andWhere('o.status = :status')
+            ->andWhere('o.typeOperations in (:type_operations)')
+            ->setParameter('start_date', $start)
+            ->setParameter('end_date', $end)
+            ->setParameter('status', Status::VALIDATED)
+            ->setParameter('type_operations', [Status::REMBOURSEMENT, Status::RETENUES])
+            ->setParameter('personal_id', $personal_id)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function findOperationAcompteAndPreByPeriod(mixed $start, mixed $end, int $personal_id): ?Operation
+    {
+        return $this->createQueryBuilder('o')
+            ->join('o.personal', 'personal')
+            ->where('personal.id = :personal_id')
+            ->andWhere('o.dateOperation >= :start_date')
+            ->andWhere('o.dateOperation <= :end_date')
+            ->andWhere('o.status = :status')
+            ->andWhere('o.typeOperations in (:type_operations)')
+            ->setParameter('start_date', $start)
+            ->setParameter('end_date', $end)
+            ->setParameter('status', Status::VALIDATED)
+            ->setParameter('type_operations', [Status::ACOMPTE, Status::PRET])
+            ->setParameter('personal_id', $personal_id)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

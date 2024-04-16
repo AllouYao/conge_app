@@ -45,7 +45,8 @@
                 <div class="card-footer">
                     <div id="normal-contained" class="float-end"></div>
                 </div>
-                <form method="POST" action="{{ path('campagne_print_bulletin_etat_salaire') }}" id="formPrintEtatSalaire">
+                <form method="POST" action="{{ path('campagne_print_bulletin_etat_salaire') }}"
+                      id="formPrintEtatSalaire">
                     <input type="hidden" id="printEtatSalaireInput" name="printEtatSalaireInput">
                     <input type="hidden" id="personalsIdInput" name="personalsIdInput">
                 </form>
@@ -69,7 +70,7 @@
             const fin = tab2_fin[1];
 
             $('#head').html(`du ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')} `);
-              const dataGrid = $('#dataGridEtatSalaire').dxDataGrid({
+            $('#dataGridEtatSalaire').dxDataGrid({
                 dataSource: `{{ url('api_reporting_etat_salaire') }}?${$data}`,
                 showBorders: true,
                 showColumnLines: true,
@@ -123,7 +124,7 @@
                         e.cancel = true;
                     }
                 },
-              
+
                 columns: [
                     {
                         dataField: "index",
@@ -202,7 +203,7 @@
                         alignment: 'right',
                     },
                     {
-                        caption: "CHARGES SALARIALES",
+                        caption: "Charges Salariales",
                         alignment: 'center',
                         columns: [
                             {
@@ -244,6 +245,26 @@
                         alignment: 'right',
                     },
                     {
+                        caption: 'Régularisations',
+                        alignment: "center",
+                        columns: [
+                            {
+                                dataType: "number",
+                                dataField: "regul_moins_percus",
+                                caption: "Moins Perçus",
+                                alignment: "right",
+                                width: 150
+                            },
+                            {
+                                dataType: "number",
+                                dataField: "regul_plus_percus",
+                                caption: "Plus Perçus",
+                                alignment: "right",
+                                width: 150
+                            }
+                        ]
+                    },
+                    {
                         dataField: 'prime_transport_legal',
                         caption: 'Indemnite Transport',
                         dataType: 'number',
@@ -256,7 +277,27 @@
                         alignment: 'right',
                     },
                     {
-                        caption: 'CHARGES FISCALES PATRONALES',
+                        caption: "Acompts & Prêts",
+                        alignment: "center",
+                        columns: [
+                            {
+                                dataType: "number",
+                                dataField: "amount_acompte_mensuel",
+                                caption: "Acompt",
+                                alignment: "right",
+                                width: 150
+                            },
+                            {
+                                dataType: "number",
+                                dataField: "amount_pret_mensuel",
+                                caption: "Prêt",
+                                alignment: "right",
+                                width: 150
+                            },
+                        ]
+                    },
+                    {
+                        caption: 'Charges Fiscales Patronales',
                         alignment: 'center',
                         columns: [
                             {
@@ -274,7 +315,7 @@
                         ]
                     },
                     {
-                        caption: 'CHARGES SOCIALES PATRONALES',
+                        caption: 'Charges Sociales Patronales',
                         alignment: 'center',
                         columns: [
                             {
@@ -350,6 +391,34 @@
                         },
                         {
                             column: 'salaireBase',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'regul_moins_percus',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'regul_plus_percus',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'amount_pret_mensuel',
+                            summaryType: 'sum',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
+                        },
+                        {
+                            column: 'amount_acompte_mensuel',
                             summaryType: 'sum',
                             customizeText: function (data) {
                                 return new Intl.NumberFormat('fr-FR').format(data.value);

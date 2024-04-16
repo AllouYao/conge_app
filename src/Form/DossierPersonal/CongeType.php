@@ -43,8 +43,8 @@ class CongeType extends AbstractType
         $builder
             ->add('typeConge', ChoiceType::class, [
                 'choices' => [
-                    'Effectif' => "Effectif",
-                    'Partiel' => "Partiel",
+                    'Effectif' => Status::EFFECTIF,
+                    'Partiel' => Status::PARTIEL,
                 ],
                 'expanded' => true,
                 'multiple' => false,
@@ -56,8 +56,8 @@ class CongeType extends AbstractType
             ])
             ->add('typePayementConge', ChoiceType::class, [
                 'choices' => [
-                    'Immédiat' => "Immédiat",
-                    'Ultérieur' => "Ultérieur",
+                    'Immédiat' => Status::IMMEDIAT,
+                    'Ultérieur' => Status::ULTERIEUR,
                 ],
                 'expanded' => true,
                 'multiple' => false,
@@ -65,8 +65,6 @@ class CongeType extends AbstractType
                     'class' => 'radio-inline'
                 ],
                 "data" => "Immédiat"
-
-                //'required' => false
             ])
             ->add('dateDepart', DateCustomType::class,)
             ->add('dateRetour', DateCustomType::class)

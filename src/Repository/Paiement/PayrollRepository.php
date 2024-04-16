@@ -67,11 +67,10 @@ class PayrollRepository extends ServiceEntityRepository
             ->join('p.categorie', 'category')
             ->join('category.categorySalarie', 'categorySalarie')
             ->join('pr.campagne', 'c')
-            ->andWhere('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
+            ->andWhere("categorySalarie.code IN (:code)")
             ->andWhere('c.active = :active')
+            ->setParameter('code', ['OUVRIER / EMPLOYES', 'CHAUFFEURS'])
             ->setParameter('active', $active)
-            ->setParameter('code_employe', 'OE')
-            ->setParameter('code_chauffeur', 'CH')
             ->getQuery()->getResult();
     }
 
@@ -132,6 +131,12 @@ class PayrollRepository extends ServiceEntityRepository
                 'payroll.numCnps',
                 'payroll.dateEmbauche',
                 'payroll.createdAt',
+                'payroll.remboursNet',
+                'payroll.remboursBrut',
+                'payroll.retenueNet',
+                'payroll.retenueBrut',
+                'payroll.amountMensualityPret',
+                'payroll.amountMensuelAcompt',
                 'campagnes.startedAt',
                 'campagnes.dateDebut as periode_debut',
                 'campagnes.dateFin as periode_fin',
@@ -240,6 +245,27 @@ class PayrollRepository extends ServiceEntityRepository
             ->andWhere('personal.active = true')
             ->andWhere('campagnes.dateDebut BETWEEN ?1 AND ?2');
         $qb->setParameters(['1' => $mouth1, '2' => $mouth2]);
+        if ($personalId) {
+            $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
+        }
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findByPeriodeEmplyees(mixed $mouth1, mixed $mouth2, ?int $personalId): array
+    {
+        $qb = $this->createQueryBuilder('payroll');
+        $qb
+            ->select()
+            ->join('payroll.campagne', 'campagnes')
+            ->join('payroll.personal', 'personal')
+            ->join('personal.categorie', 'category')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->where('campagnes.active = false')
+            ->andWhere('personal.active = true')
+            ->andWhere('category_salarie.code = :code')
+            ->andWhere('campagnes.dateDebut BETWEEN ?1 AND ?2')
+            ->orderBy('personal.matricule', 'ASC');
+        $qb->setParameters(['1' => $mouth1, '2' => $mouth2, 'code' => ['OUVRIER / EMPLOYES', 'CHAUFFEURS']]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
         }

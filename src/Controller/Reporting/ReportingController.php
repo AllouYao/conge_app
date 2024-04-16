@@ -14,6 +14,12 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/reporting', name: 'reporting_')]
 class ReportingController extends AbstractController
 {
+    public function __construct(
+        private readonly CampagneRepository $campagneRepository
+    )
+    {
+    }
+
     #[Route('/declaration_dgi', name: 'declaration_dgi', methods: ['GET', 'POST'])]
     public function viewDeclarationDgi(PersonalRepository $personalRepository): Response
     {
@@ -87,23 +93,20 @@ class ReportingController extends AbstractController
     }
 
 
+    /**
+     * @throws NonUniqueResultException
+     */
     #[Route('/element_variable', name: 'element_variable', methods: ['GET', 'POST'])]
     public function viewElementVariable(): Response
     {
+        $campagne = $this->campagneRepository->active();
         $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
-        $today = Carbon::now();
-        $date = $formatter->format($today);
+        $date = $campagne ? $formatter->format($campagne->getDateDebut()) : ' ';
+
         return $this->render('reporting/element_variable/element_variable.html.twig', [
             'date' => $date
         ]);
     }
-
-
-
-
-
-
-
 
     #[Route('/etat_salaire', name: 'etat_salaire', methods: ['GET', 'POST'])]
     public function viewEtatSalaireGlobal(PersonalRepository $personalRepository): Response
