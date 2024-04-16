@@ -27,20 +27,22 @@ class DepartureRepository extends ServiceEntityRepository
      * @param int $year
      * @return Departure[]
      */
-    public function getDepartureByDate(int $month, int $year): array
+    public function getDepartureByDate(int $month, int $year, $typeDepart): array
     {
         return $this->createQueryBuilder('departure')
             ->join('departure.personal', 'personal')
             ->andWhere('YEAR(departure.date) = :year')
             ->andWhere('MONTH(departure.date) = :month')
+            ->andWhere('departure.reason = :typeDepart')
             ->setParameter('year', $year)
             ->setParameter('month', $month)
+            ->setParameter('typeDepart', $typeDepart)
             ->orderBy('departure.date', 'ASC')
             ->getQuery()
             ->getResult();
     }
 
-    public function getDepartureByDateByEmployeRole(int $month, int $year): array
+    public function getDepartureByDateByEmployeRole(int $month, int $year, $typeDepart): array
     {
         return $this->createQueryBuilder('departure')
             ->join('departure.personal', 'personal')
@@ -49,10 +51,12 @@ class DepartureRepository extends ServiceEntityRepository
             ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
             ->andWhere('YEAR(departure.date) = :year')
             ->andWhere('MONTH(departure.date) = :month')
+            ->andWhere('departure.reason = :typeDepart')
             ->setParameter('year', $year)
             ->setParameter('month', $month)
             ->setParameter('code_employe', 'OE') 
             ->setParameter('code_chauffeur', 'CH')
+            ->setParameter('typeDepart', $typeDepart)
             ->orderBy('departure.date', 'ASC')
             ->getQuery()
             ->getResult();

@@ -29,6 +29,8 @@ class Conge
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?DateTimeInterface $dateRetour = null;
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?DateTimeInterface $dateReprise = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?DateTimeInterface $dateDernierRetour = null;
@@ -106,6 +108,18 @@ class Conge
 
         return $this;
     }
+    public function getDateReprise(): ?DateTimeInterface
+    {
+        return $this->dateReprise;
+    }
+
+    public function setDateReprise(DateTimeInterface $dateReprise): static
+    {
+        $this->dateReprise = $dateReprise;
+
+        return $this;
+    }
+    
 
     public function getDateRetour(): ?DateTimeInterface
     {
