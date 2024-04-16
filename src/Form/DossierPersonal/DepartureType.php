@@ -34,23 +34,8 @@ class DepartureType extends AbstractType
                 ],
                 'placeholder' => ""
             ])
-            ->add('reason', ChoiceType::class, [
-                'multiple' => false,
-                'expanded' => false,
-                'attr' => [
-                    'data-plugin' => 'customselect',
-                ],
-                'choices' => [
-                    'Démission' => Status::DEMISSION,
-                    'Retraite' => Status::RETRAITE,
-                    'Licenciement collectif' => Status::LICENCIEMENT_COLLECTIF,
-                    'Licenciement faute lourde' => Status::LICENCIEMENT_FAUTE_LOURDE,
-                    'Licenciement du fait de l\'employeur' => Status::LICENCIEMENT_FAIT_EMPLOYEUR,
-                    'Abandon de poste' => Status::ABANDON_DE_POST,
-                    'Licenciement pour maladie' => Status::MALADIE,
-                    'Décès' => Status::DECES
-                ],
-                'placeholder' => 'Sélectionner la raison du départ'
+            ->add('reason', TextType::class, [
+                'disabled'=>true,
             ])
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,

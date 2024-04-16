@@ -61,6 +61,7 @@ class CongeType extends AbstractType
                 //'required' => false
             ])
             ->add('dateDepart', DateCustomType::class,)
+            ->add('dateReprise', DateCustomType::class,)
             ->add('dateRetour', DateCustomType::class,[
             ])
             ->add('personal', EntityType::class, [
