@@ -6,6 +6,7 @@ use App\Entity\DossierPersonal\Conge;
 use App\Entity\DossierPersonal\Personal;
 use App\Form\CustomType\DateCustomType;
 use App\Repository\DossierPersonal\CongeRepository;
+use App\Repository\DossierPersonal\OldCongeRepository;
 use App\Service\CongeService;
 use App\Utils\Status;
 use Carbon\Carbon;
@@ -29,7 +30,8 @@ class CongeType extends AbstractType
     public function __construct(
         CongeService                                   $congeService,
         CongeRepository                                $congeRepository,
-        private readonly AuthorizationCheckerInterface $authorizationChecker
+        private readonly AuthorizationCheckerInterface $authorizationChecker,
+        private readonly OldCongeRepository            $oldCongeRepository
     )
     {
         $this->congeService = $congeService;
@@ -107,16 +109,23 @@ class CongeType extends AbstractType
                     'data-plugin' => 'customselect',
                 ],
                 'choice_attr' => function (Personal $personal) {
-                    $lastConges = $this->congeRepository->getLastCongeByID($personal->getId(), false);
-                    $embauche = $personal->getContract()->getDateEmbauche();
                     $today = Carbon::today();
-                    $workMonth = $this->congeService->getWorkMonth($embauche, $today);
+                    $last_conges = $this->congeRepository->getLastCongeByID($personal->getId(), false);
+                    $historique_conge = $this->oldCongeRepository->findOneByPerso($personal->getId());
+                    $hist_date_retour = "";
+                    if ($historique_conge) {
+                        $hist_date_retour = $historique_conge->getDateRetour()->format('d/m/Y');
+                        $work_month = $this->congeService->getWorkMonth($historique_conge->getDateRetour(), $today);
+                    } else {
+                        $embauche = $personal->getContract()->getDateEmbauche();
+                        $work_month = $this->congeService->getWorkMonth($embauche, $today);
+                    }
                     return [
                         'data-name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
                         'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y'),
                         'data-category' => '( ' . $personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' . $personal->getCategorie()->getIntitule(),
-                        'data-dernier-retour' => $lastConges ? date_format($lastConges->getDateDernierRetour(), 'd/m/Y') : null,
-                        'data-remaining' => $lastConges ? ceil($lastConges->getRemainingVacation()) : ceil($workMonth * 2.2 * 1.25)
+                        'data-dernier-retour' => $last_conges ? date_format($last_conges->getDateDernierRetour(), 'd/m/Y') : $hist_date_retour,
+                        'data-remaining' => $last_conges ? ceil($last_conges->getRemainingVacation()) : ceil($work_month * 2.2 * 1.25)
                     ];
                 }
             ])
@@ -152,19 +161,24 @@ class CongeType extends AbstractType
                     'readonly' => 'readonly'
 
                 ]
-            ]);
+            ])
+            ->add('dateReprise', DateCustomType::class);
 
         $builder
             ->addEventListener(
                 FormEvents::SUBMIT,
                 function (FormEvent $event) {
-                    /** @var Conge $data */
-                    $data = $event->getData();
-                    $personal = $data->getPersonal();
-                    $lastConges = $this->congeRepository->getLastCongeByID($personal->getId(), false);
-                    if ($lastConges)
-                        $this->congeService->congesPayerByLast($data);
-                    $this->congeService->congesPayerByFirst($data);
+                    /** @var Conge $data_c */
+                    $data_c = $event->getData();
+                    $personal = $data_c->getPersonal();
+                    $last_conges = $this->congeRepository->getLastCongeByID($personal->getId(), false);
+                    $historique_conge = $this->oldCongeRepository->findOneByPerso($personal->getId());
+
+                    if ($last_conges or $historique_conge) {
+                        $this->congeService->congesPayeByLast($data_c);
+                    } else {
+                        $this->congeService->congesPayeFirst($data_c);
+                    }
                 }
             );
 
@@ -206,7 +220,6 @@ class CongeType extends AbstractType
                     if ($data instanceof Conge && $data->getId()) {
                         $form->add('personal', EntityType::class, [
                             'class' => Personal::class,
-                            'choice_label' => 'matricule',
                             'query_builder' => function (EntityRepository $er) use ($personal) {
                                 return $er->createQueryBuilder('p')
                                     ->join('p.contract', 'ct')
@@ -225,16 +238,23 @@ class CongeType extends AbstractType
                                 'data-plugin' => 'customselect',
                             ],
                             'choice_attr' => function (Personal $personal) {
-                                $lastConges = $this->congeRepository->getLastCongeByID($personal->getId(), false);
-                                $embauche = $personal->getContract()->getDateEmbauche();
                                 $today = Carbon::today();
-                                $workMonth = $this->congeService->getWorkMonth($embauche, $today);
+                                $last_conges = $this->congeRepository->getLastCongeByID($personal->getId(), false);
+                                $historique_conge = $this->oldCongeRepository->findOneByPerso($personal->getId());
+                                $hist_date_retour = "";
+                                if ($historique_conge) {
+                                    $hist_date_retour = $historique_conge->getDateRetour()->format('d/m/Y');
+                                    $work_month = $this->congeService->getWorkMonth($historique_conge->getDateRetour(), $today);
+                                } else {
+                                    $embauche = $personal->getContract()->getDateEmbauche();
+                                    $work_month = $this->congeService->getWorkMonth($embauche, $today);
+                                }
                                 return [
                                     'data-name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
                                     'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y'),
                                     'data-category' => '( ' . $personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' . $personal->getCategorie()->getIntitule(),
-                                    'data-dernier-retour' => $lastConges ? date_format($lastConges->getDateDernierRetour(), 'd/m/Y') : null,
-                                    'data-remaining' => $lastConges ? ceil($lastConges->getRemainingVacation()) : ceil($workMonth * 2.2 * 1.25)
+                                    'data-dernier-retour' => $last_conges ? date_format($last_conges->getDateDernierRetour(), 'd/m/Y') : $hist_date_retour,
+                                    'data-remaining' => $last_conges ? ceil($last_conges->getRemainingVacation()) : ceil($work_month * 2.2 * 1.25)
                                 ];
                             }
                         ]);

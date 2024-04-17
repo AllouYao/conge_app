@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %} Ajouter un acompte{% endblock %}
+{% block title %} Ajouter un historique{% endblock %}
 
 {% block body %}
     <div class="row">
@@ -10,7 +10,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        AJOUTER UN ANCIEN CONGE
+                        AJOUTER UN HISTORIQUE DE CONGE
                     </h5>
                 </div>
                 <div class="card-body">
@@ -19,7 +19,7 @@
                 <div class="card-footer">
                     <button type="submit"
                             class="btn btn-primary float-end">{{ button_label|default('Enregistrer') }}</button>
-                    <a href="{{ path('personal_absence_index') }}"
+                    <a href="{{ path('old_conge_index') }}"
                        class="btn btn-info float-end me-2" style="color: white">Retour</a>
                 </div>
             </div>

@@ -96,8 +96,20 @@ let acompte = () => {
     $('#acompte_hireDate').val(hireDate);
     $('#acompte_category').val(category);
 }
+
+let older_conger = () => {
+    const selectedOption = $("#old_conge_personal :selected");
+    const name = selectedOption.attr('data-name');
+    const hireDate = selectedOption.attr('data-hireDate');
+    const category = selectedOption.attr('data-category');
+
+    $('#old_conge_name').val(name);
+    $('#old_conge_hireDate').val(hireDate);
+    $('#old_conge_category').val(category);
+}
+
 $('body').on('change',
-    '#charge_personal, #account_personal, #departure_personal, #conge_personal, #personal_heure_sup_personal, #personal_absence_personal, #assurance_personal_Personal, #operation_personal, #acompte_personal', function () {
+    '#charge_personal, #account_personal, #departure_personal, #conge_personal, #personal_heure_sup_personal, #personal_absence_personal, #assurance_personal_Personal, #operation_personal, #acompte_personal, #old_conge_personal', function () {
         if ($(this).attr('id') === 'charge_personal') {
             chargePeople();
         } else if ($(this).attr('id') === 'account_personal') {
@@ -114,8 +126,10 @@ $('body').on('change',
             assurance();
         } else if ($(this).attr('id') === 'operation_personal') {
             operation();
-        }else if ($(this).attr('id') === 'acompte_personal') {
+        } else if ($(this).attr('id') === 'acompte_personal') {
             acompte();
+        } else if ($(this).attr('id') === 'old_conge_personal') {
+            older_conger();
         }
     });
 
@@ -128,3 +142,4 @@ absence();
 assurance();
 operation();
 acompte();
+older_conger();

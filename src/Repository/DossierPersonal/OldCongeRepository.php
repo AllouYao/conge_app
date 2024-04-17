@@ -36,13 +36,14 @@ class OldCongeRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?OldConge
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findOneByPerso($value): ?OldConge
+    {
+        return $this->createQueryBuilder('o')
+            ->join('o.personal', 'personal')
+            ->where('personal.id = :value')
+            ->setParameter('value', $value)
+            ->orderBy('o.id', 'DESC')
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Controller\OlConge;
 
-use App\Utils\Status;
 use App\Form\OldConge\OldCongeType;
 use App\Entity\DossierPersonal\OldConge;
 use Doctrine\ORM\EntityManagerInterface;
@@ -33,58 +32,59 @@ class OldCongeController extends AbstractController
     #[Route('/api', name: 'api')]
     public function apiAcompte(OldCongeRepository $oldCongeRepository): JsonResponse
     {
-        $oldConges = $oldCongeRepository->findAll();
-        $data = [];
+        $old_conges = $oldCongeRepository->findAll();
+        $data_old_conges = [];
 
-        foreach ($oldConges as $oldConge) {
-            $data[] = [
-                'id' => $oldConge->getId(),
-                'date' => date_format($oldConge->getDateRetour(), 'd/m/y'),
-                'matricule' => $oldConge->getPersonal()->getMatricule(),
-                'nom_prenom' => $oldConge->getPersonal()->getFirstName() . ' ' . $oldConge->getPersonal()->getLastName(),
-                'genre' => $oldConge->getPersonal()->getGenre(),
-                'salaryAverage' => $oldConge->getSalaryAverage(),
-                'modifier' => $this->generateUrl('old_conge_edit', ['uuid' => $oldConge->getUuid()])
+        foreach ($old_conges as $old_conge) {
+            $data_old_conges[] = [
+                'id' => $old_conge->getId(),
+                'date' => date_format($old_conge->getDateRetour(), 'd/m/Y'),
+                'date_creation' => date_format($old_conge->getCreatedAt(), 'd/m/Y'),
+                'matricule' => $old_conge->getPersonal()->getMatricule(),
+                'nom_prenom' => $old_conge->getPersonal()->getFirstName() . ' ' . $old_conge->getPersonal()->getLastName(),
+                'genre' => $old_conge->getPersonal()->getGenre(),
+                'salaryAverage' => $old_conge->getSalaryAverage(),
+                'modifier' => $this->generateUrl('old_conge_edit', ['uuid' => $old_conge->getUuid()])
             ];
         }
-        return new JsonResponse($data);
+        return new JsonResponse($data_old_conges);
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request): Response
+    public function news(Request $request): Response
     {
 
-        $oldConge = new OldConge();
-        $form = $this->createForm(OldCongeType::class, $oldConge);
-        $form->handleRequest($request);
+        $old_conge = new OldConge();
+        $forms = $this->createForm(OldCongeType::class, $old_conge);
+        $forms->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->manager->persist($oldConge);
+        if ($forms->isSubmitted() && $forms->isValid()) {
+            $this->manager->persist($old_conge);
             $this->manager->flush();
             flash()->addSuccess('Ancien Congé enregistré avec succès');
             return $this->redirectToRoute('old_conge_index');
         }
         return $this->render('dossier_personal/old_conge/new.html.twig', [
-            'form' => $form->createView()
+            'form' => $forms->createView()
         ]);
     }
 
     #[Route('/{uuid}/edit', name: 'edit', methods:['GET','POST'])]
-    public function edit(OldConge $oldconge,Request $request): Response
+    public function edit(OldConge $old_conge,Request $request): Response
     {
-        $form = $this->createForm(OldCongeType::class,$oldconge);
-        $form->handleRequest($request);
+        $forms = $this->createForm(OldCongeType::class,$old_conge);
+        $forms->handleRequest($request);
 
-        if($form->isSubmitted() && $form->isValid())
+        if($forms->isSubmitted() && $forms->isValid())
         {
-            $this->manager->persist($oldconge);
+            $this->manager->persist($old_conge);
             $this->manager->flush();
 
             flash()->addSuccess('Ancien Congé modifié avec succès');
             return $this->redirectToRoute('old_conge_index');
         }
         return $this->render('dossier_personal/old_conge/edit.html.twig',[
-            'form' => $form
+            'form' => $forms
         ]);
     }
 }
