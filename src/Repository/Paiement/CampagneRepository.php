@@ -4,11 +4,10 @@ namespace App\Repository\Paiement;
 
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Campagne;
-use DateTime;
+use App\Utils\Status;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
-use Exception;
 
 /**
  * @extends ServiceEntityRepository<Campagne>
@@ -32,6 +31,8 @@ class CampagneRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('c')
             ->where("c.active = true")
+            ->andWhere('c.status = :status')
+            ->setParameter('status', Status::VALIDATED)
             ->setMaxResults(1)
             ->orderBy('c.id', 'DESC')
             ->getQuery()
@@ -73,16 +74,39 @@ class CampagneRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    public function findCampagnActive(): ?Campagne
+    {
+        return $this->createQueryBuilder('c')
+            ->Where('c.active = :active')
+            ->andWhere('c.status = :status')
+            ->setParameter('active', true)
+            ->setParameter('status', Status::PENDING)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+    public function findCampagnActiveAndPending(): ?Campagne
+    {
+        return $this->createQueryBuilder('c')
+            ->Where('c.active = :active')
+            ->andWhere('c.status = :status_pending OR c.status = :status_validated')
+            ->setParameter('active', true)
+            ->setParameter('status_pending', Status::PENDING)
+            ->setParameter('status_validated', Status::VALIDATED)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 
 
     public function lastCampagne(bool $isOrdinaire): ?Campagne
     {
         return $this->createQueryBuilder('c')
-            ->join('c.personal', 'p')
-            ->leftJoin('p.chargePersonals', 'ch')
             ->where("c.active = false")
             ->andWhere("c.ordinary = :value")
+            ->andWhere("c.status = :statut")
             ->setParameter('value', $isOrdinaire)
+            ->setParameter('statut', Status::VALIDATED)
             ->orderBy("c.id", "DESC")
             ->setMaxResults(1)
             ->getQuery()
@@ -109,23 +133,39 @@ class CampagneRepository extends ServiceEntityRepository
             ->getQuery()->getScalarResult();
     }
 
-    /** Retourne l'avant dernière campagne ordinaire*/
-    public function findBeforeLast()
+    /** Retourne la dernière campagne ordinaire */
+    public function findLast(): ?Campagne
     {
         return $this->createQueryBuilder('c')
             ->where('c.ordinary = true')
+            ->andWhere('c.status = :status')
+            ->setParameter('status', Status::TERMINER)
             ->orderBy('c.id', 'DESC')
-            ->setFirstResult(1)
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
     }
 
     /** Retourne la dernière campagne ordinaire */
-    public function findLast(): ?Campagne
+    public function findLastCampagneForRecap(): ?Campagne
     {
         return $this->createQueryBuilder('c')
             ->where('c.ordinary = true')
+            ->andWhere('c.status IN (:status)')
+            ->setParameter('status', [Status::PENDING, Status::VALIDATED])
+            ->orderBy('c.id', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /** Retourne l'avant dernière campagne ordinaire*/
+    public function findBeforeLast(): ?Campagne
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.ordinary = true')
+            ->andWhere("c.status = :status")
+            ->setParameter('status', Status::TERMINER)
             ->orderBy('c.id', 'DESC')
             ->setMaxResults(1)
             ->getQuery()

@@ -2,30 +2,29 @@
 
 namespace App\Controller\Paiement;
 
-use DateTime;
-use Exception;
-use Carbon\Carbon;
-use App\Utils\Status;
-use IntlDateFormatter;
-use App\Service\PayrollService;
-use App\Entity\Paiement\Campagne;
-use App\Form\Paiement\CampagneType;
 use App\Entity\DossierPersonal\Personal;
+use App\Entity\Paiement\Campagne;
 use App\Form\Paiement\CampagneExcepType;
+use App\Form\Paiement\CampagneType;
+use App\Repository\DevPaie\OperationRepository;
+use App\Repository\DossierPersonal\CongeRepository;
+use App\Repository\DossierPersonal\HeureSupRepository;
+use App\Repository\Impots\CategoryChargeRepository;
+use App\Repository\Paiement\CampagneRepository;
+use App\Repository\Paiement\PayrollRepository;
+use App\Service\PayrollService;
+use App\Utils\Status;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
-use Symfony\Component\HttpFoundation\Request;
-use App\Repository\Paiement\PayrollRepository;
-use Symfony\Component\HttpFoundation\Response;
-use App\Repository\Paiement\CampagneRepository;
-use Symfony\Component\Routing\Annotation\Route;
-use App\Service\PaieService\PaieByPeriodService;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Repository\DossierPersonal\CongeRepository;
-use App\Repository\Impots\CategoryChargeRepository;
-use App\Repository\DossierPersonal\HeureSupRepository;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use Exception;
+use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/campagne', name: 'campagne_')]
 class CampagneController extends AbstractController
@@ -45,14 +44,16 @@ class CampagneController extends AbstractController
      * @param CategoryChargeRepository $categoryChargeRepository
      * @param HeureSupRepository $heureSupRepository
      * @param CongeRepository $congeRepository
+     * @param EntityManagerInterface $manager
      */
     public function __construct(
-        PayrollService           $payrollService,
-        PayrollRepository        $payrollRepository,
-        CampagneRepository       $campagneRepository,
-        CategoryChargeRepository $categoryChargeRepository,
-        HeureSupRepository       $heureSupRepository,
-        CongeRepository          $congeRepository,
+        PayrollService                          $payrollService,
+        PayrollRepository                       $payrollRepository,
+        CampagneRepository                      $campagneRepository,
+        CategoryChargeRepository                $categoryChargeRepository,
+        HeureSupRepository                      $heureSupRepository,
+        CongeRepository                         $congeRepository,
+        private readonly EntityManagerInterface $manager, private readonly OperationRepository $operationRepository
     )
     {
         $this->payrollService = $payrollService;
@@ -68,19 +69,24 @@ class CampagneController extends AbstractController
     {
         $dateDebut = null;
         $dateFin = null;
+
         if ($this->isGranted('ROLE_RH')) {
             $payBooks = $this->payrollRepository->findPayrollByCampaign(true);
         } else {
             $payBooks = $this->payrollRepository->findPayrollByCampaignEmploye(true);
         }
+
         foreach ($payBooks as $book) {
             $dateDebut = $book->getCampagne()->getDateDebut();
             $dateFin = $book->getCampagne()->getDateFin();
         }
+        $campagne = $this->campagneRepository->findCampagnActiveAndPending();
+
         return $this->render('paiement/campagne/pay_book.html.twig', [
-            'payBooks' => $payBooks,
             'date_debut' => $dateDebut ? date_format($dateDebut, 'd/m/Y') : ' ',
             'date_fin' => $dateFin ? date_format($dateFin, 'd/m/Y') : ' ',
+            'campagne' => $campagne
+
         ]);
     }
 
@@ -96,6 +102,7 @@ class CampagneController extends AbstractController
         foreach ($payroll as $index => $item) {
             $url = $this->generateUrl('campagne_bulletin_ordinaire', ['uuid' => $item->getPersonal()->getUuid()]);
             $payBookData[] = [
+                'campagn_id' => $item->getMatricule(),
                 'index' => ++$index,
                 'type_campagne' => $item->getCampagne()->isOrdinary() ? 'Ordinaire' : 'Exceptionnelle',
                 'day_of_presence' => $item->getDayOfPresence(),
@@ -150,7 +157,12 @@ class CampagneController extends AbstractController
                  * Masse de salaire global du salarié
                  */
                 'masse_salariale' => $item->getMasseSalary(),
-                'print_bulletin' => $url
+                'print_bulletin' => $url,
+                'regul_moins_percus' => $item->getRemboursNet() + $item->getRemboursBrut(),
+                'regul_plus_percus' => $item->getRetenueNet() + $item->getRetenueBrut(),
+                'amount_pret_mensuel' => $item->getAmountMensualityPret(),
+                'amount_acompte_mensuel' => $item->getAmountMensuelAcompt(),
+                'amount_conges' => $item->getCongesPayesAmount()
             ];
         }
         return new JsonResponse($payBookData);
@@ -163,7 +175,7 @@ class CampagneController extends AbstractController
     #[Route('/paiement/campagne/open', name: 'open_campagne', methods: ['GET', 'POST'])]
     public function openCompleteExercice(Request $request, EntityManagerInterface $manager): Response
     {
-
+        // Pour le récapitulatif de la dernière paie valider et payer.
         $ordinaryCampagne = $this->campagneRepository->getOrdinaryCampagne();
         if ($ordinaryCampagne) {
             $this->addFlash('error', 'Une paie est déjà en cours d\'exécution. Merci de bien vouloir terminer ce procéssuce!');
@@ -172,7 +184,7 @@ class CampagneController extends AbstractController
 
         $campagne = new Campagne();
 
-        // setter the value of dateDebut and dateFin
+        // setter the value of dateDebut and dateFin in campagne entity
         $dateRequest = $request->request->get('dateDebut');
         if ($dateRequest) {
             $dateRequestObj = DateTime::createFromFormat('Y-m', $dateRequest);
@@ -191,76 +203,57 @@ class CampagneController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $fullDate = new DateTime();
-
             $day = 1;
             $month = $fullDate->format('m');
             $year = $fullDate->format('Y');
-
             $dateOfMonth = new DateTime($day . '-' . $month . '-' . $year);
-
             $previousCampagne = $this->campagneRepository->findLast();
-
-
-            //$countPersonal = $form->get('personal')->count();
-
             $personals = $form->get('personal')->getData();
             $countPersonal = count($personals);
 
-
             if ($countPersonal > 0) {
-
                 foreach ($personals as $personal) {
-
                     $dateEmbauche = $personal->getContract()->getDateEmbauche();
-
-                    //personnel arrivé avant le debut de la campagne passée
-
                     if (($dateEmbauche > $previousCampagne?->getStartedAt()) && $previousCampagne) {
-
+                        //personnel arrivé avant le debut de la campagne passée
                         $this->payrollService->setExtraMonthPayroll($personal, $campagne);
-
-                        //personnel arrivé entre le debut de la campagne en cour
                     } elseif (($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt()) {
-
+                        //personnel arrivé au milieu de le du mois de la campagne en cours
                         $this->payrollService->setProrataPayroll($personal, $campagne);
-
-                    } else {
+                    } elseif (!($dateEmbauche > $campagne->getStartedAt())) {
                         //personnel normal
-
                         $this->payrollService->setPayroll($personal, $campagne);
-
+                    } else {
+                        flash()->addInfo("Aucun salarié  n'est eligible pour participé à la paie de ce mois.");
                     }
-
                 }
-
                 $campagne
+                    ->setLastCampagne($previousCampagne)
                     ->setActive(true)
-                    ->setStatus(Status::EN_COURS)
+                    ->setStatus(Status::PENDING)
                     ->setOrdinary(true);
                 $manager->persist($campagne);
                 $manager->flush();
                 flash()->addSuccess('Paie ouverte avec succès.');
-                return $this->redirectToRoute('app_home');
+                return $this->redirectToRoute('campagne_livre');
 
             } else {
-
                 flash()->addWarning('Aucun personnel sélectionné!');
                 return $this->redirectToRoute('campagne_open_campagne');
-
             }
-
         }
 
         return $this->render('paiement/campagne/open.html.twig', [
             'form' => $form->createView(),
             'campagne' => $campagne,
             'lastCampagne' => $lastCampagne,
-            'periode_paie' => $date
+            'periode_paie' => $date,
+            'today' => new DateTime()
         ]);
 
     }
+
 
     /**
      * @throws NonUniqueResultException
@@ -272,6 +265,7 @@ class CampagneController extends AbstractController
 
         $exceptionalCampagne = $this->campagneRepository->getExceptionalCampagne();
         if ($exceptionalCampagne) {
+
             $this->addFlash('error', 'Une campagne exceptionnelle est déjà en cours !');
             return $this->redirectToRoute('campagne_livre');
         }
@@ -287,6 +281,7 @@ class CampagneController extends AbstractController
 
                 $this->payrollService->setExeptionnelPayroll($item->getDepartures(), $campagne);
             }
+            //foreach ($personal as $item) {//$this->payrollService->setExeptionnelPayroll($item->getDepartures(), $campagne);}
             $campagne
                 ->setActive(true)
                 ->setOrdinary(false);
@@ -372,7 +367,12 @@ class CampagneController extends AbstractController
         foreach ($campagneActives as $campagneActive) {
             $campagneActive->setClosedAt(new DateTime());
             $campagneActive->setActive(false)->setStatus(Status::TERMINER);
+            $payroll = $campagneActive->getPayrolls();
+            foreach ($payroll as $item) {
+                $item->setStatus(Status::PAYE);
+            }
         }
+
 
         $manager->flush();
         $this->addFlash('success', 'Campagne fermée avec succès');
@@ -528,7 +528,9 @@ class CampagneController extends AbstractController
                 'retenue_net' => $payroll->getRetenueNet(),
                 'retenue_brut' => $payroll->getRetenueBrut(),
                 'remboursement_net' => $payroll->getRemboursNet(),
-                'remboursement_brut' => $payroll->getRemboursBrut()
+                'remboursement_brut' => $payroll->getRemboursBrut(),
+                'pret_mensuel' => $payroll->getAmountMensualityPret(),
+                'acompte_mensuel' => $payroll->getAmountMensuelAcompt()
             ];
         }
 
@@ -543,7 +545,11 @@ class CampagneController extends AbstractController
     #[Route('/bulletin/all_print', name: 'print_all_bulletin', methods: ['GET'])]
     public function findAllBulletin(): Response
     {
-        $payrolls = $this->payrollRepository->findPayrollByCampaign(true);
+        if ($this->isGranted('ROLE_RH')) {
+            $payrolls = $this->payrollRepository->findPayrollByCampaign(true);
+        } else {
+            $payrolls = $this->payrollRepository->findPayrollByCampaignEmploye(true);
+        }
         $payBookData = [];
         foreach ($payrolls as $payroll) {
             $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
@@ -681,7 +687,9 @@ class CampagneController extends AbstractController
                 'retenue_net' => $payroll->getRetenueNet(),
                 'retenue_brut' => $payroll->getRetenueBrut(),
                 'remboursement_net' => $payroll->getRemboursNet(),
-                'remboursement_brut' => $payroll->getRemboursBrut()
+                'remboursement_brut' => $payroll->getRemboursBrut(),
+                'pret_mensuel' => $payroll->getAmountMensualityPret(),
+                'acompte_mensuel' => $payroll->getAmountMensuelAcompt()
             ];
 
         }
@@ -784,7 +792,6 @@ class CampagneController extends AbstractController
     #[Route('/bulletin/{uuid}', name: 'bulletin_incatif', methods: ['GET'])]
     public function bulletinByCampagneInactif(Personal $personal): Response
     {
-
         $payrolls = $this->payrollRepository->findBulletinByCampaign(false, $personal);
         $dataPayroll = null;
         foreach ($payrolls as $payroll) {
@@ -921,7 +928,9 @@ class CampagneController extends AbstractController
                 'retenue_net' => $payroll->getRetenueNet(),
                 'retenue_brut' => $payroll->getRetenueBrut(),
                 'remboursement_net' => $payroll->getRemboursNet(),
-                'remboursement_brut' => $payroll->getRemboursBrut()
+                'remboursement_brut' => $payroll->getRemboursBrut(),
+                'pret_mensuel' => $payroll->getAmountMensualityPret(),
+                'acompte_mensuel' => $payroll->getAmountMensuelAcompt()
             ];
         }
 
@@ -932,12 +941,119 @@ class CampagneController extends AbstractController
         ]);
 
     }
+
+    #[Route('/validated', name: 'validated', methods: ['POST'])]
+    public function ValidatedCampagne(): RedirectResponse
+    {
+        $campagne = $this->campagneRepository->findCampagnActiveAndPending();
+
+        if ($campagne) {
+            $campagne
+                ->setStatus(Status::VALIDATED);
+            foreach ($campagne->getPayrolls() as $payroll) {
+                $payroll->setStatus(Status::EN_ATTENTE);
+            }
+            $this->manager->persist($campagne);
+            $this->manager->flush();
+
+            $this->addFlash('success', 'Campagne Validée avec succès');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $this->addFlash('error', "Erreur lors de la validation de la Campagne!");
+        return $this->redirectToRoute('campagne_livre');
+    }
+
+    #[Route('/canceled', name: 'canceled', methods: ['POST'])]
+    public function canceledCampagne(): RedirectResponse
+    {
+        $campagne = $this->campagneRepository->findCampagnActiveAndPending();
+
+        if ($campagne) {
+            $campagne
+                ->setLastCampagne(null)
+                ->setActive(false)
+                ->setStatus(Status::CANCELED);
+            $payrolls = $campagne->getPayrolls();
+            foreach ($payrolls as $payroll) {
+                $payroll->setStatus(Status::CANCELED);
+                $this->manager->persist($payroll);
+            }
+            $personals = $campagne->getPersonal();
+            foreach ($personals as $personal) {
+                $conges = $this->congeRepository->findCongeByPeriode($campagne->getDateDebut(), $campagne->getDateFin(), $personal->getId());
+                if ($conges) {
+                    $conges?->setStatus("");
+                    $this->manager->persist($conges);
+                } else {
+
+                }
+
+
+                $heure_supp = $this->heureSupRepository->getHeureSupByPeriode($personal, $campagne->getDateDebut(), $campagne->getDateFin());
+                if ($heure_supp) {
+                    foreach ($heure_supp as $heure) {
+                        $heure->setStatus(Status::EN_ATTENTE);
+                        $this->manager->persist($heure);
+                    }
+                } else {
+
+                }
+
+                $regularisation = $this->operationRepository->findOperationRegullByPeriode($campagne->getDateDebut(), $campagne->getDateFin(), $personal->getId());
+                if ($regularisation) {
+                    $regularisation?->setStatus(Status::EN_ATTENTE);
+                    $this->manager->persist($regularisation);
+                } else {
+
+                }
+
+                $acomptes_pret = $this->operationRepository->findOperationAcompteAndPreByPeriod($campagne->getDateDebut(), $campagne->getDateFin(), $personal->getId());
+                if ($acomptes_pret) {
+                    if ($acomptes_pret->getTypeOperations() === Status::ACOMPTE) {
+                        $amount = $acomptes_pret->getAmount();
+                        $acomptes_pret->setRemaining($amount);
+                        $acomptes_pret->setStatusPay(null);
+                        $acomptes_pret->setStatus(Status::EN_ATTENTE);
+                        $this->manager->persist($acomptes_pret);
+                    }
+                    if ($acomptes_pret->getTypeOperations() === Status::PRET) {
+                        if ($acomptes_pret->getStatusPay() === Status::REFUND) {
+                            $amount_mensuality = $acomptes_pret->getAmountMensualite();
+                            $amount_remaining = $acomptes_pret->getRemaining();
+                            $acomptes_pret->setRemaining($amount_mensuality + $amount_remaining);
+                            $acomptes_pret->setStatusPay(null);
+                            $acomptes_pret->setStatus(Status::EN_ATTENTE);
+                        } else {
+                            $amount_mensuality = $acomptes_pret->getAmountMensualite();
+                            $amount_remaining = $acomptes_pret->getRemaining();
+                            $acomptes_pret->setRemaining($amount_mensuality + $amount_remaining);
+                            $acomptes_pret->setStatus(Status::EN_ATTENTE);
+                        }
+                        $this->manager->persist($acomptes_pret);
+                    }
+                } else {
+
+                }
+
+            }
+            $this->manager->persist($campagne);
+            $this->manager->flush();
+
+            $this->addFlash('success', 'Campagne annulée avec succès');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $this->addFlash('error', "Erreur lors de l'annualation de la Campagne!");
+        return $this->redirectToRoute('campagne_livre');
+    }
+
     #[Route('/bulletin/print/etat/salaire', name: 'print_bulletin_etat_salaire', methods: ['POST'])]
-    public function printBulletinEtatSalaire(Request $request,): Response
+    public function printBulletinEtatSalaire(Request $request): Response
     {
         $payrolls = [];
         if ($request->request->has('printEtatSalaireInput') && $request->isMethod('POST')) {
-            
+
             $dateRequest = $request->request->get('printEtatSalaireInput');
             if ($dateRequest) {
                 $dateRequestObj = DateTime::createFromFormat('Y-m', $dateRequest);
@@ -947,7 +1063,11 @@ class CampagneController extends AbstractController
                 $endAt = new DateTime($dateFin);
             }
             $personalID = (int)$request->get('personalsIdInput');
-            $payrolls = $this->payrollRepository->findByPeriode($startAt, $endAt, $personalID);
+            if ($this->isGranted('ROLE_RH')) {
+                $payrolls = $this->payrollRepository->findByPeriode($startAt, $endAt, $personalID);
+            } else {
+                $payrolls = $this->payrollRepository->findByPeriodeEmplyees($startAt, $endAt, $personalID);
+            }
         }
         $payBookData = [];
         foreach ($payrolls as $payroll) {
@@ -1086,7 +1206,9 @@ class CampagneController extends AbstractController
                 'retenue_net' => $payroll->getRetenueNet(),
                 'retenue_brut' => $payroll->getRetenueBrut(),
                 'remboursement_net' => $payroll->getRemboursNet(),
-                'remboursement_brut' => $payroll->getRemboursBrut()
+                'remboursement_brut' => $payroll->getRemboursBrut(),
+                'pret_mensuel' => $payroll->getAmountMensualityPret(),
+                'acompte_mensuel' => $payroll->getAmountMensuelAcompt()
             ];
 
         }
@@ -1096,4 +1218,5 @@ class CampagneController extends AbstractController
             'virement' => Status::VIREMENT
         ]);
     }
+
 }

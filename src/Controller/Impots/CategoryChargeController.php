@@ -57,21 +57,18 @@ class CategoryChargeController extends AbstractController
         return new JsonResponse($charge);
     }
 
-    #[IsGranted("ROLE_DEV_PAIE", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/fixcale', name: 'index_fixcale', methods: ['GET'])]
     public function indexFixcale(): Response
     {
         return $this->render('impots/category_charge/fiscale.html.twig');
     }
 
-    #[IsGranted("ROLE_DEV_PAIE", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/sociale', name: 'index_sociale', methods: ['GET'])]
     public function indexSociale(): Response
     {
         return $this->render('impots/category_charge/sociale.html.twig');
     }
 
-    #[IsGranted("ROLE_DEV_PAIE", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -92,7 +89,6 @@ class CategoryChargeController extends AbstractController
         ]);
     }
 
-    #[IsGranted("ROLE_DEV_PAIE", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, CategoryCharge $categoryCharge, EntityManagerInterface $entityManager): Response
     {

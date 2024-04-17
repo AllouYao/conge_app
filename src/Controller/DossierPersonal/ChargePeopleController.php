@@ -21,9 +21,7 @@ class ChargePeopleController extends AbstractController
     {
         if ($this->isGranted('ROLE_RH')) {
             $personals = $personalRepository->findPersonalWithChargePeaple();
-
         } else {
-
             $personals = $personalRepository->findPersonalWithChargePeapleByEmployeRole();
         }
 

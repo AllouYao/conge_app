@@ -4,6 +4,13 @@ namespace App\Utils;
 
 final class Status
 {
+    /** Type Conges & ode de paiement conges */
+    public const ULTERIEUR = 'Ultérieur';
+    public const IMMEDIAT = 'Immédiat';
+    public const EFFECTIF = 'Effectif';
+    public const PARTIEL = 'Partiel';
+    public const IMPAYEE = 'IMPAYEE';
+
     /** Category salarie */
     public const OUVRIER_EMPLOYE = 'Ouvriers / Employés';
     public const CHAUFFEUR = 'Chauffeurs';
@@ -197,6 +204,9 @@ final class Status
     /** Status Operation */
     public const REMBOURSEMENT = 'REMBOURSEMENT';
     public const RETENUES = 'RETENUES';
+    const PRET = 'PRET';
+    const ACOMPTE = 'ACOMPTE';
+
 
     /** Statut des fonctions */
     public const COMMERCIAL_PISTE = 'COMMERCIAL PISTE';
@@ -227,5 +237,16 @@ final class Status
 
     public const SUPPLEMENTAIRE = 'SUPPLEMENTAIRE';
     public const PAYE = 'PAYE';
+    public const PENDING = 'PENDING';
+    public const CANCELED = 'CANCELED';
+    public const REFUND = 'REFUND';
+    public const REASONCODE =  [
+        'demission' => Status::DEMISSION,
+        'retraite' => Status::RETRAITE,
+        'licenciement_lourde' => Status::LICENCIEMENT_FAUTE_LOURDE,
+        'licenciement_simple' => Status::LICENCIEMENT_FAUTE_LOURDE,
+        'deces' => Status::DECES
+    ];
+
 
 }

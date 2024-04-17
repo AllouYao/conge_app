@@ -4,15 +4,18 @@ namespace App\Service\PaieService;
 
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Campagne;
+use App\Repository\DevPaie\OperationRepository;
 use App\Repository\DossierPersonal\AbsenceRepository;
 use App\Repository\DossierPersonal\DetailRetenueForfetaireRepository;
 use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Repository\DossierPersonal\RetenueForfetaireRepository;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Utils\Status;
+use Carbon\Carbon;
 use DateInterval;
 use DatePeriod;
 use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
 class PaieByPeriodService
@@ -22,7 +25,9 @@ class PaieByPeriodService
         private readonly AbsenceRepository                 $absenceRepository,
         private readonly CategoryChargeRepository          $categoryChargeRepository,
         private readonly RetenueForfetaireRepository       $forfetaireRepository,
-        private readonly DetailRetenueForfetaireRepository $detailRetenueForfetaireRepository
+        private readonly DetailRetenueForfetaireRepository $detailRetenueForfetaireRepository,
+        private readonly OperationRepository               $operationRepository,
+        private readonly EntityManagerInterface            $manager
     )
     {
     }
@@ -350,6 +355,39 @@ class PaieByPeriodService
             'assurance_salariale' => (int)$salariale,
             'assurance_patronale' => (int)$patronale
         ];
+    }
+
+    public function amountPretCampagne(Personal $personal): int|null
+    {
+        $operationPret = $this->operationRepository->findOperationPretByPersonal(Status::PRET, $personal);
+        $amountMensuality = null;
+        if ($operationPret) {
+            $amountTotalPret = $operationPret->getAmount();
+            $amountMensuality = $operationPret->getAmountMensualite();
+            $restAmountPret = $amountTotalPret - $amountMensuality;
+            $operationPret->setRemaining($restAmountPret);
+            if ($restAmountPret == 0) {
+                $operationPret->setStatusPay(Status::REFUND);
+            }
+            $this->manager->persist($operationPret);
+        }
+
+        return (int)$amountMensuality;
+    }
+
+    public function amountAcomptCampagne(Personal $personal): int|null
+    {
+        $today = Carbon::today();
+        $operationAcompt = $this->operationRepository->findOperationByPersonal(Status::ACOMPTE, Status::VALIDATED, $personal, $today->month, $today->year);
+        $amountTotalAcompt = null;
+        if ($operationAcompt) {
+            $amountTotalAcompt = $operationAcompt->getAmount();
+            $operationAcompt->setRemaining(0);
+            $operationAcompt->setStatusPay(Status::REFUND);
+            $this->manager->persist($operationAcompt);
+        }
+
+        return (int)$amountTotalAcompt;
     }
 
 }

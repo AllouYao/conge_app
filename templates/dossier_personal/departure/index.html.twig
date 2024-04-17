@@ -22,7 +22,8 @@
                     <div id="dataGridDeparture"></div>
                 </div>
                 <div class="card-footer">
-                    <a href="{{ path('departure_new') }}" class="btn btn-primary float-end"
+                    <a href="{{ path('departure_new', {'typeDepart' : typeDepart }) }}"
+
                        style="color: white">Nouveau</a>
                 </div>
             </div>
@@ -41,7 +42,7 @@
             let debut;
             let fin;
             $("#dataGridDeparture").dxDataGrid({
-                dataSource: `{{ url('departure_api') }}`,
+                dataSource: `{{ url('departure_api', {'typeDepart':typeDepart}) }}`,
                 showBorders: true,
                 height: 300,
                 scrolling: {

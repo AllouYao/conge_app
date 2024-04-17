@@ -3,11 +3,13 @@
 namespace App\Controller\DevPaie\Reporting;
 
 use App\Repository\DevPaie\OperationRepository;
+use App\Repository\Paiement\CampagneRepository;
 use App\Repository\Paiement\PayrollRepository;
 use App\Utils\Status;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
+use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,7 +20,8 @@ class ApiReportingPaieController extends AbstractController
 {
     public function __construct(
         private readonly OperationRepository $operationRepository,
-        private readonly PayrollRepository   $payrollRepository
+        private readonly PayrollRepository   $payrollRepository,
+        private readonly CampagneRepository $campagneRepository
     )
     {
     }
@@ -127,8 +130,14 @@ class ApiReportingPaieController extends AbstractController
     #[Route('/regularisation_mensuel', 'regularisation_mensuel', methods: ['GET'])]
     public function regulSalaire(): JsonResponse
     {
-        $today = Carbon::today();
-        $requestOperationRegularisation = $this->payrollRepository->findOperationByPayroll([Status::RETENUES, Status::REMBOURSEMENT], Status::VALIDATED, $today->month, $today->year);
+        $campagneActive = $this->campagneRepository->active();
+        $month = (int)$campagneActive->getDateDebut()->format('m');
+        $years = (int)$campagneActive->getDateDebut()->format('Y');
+        if ($this->isGranted('ROLE_RH')) {
+            $requestOperationRegularisation = $this->payrollRepository->findOperationByPayroll([Status::RETENUES, Status::REMBOURSEMENT], Status::VALIDATED, $month, $years);
+        } else {
+            $requestOperationRegularisation = $this->payrollRepository->findOperationByPayrollByRoleEmployer([Status::RETENUES, Status::REMBOURSEMENT], Status::VALIDATED, $month, $years);
+        }
         $dataRegularisation = [];
 
         foreach ($requestOperationRegularisation as $ordre => $regularisation) {
@@ -173,10 +182,16 @@ class ApiReportingPaieController extends AbstractController
             return $this->json(['data' => []]);
         }
 
-        $requestOperationRegularisation = $this->payrollRepository->findOperationByPeriode($startAt, $endAt, $personalID);
+        if ($this->isGranted('ROLE_RH')) {
+            $requestOperationRegularisation = $this->payrollRepository->findOperationByPeriode($startAt, $endAt, $personalID);
+        } else {
+            $requestOperationRegularisation = $this->payrollRepository->findOperationByPeriodeByRoleEmployer($startAt, $endAt, $personalID);
+        }
         $dataRegularisationPeriodique = [];
 
         foreach ($requestOperationRegularisation as $ordre => $regularisation) {
+            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+            $lastPeriode = $formatter->format($regularisation['last_campagne_date_debut']);
             $regulMoins = (int)$regularisation['remboursement_net'];
             $regulPlus = (int)$regularisation['retenue_net'];
             $dataRegularisationPeriodique[] = [
@@ -190,7 +205,8 @@ class ApiReportingPaieController extends AbstractController
                 'regul_plus_percus' => $regulPlus,
                 'net_payer_apres_regularisation' => (int)$regularisation['net_payer'] ?? 0,
                 'net_payer_avant_regularisation' => (int)$regularisation['net_payer'] - $regulMoins + $regulPlus,
-                'retenue_status' => $regularisation['status_operation']
+                'retenue_status' => $regularisation['status_operation'],
+                'periode_regulariser' => $lastPeriode
             ];
         }
 

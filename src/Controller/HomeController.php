@@ -32,12 +32,12 @@ class HomeController extends AbstractController
             $dateFin = $enCour->getDateRetour();
             if ($dateFin <= $today) {
                 $enCour->setIsConge(false);
+                flash()->addInfo('le salarié ' . $enCour->getPersonal()->getFirstName() . ' ' . $enCour->getPersonal()->getLastName() . ' est de retour de congé.');
             }
             $this->manager->persist($enCour);
             $this->manager->flush();
-            flash()->addInfo('le salarié ' . $enCour->getPersonal()->getFirstName() . ' ' . $enCour->getPersonal()->getLastName() . ' est de retour de congé.');
+
         }
-        
         return $this->render('home/index.html.twig');
     }
 }

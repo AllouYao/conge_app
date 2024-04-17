@@ -22,7 +22,11 @@ class ApiReportingPaieController extends AbstractController
     public function remboursementSalaire(): JsonResponse
     {
         $today = Carbon::today();
-        $requestOperationRemboursement = $this->operationRepository->findOperationByTypeAndStatus(Status::REMBOURSEMENT, [Status::EN_ATTENTE], $today->month, $today->year);
+        if ($this->isGranted('ROLE_RH')) {
+            $requestOperationRemboursement = $this->operationRepository->findOperationByTypeAndStatus(Status::REMBOURSEMENT, [Status::EN_ATTENTE], $today->month, $today->year);
+        } else {
+            $requestOperationRemboursement = $this->operationRepository->findOperationByTypeAndStatusByEmployerRole(Status::REMBOURSEMENT, [Status::EN_ATTENTE], $today->month, $today->year);
+        }
         $dataRemboursement = [];
         foreach ($requestOperationRemboursement as $ordre => $remboursement) {
             $dataRemboursement[] = [
@@ -47,7 +51,11 @@ class ApiReportingPaieController extends AbstractController
     public function remboursementSalaireValidate(): JsonResponse
     {
         $today = Carbon::today();
-        $requestOperationRemboursement = $this->operationRepository->findOperationByTypeAndStatus(Status::REMBOURSEMENT, [Status::VALIDATED], $today->month, $today->year);
+        if ($this->isGranted('ROLE_RH')) {
+            $requestOperationRemboursement = $this->operationRepository->findOperationByTypeAndStatus(Status::REMBOURSEMENT, [Status::VALIDATED], $today->month, $today->year);
+        } else {
+            $requestOperationRemboursement = $this->operationRepository->findOperationByTypeAndStatusByEmployerRole(Status::REMBOURSEMENT, [Status::VALIDATED], $today->month, $today->year);
+        }
         $dataRemboursementValidate = [];
         foreach ($requestOperationRemboursement as $ordre => $remboursement) {
             $dataRemboursementValidate[] = [
@@ -71,7 +79,11 @@ class ApiReportingPaieController extends AbstractController
     public function retenueSalaire(): JsonResponse
     {
         $today = Carbon::today();
-        $requestOperationRetenues = $this->operationRepository->findOperationByTypeAndStatus(Status::RETENUES, [Status::EN_ATTENTE], $today->month, $today->year);
+        if ($this->isGranted('ROLE_RH')) {
+            $requestOperationRetenues = $this->operationRepository->findOperationByTypeAndStatus(Status::RETENUES, [Status::EN_ATTENTE], $today->month, $today->year);
+        } else {
+            $requestOperationRetenues = $this->operationRepository->findOperationByTypeAndStatusByEmployerRole(Status::RETENUES, [Status::EN_ATTENTE], $today->month, $today->year);
+        }
         $dataRetenueSalaire = [];
 
         foreach ($requestOperationRetenues as $ordre => $retenue) {
@@ -97,7 +109,11 @@ class ApiReportingPaieController extends AbstractController
     public function retenueSalaireValidate(): JsonResponse
     {
         $today = Carbon::today();
-        $requestOperationRetenues = $this->operationRepository->findOperationByTypeAndStatus(Status::RETENUES, [Status::VALIDATED], $today->month, $today->year);
+        if ($this->isGranted('ROLE_RH')) {
+            $requestOperationRetenues = $this->operationRepository->findOperationByTypeAndStatus(Status::RETENUES, [Status::VALIDATED], $today->month, $today->year);
+        } else {
+            $requestOperationRetenues = $this->operationRepository->findOperationByTypeAndStatusByEmployerRole(Status::RETENUES, [Status::VALIDATED], $today->month, $today->year);
+        }
         $dataRetenueSalaire = [];
 
         foreach ($requestOperationRetenues as $ordre => $retenue) {

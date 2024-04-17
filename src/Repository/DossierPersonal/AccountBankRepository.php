@@ -28,9 +28,12 @@ class AccountBankRepository extends ServiceEntityRepository
             ->join('acc.personal', 'p')
             ->join('p.categorie', 'category')
             ->join('category.categorySalarie', 'categorySalarie')
-            ->andWhere('categorySalarie.name IN (:name)')
+            ->where('p.modePaiement = :mode_paiement')
+            ->andWhere('categorySalarie.code IN (:code)')
             ->andWhere('p.active = true')
-            ->setParameter('name', [Status::CHAUFFEUR, Status::OUVRIER_EMPLOYE])
+            ->setParameter('mode_paiement', Status::VIREMENT)
+            ->setParameter('code', ['OUVRIER / EMPLOYES', 'CHAUFFEURS'])
+            ->orderBy('p.matricule', 'ASC')
             ->getQuery()->getResult();
     }
 
@@ -44,6 +47,7 @@ class AccountBankRepository extends ServiceEntityRepository
             ->andWhere('contract.typeContrat IN (:type)')
             ->setParameter('mode_paiement', Status::VIREMENT)
             ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
+            ->orderBy('p.matricule', 'ASC')
             ->getQuery()->getResult();
     }
 

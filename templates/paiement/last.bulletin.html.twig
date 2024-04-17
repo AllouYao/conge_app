@@ -644,6 +644,32 @@
                                             <td></td>
                                         </tr>
                                     {% endif %}
+                                    {% if payrolls.pret_mensuel %}
+                                        <tr class="small-text sans-bordure no-border-button no-border-top">
+                                            <td>028</td>
+                                            <td>Montant du prêt</td>
+                                            <td class="text-end"></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td class="text-end">{{ payrolls.pret_mensuel|number_format(0, ',', ' ') }}</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if payrolls.acompte_mensuel %}
+                                        <tr class="small-text sans-bordure no-border-button no-border-top">
+                                            <td>029</td>
+                                            <td>Montant du acompte</td>
+                                            <td class="text-end"></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td class="text-end">{{ payrolls.acompte_mensuel|number_format(0, ',', ' ') }}</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    {% endif %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td></td>
                                         <td></td>

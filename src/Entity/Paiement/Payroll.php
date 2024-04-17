@@ -221,6 +221,12 @@ class Payroll
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $status = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountMensualityPret = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountMensuelAcompt = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -1013,6 +1019,30 @@ class Payroll
     public function setStatus(?string $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getAmountMensualityPret(): ?string
+    {
+        return $this->amountMensualityPret;
+    }
+
+    public function setAmountMensualityPret(?string $amountMensualityPret): static
+    {
+        $this->amountMensualityPret = $amountMensualityPret;
+
+        return $this;
+    }
+
+    public function getAmountMensuelAcompt(): ?string
+    {
+        return $this->amountMensuelAcompt;
+    }
+
+    public function setAmountMensuelAcompt(?string $amountMensuelAcompt): static
+    {
+        $this->amountMensuelAcompt = $amountMensuelAcompt;
 
         return $this;
     }

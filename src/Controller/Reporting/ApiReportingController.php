@@ -47,7 +47,7 @@ class ApiReportingController extends AbstractController
         DetailSalaryRepository      $detailSalaryRepository,
         PersonalRepository          $personalRepository,
         DetailPrimeSalaryRepository $detailPrimeSalaryRepository,
-        CampagneRepository          $campagneRepository
+        CampagneRepository          $campagneRepository,
     )
     {
         $this->payrollRepository = $payrollRepository;
@@ -65,7 +65,11 @@ class ApiReportingController extends AbstractController
     #[Route('/prime_indemnite', name: 'prime_indemnite', methods: ['GET'])]
     public function primeIndemnite(): JsonResponse
     {
-        $personals = $this->personalRepository->findAllPersonal();
+        if ($this->isGranted('ROLE_RH')) {
+            $personals = $this->personalRepository->findAllPersonalOnCampain();
+        } else {
+            $personals = $this->personalRepository->findAllPersonalByEmployeRole();
+        }
         $personalPrime = [];
         foreach ($personals as $value => $personal) {
             $primePanier = $this->primesRepository->findOneBy(['code' => Status::PRIME_PANIER]);
@@ -136,8 +140,14 @@ class ApiReportingController extends AbstractController
             return $this->json(['data' => []]);
         }
 
+
         $data = [];
-        $salaries = $this->payrollRepository->findEtatSalaire($startAt, $endAt, $personalID);
+        if ($this->isGranted('ROLE_RH')) {
+            $salaries = $this->payrollRepository->findEtatSalaire($startAt, $endAt, $personalID);
+        } else {
+            $salaries = $this->payrollRepository->findEtatSalaireByRoleEmployer($startAt, $endAt, $personalID);
+        }
+
         foreach ($salaries as $index => $salary) {
             $url = $this->generateUrl('campagne_bulletin_incatif', ['uuid' => $salary['personal_uuid']]);
             $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
@@ -177,7 +187,11 @@ class ApiReportingController extends AbstractController
                 'assurance_patronales' => (int)$salary['employeurSante'],
                 'charge_patronal' => (int)$salary['totalRetenuePatronal'],
                 'masse_salariale' => (int)$salary['masseSalary'],
-                'print_bulletin' => $url
+                'print_bulletin' => $url,
+                'regul_moins_percus' => (int)$salary['remboursNet'] + (int)$salary['remboursBrut'],
+                'regul_plus_percus' => (int)$salary['retenueNet'] + $salary['retenueBrut'],
+                'amount_pret_mensuel' => (int)$salary['amountMensualityPret'],
+                'amount_acompte_mensuel' => (int)$salary['amountMensuelAcompt']
             ];
         }
         return new JsonResponse($data);
@@ -456,38 +470,39 @@ class ApiReportingController extends AbstractController
     {
         $dataElementVariable = [];
         $campainBefore = $this->campagneRepository->findBeforeLast();
-        $campainLast = $this->campagneRepository->findLast();
+        $campainLast = $this->campagneRepository->findLastCampagneForRecap();
 
-        $payrollBefore = $this->payrollRepository->findPayrollByCampainId($campainBefore?->getId());
-        $payrollLast = $this->payrollRepository->findPayrollByCampainId($campainLast?->getId());
+        $personals = $campainLast->getPersonal();
 
-        if (!$payrollBefore && !$payrollLast) {
-            return $this->json(['data' => []]);
-        }
+        foreach ($personals as $index => $personal) {
+            $payrollBefore = $this->payrollRepository->findOnePayroll($campainBefore, $personal);
+            $payrollLast = $this->payrollRepository->findOnePayroll($campainLast, $personal);
 
+            if (!$payrollBefore && !$payrollLast) {
+                return $this->json(['data' => []]);
+            }
 
-        foreach ($payrollLast as $x => $last) {
-            $personal = $last->getPersonal();
+            $amountBrutBefore = $payrollBefore?->getBrutAmount();
+            $amountBrutLast = $payrollLast?->getBrutAmount();
+            $amountNetBefore = $payrollBefore?->getNetPayer();
+            $amountNetLast = $payrollLast?->getNetPayer();
+            $amountEcartBrut = $amountBrutLast - $amountBrutBefore;
+            $amountEcartNet = $amountNetLast - $amountNetBefore;
 
-            $dataElementVariable[$x] = [
-                'matricule' => $last->getMatricule(),
+            $dataElementVariable[] = [
+                'index' => ++$index,
+                'matricule' => $personal->getMatricule(),
                 'nom' => $personal->getFirstName(),
                 'prenoms' => $personal->getLastName(),
-                'last_brut_amount' => $last->getBrutAmount(),
-                'last_net_amount' => $last->getNetPayer(),
-                'before_brut_amount' => 0,
-                'before_net_amount' => 0,
-                'ecart_brut_amount' => $last->getBrutAmount(),
-                'ecart_net_amount' => $last->getNetPayer()
+                'before_brut_amount' => (int)$amountBrutBefore,
+                'last_brut_amount' => (int)$amountBrutLast,
+                'before_net_amount' => (int)$amountNetBefore,
+                'last_net_amount' => (int)$amountNetLast,
+                'ecart_brut_amount' => (int)$amountEcartBrut,
+                'ecart_net_amount' => (int)$amountEcartNet
             ];
         }
 
-        foreach ($payrollBefore as $y => $before) {
-            $dataElementVariable[$y]['before_brut_amount'] = $before->getBrutAmount();
-            $dataElementVariable[$y]['before_net_amount'] = $before->getNetPayer();
-            $dataElementVariable[$y]['ecart_brut_amount'] = $before->getBrutAmount() - $dataElementVariable[$y]['ecart_brut_amount'];
-            $dataElementVariable[$y]['ecart_net_amount'] = $before->getNetPayer() - $dataElementVariable[$y]['ecart_net_amount'];
-        }
         return new  JsonResponse($dataElementVariable);
     }
 
@@ -496,7 +511,11 @@ class ApiReportingController extends AbstractController
     public function etatVersement(): JsonResponse
     {
         $dataVirement = [];
-        $requestVirements = $this->payrollRepository->getPayrollVirement(Status::VIREMENT, true, true);
+        if ($this->isGranted('ROLE_RH')) {
+            $requestVirements = $this->payrollRepository->getPayrollVirement(Status::VIREMENT, true, true);
+        } else {
+            $requestVirements = $this->payrollRepository->getPayrollVirementByRoleEmployeur(Status::VIREMENT, true, true);
+        }
         if (!$requestVirements) {
             return $this->json(['data' => []]);
         }
@@ -519,7 +538,11 @@ class ApiReportingController extends AbstractController
     public function etatVersementCaisse(): JsonResponse
     {
         $dataCaisse = [];
-        $requestVirements = $this->payrollRepository->getPayrollVirement(Status::CAISSE, true, true);
+        if ($this->isGranted('ROLE_RH')) {
+            $requestVirements = $this->payrollRepository->getPayrollVirement(Status::CAISSE, true, true);
+        } else {
+            $requestVirements = $this->payrollRepository->getPayrollVirementByRoleEmployeur(Status::CAISSE, true, true);
+        }
         if (!$requestVirements) {
             return $this->json(['data' => []]);
         }
@@ -563,7 +586,11 @@ class ApiReportingController extends AbstractController
         }
 
         $data = [];
-        $requestVirements = $this->payrollRepository->findPayrollVirementAnnuel(Status::VIREMENT, false, true, $startAt, $endAt, $personalID);
+        if ($this->isGranted('ROLE_RH')) {
+            $requestVirements = $this->payrollRepository->findPayrollVirementAnnuel(Status::VIREMENT, false, true, $startAt, $endAt, $personalID);
+        } else {
+            $requestVirements = $this->payrollRepository->findPayrollVirementAnnuelByRoleEmployeur(Status::VIREMENT, false, true, $startAt, $endAt, $personalID);
+        }
         foreach ($requestVirements as $virement) {
             $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
             $date = $virement['debut'];
@@ -604,7 +631,11 @@ class ApiReportingController extends AbstractController
         }
 
         $data = [];
-        $requestVirements = $this->payrollRepository->findPayrollVirementAnnuel(Status::CAISSE, false, true, $startAt, $endAt, $personalID);
+        if ($this->isGranted('ROLE_RH')) {
+            $requestVirements = $this->payrollRepository->findPayrollVirementAnnuel(Status::CAISSE, false, true, $startAt, $endAt, $personalID);
+        } else {
+            $requestVirements = $this->payrollRepository->findPayrollVirementAnnuelByRoleEmployeur(Status::CAISSE, false, true, $startAt, $endAt, $personalID);
+        }
         foreach ($requestVirements as $index => $virement) {
             $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
             $date = $virement['debut'];

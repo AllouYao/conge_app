@@ -29,6 +29,8 @@ class Conge
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?DateTimeInterface $dateRetour = null;
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?DateTimeInterface $dateReprise = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?DateTimeInterface $dateDernierRetour = null;
@@ -81,6 +83,9 @@ class Conge
     #[ORM\OneToMany(mappedBy: 'conge', targetEntity: CongePartiel::class)]
     private Collection $congePartiels;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $status = null;
+
     public function __construct()
     {
         $this->congePartiels = new ArrayCollection();
@@ -103,6 +108,18 @@ class Conge
 
         return $this;
     }
+    public function getDateReprise(): ?DateTimeInterface
+    {
+        return $this->dateReprise;
+    }
+
+    public function setDateReprise(DateTimeInterface $dateReprise): static
+    {
+        $this->dateReprise = $dateReprise;
+
+        return $this;
+    }
+    
 
     public function getDateRetour(): ?DateTimeInterface
     {
@@ -334,6 +351,18 @@ class Conge
                 $congePartiel->setConge(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?string $status): static
+    {
+        $this->status = $status;
 
         return $this;
     }

@@ -40,6 +40,7 @@ class Campagne
     private ?self $lastCampagne = null;
 
     #[ORM\OneToOne(mappedBy: 'lastCampagne', targetEntity: self::class, cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: true)]
     private ?self $campagne = null;
 
     #[ORM\ManyToMany(targetEntity: Personal::class, inversedBy: 'campagnes')]
@@ -124,7 +125,7 @@ class Campagne
         return $this->lastCampagne;
     }
 
-    public function setLastCampagne(self $lastCampagne): static
+    public function setLastCampagne(?self $lastCampagne): static
     {
         $this->lastCampagne = $lastCampagne;
 

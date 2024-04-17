@@ -13,11 +13,18 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\PositiveOrZero;
 
 class OperationType extends AbstractType
 {
+    public function __construct(
+        private readonly AuthorizationCheckerInterface $authorizationChecker
+    )
+    {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -59,19 +66,33 @@ class OperationType extends AbstractType
             ])
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
-                'choice_label' => 'firstName',
                 'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('p')
-                        ->join('p.contract', 'contract')
-                        ->leftJoin('p.departures', 'departures')
-                        ->where('departures.id IS NULL')
-                        ->andWhere('contract.typeContrat IN (:type)')
-                        ->andWhere('p.active = true')
-                        ->setParameter('type', [Status::CDI, Status::CDD, Status::CDDI]);
+                    if ($this->authorizationChecker->isGranted('ROLE_RH')) {
+                        return $er->createQueryBuilder('p')
+                            ->join('p.contract', 'contract')
+                            ->leftJoin('p.departures', 'departures')
+                            ->where('departures.id IS NULL')
+                            ->andWhere('p.active = true')
+                            ->andWhere('contract.typeContrat IN (:type)')
+                            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
+                            ->orderBy('p.matricule', 'ASC');
+                    } else {
+                        return $er->createQueryBuilder('p')
+                            ->join('p.contract', 'contract')
+                            ->join('p.categorie', 'category')
+                            ->join('category.categorySalarie', 'category_salarie')
+                            ->leftJoin('p.departures', 'departures')
+                            ->where('departures.id IS NULL')
+                            ->andWhere('p.active = true')
+                            ->andWhere('contract.typeContrat IN (:type)')
+                            ->andWhere("category_salarie.code IN (:code)")
+                            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
+                            ->setParameter('code', ['OUVRIER / EMPLOYES', 'CHAUFFEURS'])
+                            ->orderBy('p.matricule', 'ASC');
+                    }
                 },
                 'placeholder' => 'Sélectionner un salarié',
                 'attr' => [
-                    'class' => 'form-select form-select-sm',
                     'data-plugin' => 'customselect',
                 ],
                 'choice_attr' => function (Personal $personal) {

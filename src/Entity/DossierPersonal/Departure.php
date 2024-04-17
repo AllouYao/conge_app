@@ -40,6 +40,8 @@ class Departure
 
     #[ORM\Column(length: 255)]
     private ?string $reason = null;
+    #[ORM\Column(length: 255)]
+    private ?string $reasonCode = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $salaryDue = null;
@@ -71,6 +73,9 @@ class Departure
 
     #[ORM\ManyToOne(inversedBy: 'user')]
     private ?User $user = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $dayOfPresence = null;
 
     public function __construct()
     {
@@ -151,6 +156,17 @@ class Departure
     public function setReason(string $reason): static
     {
         $this->reason = $reason;
+
+        return $this;
+    }
+    public function getReasonCode(): ?string
+    {
+        return $this->reasonCode;
+    }
+
+    public function setReasonCode(string $reasonCode): static
+    {
+        $this->reasonCode = $reasonCode;
 
         return $this;
     }
@@ -307,6 +323,18 @@ class Departure
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getDayOfPresence(): ?string
+    {
+        return $this->dayOfPresence;
+    }
+
+    public function setDayOfPresence(?string $dayOfPresence): static
+    {
+        $this->dayOfPresence = $dayOfPresence;
 
         return $this;
     }

@@ -1,0 +1,160 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Historique Congés{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridAcompte {
+            border-width: 50px;
+            height: 350px;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <form method="POST" action="#" id="">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title-custom" style="color: white" id="date">
+                            <i data-feather="list"></i>
+                            HISTORIQUE DES CONGES
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="dataGridOldConge"></div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{{ path('old_conge_new') }}" class="btn btn-primary float-end"
+                           style="color: white">Nouveau</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        $(document).ready(function () {
+
+            $("#dataGridOldConge").dxDataGrid({
+                dataSource: '{{ url("old_conge_api") }}',
+                showBorders: true,
+                showColumnLines: true,
+                showRowLines: true,
+                rowAlternationEnabled: true,
+                scrolling: {
+                    columnRenderingMode: 'virtual',
+                    mode: 'virtual'
+                },
+                editing: {
+                    mode: 'cell'
+                },
+                selection: {
+                    mode: 'multiple',
+                    showCheckBoxesMode: 'always'
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx']
+                },
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('Historiques Congés');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                            customizeCell: function (options) {
+                                const {gridCell, excelCell} = options;
+                                if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
+                                    excelCell.text = formatNumber(gridCell.value);
+                                    excelCell.font = {size: 9};
+                                    excelCell.alignment = {horizontal: 'left'};
+                                }
+                            }
+                        }).then(() => {
+                            const date = new Date();
+                            const year = date.getFullYear();
+                            const month = date.getMonth() + 1;
+                            const day = date.getDate();
+                            const dateFormat = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
+                            workbook.xlsx.writeBuffer().then(function (buffer) {
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `HISTORIQUE CONGES${dateFormat}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                grouping: {
+                    autoExpandAll: true
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...'
+                },
+                paging: {
+                    pageSize: 10
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                columns: [
+                    {
+                        caption: 'Matricule',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'matricule',
+                    },
+                    {
+                        caption: 'Nom & prénom(s)',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'nom_prenom',
+                    },
+                    {
+                        caption: 'Date dernier retour de congé',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date',
+                    },
+                    {
+                        caption: 'Salaire moyen annuel',
+                        alignment: 'right',
+                        dataType: 'number',
+                        dataField: 'salaryAverage',
+                    },
+                    {
+                        caption: 'Ajouter le',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_creation',
+                    },
+                    {
+                        caption: 'Action',
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<a title='modifier'>")
+                                .html('<i data-feather="edit" style="color: #C9971C"></i>')
+                                .attr("href", options.data.modifier)
+                                .appendTo(container);
+                            feather.replace();
+                        },
+                    },
+                ],
+            }).dxDataGrid("instance");
+        })
+    </script>
+
+{% endblock %}

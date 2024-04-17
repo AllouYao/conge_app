@@ -52,7 +52,7 @@ class HeureSupController extends AbstractController
         $salaireHoraire = 0;
 
         if ($this->isGranted('ROLE_RH')) {
-            $personals = $this->personalRepository->findAllPersonal();
+            $personals = $this->personalRepository->findAllPersonalOnCampain();
         } else {
             $personals = $this->personalRepository->findAllPersonalByEmployeRole();
         }
@@ -84,6 +84,7 @@ class HeureSupController extends AbstractController
                     $totalHeure += (int)$item->getTotalHorraire();
                     $workTime = $workTimeRepository->findOneBy(['type' => Status::MAJORATION_15_PERCENT, 'code' => Status::SUPPLEMENTAIRE]);
                     if ($jourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $heure <= $workTime->getHourValue()) {
+
                         $heure_15 += $heure;
                         $heure15 = $heure_15;
 
@@ -194,7 +195,6 @@ class HeureSupController extends AbstractController
                 'modifier' => $this->generateUrl('personal_heure_sup_edit', ['uuid' => $heureSup->getPersonal()->getUuid()])
             ];
         }
-
         return new JsonResponse($apiRequestHeureSupp);
     }
 
