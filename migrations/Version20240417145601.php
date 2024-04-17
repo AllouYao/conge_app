@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20240409154404 extends AbstractMigration
+final class Version20240417145601 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -33,6 +33,7 @@ final class Version20240409154404 extends AbstractMigration
         $this->addSql('CREATE TABLE charge_people (id INT AUTO_INCREMENT NOT NULL, personal_id INT NOT NULL, user_id INT DEFAULT NULL, first_name VARCHAR(255) NOT NULL, last_name VARCHAR(255) NOT NULL, birthday DATE NOT NULL, gender VARCHAR(255) NOT NULL, num_piece VARCHAR(255) NOT NULL, contact VARCHAR(255) DEFAULT NULL, uuid VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME DEFAULT NULL, INDEX IDX_1DB5E6D05D430949 (personal_id), INDEX IDX_1DB5E6D0A76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE charge_personals (id INT AUTO_INCREMENT NOT NULL, personal_id INT NOT NULL, departure_id INT DEFAULT NULL, amount_its NUMERIC(20, 2) DEFAULT NULL, amount_cnps NUMERIC(20, 2) DEFAULT NULL, amount_cmu NUMERIC(20, 2) DEFAULT NULL, amount_total_charge_personal NUMERIC(20, 2) DEFAULT NULL, num_part NUMERIC(10, 2) NOT NULL, amount_impot_brut NUMERIC(20, 2) DEFAULT NULL, amount_credit_impot NUMERIC(20, 2) DEFAULT NULL, uuid VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME DEFAULT NULL, INDEX IDX_988A281D5D430949 (personal_id), INDEX IDX_988A281D7704ED06 (departure_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE conge (id INT AUTO_INCREMENT NOT NULL, personal_id INT NOT NULL, user_id INT DEFAULT NULL, date_depart DATE NOT NULL, date_retour DATE NOT NULL, date_dernier_retour DATE DEFAULT NULL, salaire_moyen NUMERIC(20, 2) DEFAULT NULL, allocation_conge NUMERIC(20, 2) DEFAULT NULL, is_conge TINYINT(1) NOT NULL, type_conge VARCHAR(255) DEFAULT NULL, type_payement_conge VARCHAR(255) DEFAULT NULL, gratification NUMERIC(20, 2) DEFAULT NULL, days NUMERIC(8, 2) DEFAULT NULL, days_plus NUMERIC(8, 2) DEFAULT NULL, salary_due NUMERIC(20, 2) DEFAULT NULL, work_months NUMERIC(8, 2) DEFAULT NULL, total_days NUMERIC(8, 2) DEFAULT NULL, older_days NUMERIC(8, 2) DEFAULT NULL, remaining_vacation NUMERIC(10, 2) DEFAULT NULL, uuid VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME DEFAULT NULL, INDEX IDX_2ED893485D430949 (personal_id), INDEX IDX_2ED89348A76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE conge_partiel (id INT AUTO_INCREMENT NOT NULL, conge_id INT DEFAULT NULL, date_depart DATE NOT NULL, date_retour DATE NOT NULL, INDEX IDX_1EE74E53CAAC9A59 (conge_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE contract (id INT AUTO_INCREMENT NOT NULL, personal_id INT NOT NULL, date_embauche DATE NOT NULL, date_effet DATE DEFAULT NULL, date_fin DATE DEFAULT NULL, temps_contractuel VARCHAR(255) DEFAULT NULL, type_contrat VARCHAR(255) NOT NULL, ref_contract VARCHAR(255) NOT NULL, uuid VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME DEFAULT NULL, UNIQUE INDEX UNIQ_E98F28595D430949 (personal_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE departure (id INT AUTO_INCREMENT NOT NULL, personal_id INT NOT NULL, user_id INT DEFAULT NULL, date DATE NOT NULL, is_paied TINYINT(1) DEFAULT NULL, conge_amount NUMERIC(20, 2) DEFAULT NULL, dissmissal_amount NUMERIC(20, 2) DEFAULT NULL, notice_amount NUMERIC(20, 2) DEFAULT NULL, reason VARCHAR(255) NOT NULL, salary_due NUMERIC(20, 2) DEFAULT NULL, gratification NUMERIC(20, 2) DEFAULT NULL, frais_funeraire NUMERIC(20, 2) DEFAULT NULL, amount_lcmt_imposable NUMERIC(20, 2) DEFAULT NULL, amount_lcmt_no_imposable NUMERIC(20, 2) DEFAULT NULL, total_indemnite_imposable NUMERIC(20, 2) DEFAULT NULL, uuid VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME DEFAULT NULL, UNIQUE INDEX UNIQ_45E9C6715D430949 (personal_id), INDEX IDX_45E9C671A76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE detail_prime_salary (id INT AUTO_INCREMENT NOT NULL, prime_id INT NOT NULL, salary_id INT NOT NULL, amount NUMERIC(20, 2) NOT NULL, uuid VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME DEFAULT NULL, INDEX IDX_D4BA2BC69247986 (prime_id), INDEX IDX_D4BA2BCB0FDF16E (salary_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
@@ -73,6 +74,7 @@ final class Version20240409154404 extends AbstractMigration
         $this->addSql('ALTER TABLE charge_personals ADD CONSTRAINT FK_988A281D7704ED06 FOREIGN KEY (departure_id) REFERENCES departure (id)');
         $this->addSql('ALTER TABLE conge ADD CONSTRAINT FK_2ED893485D430949 FOREIGN KEY (personal_id) REFERENCES personal (id)');
         $this->addSql('ALTER TABLE conge ADD CONSTRAINT FK_2ED89348A76ED395 FOREIGN KEY (user_id) REFERENCES user (id)');
+        $this->addSql('ALTER TABLE conge_partiel ADD CONSTRAINT FK_1EE74E53CAAC9A59 FOREIGN KEY (conge_id) REFERENCES conge (id)');
         $this->addSql('ALTER TABLE contract ADD CONSTRAINT FK_E98F28595D430949 FOREIGN KEY (personal_id) REFERENCES personal (id)');
         $this->addSql('ALTER TABLE departure ADD CONSTRAINT FK_45E9C6715D430949 FOREIGN KEY (personal_id) REFERENCES personal (id)');
         $this->addSql('ALTER TABLE departure ADD CONSTRAINT FK_45E9C671A76ED395 FOREIGN KEY (user_id) REFERENCES user (id)');
@@ -99,13 +101,11 @@ final class Version20240409154404 extends AbstractMigration
         $this->addSql('ALTER TABLE user_role ADD CONSTRAINT FK_2DE8C6A3A76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE user_role ADD CONSTRAINT FK_2DE8C6A3D60322AC FOREIGN KEY (role_id) REFERENCES role (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE variable_paie ADD CONSTRAINT FK_F15997C55D430949 FOREIGN KEY (personal_id) REFERENCES personal (id)');
-        $this->addSql('ALTER TABLE conge_partiel ADD CONSTRAINT FK_1EE74E53CAAC9A59 FOREIGN KEY (conge_id) REFERENCES conge (id)');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE conge_partiel DROP FOREIGN KEY FK_1EE74E53CAAC9A59');
         $this->addSql('ALTER TABLE absence DROP FOREIGN KEY FK_765AE0C95D430949');
         $this->addSql('ALTER TABLE absence DROP FOREIGN KEY FK_765AE0C9A76ED395');
         $this->addSql('ALTER TABLE account_bank DROP FOREIGN KEY FK_54F338D05D430949');
@@ -124,6 +124,7 @@ final class Version20240409154404 extends AbstractMigration
         $this->addSql('ALTER TABLE charge_personals DROP FOREIGN KEY FK_988A281D7704ED06');
         $this->addSql('ALTER TABLE conge DROP FOREIGN KEY FK_2ED893485D430949');
         $this->addSql('ALTER TABLE conge DROP FOREIGN KEY FK_2ED89348A76ED395');
+        $this->addSql('ALTER TABLE conge_partiel DROP FOREIGN KEY FK_1EE74E53CAAC9A59');
         $this->addSql('ALTER TABLE contract DROP FOREIGN KEY FK_E98F28595D430949');
         $this->addSql('ALTER TABLE departure DROP FOREIGN KEY FK_45E9C6715D430949');
         $this->addSql('ALTER TABLE departure DROP FOREIGN KEY FK_45E9C671A76ED395');
@@ -163,6 +164,7 @@ final class Version20240409154404 extends AbstractMigration
         $this->addSql('DROP TABLE charge_people');
         $this->addSql('DROP TABLE charge_personals');
         $this->addSql('DROP TABLE conge');
+        $this->addSql('DROP TABLE conge_partiel');
         $this->addSql('DROP TABLE contract');
         $this->addSql('DROP TABLE departure');
         $this->addSql('DROP TABLE detail_prime_salary');
