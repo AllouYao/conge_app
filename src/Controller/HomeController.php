@@ -22,7 +22,7 @@ class HomeController extends AbstractController
         $this->manager = $manager;
     }
 
-    #[Route('/home', name: 'app_home')]
+    #[Route(path: ['/home', '/'], name: 'app_home')]
     public function index(MessageBusInterface $messageBus): Response
     {
         //$messageBus->dispatch(new UpdateOlderPersonal());
