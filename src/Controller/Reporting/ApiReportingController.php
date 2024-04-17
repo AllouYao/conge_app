@@ -472,7 +472,10 @@ class ApiReportingController extends AbstractController
         $campainBefore = $this->campagneRepository->findBeforeLast();
         $campainLast = $this->campagneRepository->findLastCampagneForRecap();
 
-        $personals = $campainLast->getPersonal();
+        if (!$campainBefore) {
+            return $this->json(['data' => []]);
+        }
+        $personals = $campainBefore->getPersonal();
 
         foreach ($personals as $index => $personal) {
             $payrollBefore = $this->payrollRepository->findOnePayroll($campainBefore, $personal);
