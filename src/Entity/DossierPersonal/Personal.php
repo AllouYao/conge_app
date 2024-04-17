@@ -146,6 +146,9 @@ class Personal
     private Collection $operations;
     #[ORM\Column]
     private ?bool $active = null;
+
+    #[ORM\OneToOne(mappedBy: 'personal', cascade: ['persist', 'remove'])]
+    private ?OldConge $oldConge = null;
     public function __construct()
     {
         $this->chargePeople = new ArrayCollection();
@@ -879,6 +882,28 @@ class Personal
     public function setActive(bool $active): static
     {
         $this->active = $active;
+
+        return $this;
+    }
+
+    public function getOldConge(): ?OldConge
+    {
+        return $this->oldConge;
+    }
+
+    public function setOldConge(?OldConge $oldConge): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($oldConge === null && $this->oldConge !== null) {
+            $this->oldConge->setPersonal(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($oldConge !== null && $oldConge->getPersonal() !== $this) {
+            $oldConge->setPersonal($this);
+        }
+
+        $this->oldConge = $oldConge;
 
         return $this;
     }
