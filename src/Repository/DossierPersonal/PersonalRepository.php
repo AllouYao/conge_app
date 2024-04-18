@@ -156,6 +156,8 @@ class PersonalRepository extends ServiceEntityRepository
                 'account_banks.code as code_banque',
                 'account_banks.numCompte as numero_compte',
                 'account_banks.rib as rib',
+                'p.modePaiement as mode_paiement'
+
             ])
             ->join('p.categorie', 'category')
             ->join('p.contract', 'contract')
