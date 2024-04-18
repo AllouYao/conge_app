@@ -170,7 +170,7 @@ class PersonalRepository extends ServiceEntityRepository
             ->andWhere('contract.typeContrat IN (:type)')
             //->andWhere('p.active = true')
             ->setParameter('type', [Status::CDI, Status::CDD, Status::CDDI])
-            ->orderBy('p.matricule', 'ASC')
+            ->orderBy('p.active', 'DESC')
             ->getQuery()
             ->getResult();
     }
