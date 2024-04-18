@@ -149,7 +149,8 @@ class PersonalController extends AbstractController
                 'active' => $item['active'],
                 'personal_id' => $item['personal_id'],
                 'all_enable' => $this->personalRepository->areAllUsersActivated(),
-                'mode_paiement' => $item['mode_paiement']
+                'mode_paiement' => $item['mode_paiement'],
+                'sursalaire' => $item['personal_sursalaire']
             ];
         }
         return new JsonResponse($personalSalaried);

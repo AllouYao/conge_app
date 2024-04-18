@@ -208,6 +208,15 @@
                         },
                     },
                     {
+                        caption: 'Sursalaire (Fcfa)',
+                        dataType: 'number',
+                        dataField: 'sursalaire',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
                         caption: 'Mode Paiement',
                         dataType: 'string',
                         dataField: 'mode_paiement',
