@@ -51,6 +51,11 @@
                     columnRenderingMode: 'virtual',
                     mode: "virtual",
                 },
+                selection: {
+                    mode: "multiple",
+                    allowSelectAll: true,
+                    showCheckBoxesMode: "always"
+                },
                 groupPanel: {
                     visible: true
                 },
@@ -146,16 +151,18 @@
                         {
                             column: 'name_salaried',
                             summaryType: 'count',
-                            displayFormat: 'Nombre Salaries : {0}'
+                            displayFormat: 'Salariés : {0}'
                         },
                         {
                             column: 'cles',
                             customizeText() {
-                                return 'TOTAL '
-                            }
+                                return 'Cumul : '
+                            },
                         },
                         {
-                            column: 'salaire_net', summaryType: 'sum',
+                            column: 'salaire_net', summaryType: 'sum', customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
                         },
                     ],
                 }

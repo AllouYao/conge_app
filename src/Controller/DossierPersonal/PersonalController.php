@@ -42,7 +42,7 @@ class PersonalController extends AbstractController
         DetailPrimeSalaryRepository $detailPrimeSalaryRepository
     ): Response
     {
-        $accountNumber = $nameBanque =  null;
+        $accountNumber = $nameBanque = null;
         $accountBanque = $personal->getAccountBanks();
         foreach ($accountBanque as $value) {
             $accountNumber = $value->getCode() . ' ' . $value->getCodeAgence() . ' ' . $value->getNumCompte() . ' ' . $value->getRib();
@@ -52,12 +52,10 @@ class PersonalController extends AbstractController
         $index = $personalSalaried[10];
 
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
-        $dateFin = $personal->getContract()->getDateFin();
-        $typeContrat = $personal->getContract()->getTypeContrat();
         $today = new DateTime();
         $anciennete = (int)$personal->getOlder();
         $age = $personal->getBirthday() ? $personal->getBirthday()->diff($today)->y : '';
-        $dureeContrat = $typeContrat === Status::CDD ? round(($dateFin->diff($dateEmbauche)->days) / 30) : round(($today->diff($dateEmbauche)->days) / 30);
+        $dureeContrat = round(($today->diff($dateEmbauche)->days) / 30);
 
         $numberEnfant = $personal->getChargePeople()->count();
 
@@ -150,9 +148,9 @@ class PersonalController extends AbstractController
                 'modifier' => $this->generateUrl('personal_edit', ['uuid' => $item['uuid']]),
                 'active' => $item['active'],
                 'personal_id' => $item['personal_id'],
-                'all_enable' => $this->personalRepository->areAllUsersActivated()
-
-
+                'all_enable' => $this->personalRepository->areAllUsersActivated(),
+                'mode_paiement' => $item['mode_paiement'],
+                'sursalaire' => $item['personal_sursalaire']
             ];
         }
         return new JsonResponse($personalSalaried);
@@ -161,11 +159,10 @@ class PersonalController extends AbstractController
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(): Response
     {
-        $status  = $this->personalRepository->areAllUsersActivated();
+        $status = $this->personalRepository->areAllUsersActivated();
 
-        //dd(['staus'=>$status]);
-        return $this->render('dossier_personal/personal/index.html.twig',[
-            'status'=>$status
+        return $this->render('dossier_personal/personal/index.html.twig', [
+            'status' => $status
         ]);
     }
 
@@ -177,7 +174,6 @@ class PersonalController extends AbstractController
     ): Response
     {
         $matricule = $matriculeGenerator->generateMatricule();
-        //$numCNPS = $matriculeGenerator->generateNumCnps();
         $numContract = $matriculeGenerator->generateNumContract();
         $personal = (new Personal())->setMatricule($matricule);
         $salaire = (new Salary());
@@ -310,6 +306,7 @@ class PersonalController extends AbstractController
         return $this->redirectToRoute('personal_index');
 
     }
+
     #[Route('/toggle/all', name: 'toggle_all', methods: ['POST'])]
     public function disableAll(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -317,34 +314,34 @@ class PersonalController extends AbstractController
 
             $status = $request->request->get("toggleAllInput");
 
-            if($status == "on"){
+            if ($status == "on") {
 
                 $personals = $this->personalRepository->findAll();
-                foreach($personals as $personal){
-                        $personal->setActive(true);
-                        $entityManager->persist($personal);
-                        $entityManager->flush();
+                foreach ($personals as $personal) {
+                    $personal->setActive(true);
+                    $entityManager->persist($personal);
+                    $entityManager->flush();
                 }
 
                 flash()->addSuccess('Salariés Activés avec succès.');
 
-            }else{
+            } else {
 
                 $personals = $this->personalRepository->findAll();
-                foreach($personals as $personal){
-                        $personal->setActive(false);
-                        $entityManager->persist($personal);
-                        $entityManager->flush();
+                foreach ($personals as $personal) {
+                    $personal->setActive(false);
+                    $entityManager->persist($personal);
+                    $entityManager->flush();
                 }
 
                 flash()->addSuccess('Salariés Désactivés avec succès.');
             }
-            
+
             return $this->redirectToRoute('personal_index');
         }
 
         return $this->redirectToRoute('personal_index');
 
     }
-   
+
 }

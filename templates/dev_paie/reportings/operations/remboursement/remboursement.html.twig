@@ -177,20 +177,26 @@
                             displayFormat: 'Salariés : {0}'
                         },
                         {
-                            column: 'nom_salarie',
+                            column: 'station_salarie',
                             customizeText() {
-                                return 'CUMUL DES REMBOURSEMENTS ';
+                                return 'CUMUL :';
                             }
                         },
                         {
                             column: 'remboursement_montant_brut',
                             summaryType: 'sum',
-                            displayFormat: 'Sur le Brut : {0}'
+                            displayFormat: '{0}',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
                         },
                         {
                             column: 'remboursement_montant_net',
                             summaryType: 'sum',
-                            displayFormat: 'Sur le Net : {0}'
+                            displayFormat: '{0}',
+                            customizeText: function (data) {
+                                return new Intl.NumberFormat('fr-FR').format(data.value);
+                            },
                         }
                     ]
                 },

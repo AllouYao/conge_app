@@ -17,7 +17,7 @@
                     <div class="card-header">
                         <h5 class="card-title-custom" style="color: white" id="date">
                             <i data-feather="list"></i>
-                            PRET / ACOMPTE
+                            PRET & ACOMPTE EN ATTENTE POUR VALIDATION
                         </h5>
                     </div>
                     <div class="card-body">
@@ -34,7 +34,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        Êtes-vous sûr de vouloir valider les prêts / ou acomptes ?
+                                        Êtes-vous sûr de vouloir valider les prêts ou acomptes ?
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annuler
@@ -63,12 +63,6 @@
         }
 
         $(document).ready(function () {
-
-            const date = new Date();
-            // const year = date.getFullYear();
-            // const month = date.getMonth() + 1;
-            //  const day = date.getDate();
-
             const dataGrid = $("#dataGridAcompte").dxDataGrid({
                 dataSource: '{{ url("app_paiement_acompte_api_pending") }}',
                 showBorders: true,
@@ -139,7 +133,7 @@
                 columnAutoWidth: true,
                 columns: [
                     {
-                        caption: 'Date d\'opération',
+                        caption: 'Date Opération',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date',
@@ -151,13 +145,13 @@
                         dataField: 'matricule',
                     },
                     {
-                        caption: 'Nom & prénom(s)',
+                        caption: 'Nom & Prénom(s)',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'nom_prenom',
                     },
                     {
-                        caption: 'Type d\'opération',
+                        caption: 'Type Opération',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'type',
@@ -169,14 +163,14 @@
                         dataField: 'amount',
                     },
                     {
-                        caption: 'Montant remboursé',
-                        alignment: 'center',
+                        caption: 'Montant Remboursé',
+                        alignment: 'right',
                         dataType: 'string',
                         dataField: 'amount_refund',
                     },
                     {
                         caption: 'Restant',
-                        alignment: 'center',
+                        alignment: 'right',
                         dataType: 'string',
                         dataField: 'remaining',
                     },
@@ -200,6 +194,36 @@
                         }
                     },
                 ],
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'matricule',
+                            summaryType: 'count',
+                            displayFormat: 'Salariés : {0}'
+                        },
+                        {
+                            column: 'type',
+                            customizeText() {
+                                return 'Cumul : ';
+                            }
+                        },
+                        {
+                            column: 'amount',
+                            summaryType: 'sum',
+                            displayFormat: '{0}'
+                        },
+                        {
+                            column: 'amount_refund',
+                            summaryType: 'sum',
+                            displayFormat: '{0}'
+                        },
+                        {
+                            column: 'remaining',
+                            summaryType: 'sum',
+                            displayFormat: '{0}'
+                        },
+                    ]
+                },
                 toolbar: {
                     items: [
                         {

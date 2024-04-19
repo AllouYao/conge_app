@@ -7,7 +7,9 @@ use App\Entity\User;
 use App\Form\Paiement\AcompteType;
 use App\Repository\DevPaie\OperationRepository;
 use App\Utils\Status;
+use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
+use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,7 +29,12 @@ class AcompteController extends AbstractController
     #[Route('/list', name: 'list')]
     public function list(): Response
     {
-        return $this->render('paiement/acompte/list.html.twig');
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, 'MMMM Y');
+        $today = Carbon::now();
+        $date = $formatter->format($today);
+        return $this->render('paiement/acompte/list.html.twig', [
+            'date' => $date
+        ]);
     }
 
     #[Route('/index', name: 'index')]
@@ -45,13 +52,18 @@ class AcompteController extends AbstractController
     #[Route('/api/acompte', name: 'api_acompte')]
     public function apiAcompte(OperationRepository $operationRepository): JsonResponse
     {
-        $operations = $operationRepository->findBy(['typeOperations' => [Status::ACOMPTE, Status::PRET]]);
+        $today = Carbon::today();
+        if ($this->isGranted('ROLE_RH')) {
+            $operations = $operationRepository->findOperationByType([Status::ACOMPTE, Status::PRET], $today->month, $today->year);
+        } else {
+            $operations = $operationRepository->findOperationByTypeAndEmployerRole([Status::ACOMPTE, Status::PRET], $today->month, $today->year);
+        }
         $data = [];
 
         foreach ($operations as $operation) {
             $data[] = [
                 'id' => $operation->getId(),
-                'date' => date_format($operation->getDateOperation(), 'd/m/y'),
+                'date' => date_format($operation->getDateOperation(), 'd/m/Y'),
                 'matricule' => $operation->getPersonal()->getMatricule(),
                 'nom_prenom' => $operation->getPersonal()->getFirstName() . ' ' . $operation->getPersonal()->getLastName(),
                 'genre' => $operation->getPersonal()->getGenre(),
@@ -65,23 +77,29 @@ class AcompteController extends AbstractController
         }
         return new JsonResponse($data);
     }
+
     #[Route('/api/pending', name: 'api_pending')]
     public function apiAcomptePending(OperationRepository $operationRepository): JsonResponse
     {
-        $operations = $operationRepository->findBy(['typeOperations' => [Status::ACOMPTE, Status::PRET], 'status' => Status::EN_ATTENTE]);
+        $today = Carbon::today();
+        if ($this->isGranted('ROLE_RH')) {
+            $operations = $operationRepository->findAcomptAndPretByStatus([Status::ACOMPTE, Status::PRET], Status::EN_ATTENTE, $today->month, $today->year);
+        } else {
+            $operations = $operationRepository->findAcomptAndPretByStatusAndEmployerRole([Status::ACOMPTE, Status::PRET], Status::EN_ATTENTE, $today->month, $today->year);
+        }
         $data = [];
 
         foreach ($operations as $operation) {
             $data[] = [
                 'id' => $operation->getId(),
-                'date' => date_format($operation->getDateOperation(), 'd/m/y'),
+                'date' => date_format($operation->getDateOperation(), 'd/m/Y'),
                 'matricule' => $operation->getPersonal()->getMatricule(),
                 'nom_prenom' => $operation->getPersonal()->getFirstName() . ' ' . $operation->getPersonal()->getLastName(),
                 'genre' => $operation->getPersonal()->getGenre(),
                 'type' => $operation->getTypeOperations(),
-                'amount' => $operation->getAmount(),
-                'amount_refund' => $operation->getAmountRefund() ?? 0,
-                'remaining' => $operation->getRemaining(),
+                'amount' => (int)$operation->getAmount(),
+                'amount_refund' => (int)$operation->getAmountRefund() ?? 0,
+                'remaining' => (int)$operation->getRemaining(),
                 'status' => $operation->getStatus(),
                 'modifier' => $this->generateUrl('app_paiement_acompte_edit', ['uuid' => $operation->getUuid()])
             ];
@@ -92,18 +110,23 @@ class AcompteController extends AbstractController
     #[Route('/api/validate', name: 'api_validate')]
     public function apiValidate(OperationRepository $operationRepository): JsonResponse
     {
-        $operations = $operationRepository->findBy(['typeOperations' => [Status::ACOMPTE, Status::PRET], 'status' => Status::VALIDATED]);
+        $today = Carbon::today();
+        if ($this->isGranted('ROLE_RH')) {
+            $operations = $operationRepository->findAcomptAndPretByStatus([Status::ACOMPTE, Status::PRET], Status::VALIDATED, $today->month, $today->year);
+        } else {
+            $operations = $operationRepository->findAcomptAndPretByStatusAndEmployerRole([Status::ACOMPTE, Status::PRET], Status::VALIDATED, $today->month, $today->year);
+        }
         $data = [];
 
         foreach ($operations as $operation) {
             $data[] = [
-                'date' => date_format($operation->getDateOperation(), 'd/m/y'),
+                'date' => date_format($operation->getDateOperation(), 'd/m/Y'),
                 'matricule' => $operation->getPersonal()->getMatricule(),
                 'nom_prenom' => $operation->getPersonal()->getFirstName() . ' ' . $operation->getPersonal()->getLastName(),
                 'type' => $operation->getTypeOperations(),
-                'amount' => $operation->getAmount(),
-                'amount_refund' => $operation->getAmountRefund() ?? 0,
-                'remaining' => $operation->getRemaining(),
+                'amount' => (int)$operation->getAmount(),
+                'amount_refund' => (int)$operation->getAmountRefund() ?? 0,
+                'remaining' => (int)$operation->getRemaining(),
                 'status' => $operation->getStatus(),
                 'modifier' => $this->generateUrl('app_paiement_acompte_edit', ['uuid' => $operation->getUuid()])
             ];
@@ -112,7 +135,7 @@ class AcompteController extends AbstractController
     }
 
     #[Route('/validate', name: 'validate', methods: ['POST'])]
-    public function validate(Request $request,OperationRepository $operationRepository): Response
+    public function validate(Request $request, OperationRepository $operationRepository): Response
     {
         if ($request->request->has('acompteInput') && $request->isMethod('POST')) {
 
@@ -158,7 +181,7 @@ class AcompteController extends AbstractController
                 ->setRemaining($operation->getAmount());
             $this->manager->persist($operation);
             $this->manager->flush();
-            flash()->addSuccess($operation->getTypeOperations().' enregistré avec succès');
+            flash()->addSuccess($operation->getTypeOperations() . ' enregistré avec succès');
             return $this->redirectToRoute('app_paiement_acompte_list');
         }
         return $this->render('paiement/acompte/new.html.twig', [
@@ -166,18 +189,17 @@ class AcompteController extends AbstractController
         ]);
     }
 
-    #[Route('/{uuid}/edit', name: 'edit', methods:['GET','POST'])]
-    public function edit(Operation $operation,Request $request): Response
+    #[Route('/{uuid}/edit', name: 'edit', methods: ['GET', 'POST'])]
+    public function edit(Operation $operation, Request $request): Response
     {
-        $form = $this->createForm(AcompteType::class,$operation);
+        $form = $this->createForm(AcompteType::class, $operation);
         $form->handleRequest($request);
 
-        if($form->isValid() && $form->isSubmitted())
-        {
+        if ($form->isValid() && $form->isSubmitted()) {
             $this->manager->persist($operation);
             $this->manager->flush();
         }
-        return $this->render('paiement/acompte/edit.html.twig',[
+        return $this->render('paiement/acompte/edit.html.twig', [
             'form' => $form
         ]);
     }

@@ -4,6 +4,13 @@ namespace App\Utils;
 
 final class Status
 {
+    /** Type Conges & ode de paiement conges */
+    public const ULTERIEUR = 'Ultérieur';
+    public const IMMEDIAT = 'Immédiat';
+    public const EFFECTIF = 'Effectif';
+    public const PARTIEL = 'Partiel';
+    public const IMPAYEE = 'IMPAYEE';
+
     /** Category salarie */
     public const OUVRIER_EMPLOYE = 'Ouvriers / Employés';
     public const CHAUFFEUR = 'Chauffeurs';

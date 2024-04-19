@@ -22,7 +22,6 @@ class PersonalHeureSupType extends AbstractType
         $builder
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
-                'choice_label' => 'firstName',
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('p')
                         ->join('p.contract', 'ct')

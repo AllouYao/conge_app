@@ -17,7 +17,7 @@
                     <div class="card-header">
                         <h5 class="card-title-custom" style="color: white" id="date">
                             <i data-feather="list"></i>
-                            PRET / ACOMPTE
+                            PRET & ACOMPTE VALIDES
                         </h5>
                     </div>
                     <div class="card-body">
@@ -37,12 +37,6 @@
         }
 
         $(document).ready(function () {
-
-            const date = new Date();
-            // const year = date.getFullYear();
-            // const month = date.getMonth() + 1;
-            //  const day = date.getDate();
-
             $("#dataGridAcompte").dxDataGrid({
                 dataSource: '{{ url("app_paiement_acompte_api_validate") }}',
                 showBorders: true,
@@ -113,7 +107,7 @@
                 columnAutoWidth: true,
                 columns: [
                     {
-                        caption: 'Date d\'opération',
+                        caption: "Date Opération",
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date',
@@ -125,13 +119,13 @@
                         dataField: 'matricule',
                     },
                     {
-                        caption: 'Nom & prénom(s)',
+                        caption: 'Nom & Prénom(s)',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'nom_prenom',
                     },
                     {
-                        caption: 'Type d\'opération',
+                        caption: 'Type Opération',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'type',
@@ -143,7 +137,7 @@
                         dataField: 'amount',
                     },
                     {
-                        caption: 'Montant remboursé',
+                        caption: 'Montant Remboursé',
                         alignment: 'right',
                         dataType: 'number',
                         dataField: 'amount_refund',
@@ -170,20 +164,30 @@
                 summary: {
                     totalItems: [
                         {
-                            column: 'ordre',
+                            column: 'matricule',
                             summaryType: 'count',
                             displayFormat: 'Salariés : {0}'
                         },
                         {
-                            column: 'nom_salarie',
+                            column: 'type',
                             customizeText() {
-                                return 'CUMUL DES RETENUES SUR SALAIRE';
+                                return 'Cumul : ';
                             }
                         },
                         {
-                            column: 'retenue_montant_brut',
+                            column: 'amount',
                             summaryType: 'sum',
-                            displayFormat: 'Sur le Brut : {0}'
+                            displayFormat: '{0}'
+                        },
+                        {
+                            column: 'amount_refund',
+                            summaryType: 'sum',
+                            displayFormat: '{0}'
+                        },
+                        {
+                            column: 'remaining',
+                            summaryType: 'sum',
+                            displayFormat: '{0}'
                         },
                     ]
                 },

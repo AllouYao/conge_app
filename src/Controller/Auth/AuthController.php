@@ -56,9 +56,6 @@ class AuthController extends AbstractController
         return new JsonResponse($users);
     }
 
-    #[IsGranted("ROLE_DEV_PAIE", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
-    //#[IsGranted("ROLE_RH", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
-    //#[IsGranted("ROLE_ADMIN", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/', name: 'index')]
     public function index(): Response
     {
@@ -69,7 +66,6 @@ class AuthController extends AbstractController
         ]);
     }
 
-    #[IsGranted("ROLE_DEV_PAIE", message: 'Vous avez pas les accès, veillez quitter la page. merci!', statusCode: 404)]
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
     {

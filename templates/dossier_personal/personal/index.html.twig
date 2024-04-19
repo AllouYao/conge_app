@@ -37,8 +37,8 @@
     <form id="toggleAll" method="POST" action="/dossier/personal/toggle/all">
         <input id="toggleAllInput" type="hidden" name="toggleAllInput">
     </form>
-  
-    <input id="statusPersonnal" type="hidden" name="statusPersonnal" value="{{status}}">
+
+    <input id="statusPersonnal" type="hidden" name="statusPersonnal" value="{{ status }}">
 
 
 
@@ -75,6 +75,11 @@
                 groupPanel: {
                     visible: true
                 },
+                selection: {
+                    mode: "multiple",
+                    allowSelectAll: true,
+                    showCheckBoxesMode: "always"
+                },
                 export: {
                     enabled: true,
                     allowExportSelectedData: true,
@@ -89,7 +94,7 @@
                             worksheet,
                             autoFilterEnabled: true,
                             customizeCell: function (options) {
-                                
+
                                 const {gridCell, excelCell} = options;
                                 if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
                                     excelCell.text = formatNumber(gridCell.value)
@@ -203,11 +208,26 @@
                         },
                     },
                     {
+                        caption: 'Sursalaire (Fcfa)',
+                        dataType: 'number',
+                        dataField: 'sursalaire',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Mode Paiement',
+                        dataType: 'string',
+                        dataField: 'mode_paiement',
+                        alignment: 'left',
+                    },
+                    {
                         caption: 'Actions',
                         alignment: 'center',
                         columns: [
                             {
-                                headerCellTemplate: $('#statusPersonnal').val()?  $('<div class="form-check form-switch mx-5"><input class="form-check-input toggle-personal-all" type="checkbox" id="toggleAllPersonals" checked value="off"> <label class="form-check-label" for="toggleAllPersonal"></label> </div>'):$('<div class="form-check form-switch mx-5"><input class="form-check-input toggle-personal-all" type="checkbox" id="toggleAllPersonals" value="on"> <label class="form-check-label" for="toggleAllPersonal"></label> </div>'),
+                                headerCellTemplate: $('#statusPersonnal').val() ? $('<div class="form-check form-switch mx-5"><input class="form-check-input toggle-personal-all" type="checkbox" id="toggleAllPersonals" checked value="off"> <label class="form-check-label" for="toggleAllPersonal"></label> </div>') : $('<div class="form-check form-switch mx-5"><input class="form-check-input toggle-personal-all" type="checkbox" id="toggleAllPersonals" value="on"> <label class="form-check-label" for="toggleAllPersonal"></label> </div>'),
 
                                 columns: [
                                     {
@@ -257,20 +277,29 @@
                                 }
                             },
                         ],
-                        
+
                         width: 120
                     }
                 ],
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'index',
+                            summaryType: 'count',
+                            displayFormat: 'Salariés : {0}'
+                        },
+                    ]
+                }
             })
         })
-    
 
-    $(document).ready(function(){
 
-        $data = $('#toggleAllPersonals').val();
-        console.log("data:"+$data);
+        $(document).ready(function () {
 
-    });
+            $data = $('#toggleAllPersonals').val();
+            console.log("data:" + $data);
+
+        });
     </script>
 
 {% endblock %} 

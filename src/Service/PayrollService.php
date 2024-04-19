@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Paiement\Campagne;
 use App\Entity\Paiement\Payroll;
+use App\Repository\DossierPersonal\CongeRepository;
 use App\Repository\Impots\ChargeEmployeurRepository;
 use App\Repository\Impots\ChargePersonalsRepository;
 use App\Service\PaieService\PaieByPeriodService;
@@ -25,6 +26,7 @@ class PayrollService
     private PaieServices $paieServices;
     private PaieByPeriodService $paieByPeriodService;
     private PaieProrataService $paieProrataService;
+    private CongeRepository $congeRepository;
 
 
     public function __construct(
@@ -34,7 +36,7 @@ class PayrollService
         PrimeService              $primeService,
         PaieServices              $paieServices,
         PaieByPeriodService       $paieByPeriodService,
-        PaieProrataService        $paieProrataService
+        PaieProrataService        $paieProrataService, CongeRepository $congeRepository
     )
     {
         $this->manager = $entityManager;
@@ -44,6 +46,7 @@ class PayrollService
         $this->paieServices = $paieServices;
         $this->paieByPeriodService = $paieByPeriodService;
         $this->paieProrataService = $paieProrataService;
+        $this->congeRepository = $congeRepository;
     }
 
     /**
@@ -74,8 +77,7 @@ class PayrollService
         $majorationHeursSupp = ceil($this->paieServices->getHeureSuppCampagne($personal, $campagne));
         $primeAnciennete = ceil($this->paieServices->getPrimeAncienneteCampagne($personal, $campagne));
         $salary->setPrimeAciennete((int)$primeAnciennete); // Enregistrer après récuperation la prime d'anciennete dans la table salary
-        $congesPayes = null; // Ajouter ici la fonction qui nous permet d'obtenir le montant de l'allocation en fonction du mois de campagne.
-
+        $congesPayes = $this->paieServices->getAmountCongesPayes($personal);// Ajouter ici la fonction qui nous permet d'obtenir le montant de l'allocation en fonction du mois de campagne.
 
         /** Ajouter toutes les primes possible  */
         $primeFonctions = ceil($this->primeService->getPrimeFonction($personal) * $dayOfCurrentMonth / self::DAY_IN_MONTH_WORK);
@@ -211,6 +213,7 @@ class PayrollService
             /** Brut et Net imposable du salarié */
             ->setBrutAmount($salaireBrut)
             ->setImposableAmount($netImposable)
+            ->setCongesPayesAmount($congesPayes)
             /** Regularisation sur net ou brut */
             ->setRemboursBrut($remboursementBrut)
             ->setRemboursNet($remboursementNet)
@@ -228,6 +231,13 @@ class PayrollService
 
         $this->manager->persist($payroll);
         $this->manager->persist($salary);
+
+        $conge = $this->congeRepository->findCongeByPersonal($personal->getId());
+        if (!$conge?->getStatus() && ($conge?->getTypeConge() === Status::EFFECTIF or $conge?->getTypeConge() === Status::PARTIEL) && $conge?->getTypePayementConge() === Status::IMMEDIAT) {
+            $conge->setStatus(Status::PAYE);
+        } elseif (!$conge?->getStatus() && ($conge?->getTypeConge() === Status::EFFECTIF or $conge?->getTypeConge() === Status::PARTIEL) && $conge?->getTypePayementConge() === Status::ULTERIEUR) {
+            $conge->setStatus(Status::IMPAYEE);
+        }
 
         return $payroll;
     }

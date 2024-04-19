@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Acompte / Prêt {% endblock %}
+{% block title %}Historique Congés{% endblock %}
 {% block stylesheets %}
     <style>
         #dataGridAcompte {
@@ -17,7 +17,7 @@
                     <div class="card-header">
                         <h5 class="card-title-custom" style="color: white" id="date">
                             <i data-feather="list"></i>
-                            ANCIEN CONGE
+                            HISTORIQUE DES CONGES
                         </h5>
                     </div>
                     <div class="card-body">
@@ -41,11 +41,6 @@
         }
 
         $(document).ready(function () {
-
-            const date = new Date();
-            // const year = date.getFullYear();
-            // const month = date.getMonth() + 1;
-            //  const day = date.getDate();
 
             $("#dataGridOldConge").dxDataGrid({
                 dataSource: '{{ url("old_conge_api") }}',
@@ -75,7 +70,7 @@
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('Acompte ou prêt');
+                        const worksheet = workbook.addWorksheet('Historiques Congés');
                         DevExpress.excelExporter.exportDataGrid({
                             component: e.component,
                             worksheet,
@@ -95,7 +90,7 @@
                             const day = date.getDate();
                             const dateFormat = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `ACOMPTE_PRET${dateFormat}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `HISTORIQUE CONGES${dateFormat}.xlsx`);
                             });
                         });
                         e.cancel = true;
@@ -117,12 +112,6 @@
                 columnAutoWidth: true,
                 columns: [
                     {
-                        caption: 'Date d\'opération',
-                        alignment: 'center',
-                        dataType: 'string',
-                        dataField: 'date',
-                    },
-                    {
                         caption: 'Matricule',
                         alignment: 'left',
                         dataType: 'string',
@@ -136,15 +125,21 @@
                     },
                     {
                         caption: 'Date dernier retour de congé',
-                        alignment: 'left',
+                        alignment: 'center',
                         dataType: 'string',
-                        dataField: 'type',
+                        dataField: 'date',
                     },
                     {
                         caption: 'Salaire moyen annuel',
                         alignment: 'right',
                         dataType: 'number',
                         dataField: 'salaryAverage',
+                    },
+                    {
+                        caption: 'Ajouter le',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_creation',
                     },
                     {
                         caption: 'Action',

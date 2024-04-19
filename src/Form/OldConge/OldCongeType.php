@@ -2,23 +2,32 @@
 
 namespace App\Form\OldConge;
 
-use Doctrine\ORM\EntityRepository;
-use App\Form\CustomType\DateCustomType;
 use App\Entity\DossierPersonal\OldConge;
 use App\Entity\DossierPersonal\Personal;
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
+use App\Form\CustomType\DateCustomType;
+use App\Utils\Status;
+use DateTime;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class OldCongeType extends AbstractType
 {
+    public function __construct(
+        private readonly AuthorizationCheckerInterface $authorizationChecker
+    )
+    {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('dateRetour', DateCustomType::class)
-            ->add('salaryAverage', TextType::class,[
+            ->add('salaryAverage', TextType::class, [
                 'attr' => [
                     'class' => 'text-end separator'
                 ]
@@ -43,14 +52,39 @@ class OldCongeType extends AbstractType
             ])
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
-                'choice_label' => 'matricule',
                 'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('p')
-                        ->join('p.contract', 'ct')
-                        ->leftJoin('p.departures', 'departures')
-                        ->where('departures.id IS NULL');
+                    if ($this->authorizationChecker->isGranted('ROLE_RH')) {
+                        return $er->createQueryBuilder('p')
+                            ->join('p.contract', 'ct')
+                            ->leftJoin('p.departures', 'departures')
+                            ->leftJoin('p.conges', 'c')
+                            ->where('c.id IS NULL OR c.dateDernierRetour < :today AND c.isConge = false ')
+                            ->andWhere('departures.id IS NULL')
+                            ->andWhere('ct.typeContrat IN (:type)')
+                            ->andWhere('p.active = true')
+                            ->setParameter('today', new DateTime())
+                            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
+                            ->orderBy('p.matricule', 'ASC');
+                    } else {
+                        return $er->createQueryBuilder('p')
+                            ->join('p.contract', 'ct')
+                            ->join('p.categorie', 'category')
+                            ->join('category.categorySalarie', 'category_salarie')
+                            ->leftJoin('p.departures', 'departures')
+                            ->leftJoin('p.conges', 'c')
+                            ->where('c.id IS NULL OR c.dateDernierRetour < :today AND c.isConge = false ')
+                            ->andWhere('departures.id IS NULL')
+                            ->andWhere('p.active = true')
+                            ->andWhere('ct.typeContrat IN (:type)')
+                            ->andWhere("category_salarie.code IN (:code)")
+                            ->setParameter('today', new DateTime())
+                            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
+                            ->setParameter('code', ['OUVRIER / EMPLOYES', 'CHAUFFEURS'])
+                            ->orderBy('p.matricule', 'ASC');
+                    }
+
                 },
-                'placeholder' => 'Sélectionner un matricule',
+                'placeholder' => 'Sélectionner un salarié',
                 'attr' => [
                     'data-plugin' => 'customselect',
                 ],

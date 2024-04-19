@@ -22,7 +22,7 @@ class HomeController extends AbstractController
         $this->manager = $manager;
     }
 
-    #[Route('/home', name: 'app_home')]
+    #[Route(path: ['/home', '/'], name: 'app_home')]
     public function index(MessageBusInterface $messageBus): Response
     {
         //$messageBus->dispatch(new UpdateOlderPersonal());
@@ -32,10 +32,11 @@ class HomeController extends AbstractController
             $dateFin = $enCour->getDateRetour();
             if ($dateFin <= $today) {
                 $enCour->setIsConge(false);
+                flash()->addInfo('le salarié ' . $enCour->getPersonal()->getFirstName() . ' ' . $enCour->getPersonal()->getLastName() . ' est de retour de congé.');
             }
             $this->manager->persist($enCour);
             $this->manager->flush();
-            flash()->addInfo('le salarié ' . $enCour->getPersonal()->getFirstName() . ' ' . $enCour->getPersonal()->getLastName() . ' est de retour de congé.');
+
         }
         return $this->render('home/index.html.twig');
     }

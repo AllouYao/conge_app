@@ -41,7 +41,7 @@ class WorkTimeController extends AbstractController
 
         foreach ($allWorkTimes as $workTime) {
             $workTimes[] = [
-                'type' => $workTime->getType(),
+                'type' => $workTime->getCode(),
                 'hourValue' => $workTime->getHourValue(),
                 'rateValue' => $workTime->getRateValue(),
                 'modifier' => $this->generateUrl('work_time_normal_edit', ['uuid' => $workTime->getUuid()])

@@ -31,7 +31,11 @@ class OperationController extends AbstractController
     public function apiOperations(OperationRepository $operationRepository): JsonResponse
     {
         $today = Carbon::today();
-        $operationRequest = $operationRepository->findOperationByType([Status::REMBOURSEMENT, Status::RETENUES], $today->month, $today->year);
+        if ($this->isGranted('ROLE_RH')) {
+            $operationRequest = $operationRepository->findOperationByType([Status::REMBOURSEMENT, Status::RETENUES], $today->month, $today->year);
+        } else {
+            $operationRequest = $operationRepository->findOperationByTypeAndEmployerRole([Status::REMBOURSEMENT, Status::RETENUES], $today->month, $today->year);
+        }
         if (!$operationRequest) {
             return $this->json(['data' => []]);
         }
@@ -45,6 +49,7 @@ class OperationController extends AbstractController
                 'personal_fullname' => $personal->getFirstName() . ' ' . $personal->getLastName(),
                 'amount_brut' => $operation->getAmountBrut(),
                 'amount_net' => $operation->getAmountNet(),
+                'status' => $operation->getStatus(),
                 'modifier' => $this->generateUrl('dev_paie_operation_edit', ['uuid' => $operation->getUuid()])
             ];
         }

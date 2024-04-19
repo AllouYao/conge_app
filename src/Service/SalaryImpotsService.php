@@ -84,7 +84,7 @@ class SalaryImpotsService implements SalaryInterface
             $salaire = $this->paieServices->getProvisoireBrutAndBrutImpoCampagne($personal, $campagne);
             $majorationHeursSupp = $this->paieServices->getHeureSuppCampagne($personal, $campagne);
             $primeAnciennete = $this->paieServices->getPrimeAncienneteCampagne($personal, $campagne);
-            $congesPayes = null; // Ajouter ici la fonction qui nous permet d'obtenir le montant de l'allocation conges du mois actuel.
+            $congesPayes = $this->paieServices->getAmountCongesPayes($personal); // Ajouter ici la fonction qui nous permet d'obtenir le montant de l'allocation conges du mois actuel.
             $netImposable = $salaire['brut_imposable_amount'] + $majorationHeursSupp + $primeAnciennete + $congesPayes;
             $impotNet = $impotBrut - $creditImpot;
             if ($netImposable <= 75000 || $impotNet < 0) {

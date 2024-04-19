@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Smig{% endblock %}
+{% block title %}Regularisation (Moins / Plus) perçus{% endblock %}
 {% block stylesheets %}
     <style>
         #dataGridOperation {
@@ -54,13 +54,17 @@
                 allowColumnResizing: true,
                 columnAutoWidth: true,
                 rowAlternationEnabled: true,
-                height: 355,
+                height: 350,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual"
                 },
                 groupPanel: {
                     visible: true
+                },
+                selection: {
+                    mode: 'multiple',
+                    showCheckBoxesMode: 'always'
                 },
                 export: {
                     enabled: true,
@@ -110,12 +114,6 @@
                         dataField: 'date_operation',
                     },
                     {
-                        caption: 'Type Opération',
-                        alignment: 'left',
-                        dataType: 'string',
-                        dataField: 'type_operation',
-                    },
-                    {
                         caption: 'Matricule',
                         alignment: 'center',
                         dataType: 'string',
@@ -128,50 +126,56 @@
                         dataField: 'personal_fullname',
                     },
                     {
+                        caption: 'Type Opération',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'type_operation',
+                    },
+                    {
                         caption: 'Montant Brut',
                         alignment: 'right',
                         dataType: 'number',
                         dataField: 'amount_brut',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
                     },
                     {
                         caption: 'Montant Net',
                         alignment: 'right',
                         dataType: 'number',
                         dataField: 'amount_net',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
                     },
                     {
-                        caption: 'Action',
+                        caption: 'Actions',
                         dataField: 'modifier',
                         alignment: 'center',
                         cellTemplate: function (container, options) {
-                            $("<a title='modifier'>")
-                                .html('<i data-feather="edit" style="color: #C9971C"></i>')
-                                .attr("href", options.data.modifier)
-                                .appendTo(container);
-                            feather.replace();
+                            const status = options.data.status;
+                            if (status === 'EN ATTENTE') {
+                                $("<a title='modifier'>")
+                                    .html('<i data-feather="edit" style="color: #C9971C"></i>')
+                                    .attr("href", options.data.modifier)
+                                    .appendTo(container);
+                                feather.replace();
+                            } else {
+
+                            }
                         },
                     },
                 ],
                 summary: {
                     totalItems: [
                         {
-                            column: 'date_operation',
+                            column: 'personal_matricule',
                             summaryType: 'count',
-                            displayFormat: 'Total salariés : {0}'
+                            displayFormat: 'Salariés : {0}'
                         },
                         {
-                            column: 'personal_fullname',
-                            displayFormat: 'Total Montant :'
+                            column: 'type_operation',
+                            displayFormat: 'CUMUL :'
                         },
                         {
                             column: 'amount_brut',
                             summaryType: 'sum',
+                            displayFormat: '{0}',
                             customizeText: function (data) {
                                 return new Intl.NumberFormat('fr-FR').format(data.value);
                             },
@@ -179,6 +183,7 @@
                         {
                             column: 'amount_net',
                             summaryType: 'sum',
+                            displayFormat: '{0}',
                             customizeText: function (data) {
                                 return new Intl.NumberFormat('fr-FR').format(data.value);
                             },

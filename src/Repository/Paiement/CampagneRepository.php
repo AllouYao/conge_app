@@ -31,6 +31,8 @@ class CampagneRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('c')
             ->where("c.active = true")
+            ->andWhere('c.status = :status')
+            ->setParameter('status', Status::VALIDATED)
             ->setMaxResults(1)
             ->orderBy('c.id', 'DESC')
             ->getQuery()
