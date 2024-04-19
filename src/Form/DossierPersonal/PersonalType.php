@@ -10,6 +10,7 @@ use App\Utils\Status;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -112,6 +113,13 @@ class PersonalType extends AbstractType
                 'required' => false
             ])
             ->add('numExtraitActe', TextType::class, [
+                'required' => false
+            ])
+            ->add('isCmu', CheckboxType::class, [
+                'required' => false,
+                'label' => false,
+            ])
+            ->add('numCmu', TextType::class, [
                 'required' => false
             ])
             ->add('etatCivil', ChoiceType::class, [

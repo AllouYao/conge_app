@@ -149,6 +149,12 @@ class Personal
 
     #[ORM\OneToOne(mappedBy: 'personal', cascade: ['persist', 'remove'])]
     private ?OldConge $oldConge = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $isCmu = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $numCmu = null;
     public function __construct()
     {
         $this->chargePeople = new ArrayCollection();
@@ -904,6 +910,30 @@ class Personal
         }
 
         $this->oldConge = $oldConge;
+
+        return $this;
+    }
+
+    public function isIsCmu(): ?bool
+    {
+        return $this->isCmu;
+    }
+
+    public function setIsCmu(?bool $isCmu): static
+    {
+        $this->isCmu = $isCmu;
+
+        return $this;
+    }
+
+    public function getNumCmu(): ?string
+    {
+        return $this->numCmu;
+    }
+
+    public function setNumCmu(?string $numCmu): static
+    {
+        $this->numCmu = $numCmu;
 
         return $this;
     }

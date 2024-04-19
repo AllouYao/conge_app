@@ -211,19 +211,23 @@ class CampagneController extends AbstractController
             $previousCampagne = $this->campagneRepository->findLast();
             $personals = $form->get('personal')->getData();
             $countPersonal = count($personals);
+            $last_month = $previousCampagne->getStartedAt()->format('m');
+            $last_day_pr_camp = new DateTime(31 . '-' . $last_month . '-' . $year);
+
 
             if ($countPersonal > 0) {
                 foreach ($personals as $personal) {
                     $dateEmbauche = $personal->getContract()->getDateEmbauche();
-                    if (($dateEmbauche > $previousCampagne?->getStartedAt()) && $previousCampagne) {
+
+                    if (($dateEmbauche > $previousCampagne?->getStartedAt()) && $dateEmbauche <= $last_day_pr_camp) {
                         //personnel arrivé avant le debut de la campagne passée
-                        $this->payrollService->setExtraMonthPayroll($personal, $campagne);
+                        $extra = $this->payrollService->setExtraMonthPayroll($personal, $campagne);
                     } elseif (($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt()) {
-                        //personnel arrivé au milieu de le du mois de la campagne en cours
-                        $this->payrollService->setProrataPayroll($personal, $campagne);
-                    } elseif (!($dateEmbauche > $campagne->getStartedAt())) {
+                        //personnel arrivé au milieu de du mois de la campagne en cours
+                        $milieu = $this->payrollService->setProrataPayroll($personal, $campagne);
+                    } elseif ((!($dateEmbauche > $campagne->getStartedAt())) or $dateEmbauche > $previousCampagne->getStartedAt()) {
                         //personnel normal
-                        $this->payrollService->setPayroll($personal, $campagne);
+                        $normal = $this->payrollService->setPayroll($personal, $campagne);
                     } else {
                         flash()->addInfo("Aucun salarié  n'est eligible pour participé à la paie de ce mois.");
                     }

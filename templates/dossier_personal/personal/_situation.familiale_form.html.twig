@@ -30,5 +30,19 @@
                 {{ form_errors(form.numExtraitActe) }}
             </div>
         </div>
+        <div class="mb-2 row">
+            <label class="col-md-2 form-check-label">Assuré ?<span
+                        class="text-danger"> *</span></label>
+            <div class="col-md-2 form-switch">
+                {{ form_widget(form.isCmu) }}
+                {{ form_errors(form.isCmu) }}
+            </div>
+            <label class="col-md-2 col-form-label">Numéro Cmu<span
+                        class="text-danger"> *</span></label>
+            <div class="col-md-2">
+                {{ form_widget(form.numCmu) }}
+                {{ form_errors(form.numCmu) }}
+            </div>
+        </div>
     </fieldset>
 </div>

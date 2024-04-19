@@ -145,7 +145,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->join('payroll.campagne', 'campagnes')
             ->join('payroll.personal', 'personal')
             ->where('campagnes.active = false')
-            ->andWhere('personal.active = true')
+            //->andWhere('personal.active = true')
             ->andWhere('campagnes.status = :status')
             ->andWhere('payroll.status = :payroll_status')
             ->andWhere('campagnes.dateDebut BETWEEN ?1 AND ?2');

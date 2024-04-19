@@ -29,7 +29,6 @@ class PaieProrataService
         private readonly OperationRepository               $operationRepository,
         private readonly AbsenceRepository                 $absenceRepository,
         private readonly AbsenceService                    $absenceService,
-        //private readonly PrimeService                      $primeService,
         private readonly EntityManagerInterface            $manager
 
     )
@@ -45,7 +44,6 @@ class PaieProrataService
         $lastWorkDay = $personal->getContract()->getDateEmbauche();
         $lastWorkDay = $lastWorkDay->format('d');
         $lastWorkDay = self::NR_JOUR_TRAVAILLER - $lastWorkDay;
-
         $dayOfPresence = $dayOfPresence + $lastWorkDay;
 
         $date = $campagne->getDateDebut();
@@ -252,12 +250,21 @@ class PaieProrataService
     /** Montant de la couverture maladie universelle du salarie, charge salarial de la periode de paie */
     public function amountCMU(Personal $personal): float|int
     {
-        $categoryRate = $this->categoryChargeRepository->findOneBy(['codification' => 'CMU']);
+        $category_rate = $this->categoryChargeRepository->findOneBy(['codification' => 'CMU']);
         // Je recupere le nombre d'enfant à charge
-        $chargePeople = $personal->getChargePeople()->count();
-        $marie = $personal->getEtatCivil() === Status::MARIEE ? 1 : 0;
-        $CMU = $categoryRate->getValue();
-        return ($chargePeople * $CMU) + ($CMU * $marie) + $CMU;
+        $charge_people = 0;
+        foreach ($personal->getChargePeople() as $charge_person) {
+            if ($charge_person->isIsCmu() === true && $charge_person->getNumCmu() != null) {
+                $charge_people++;
+            }
+        }
+        $marie = $personal->getEtatCivil() === Status::MARIEE;
+        $marie_cmu = 0;
+        if ($marie && $personal->isIsCmu() === true && $personal->getNumCmu() != null) {
+            $marie_cmu = 1;
+        }
+        $cmu_value = $category_rate->getValue();
+        return ($charge_people * $cmu_value) + ($cmu_value * $marie_cmu) + $cmu_value;
     }
 
     /** Montant de la couverture maladie universelle du salarie, charge patronal de la periode de paie */
