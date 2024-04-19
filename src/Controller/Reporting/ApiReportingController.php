@@ -489,9 +489,9 @@ class ApiReportingController extends AbstractController
             $mois_persus_brut = $payrollBefore?->getRemboursBrut();
             $plus_persus_net = $payrollBefore?->getRetenueNet();
             $plus_persus_brut = $payrollBefore?->getRetenueBrut();
-            $amountBrutBefore = $payrollBefore?->getBrutAmount() - ($mois_persus_brut + $plus_persus_brut);
+            $amountBrutBefore = $payrollBefore?->getBrutAmount() + $plus_persus_brut - ($mois_persus_brut);
             $amountBrutLast = $payrollLast?->getBrutAmount();
-            $amountNetBefore = $payrollBefore?->getNetPayer() - ($mois_persus_net + $plus_persus_net);
+            $amountNetBefore = $payrollBefore?->getNetPayer() + $plus_persus_net  - ($mois_persus_net);
             $amountNetLast = $payrollLast?->getNetPayer();
             $amountEcartBrut = $amountBrutLast - $amountBrutBefore;
             $amountEcartNet = $amountNetLast - $amountNetBefore;
