@@ -18,8 +18,8 @@ let marriedShow = () => {
         $("#personal_conjoint").attr("required", "required");
         $("#personal_numCertificat").attr("required", "required");
         $("#personal_numExtraitActe").attr("required", "required");
-        $("#personal_isCmu").attr("required", "required");
-        $("#personal_numCmu").attr("required", "required");
+        $("#personal_isCmu").removeAttr("required");
+        $("#personal_numCmu").removeAttr("required");
     }
 }
 
