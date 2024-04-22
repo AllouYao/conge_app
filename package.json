@@ -30,7 +30,8 @@
         "simplebar": "^5.3.3",
         "webpack": "^5.74.0",
         "webpack-cli": "^4.10.0",
-        "webpack-notifier": "^1.15.0"
+        "webpack-notifier": "^1.15.0",
+        "yearpicker.js": "^1.0.1"
     },
     "license": "UNLICENSED",
     "private": true,

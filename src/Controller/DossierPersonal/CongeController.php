@@ -16,7 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/dossier/personal/conge', name: 'conge_')]
 class CongeController extends AbstractController
@@ -98,7 +98,6 @@ class CongeController extends AbstractController
             $personal = $conge->getPersonal();
             $last_conge = $congeRepository->getLastCongeByID($personal->getId(), false);
             $historique_conge = $this->oldCongeRepository->findOneByPerso($personal->getId());
-            $last_date_retour = $last_conge ? $last_conge->getDateRetour() : $historique_conge->getDateRetour();
 
             /** Verifier si le salarié sélectionner est déjà en congés */
             $conge_active = $congeRepository->getLastCongeByID($personal->getId(), true);
@@ -108,7 +107,9 @@ class CongeController extends AbstractController
                 return $this->redirectToRoute('conge_index');
             }
 
+            $last_date_retour = null;
             if ($last_conge or $historique_conge) {
+                $last_date_retour = $last_conge ? $last_conge->getDateRetour() or $historique_conge->getDateRetour() : null;
                 $congeService->congesPayeByLast($conge);
             } else {
                 $congeService->congesPayeFirst($conge);

@@ -13,6 +13,7 @@ import 'datatables.net-bs5/css/dataTables.bootstrap5.css'
 import 'datatables.net-responsive-bs5/css/responsive.bootstrap5.css'
 import 'datatables.net-buttons-bs5/css/buttons.bootstrap5.css'
 import 'datatables.net-select-bs5/css/select.bootstrap5.css'
+import 'yearpicker.js/dist/yearpicker.css'
 
 import 'select2/dist/css/select2.css'
 
@@ -35,7 +36,8 @@ global.moment = moment;
 const feather = require('feather-icons')
 global.feather = feather
 
-
+const yearpicker = require('yearpicker.js/dist/yearpicker');
+global.yearpicker =  yearpicker;
 /**
  * Plugins js
  */
@@ -748,3 +750,4 @@ import './js/app';
 
 // Feather Icons
 feather.replace()
+$(".yearpicker").yearpicker()

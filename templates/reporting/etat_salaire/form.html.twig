@@ -1,13 +1,24 @@
 <div class="mb-2 row">
-    <label class="col-md-2 col-form-label" for="example-month">Période de paie</label>
-    <div class="col-md-4">
-        <input class="form-control form-control-sm" id="example-month" type="month" name="dateDebut"
-               required>
+    <label class="col-md-1 col-form-label" for="example-month">Mois de paie</label>
+    <div class="col-md-2">
+        <select name="months[]" id="months" class="form-select form-select-sm full-width-fix"
+                data-placeholder="Sélectionner le mois"
+                multiple
+                data-plugin="customselect">
+            {% for id,m in months %}
+                <option value="{{ id }}">{{ m }}</option>
+            {% endfor %}
+        </select>
     </div>
-    <label class="col-md-2 control-label" for="personalsId">Personnel </label>
+    <label class="col-md-1 col-form-label" for="example-month">Année</label>
+    <div class="col-md-2">
+        <input type="text" class="form-control-sm form-control yearpicker" name="year" id="year">
+    </div>
+    <label class="col-md-1 col-form-label" for="personalsId">Personnels</label>
     <div class="col-md-4">
         <select name="personalsId" id="personalsId" placeholder="Sélectionner un salarier"
-                class="form-select form-select-sm full-width-fix" data-placeholder="Sélectionner un salarier" data-plugin="customselect">
+                class="form-select form-select-sm full-width-fix" data-placeholder="Sélectionner un salarier"
+                data-plugin="customselect">
             <option value="" selected></option>
             <option value="">Tous</option>
             {% for p in personals %}

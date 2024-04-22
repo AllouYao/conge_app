@@ -499,7 +499,7 @@
                                         <td class="text-end">{{ payrolls.amount_cmu_patronal|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.assurance_patronales and payrolls.assurance_patronales %}
+                                {% if payrolls.assurance_patronales and payrolls.assurance_patronales > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>031</td>
                                         <td>Assurance part patronale</td>
@@ -512,7 +512,7 @@
                                         <td class="text-end">{{ payrolls.assurance_patronales|number_format(0, ',', ' ') }}</td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.charge_salarial and payrolls.charge_patronal %}
+                                {% if payrolls.charge_salarial and payrolls.charge_patronal > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td></td>
                                         <td class="text-center">Total Cotisations</td>
@@ -567,7 +567,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.amount_prime_outi and payrolls.amount_prime_outi > 0%}
+                                {% if payrolls.amount_prime_outi and payrolls.amount_prime_outi > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>029</td>
                                         <td>Prime outillage</td>
@@ -606,7 +606,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.retenue_net != 0 %}
+                                {% if payrolls.retenue_net and payrolls.retenue_net > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>026</td>
                                         <td>Retenue sur salaire (Trop perçus)</td>
@@ -619,7 +619,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.remboursement_net != 0 %}
+                                {% if payrolls.remboursement_net and payrolls.remboursement_net > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>027</td>
                                         <td>Remboursement sur salaire (Moins perçus)</td>
@@ -632,7 +632,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.pret_mensuel %}
+                                {% if payrolls.pret_mensuel and payrolls.pret_mensuel > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>028</td>
                                         <td>Montant du prêt</td>
@@ -645,7 +645,7 @@
                                         <td></td>
                                     </tr>
                                 {% endif %}
-                                {% if payrolls.acompte_mensuel %}
+                                {% if payrolls.acompte_mensuel and payrolls.acompte_mensuel > 0 %}
                                     <tr class="small-text sans-bordure no-border-button no-border-top">
                                         <td>029</td>
                                         <td>Montant du acompte</td>
@@ -764,11 +764,13 @@
                                 <table class="table table-borderless table-sm">
                                     <tbody>
                                     {% if payrolls.mode_paiement == virement %}
-                                        <tr class="small-text sans-bordure">
-                                            <td class="h7">Banque & N° Compte du
-                                                salarié {{ payrolls.banque_name|upper }}
-                                                : {{ payrolls.account_number }}</td>
-                                        </tr>
+                                        {% for ak in payrolls.account_banks %}
+                                            <tr class="small-text sans-bordure">
+                                                <td class="h7">Banque & N° Compte du
+                                                    salarié {{ ak.name|upper }}
+                                                    : {{ ak.account }}</td>
+                                            </tr>
+                                        {% endfor %}
                                     {% endif %}
                                     </tbody>
                                 </table>

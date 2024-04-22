@@ -1,8 +1,8 @@
 
 <div class="mb-2 row">
-    <label class="col-md-2 col-form-label">Salaire de base <span
+    <label class="col-md-1 col-form-label">Salaire de base <span
                 class="text-danger">*</span></label>
-    <div class="col-md-2">
+    <div class="col-md-3">
         {{ form_widget(form.salary.baseAmount) }}
         {{ form_errors(form.salary.baseAmount) }}
     </div>
@@ -11,41 +11,41 @@
         {{ form_widget(form.salary.sursalaire) }}
         {{ form_errors(form.salary.sursalaire) }}
     </div>
-    <label class="col-md-2 col-form-label">Prime de Transport <span
+    <label class="col-md-1 col-form-label">Prime Transp. <span
                 class="text-danger">*</span></label>
-    <div class="col-md-2">
+    <div class="col-md-3">
         {{ form_widget(form.salary.primeTransport) }}
         {{ form_errors(form.salary.primeTransport) }}
     </div>
 </div>
 <div class="mb-2 row">
-    <label class="col-md-2 col-form-label"> Salaire brut <span
+    <label class="col-md-1 col-form-label"> Salaire brut <span
                 class="text-danger">*</span></label>
-    <div class="col-md-2">
+    <div class="col-md-3">
         {{ form_widget(form.salary.brutAmount) }}
         {{ form_errors(form.salary.brutAmount) }}
     </div>
-    <label class="col-md-2 col-form-label">Salaire brut imposable <span
+    <label class="col-md-1 col-form-label">Salaire impos. <span
                 class="text-danger">*</span></label>
-    <div class="col-md-2">
+    <div class="col-md-3">
         {{ form_widget(form.salary.brutImposable) }}
         {{ form_errors(form.salary.brutImposable) }}
     </div>
-    <label class="col-md-2 col-form-label">Mode de paiement <span
+    <label class="col-md-1 col-form-label">Mode paie. <span
                 class="text-danger">*</span></label>
-    <div class="col-md-2">
+    <div class="col-md-3">
         {{ form_widget(form.modePaiement) }}
         {{ form_errors(form.modePaiement) }}
     </div>
 </div>
 <div class="mb-2 row">
-    <label class="col-md-2 col-form-label">Montant avantage en nature</label>
-    <div class="col-md-4">
+    <label class="col-md-1 col-form-label">Montant av. nat.</label>
+    <div class="col-md-3">
         {{ form_widget(form.salary.amountAventage) }}
         {{ form_errors(form.salary.amountAventage) }}
     </div>
-    <label class="col-md-2 col-form-label">Avantage en nature</label>
-    <div class="col-md-4">
+    <label class="col-md-1 col-form-label">Avantage nat.</label>
+    <div class="col-md-3">
         {{ form_widget(form.salary.avantage) }}
     </div>
 </div>

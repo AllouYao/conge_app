@@ -32,15 +32,11 @@ class PayrollRepository extends ServiceEntityRepository
      * @return Payroll[]|null
      * Retourne le dictionnaire des salaire de la campagne en fonction du type et du status de la campagne pour les bulletins
      */
-    public function findBulletinByCampaign(bool $active, Personal $personal): ?array
+    public function findBulletinByCampaign(bool $active, Payroll $payroll): ?Payroll
     {
         return $this->createQueryBuilder('pr')
-            ->join('pr.personal', 'p')
-            ->join('pr.campagne', 'c')
-            ->andWhere('c.active = :active')
-            ->andWhere('p.id = :personal')
             ->setParameter('active', $active)
-            ->setParameter('personal', $personal->getId())
+            ->setParameter('is', $personal->getId())
             ->getQuery()->getResult();
     }
 
@@ -88,6 +84,7 @@ class PayrollRepository extends ServiceEntityRepository
                 'personal.service as station',
                 'personal.uuid as personal_uuid',
                 'YEAR(personal.birthday) as personal_birthday',
+                'payroll.uuid as payroll_uuid',
                 'payroll.matricule',
                 'payroll.dayOfPresence',
                 'payroll.baseAmount',
@@ -156,7 +153,89 @@ class PayrollRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findEtatSalaireByRoleEmployer(mixed $mouth1, mixed $mouth2, ?int $personalId): array
+    public function findEtatSalaireClone(array $months, int $year, ?int $personalId): array
+    {
+        $qb = $this->createQueryBuilder('payroll');
+        $qb
+            ->select([
+                'personal.id as personal_id',
+                'personal.firstName as nom',
+                'personal.lastName as prenoms',
+                'personal.refCNPS',
+                'personal.older',
+                'personal.service as station',
+                'personal.uuid as personal_uuid',
+                'YEAR(personal.birthday) as personal_birthday',
+                'payroll.uuid as payroll_uuid',
+                'payroll.matricule',
+                'payroll.dayOfPresence',
+                'payroll.baseAmount',
+                'payroll.sursalaire',
+                'payroll.AncienneteAmount',
+                'payroll.primeFonctionAmount',
+                'payroll.primeLogementAmount',
+                'payroll.indemniteFonctionAmount',
+                'payroll.indemniteLogementAmount',
+                'payroll.majorationAmount',
+                'payroll.congesPayesAmount',
+                'payroll.brutAmount',
+                'payroll.imposableAmount',
+                'payroll.salaryCnps',
+                'payroll.salaryIts',
+                'payroll.fixcalAmount',
+                'payroll.salaryCmu',
+                'payroll.salarySante',
+                'payroll.totalRetenueSalarie',
+                'payroll.netPayer',
+                'payroll.employeurCr',
+                'payroll.employeurIs',
+                'payroll.employeurCmu',
+                'payroll.amountTA',
+                'payroll.amountFPC',
+                'payroll.employeurFdfp',
+                'payroll.employeurAt',
+                'payroll.employeurPf',
+                'payroll.employeurSante',
+                'payroll.totalRetenuePatronal',
+                'payroll.masseSalary',
+                'payroll.salaryTransport',
+                'payroll.amountPrimePanier',
+                'payroll.amountPrimeSalissure',
+                'payroll.amountPrimeOutillage',
+                'payroll.amountPrimeTenueTrav',
+                'payroll.amountPrimeRendement',
+                'payroll.amountPrimeRendement',
+                'payroll.aventageNonImposable',
+                'payroll.numberPart',
+                'payroll.numCnps',
+                'payroll.dateEmbauche',
+                'payroll.createdAt',
+                'payroll.remboursNet',
+                'payroll.remboursBrut',
+                'payroll.retenueNet',
+                'payroll.retenueBrut',
+                'payroll.amountMensualityPret',
+                'payroll.amountMensuelAcompt',
+                'campagnes.startedAt',
+                'campagnes.dateDebut as periode_debut',
+                'campagnes.dateFin as periode_fin',
+                'campagnes.ordinary'
+            ])
+            ->join('payroll.campagne', 'campagnes')
+            ->join('payroll.personal', 'personal')
+            ->where('campagnes.active = false')
+            //->andWhere('personal.active = true')
+            ->andWhere('campagnes.status = :status')
+            ->andWhere('payroll.status = :payroll_status')
+            ->andWhere('MONTH(campagnes.dateDebut) IN (?1) AND YEAR(campagnes.dateDebut) = ?2');
+        $qb->setParameters([1 => $months, 2 => $year, 'status' => Status::TERMINER, 'payroll_status' => Status::PAYE]);
+        if ($personalId) {
+            $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
+        }
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findEtatSalaireByRoleEmployer(array $mouths, int $year, ?int $personalId): array
     {
         $qb = $this->createQueryBuilder('payroll');
         $qb
@@ -226,8 +305,9 @@ class PayrollRepository extends ServiceEntityRepository
             ->andWhere('campagnes.status = :status')
             ->andWhere('payroll.status = :payroll_status')
             ->andWhere('category_salarie.code = :code')
-            ->andWhere('campagnes.dateDebut BETWEEN ?1 AND ?2');
-        $qb->setParameters(['1' => $mouth1, '2' => $mouth2, 'status' => Status::TERMINER, 'payroll_status' => Status::PAYE, 'code' => ['OUVRIER / EMPLOYES', 'CHAUFFEURS']]);
+            ->andWhere('MONTH(campagnes.dateDebut) IN (?1) AND YEAR(campagnes.dateDebut) = ?2');
+        ;
+        $qb->setParameters([1 => $mouths, 2 => $year, 'status' => Status::TERMINER, 'payroll_status' => Status::PAYE, 'code' => ['OUVRIER / EMPLOYES', 'CHAUFFEURS']]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
         }

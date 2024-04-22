@@ -125,16 +125,9 @@ class ApiReportingController extends AbstractController
     #[Route('/etat_salaire_globale', name: 'etat_salaire', methods: ['GET'])]
     public function etatSalarialeGlobale(Request $request): JsonResponse
     {
-        $dateRequest = $request->get('dateDebut');
-        $startAt = $endAt = null;
-        if ($dateRequest) {
-            $dateRequestObj = DateTime::createFromFormat('Y-m', $dateRequest);
-            $dateDebut = $dateRequestObj->format('Y-m-01');
-            $dateFin = $dateRequestObj->format('Y-m-t');
-            $startAt = new DateTime($dateDebut);
-            $endAt = new DateTime($dateFin);
-        }
+        $month_request = $request->get('months');
         $personalID = (int)$request->get('personalsId');
+        $year = (int)$request->get('year');
 
         if (!$request->isXmlHttpRequest()) {
             return $this->json(['data' => []]);
@@ -143,13 +136,13 @@ class ApiReportingController extends AbstractController
 
         $data = [];
         if ($this->isGranted('ROLE_RH')) {
-            $salaries = $this->payrollRepository->findEtatSalaire($startAt, $endAt, $personalID);
+            $salaries = $this->payrollRepository->findEtatSalaireClone($month_request, $year, $personalID);
         } else {
-            $salaries = $this->payrollRepository->findEtatSalaireByRoleEmployer($startAt, $endAt, $personalID);
+            $salaries = $this->payrollRepository->findEtatSalaireByRoleEmployer($month_request, $year, $personalID);
         }
 
         foreach ($salaries as $index => $salary) {
-            $url = $this->generateUrl('campagne_bulletin_incatif', ['uuid' => $salary['personal_uuid']]);
+            $url = $this->generateUrl('campagne_bulletin_incatif', ['uuid' => $salary['payroll_uuid']]);
             $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
             $date = $salary['periode_debut'];
             $periode = $formatter->format($date);
@@ -491,7 +484,7 @@ class ApiReportingController extends AbstractController
             $plus_persus_brut = $payrollBefore?->getRetenueBrut();
             $amountBrutBefore = $payrollBefore?->getBrutAmount() + $plus_persus_brut - ($mois_persus_brut);
             $amountBrutLast = $payrollLast?->getBrutAmount();
-            $amountNetBefore = $payrollBefore?->getNetPayer() + $plus_persus_net  - ($mois_persus_net);
+            $amountNetBefore = $payrollBefore?->getNetPayer() + $plus_persus_net - ($mois_persus_net);
             $amountNetLast = $payrollLast?->getNetPayer();
             $amountEcartBrut = $amountBrutLast - $amountBrutBefore;
             $amountEcartNet = $amountNetLast - $amountNetBefore;

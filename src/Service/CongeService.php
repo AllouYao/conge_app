@@ -57,13 +57,8 @@ class CongeService
         /** Jour supplémentaire de congé en fonction de l'ancienneté du salarié */
         $dr_conge_supp_2 = round($this->echelonConge($anciennete), 2);
 
-
-        /** Determiner le salaire brut de la periode */
-        $sal_brut_periode = $this->payrollRepository->getPeriodiqueSalary1($personal, $date_depart_cgs);
-
         /** Determiner le nombre de mois travail depuis la date d'embauche jusqu'à la date de depart en congés */
         $works_months = round($this->getWorkMonth($embauche, $date_depart_cgs));
-
 
         /** Determiner nombre de jour ouvrable de congés */
         $day_ouvrable_cgs = ceil($works_months * self::JOUR_CONGE_OUVRABLE);
@@ -72,7 +67,13 @@ class CongeService
         $day_calandre_cgs = ceil($day_ouvrable_cgs * self::JOUR_CONGE_CALANDAIRE);
 
         /** Determiner le salaire moyen mensuel (SMM) des 12 dernier mois travailler par le salarie */
-        $somme = round($sal_brut_periode / 12, 2);
+        if ($conge->getPersonal()->getPayrolls()->count() >= 12) {
+            /** Determiner le salaire brut de la periode */
+            $sal_brut_periode = $this->payrollRepository->getPeriodiqueSalary1($personal, $date_depart_cgs);
+            $somme = round($sal_brut_periode / 12, 2);
+        } else {
+            $somme = $conge->getSalaireMoyen();
+        }
 
         /** Determiner l'allocation de congé du salarié */
         $allocation_cgs = round(($somme * self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE * $works_months) / 30, 2);
@@ -89,7 +90,6 @@ class CongeService
         if ($works_months >= 12) {
             $conge
                 ->setWorkMonths($works_months)
-                ->setSalaireMoyen($somme)
                 ->setDaysPlus($dr_conge_supp_1 + $dr_conge_supp_2)
                 ->setTotalDays($total_day_cgs)
                 ->setDays($day_cgs_exploied)

@@ -110,12 +110,15 @@ class PaieServices
     public function getAmountCongesPayes(Personal $personal): float|int
     {
         $conge = $this->congeRepository->findCongeByPersonal($personal->getId());
-        if (!$conge?->getStatus() && ($conge?->getTypeConge() === Status::EFFECTIF or $conge?->getTypeConge() === Status::PARTIEL) && $conge?->getTypePayementConge() === Status::IMMEDIAT) {
+        if ($conge?->getStatus() === Status::VALIDATED && ($conge?->getTypeConge() === Status::EFFECTIF or $conge?->getTypeConge() === Status::PARTIEL) && $conge?->getTypePayementConge() === Status::IMMEDIAT) {
             $conge_amount = round($conge?->getAllocationConge());
-        } elseif (!$conge?->getStatus() && ($conge?->getTypeConge() === Status::EFFECTIF or $conge?->getTypeConge() === Status::PARTIEL) && $conge?->getTypePayementConge() === Status::ULTERIEUR) {
+            $conge?->setStatus(Status::PAYE);
+        } elseif ($conge?->getStatus() === Status::VALIDATED && ($conge?->getTypeConge() === Status::EFFECTIF or $conge?->getTypeConge() === Status::PARTIEL) && $conge?->getTypePayementConge() === Status::ULTERIEUR) {
             $conge_amount = 0;
+            $conge?->setStatus(Status::IMPAYEE);
         } elseif ($conge?->getStatus() === Status::IMPAYEE && $conge?->isIsConge() === false) {
             $conge_amount = round($conge?->getAllocationConge());
+            $conge?->setStatus(Status::PAYE);
         } else {
             $conge_amount = 0;
         }
