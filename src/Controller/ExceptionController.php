@@ -17,7 +17,8 @@ class ExceptionController extends AbstractController
     public function catchException(): Response
     {
         flash()->addError("Oups! Une erreur est survenue lors du traitement.");
-        return $this->redirectToRoute('conge_index');
+        return $this->render('exception/exception.htlm.twig');
 
-    }
+
+    } 
 }

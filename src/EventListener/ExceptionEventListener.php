@@ -3,8 +3,8 @@
 namespace App\EventListener;
 
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
 class ExceptionEventListener
 {
@@ -16,18 +16,18 @@ class ExceptionEventListener
     {
         $this->router = $router;
     }
-    
 
-    public function onKernelException(RequestEvent $event)
+    public function onKernelException(ExceptionEvent $event)
     {
         // Check any Exeption on the program
-        dd("Test");
-        $url = $this->router->generate('exception');
+        if($event->getThrowable()){
 
+            $url = $this->router->generate('exception');
 
-        $response = new RedirectResponse($url);
+            $response = new RedirectResponse($url);
 
-        $event->setResponse($response);
+            $event->setResponse($response);
+        }
 
     }
 
