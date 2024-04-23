@@ -67,16 +67,53 @@ class PersonalRepository extends ServiceEntityRepository
     /**
      * @return Personal[] Returns an array of Personal objects
      */
-    public function findAllPersonal(): array
+    public function findPersoRequest(): array
     {
-        $qb = $this->createQueryBuilder('p')
+        $query = $this->createQueryBuilder('p')
+            ->select([
+                'p.id',
+                'p.matricule',
+                'p.firstName',
+                'p.lastName',
+            ])
+            ->join('p.contract', 'contract')
             ->leftJoin('p.departures', 'departures')
             ->where('departures.id IS NULL')
+            ->andWhere('contract.typeContrat IN (:type)')
+            ->andWhere('p.active = true')
+            ->setParameter('type', [Status::CDI, Status::CDD, Status::CDDI])
+            ->orderBy('p.firstName', 'ASC')
             ->getQuery()
             ->getResult();
         return array_map(function ($result) {
             return $result;
-        }, $qb);
+        }, $query);
+    }
+    public function findPersoReqRole(): array
+    {
+        $query = $this->createQueryBuilder('p')
+            ->select([
+                'p.id',
+                'p.matricule',
+                'p.firstName',
+                'p.lastName',
+            ])
+            ->join('p.contract', 'contract')
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->leftJoin('p.departures', 'departures')
+            ->where("category_salarie.code IN (:code)")
+            ->andWhere('contract.typeContrat IN (:type)')
+            ->andWhere('p.active = true')
+            ->andWhere('departures.id IS NULL')
+            ->setParameter('code', ['OUVRIER / EMPLOYES', 'CHAUFFEURS'])
+            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
+            ->orderBy('p.matricule', 'ASC')
+            ->getQuery()
+            ->getResult();
+        return array_map(function ($result) {
+            return $result;
+        }, $query);
     }
 
 

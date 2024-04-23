@@ -224,7 +224,6 @@ class PayrollRepository extends ServiceEntityRepository
             ->join('payroll.campagne', 'campagnes')
             ->join('payroll.personal', 'personal')
             ->where('campagnes.active = false')
-            //->andWhere('personal.active = true')
             ->andWhere('campagnes.status = :status')
             ->andWhere('payroll.status = :payroll_status')
             ->andWhere('MONTH(campagnes.dateDebut) IN (?1) AND YEAR(campagnes.dateDebut) = ?2');
@@ -305,8 +304,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->andWhere('campagnes.status = :status')
             ->andWhere('payroll.status = :payroll_status')
             ->andWhere('category_salarie.code = :code')
-            ->andWhere('MONTH(campagnes.dateDebut) IN (?1) AND YEAR(campagnes.dateDebut) = ?2');
-        ;
+            ->andWhere('MONTH(campagnes.dateDebut) IN (?1) AND YEAR(campagnes.dateDebut) = ?2');;
         $qb->setParameters([1 => $mouths, 2 => $year, 'status' => Status::TERMINER, 'payroll_status' => Status::PAYE, 'code' => ['OUVRIER / EMPLOYES', 'CHAUFFEURS']]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
@@ -641,7 +639,7 @@ class PayrollRepository extends ServiceEntityRepository
     }
 
     /** Retourner les elements pour l'etat des virement par periode */
-    public function findPayrollVirementAnnuel(?string $typeVersement, bool $active, bool $type, mixed $debut, mixed $fin, ?int $personalId): array
+    public function findPayrollVirementAnnuel(?string $typeVersement, bool $active, bool $type, array $months, int $year, ?int $personalId): array
     {
         $qb = $this->createQueryBuilder('pr');
         $qb
@@ -668,17 +666,10 @@ class PayrollRepository extends ServiceEntityRepository
             ->where('c.ordinary = :type')
             ->andWhere('c.active = :active')
             ->andWhere('p.modePaiement = :type_versement')
-            ->andWhere('c.dateDebut >= :date_debut')
-            ->andWhere('c.dateFin <= :date_fin')
             ->andWhere('c.status = :status')
             ->andWhere('pr.status = :payrol_statut')
-            ->setParameter('type', $type)
-            ->setParameter('active', $active)
-            ->setParameter('status', Status::TERMINER)
-            ->setParameter('payrol_statut', Status::PAYE)
-            ->setParameter('type_versement', $typeVersement)
-            ->setParameter('date_debut', $debut)
-            ->setParameter('date_fin', $fin);
+            ->andWhere('MONTH(c.dateDebut) IN (?1) AND YEAR(c.dateDebut) = ?2');
+        $qb->setParameters([1 => $months, 2 => $year, 'type' => $type, 'active' => $active, 'status' => Status::TERMINER, 'payrol_statut' => Status::PAYE, 'type_versement' => $typeVersement]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('p.id', $personalId));
         }
