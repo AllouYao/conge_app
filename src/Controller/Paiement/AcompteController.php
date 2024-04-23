@@ -195,7 +195,7 @@ class AcompteController extends AbstractController
         $form = $this->createForm(AcompteType::class, $operation);
         $form->handleRequest($request);
 
-        if ($form->isValid() && $form->isSubmitted()) {
+        if ( $form->isSubmitted() && $form->isValid()) {
             $this->manager->persist($operation);
             $this->manager->flush();
         }
