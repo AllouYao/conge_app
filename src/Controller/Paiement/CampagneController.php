@@ -55,7 +55,7 @@ class CampagneController extends AbstractController
         HeureSupRepository                      $heureSupRepository,
         CongeRepository                         $congeRepository,
         private readonly EntityManagerInterface $manager,
-        private readonly OperationRepository $operationRepository
+        private readonly OperationRepository    $operationRepository
     )
     {
         $this->payrollService = $payrollService;
@@ -102,7 +102,7 @@ class CampagneController extends AbstractController
         }
         $payBookData = [];
         foreach ($payroll as $index => $item) {
-            $url = $this->generateUrl('campagne_bulletin_ordinaire', ['uuid' => $item->getPersonal()->getUuid()]);
+            $url = $this->generateUrl('campagne_bulletin_incatif', ['uuid' => $item->getUuid()]);
             $payBookData[] = [
                 'campagn_id' => $item->getMatricule(),
                 'index' => ++$index,
@@ -395,10 +395,10 @@ class CampagneController extends AbstractController
 
     /** Bulletin de paie pour les campagnes de paie ordinaire active */
     #[Route('/bulletin/ordinaire/{uuid}', name: 'bulletin_ordinaire', methods: ['GET'])]
-    public function bulletin(Personal $personal): Response
+    public function bulletin(Payroll $payroll): Response
     {
 
-        $payrolls = $this->payrollRepository->findBulletinByCampaign(true, $personal);
+        $payrolls = $this->payrollRepository->findBulletinByCampaign(true, $payroll);
         $dataPayroll = null;
         foreach ($payrolls as $payroll) {
             $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
