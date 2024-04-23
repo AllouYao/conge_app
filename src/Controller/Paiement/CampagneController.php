@@ -54,7 +54,8 @@ class CampagneController extends AbstractController
         CategoryChargeRepository                $categoryChargeRepository,
         HeureSupRepository                      $heureSupRepository,
         CongeRepository                         $congeRepository,
-        private readonly EntityManagerInterface $manager, private readonly OperationRepository $operationRepository
+        private readonly EntityManagerInterface $manager,
+        private readonly OperationRepository $operationRepository
     )
     {
         $this->payrollService = $payrollService;
@@ -987,9 +988,9 @@ class CampagneController extends AbstractController
             $personals = $campagne->getPersonal();
             foreach ($personals as $personal) {
                 $conges = $this->congeRepository->findCongeByPeriode($campagne->getDateDebut(), $campagne->getDateFin(), $personal->getId());
-                if ($conges->getStatus() === Status::PAYE or $conges->getStatus() === Status::IMPAYEE) {
+                if ($conges?->getStatus() === Status::PAYE or $conges?->getStatus() === Status::IMPAYEE) {
                     $conges->setStatus(Status::VALIDATED);
-                } elseif ($conges->getStatus() === Status::PAYE && $conges->isIsConge() === false) {
+                } elseif ($conges?->getStatus() === Status::PAYE && $conges->isIsConge() === false) {
                     $conges?->setStatus(Status::IMPAYEE);
                 }
                 $this->manager->persist($conges);
