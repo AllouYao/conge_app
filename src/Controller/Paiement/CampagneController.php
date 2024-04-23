@@ -990,10 +990,11 @@ class CampagneController extends AbstractController
                 $conges = $this->congeRepository->findCongeByPeriode($campagne->getDateDebut(), $campagne->getDateFin(), $personal->getId());
                 if ($conges?->getStatus() === Status::PAYE or $conges?->getStatus() === Status::IMPAYEE) {
                     $conges->setStatus(Status::VALIDATED);
+                    $this->manager->persist($conges);
                 } elseif ($conges?->getStatus() === Status::PAYE && $conges->isIsConge() === false) {
                     $conges?->setStatus(Status::IMPAYEE);
+                    $this->manager->persist($conges);
                 }
-                $this->manager->persist($conges);
 
 
                 $heure_supp = $this->heureSupRepository->getHeureSupByPeriode($personal, $campagne->getDateDebut(), $campagne->getDateFin());
