@@ -11,7 +11,7 @@ use App\Entity\Paiement\Campagne;
 use App\Repository\Impots\ChargeEmployeurRepository;
 use App\Repository\Impots\ChargePersonalsRepository;
 use App\Repository\Paiement\CampagneRepository;
-use App\Service\CasExeptionel\DepartureCampagneService;
+use App\Service\CasExeptionel\PaieOutService;
 use App\Service\PaieService\PaieByPeriodService;
 use App\Service\PaieService\PaieProrataService;
 use App\Service\PaieService\PaieServices;
@@ -25,14 +25,14 @@ class SalaryImpotsService implements SalaryInterface
     private ChargePersonalsRepository $chargePersonalRt;
     private ChargeEmployeurRepository $chargeEmployeurRt;
     private PaieServices $paieServices;
-    private DepartureCampagneService $departureCampagneService;
+    private PaieOutService $departureCampagneService;
 
     public function __construct(
         EntityManagerInterface               $manager,
         ChargePersonalsRepository            $chargePersonalsRepository,
         ChargeEmployeurRepository            $chargeEmployeurRepository,
         PaieServices                         $paieServices,
-        DepartureCampagneService             $departureCampagneService,
+        PaieOutService                       $departureCampagneService,
         private readonly PaieByPeriodService $paieByPeriodService,
         private readonly CampagneRepository  $campagneRepository,
         private readonly PaieProrataService  $paieProrataService

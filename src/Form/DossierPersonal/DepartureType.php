@@ -15,9 +15,17 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class DepartureType extends AbstractType
 {
+
+    public function __construct(
+        private readonly AuthorizationCheckerInterface $authorizationChecker,
+    )
+    {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -35,17 +43,27 @@ class DepartureType extends AbstractType
                 'placeholder' => ""
             ])
             ->add('reason', TextType::class, [
-                'disabled'=>true,
+                'disabled' => true,
             ])
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
-                'choice_label' => 'matricule',
                 'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('p')
-                        ->join('p.contract', 'ct')
-                        ->leftJoin('p.departures', 'departure')
-                        ->where('departure.id IS NULL ')
-                        ->orderBy('p.matricule', 'ASC');
+                    if ($this->authorizationChecker->isGranted('ROLE_RH')) {
+                        return $er->createQueryBuilder('p')
+                            ->join('p.contract', 'ct')
+                            ->leftJoin('p.departures', 'departure')
+                            ->where('departure.id IS NULL ')
+                            ->andWhere('ct.typeContrat IN (:type)')
+                            ->andWhere('p.active = false')
+                            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
+                            ->orderBy('p.firstName', 'ASC');
+                    } else {
+                        return $er->createQueryBuilder('p')
+                            ->join('p.contract', 'ct')
+                            ->leftJoin('p.departures', 'departure')
+                            ->where('departure.id IS NULL ')
+                            ->orderBy('p.matricule', 'ASC');
+                    }
                 },
                 'placeholder' => 'Sélectionner un matricule',
                 'attr' => [
@@ -82,12 +100,12 @@ class DepartureType extends AbstractType
             ->addEventListener(
                 FormEvents::PRE_SET_DATA,
                 function (FormEvent $event) {
-                    /** @var Departure $data */
-                    $data = $event->getData();
-                    $form = $event->getForm();
-                    $personal = $data->getPersonal();
-                    if ($data instanceof Departure && $data->getId()) {
-                        $form->add('personal', EntityType::class, [
+                    /** @var Departure $data_d */
+                    $data_d = $event->getData();
+                    $forms = $event->getForm();
+                    $personal = $data_d->getPersonal();
+                    if ($data_d instanceof Departure && $data_d->getId()) {
+                        $forms->add('personal', EntityType::class, [
                             'class' => Personal::class,
                             'choice_label' => 'matricule',
                             'query_builder' => function (EntityRepository $er) use ($personal) {

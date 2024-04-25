@@ -4,215 +4,162 @@ namespace App\Service\CasExeptionel;
 
 use App\Entity\DossierPersonal\Departure;
 use App\Entity\Paiement\Campagne;
+use App\Repository\DossierPersonal\AbsenceRepository;
 use App\Repository\DossierPersonal\DetailRetenueForfetaireRepository;
 use App\Repository\DossierPersonal\HeureSupRepository;
 use App\Repository\DossierPersonal\RetenueForfetaireRepository;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Service\AbsenceService;
+use App\Service\UtimeDepartServ;
 use App\Utils\Status;
-use DateInterval;
-use DatePeriod;
 use DateTime;
 use Exception;
 
-class DepartureCampagneService
+class PaieOutService
 {
+    const NR_JOUR_TRAVAILLER = 30;
+
     public function __construct(
         private readonly AbsenceService                    $absenceService,
         private readonly HeureSupRepository                $heureSupRepository,
         private readonly CategoryChargeRepository          $categoryChargeRepository,
         private readonly RetenueForfetaireRepository       $forfetaireRepository,
-        private readonly DetailRetenueForfetaireRepository $detailRetenueForfetaireRepository
+        private readonly DetailRetenueForfetaireRepository $detailRetenueForfetaireRepository,
+        private readonly AbsenceRepository                 $absenceRepository,
+        private readonly UtimeDepartServ                   $utimeDepartServ
     )
     {
     }
 
-    public function amountSalaireBrutAndImposable(Departure $departure): array
+    /** Fonction pour determiner les élément de salaire du salariés au cours du mois de départ */
+    public function getSalaires(Departure $departure): array
     {
         $personal = $departure->getPersonal();
-        $date = $departure->getDate();
-        $month = (int)$date->format('m');
-        $year = (int)$date->format('Y');
-        $categorielWithAbsence = $this->absenceService->getAmountByMonth($personal, $month, $year);
-        $actuelCategoriel = (int)$personal->getCategorie()->getAmount();
-        if ($personal->getAbsences()->count() > 0) {
-            $salaireCategoriel = $categorielWithAbsence;
-            $salaireBrut = $personal->getSalary()->getBrutAmount() - $actuelCategoriel + $salaireCategoriel;
-            $brutImposable = $personal->getSalary()->getBrutImposable() - $actuelCategoriel + $categorielWithAbsence;
+        $day_of_presence = $this->utimeDepartServ->getDaysPresence($departure);
+
+
+        $date_depart = $departure->getDate();
+        $month = (int)$date_depart->format('m');
+        $years = (int)$date_depart->format('Y');
+
+        $salaire_base = (int)$personal->getCategorie()?->getAmount();
+        $absences = $this->absenceRepository->getAbsenceByMonth($personal, $month, $years);
+
+        if ($absences) {
+            $jours = 0;
+            foreach ($absences as $absence) {
+                $nb_absence = $this->absenceService->countDays($absence);
+                $jours += $nb_absence;
+            }
+            $new_day_presence = $day_of_presence - $jours;
+            $sal_categoriel = ceil($salaire_base * $new_day_presence / self::NR_JOUR_TRAVAILLER);
+            $salaire_brut = ceil((int)$personal->getSalary()?->getBrutAmount() * $new_day_presence / self::NR_JOUR_TRAVAILLER);
+            $brut_imposable = ceil((int)$personal->getSalary()?->getBrutImposable() * $new_day_presence / self::NR_JOUR_TRAVAILLER);
         } else {
-            $salaireCategoriel = $actuelCategoriel;
-            $salaireBrut = $personal->getSalary()->getBrutAmount();
-            $brutImposable = $personal->getSalary()->getBrutImposable();
+            $new_day_presence = $day_of_presence;
+            $sal_categoriel = $salaire_base * $new_day_presence / self::NR_JOUR_TRAVAILLER;
+            $salaire_brut = $personal->getSalary()?->getBrutAmount() * $new_day_presence / self::NR_JOUR_TRAVAILLER;
+            $brut_imposable = $personal->getSalary()?->getBrutImposable() * $new_day_presence / self::NR_JOUR_TRAVAILLER;
         }
+
         return [
-            'salaire_categoriel' => $salaireCategoriel,
-            'brut_amount' => round($salaireBrut, 2),
-            'brut_imposable_amount' => round($brutImposable, 2)
+            'day_of_presence' => $new_day_presence,
+            'salaire_categoriel' => ceil($sal_categoriel),
+            'brut_amount' => ceil($salaire_brut),
+            'brut_imposable_amount' => ceil($brut_imposable)
         ];
     }
 
-    /** Obtenir le nombre de jour de présence depuis le premier jour du mois actuel jusqu'au jour du départ de l'entreprise */
-    public function NbDayOfPresenceBeforeDeparture(Departure $departure): float|int|null
-    {
-        /** Obtenir les jours précédent le jour du départ dépuis le premier jours du mois de licenciement de l'année */
-        $dateDepart = $departure->getDate();
-        $anneeDepart = $dateDepart->format('Y');
-        $moisDepart = $dateDepart->format('m');
-        $annee = (int)$anneeDepart;
-        $mois = (int)$moisDepart;
-        $firstDayOfYear = new DateTime("$annee-$mois-01");
-        $interval = new DateInterval('P1D');
-        $periode = new DatePeriod($firstDayOfYear, $interval, $dateDepart);
-        $day = [];
-        foreach ($periode as $date) {
-            $day[] = $date;
-        }
-        /** Obtenir le nombre de jours de presence que fait la période */
-        return ceil(count($day));
-    }
-
-    /** Obtenir le nombre de jour de présence depuis le premier jour du mois actuel jusqu'au dernier jour du mois
-     * @throws Exception
-     */
-    public function NbDayOfPresenceByCurrentMonth(Departure $departure): float|int|null
-    {
-        /** Obtenir les jours précédent le jour du départ dépuis le premier jours du mois de licenciement de l'année */
-        $dateDepart = $departure->getDate();
-        $anneeDepart = $dateDepart->format('Y');
-        $moisDepart = $dateDepart->format('m');
-        $annee = (int)$anneeDepart;
-        $mois = (int)$moisDepart;
-        $firstDayOfMonth = new DateTime("$annee-$mois-01");
-        $lastDayOfMonth = new DateTime(date('Y-m-t', mktime(0, 0, 0, $mois + 1, 0, $annee)));
-        $interval = new DateInterval('P1D');
-        $periode = new DatePeriod($firstDayOfMonth, $interval, $lastDayOfMonth);
-        $day = [];
-        foreach ($periode as $date) {
-            $day[] = $date;
-        }
-        /** Obtenir le nombre de jours de presence que fait la période */
-        return ceil(count($day) + 1);
-    }
-
-    /** Determiner le salaire de base en fonction des jour travailler dans le mois
-     * @throws Exception
-     */
-    public function baseAmountByNbDayOfPresence(Departure $departure): float|int|null
-    {
-        /** Salaire catégoriel en fonction du nombre de jour travail avant le départ de l'entreprise **/
-        $salaireCategoriel = $this->amountSalaireBrutAndImposable($departure)['salaire_categoriel']; // le salaire de base du salarié concerné
-        $nbDayOfPresence = $this->NbDayOfPresenceBeforeDeparture($departure); // nombre de jour travailler du 1er jusqu'a la date de depart
-        $nbDayOfMonth = $this->NbDayOfPresenceByCurrentMonth($departure); // nombre de jour travailler du 1er jusqu'a la date de depart
-        return round($salaireCategoriel * $nbDayOfPresence / $nbDayOfMonth);
-    }
-
-    /**
-     * Determiner le netImposable en fonction des jour travailler dans le mois
-     * @throws Exception
-     */
-    public function netImposableByNbDayOfPresence(Departure $departure): float|int|null
-    {
-        /** Salaire catégoriel en fonction du nombre de jour travail avant le départ de l'entreprise **/
-        $netImposable = $this->amountSalaireBrutAndImposable($departure)['brut_imposable_amount']; // le salaire de base du salarié concerné
-        $nbDayOfPresence = $this->NbDayOfPresenceBeforeDeparture($departure); // nombre de jour travailler du 1er jusqu'a la date de depart
-        $nbDayOfMonth = $this->NbDayOfPresenceByCurrentMonth($departure); // nombre de jour travailler du 1er jusqu'a la date de depart
-        return round($netImposable * $nbDayOfPresence / $nbDayOfMonth);
-    }
-
-    /** Determiner la majoration des heures supplémentaire dans la periode de campagne */
-    public function amountHeureSuppByCampagneAndDeparture(Departure $departure, Campagne $campagne): float|int
+    /** Fonction pour determiner le montant de la majoration des heures supp du salarié au cours du mois de depart */
+    public function getMajorations(Departure $departure): float|int
     {
         $personal = $departure->getPersonal();
+        $date_depart = $departure->getDate();
+        $month = (int)$date_depart->format('m');
+        $years = (int)$date_depart->format('Y');
+        $first_day = new DateTime("$years-$month-1");
+        $last_day = new DateTime(date('Y-m-t', mktime(0, 0, 0, $month + 1, 0, $years)));
         $majoration = 0;
-        $dateDebut = $campagne->getDateDebut();
-        $dateFin = $campagne->getDateFin();
-        $heureSupps = $this->heureSupRepository->getHeureSupByPeriode($personal, $dateDebut, $dateFin);
-        foreach ($heureSupps as $supp) {
-            $majoration += $supp?->getAmount();
+        $heures_supple = $this->heureSupRepository->getHeureSupByPeriode($personal, $first_day, $last_day);
+        foreach ($heures_supple as $heure) {
+            $majoration += $heure?->getAmount();
         }
         return $majoration;
     }
 
-    /** Determiner la prime d'ancienneté dans la periode de campagne
-     * @throws Exception
-     */
-    public function amountPrimeAncienneteCampagneByDeparture(Departure $departure): float|int
+    /** Fonction pour determiner le montant de l'ancienneté du salarié qui est sur le départ */
+    public function getPrimeAncien(Departure $departure): float|int
     {
         $personal = $departure->getPersonal();
-        $salaireCategoriel = (int)$this->baseAmountByNbDayOfPresence($departure);
-        $anciennete = (double)$personal->getOlder();
+        $salaire_base = $this->getSalaires($departure)['salaire_categoriel'];
+        $anciennete = (int)$this->utimeDepartServ->getAnciennitySal($departure) / 12;
         if ($anciennete >= 2 && $anciennete < 3) {
-            $primeAnciennete = $salaireCategoriel * 2 / 100;
+            $prime_anciennity = $salaire_base * 2 / 100;
         } elseif ($anciennete >= 3 && $anciennete <= 25) {
-            $primeAnciennete = ($salaireCategoriel * $anciennete) / 100;
+            $prime_anciennity = ($salaire_base * $anciennete) / 100;
         } elseif ($anciennete >= 26) {
-            $primeAnciennete = ($salaireCategoriel * 25) / 100;
+            $prime_anciennity = ($salaire_base * 25) / 100;
         } else {
-            $primeAnciennete = 0;
+            $prime_anciennity = 0;
         }
-        return $primeAnciennete;
+        return $prime_anciennity;
     }
 
-    /** Montant du nombre de part pour les salarié de la periode de campagne */
-    public function nbPartCampagneByDeparture(Departure $departure): float|int
+    /** Fonction pour determiner le nombre de part du salarié qui est sur le départ */
+    public function getNombrePart(Departure $departure): float|int
     {
         $personal = $departure->getPersonal();
-        $nbrePart = [
+        $nb_part = [
             'CELIBATAIRE' => 1,
             'MARIE' => 2,
             'VEUF' => 1,
             'DIVORCE' => 1
         ];
-        // Je recupere le nombre d'enfant à charge
-        $chargePeople = $personal->getChargePeople()->count();
+        $charge_people = $personal->getChargePeople()->count();
 
-        //Ici je voudrais mouvementé le nbre de part du salarié en fonction du nombre d'enfant à charge
         if ($personal->getEtatCivil() === 'CELIBATAIRE' || $personal->getEtatCivil() === 'DIVORCE') {
             return match (true) {
-                $chargePeople == 1 => 2,
-                $chargePeople == 2 => 2.5,
-                $chargePeople == 3 => 3,
-                $chargePeople == 4 => 3.5,
-                $chargePeople == 5 => 4,
-                $chargePeople == 6 => 4.5,
-                $chargePeople > 6 => 5,
+                $charge_people == 1 => 2,
+                $charge_people == 2 => 2.5,
+                $charge_people == 3 => 3,
+                $charge_people == 4 => 3.5,
+                $charge_people == 5 => 4,
+                $charge_people == 6 => 4.5,
+                $charge_people > 6 => 5,
                 default => 1,
             };
         } elseif ($personal->getEtatCivil() === 'MARIE') {
             return match (true) {
-                $chargePeople == 1 => 2.5,
-                $chargePeople == 2 => 3,
-                $chargePeople == 3 => 3.5,
-                $chargePeople == 4 => 4,
-                $chargePeople == 5 => 4.5,
-                $chargePeople >= 6 => 5,
+                $charge_people == 1 => 2.5,
+                $charge_people == 2 => 3,
+                $charge_people == 3 => 3.5,
+                $charge_people == 4 => 4,
+                $charge_people == 5 => 4.5,
+                $charge_people >= 6 => 5,
                 default => 2,
             };
         } elseif ($personal->getEtatCivil() === 'VEUF') {
             return match (true) {
-                $chargePeople == 1 => 2.5,
-                $chargePeople == 2 => 3,
-                $chargePeople == 3 => 3.5,
-                $chargePeople == 4 => 4,
-                $chargePeople == 5 => 4.5,
-                $chargePeople >= 6 => 5,
+                $charge_people == 1 => 2.5,
+                $charge_people == 2 => 3,
+                $charge_people == 3 => 3.5,
+                $charge_people == 4 => 4,
+                $charge_people == 5 => 4.5,
+                $charge_people >= 6 => 5,
                 default => 1,
             };
         }
-        return $nbrePart[$personal->getEtatCivil()];
+        return $nb_part[$personal->getEtatCivil()];
     }
 
-    /** Montant de l'impôts brut sur le salaire, charge salarial de la periode de paie
-     * @throws Exception
-     */
-    public function amountImpotBrutCampagneByDeparture(Departure $departure, Campagne $campagne): float|int
+    /** Fonction pour determiner l'impôt brut du salarié qui est sur le départ */
+    public function getImpotBrut(Departure $departure): float|int
     {
-        $majorationHeursSupp = $this->amountHeureSuppByCampagneAndDeparture($departure, $campagne);
-        $primeAnciennete = $this->amountPrimeAncienneteCampagneByDeparture($departure);
-        $brutImposable = $this->netImposableByNbDayOfPresence($departure);
-        $congesPayes = null; // Ajouter après avoir calculer la fonction qui retourne l'allocation de conges payer.
-        $netImposable = $brutImposable + $majorationHeursSupp + $primeAnciennete + $congesPayes;
-        $tranchesImposition = [
+        $majoration = $this->getMajorations($departure);
+        $prime_anciennete = $this->getPrimeAncien($departure);
+        $brut_imposable = $this->getSalaires($departure)['brut_imposable_amount'];
+        $net_imposable = $majoration + $prime_anciennete + $brut_imposable;
+        $tranches_imposit = [
             ['min' => 0, 'limite' => 75000, 'taux' => 0],
             ['min' => 75001, 'limite' => 240000, 'taux' => 0.16],
             ['min' => 240001, 'limite' => 800000, 'taux' => 0.21],
@@ -221,60 +168,62 @@ class DepartureCampagneService
             ['min' => 8000001, 'limite' => PHP_INT_MAX, 'taux' => 0.32],
         ];
 
-        $impotBrut = 0;
+        $impot_brut = 0;
 
-        foreach ($tranchesImposition as $tranche) {
-            $limiteMin = $tranche['min'];
-            $limiteMax = $tranche['limite'];
-            $taux = $tranche['taux'];
-            if ($netImposable > $limiteMin && $netImposable >= $limiteMax) {
-                $montantImposable = ($limiteMax - $limiteMin) * $taux;
-                $impotBrut += $montantImposable;
-            } else if ($netImposable > $limiteMin) {
-                $montantImposable = ($netImposable - $limiteMin) * $taux;
-                $impotBrut += $montantImposable;
+        foreach ($tranches_imposit as $tranche) {
+            $limite_min = $tranche['min'];
+            $limite_max = $tranche['limite'];
+            $taux_imposit = $tranche['taux'];
+            if ($net_imposable > $limite_min && $net_imposable >= $limite_max) {
+                $montant_imposee = ($limite_max - $limite_min) * $taux_imposit;
+                $impot_brut += $montant_imposee;
+            } else if ($net_imposable > $limite_min) {
+                $montant_imposee = ($net_imposable - $limite_min) * $taux_imposit;
+                $impot_brut += $montant_imposee;
                 break;
             }
         }
-        return $impotBrut;
+        return $impot_brut;
     }
 
-    /** Montant du crédit d'impôt à déduit sur l'impôts brut, charge salarial de la periode de paie */
-    function amountCreditImpotCampagneByDeparture(Departure $departure): float|int
+    /** Fonction pour determiner le credit d'impôt du salarié qui est sur le départ */
+    function getCreditImpot(Departure $departure): float|int
     {
-        $nbrePart = $this->nbPartCampagneByDeparture($departure);
-        $creditImpot = null;
-        switch ($nbrePart) {
+        $nb_part = $this->getNombrePart($departure);
+
+        $credit_impot = null;
+        switch ($nb_part) {
             case 1;
-                $creditImpot = 0;
+                $credit_impot = 0;
                 break;
             case 1.5;
-                $creditImpot = 5500;
+                $credit_impot = 5500;
                 break;
             case 2;
-                $creditImpot = 11000;
+                $credit_impot = 11000;
                 break;
             case 2.5;
-                $creditImpot = 16500;
+                $credit_impot = 16500;
                 break;
             case 3;
-                $creditImpot = 22000;
+                $credit_impot = 22000;
                 break;
             case 3.5;
-                $creditImpot = 27500;
+                $credit_impot = 27500;
                 break;
             case 4;
-                $creditImpot = 33000;
+                $credit_impot = 33000;
                 break;
             case 4.5;
-                $creditImpot = 38500;
+                $credit_impot = 38500;
                 break;
             case 5;
-                $creditImpot = 44000;
+                $credit_impot = 44000;
                 break;
         }
-        return $creditImpot;
+        return $credit_impot;
     }
+
 
     /** Montant de la retraite générale, charge salarial de la periode de paie
      * @throws Exception

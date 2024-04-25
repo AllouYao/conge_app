@@ -2,35 +2,41 @@
 
 namespace App\Controller\DossierPersonal;
 
-use Exception;
-use Carbon\Carbon;
-use App\Entity\User;
-use App\Utils\Status;
-use IntlDateFormatter;
-use App\Service\DepartServices;
-use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\DossierPersonal\Departure;
+use App\Entity\User;
 use App\Form\DossierPersonal\DepartureType;
+use App\Repository\DossierPersonal\DepartureRepository;
+use App\Service\CasExeptionel\PaieOutService;
+use App\Service\DepartServices;
+use App\Service\UtimeDepartServ;
+use App\Utils\Status;
+use Carbon\Carbon;
+use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use IntlDateFormatter;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Repository\DossierPersonal\DepartureRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/dossier/personal/departure', name: 'departure_')]
 class DepartureController extends AbstractController
 {
     private DepartureRepository $departureRepository;
     private DepartServices $departServices;
+    private UtimeDepartServ $utimeDepartServ;
+    private PaieOutService $paieOutService;
 
     public function __construct(
         DepartureRepository $departureRepository,
-        DepartServices      $departServices,
+        DepartServices      $departServices, UtimeDepartServ $utimeDepartServ, PaieOutService $paieOutService,
     )
     {
         $this->departureRepository = $departureRepository;
         $this->departServices = $departServices;
+        $this->utimeDepartServ = $utimeDepartServ;
+        $this->paieOutService = $paieOutService;
     }
 
     /**
@@ -46,11 +52,11 @@ class DepartureController extends AbstractController
         $month = $today->month;
         $apiDeparture = [];
 
-        if ($this->isGranted('ROLE_RH')){
+        if ($this->isGranted('ROLE_RH')) {
 
             $departures = $this->departureRepository->getDepartureByDate($month, $years, $codeDepart);
 
-        }else{
+        } else {
 
             $departures = $this->departureRepository->getDepartureByDateByEmployeRole($month, $years, $codeDepart);
 
@@ -127,40 +133,43 @@ class DepartureController extends AbstractController
      * @throws Exception
      */
     #[Route('/new/{typeDepart}', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $manager, $typeDepart): Response
+    public function news(Request $request, EntityManagerInterface $manager, $typeDepart): Response
     {
         /**
-         * @var User $currentUser
+         * @var User $current_user
          */
 
-        $typeDeparts =  [
-            'demission'=>'Démission',
-            'retraite'=>'Retraite',
+        $type_departs = [
+            'demission' => 'Démission',
+            'retraite' => 'Retraite',
             'licenciement_lourde' => 'Licenciement faute lourde',
             'licenciement_simple' => 'Licenciement faute simple',
-            'deces'=>'Décès',
+            'deces' => 'Décès',
         ];
 
-        $currentUser = $this->getUser();
+        $current_user = $this->getUser();
         $departure = new Departure();
-        $departure->setReason($typeDeparts[$typeDepart]);
-        $form = $this->createForm(DepartureType::class, $departure);
-        $form->handleRequest($request);
+        $departure->setReason($type_departs[$typeDepart]);
+        $forms = $this->createForm(DepartureType::class, $departure);
+        $forms->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($forms->isSubmitted() && $forms->isValid()) {
             $departure->setReasonCode(Status::REASONCODE[$typeDepart]);
-            $this->departServices->calculeDroitsAndIndemnity($departure);
-            $departure->setUser($currentUser);
+            //$this->departServices->calculeDroitsAndIndemnity($departure);
+            //$dpees = $this->utimeDepartServ->getAnciennitySal($departure);
+            //$paie_out = $this->paieOutService->getCreditImpot($departure);
+            //dd(['depart' => $dpees, 'paie_out' => $paie_out]);
+            $departure->setUser($current_user);
             $manager->persist($departure);
             $manager->flush();
 
             flash()->addSuccess('Depart enregistrer avec succès.');
-            return $this->redirectToRoute('departure_index', ['typeDepart'=>$typeDepart], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('departure_index', ['typeDepart' => $typeDepart], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('dossier_personal/departure/new.html.twig', [
             'departure' => $departure,
-            'form' => $form->createView(),
+            'form' => $forms->createView(),
             'typeDepart' => $typeDepart,
         ]);
     }
