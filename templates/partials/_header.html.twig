@@ -2,137 +2,96 @@
 <div class="navbar-custom">
     <div class="container-fluid">
         <ul class="list-unstyled topnav-menu float-end mb-0">
-            <li class="dropdown d-none d-lg-inline-block">
-                <a class="nav-link dropdown-toggle arrow-none" href="#">
-                    {% set campagne_info = campagne_info.getCampagne()%}
-                    <span>Campagne : {% if campagne_info %} Ouverte {% else %} Fermée {% endif %}</span>
+            <li class="d-none d-lg-block pt-3">
+                <a href="javascript:void(0);" class="text-decoration-none text-white h6">
+                    {% if campagne_info.campagne %}
+                        Campagne ouverte
+                    {% else %}
+                        Campagne fermée
+                    {% endif %}
                 </a>
             </li>
-            <li class="dropdown d-none d-lg-inline-block">
-                <a class="nav-link dropdown-toggle arrow-none" data-toggle="fullscreen" href="#">
-                    <i data-feather="maximize"></i>
-                </a>
-            </li>
-            <li class="dropdown d-none d-lg-inline-block topbar-dropdown">
-                <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button"
-                   aria-haspopup="false" aria-expanded="false">
-                    <i data-feather="grid"></i>
-                </a>
-                <div class="dropdown-menu dropdown-lg dropdown-menu-end p-0">
 
-                    <div class="p-1">
-                        <div class="row g-0">
-                            <div class="col">
-                                <a class="dropdown-icon-item" href="#">
-                                    <i data-feather="shopping-cart"></i>
-                                    <span>Carburant</span>
-                                </a>
-                            </div>
-                            <div class="col">
-                                <a class="dropdown-icon-item" href="#">
-                                    <i data-feather="slack"></i>
-                                    <span>Gaz</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </li>
             <li class="dropdown notification-list topbar-dropdown">
                 <a class="nav-link dropdown-toggle position-relative" data-bs-toggle="dropdown" href="#" role="button"
                    aria-haspopup="false" aria-expanded="false">
                     <i data-feather="bell"></i>
-                    <span class="badge bg-danger rounded-circle noti-icon-badge">1</span>
+                    <span class="badge bg-danger rounded-circle noti-icon-badge">6</span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-lg">
-
                     <!-- item-->
                     <div class="dropdown-item noti-title">
                         <h5 class="m-0">
-                            Notification
+                            <span class="float-end">
+                                <a href="" class="text-dark"><small>Clear All</small></a>
+                            </span>Notification
                         </h5>
                     </div>
+
                     <div class="noti-scroll" data-simplebar>
-                        <a href="" class="dropdown-item notify-item border-bottom">
-                            <div class="notify-icon">
-                                <div class="notify-icon bg-danger"><i class="uil uil-comment-message"></i></div>
+                        <!-- item-->
+                        <a href="javascript:void(0);" class="dropdown-item notify-item">
+                            <div class="notify-icon bg-primary">
+                                <i class="uil uil-heart"></i>
                             </div>
-                            <p class="notify-details">Karen Robinson</p>
-                            <p class="text-muted mb-0 user-msg">
-                                <small>Wow ! this admin looks good and awesome design</small>
+                            <p class="notify-details">
+                                Carlos Crouch liked <b>Admin</b> <small class="text-muted">13 days ago</small>
                             </p>
                         </a>
                     </div>
 
                     <!-- All-->
-                    <a href=""
-                       class="dropdown-item text-center text-primary notify-item notify-all">
-                        Voir tous <i class="fe-arrow-right"></i>
+                    <a href="javascript:void(0);" class="dropdown-item text-center text-primary notify-item notify-all">
+                        View all <i class="fe-arrow-right"></i>
                     </a>
 
                 </div>
             </li>
+
             <li class="dropdown notification-list topbar-dropdown">
                 <a class="nav-link dropdown-toggle nav-user me-0" data-bs-toggle="dropdown" href="#" role="button"
                    aria-haspopup="false" aria-expanded="false">
-                        <i data-feather="user" class="icon-dual icon-xs mr-2"></i>
                     <span class="pro-user-name ms-1">
-                        {{ app.user.username is defined ? app.user.username : '' }} <i class="uil uil-angle-down"></i>
+                       <strong>{{ app.user.lastName is defined ? app.user.lastName : app.user.username }}</strong>
+                        <i class="uil uil-angle-down"></i>
                     </span>
                 </a>
-                <div class="dropdown-menu profile-dropdown-items dropdown-menu-right">
+                <div class="dropdown-menu dropdown-menu-end profile-dropdown ">
                     <!-- item-->
-                    <a href="/auth/user/{{ app.user.uuid}}/show/profile" class="dropdown-item notify-item">
-                        <i data-feather="user" class="icon-dual icon-xs mr-2"></i>
-                        <span>Mon compte</span>
-                        
+                    <div class="dropdown-header noti-title">
+                        <h6 class="text-overflow m-0">Bienvenue !</h6>
+                    </div>
+                    <a href="{{ path('auth_user_edit_profile') }}" class="dropdown-item notify-item">
+                        <i data-feather="user" class="icon-dual icon-xs me-1"></i><span>Mon compte</span>
                     </a>
-                    <div class="dropdown-divider"></div>
                     <a href="{{ path('app_logout') }}" class="dropdown-item notify-item">
-                        <i data-feather="log-out" class="icon-dual icon-xs mr-2"></i>
-                        <span>Se déconnecter</span>
+                        <i data-feather="log-out" class="icon-dual icon-xs me-1"></i><span>Se déconnecter</span>
                     </a>
+
                 </div>
             </li>
+
         </ul>
 
         <!-- LOGO -->
         <div class="logo-box">
-            <a href="{{ path('app_home') }}" class="logo logo-dark">
+            <a href="index.html" class="logo logo-dark">
                 <span class="logo-sm">
-{#                    <img src="assets/images/logo-sm.png" alt="" height="24"> #}
-                    <!-- <span class="logo-lg-text-light">Shreyu</span> -->
+                    <img src="assets/images/logo-sm.png" alt="" height="24">
+                    <span class="logo-lg-text-light">Shreyu</span>
                 </span>
                 <span class="logo-lg">
-{#                    <img src="assets/images/logo-dark.png" alt="" height="24"> #}
-                    <span class="logo-lg-text-light">Orbis Paie</span>
-
-                    {% set society_info = society_info.getSociety()%}
-
-                    <span class="logo-sm-text text-white mx-5">
-                        {% if society_info %}
-                        <i class="bi bi-buildings-fill logo-lg-text-light"></i>
-                        {{society_info.raisonSocial}} 
-                        {% endif %}
-                    </span>
-
-                    <span class="logo-sm-text text-white">
-                        {% if society_info %}
-                        <i class="bi bi-geo-alt-fill logo-lg-text-light" ></i>
-                        {{society_info.siege}} 
-                        {% endif %}
-                    </span>
-
+                    <img src="assets/images/logo-dark.png" alt="" height="24">
+                    <span class="logo-lg-text-light">ORBIS PAIE</span>
                 </span>
             </a>
-            
-            <a href="{{ path('app_home') }}" class="logo logo-light">
+
+            <a href="index.html" class="logo logo-light">
                 <span class="logo-sm">
-{#                    <img src="assets/images/logo-sm.png" alt="" height="24"> #}
+                    <img src="assets/images/logo-sm.png" alt="" height="24">
                 </span>
                 <span class="logo-lg">
-{#                    <img src="assets/images/logo-light.png" alt="" height="24"> #}
+                    <img src="assets/images/logo-light.png" alt="" height="24">
                 </span>
             </a>
         </div>
@@ -143,6 +102,7 @@
                     <i data-feather="menu"></i>
                 </button>
             </li>
+
             <li>
                 <!-- Mobile menu toggle (Horizontal Layout)-->
                 <a class="navbar-toggle nav-link" data-bs-toggle="collapse" data-bs-target="#topnav-menu-content">
@@ -153,6 +113,27 @@
                     </div>
                 </a>
                 <!-- End mobile menu toggle-->
+            </li>
+
+            <!--  -->
+            {% set societe = society_info.info %}
+            {% set societe_edit = is_granted('ROLE_ADMIN') ? path('admin_society_edit', {'uuid': societe.uuid}): path('app_home') %}
+            <li class="d-none d-xl-block pt-2">
+                <a href="{{ societe_edit }}" class="navbar-brand logo">
+                <span class="logo-lg">
+                  <span class="d-inline h6 text-white">
+                      <i class="bi bi-buildings-fill logo-lg-text-light"></i>
+                      <strong>{{ societe.raisonSocial }}</strong>
+                      <sub>{{ societe.forme }}</sub>
+                  </span>
+                </span>
+                </a>
+            </li>
+            <li class="d-none d-xl-block pt-3">
+                <a href="{{ path('app_home') }}" class="text-decoration-none text-white">
+                    <i class="bi bi-geo-alt-fill logo-lg-text-light"></i>
+                    <strong>{{ societe.siege }}</strong>
+                </a>
             </li>
         </ul>
         <div class="clearfix"></div>

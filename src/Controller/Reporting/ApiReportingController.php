@@ -65,11 +65,7 @@ class ApiReportingController extends AbstractController
     #[Route('/prime_indemnite', name: 'prime_indemnite', methods: ['GET'])]
     public function primeIndemnite(): JsonResponse
     {
-        if ($this->isGranted('ROLE_RH')) {
-            $personals = $this->personalRepository->findAllPersonalOnCampain();
-        } else {
-            $personals = $this->personalRepository->findAllPersonalByEmployeRole();
-        }
+        $personals = $this->personalRepository->findAllPersonalOnCampain();
         $personalPrime = [];
         foreach ($personals as $value => $personal) {
             $primePanier = $this->primesRepository->findOneBy(['code' => Status::PRIME_PANIER]);

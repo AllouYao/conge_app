@@ -52,7 +52,7 @@ class ReportingController extends AbstractController
         if ($this->isGranted('ROLE_RH')) {
             $personals = $personalRepository->findPersoRequest();
         } else {
-            $personals = $personalRepository->findPersoReqRole();
+            $personals = $personalRepository->findPersoRequest();
         }
 
         $months = array(
@@ -82,7 +82,7 @@ class ReportingController extends AbstractController
         if ($this->isGranted('ROLE_RH')) {
             $personals = $personalRepository->findPersoRequest();
         } else {
-            $personals = $personalRepository->findPersoReqRole();
+            $personals = $personalRepository->findPersoRequest();
         }
 
         $months = array(
@@ -180,11 +180,7 @@ class ReportingController extends AbstractController
     #[Route('/etat_versement_caisse_annuels', name: 'etat_versement_caisse_annuel', methods: ['GET', 'POST'])]
     public function viewEtatVersementCaisseAnnuel(PersonalRepository $personalRepository): Response
     {
-        if ($this->isGranted('ROLE_RH')) {
-            $personals = $personalRepository->findAllPersonalOnCampain();
-        } else {
-            $personals = $personalRepository->findAllPersonalByEmployeRole();
-        }
+        $personals = $personalRepository->findAllPersonalOnCampain();
         return $this->render('reporting/etat_versement/caisse.annuel.html.twig', [
             'personals' => $personals
         ]);

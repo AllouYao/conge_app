@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\DossierPersonal\CongeRepository;
+use App\Repository\DossierPersonal\PersonalRepository;
 use App\Scheduler\UpdateOlderPersonal;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,7 +24,7 @@ class HomeController extends AbstractController
     }
 
     #[Route(path: ['/home', '/'], name: 'app_home')]
-    public function index(MessageBusInterface $messageBus): Response
+    public function index(MessageBusInterface $messageBus, PersonalRepository $personalRepository): Response
     {
         //$messageBus->dispatch(new UpdateOlderPersonal());
         $today = Carbon::today();

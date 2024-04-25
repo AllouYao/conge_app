@@ -53,12 +53,7 @@ class HeureSupController extends AbstractController
         $apiHeureSupp = [];
         $salaireHoraire = 0;
 
-        if ($this->isGranted('ROLE_RH')) {
-            $personals = $this->personalRepository->findAllPersonalOnCampain();
-        } else {
-            $personals = $this->personalRepository->findAllPersonalByEmployeRole();
-        }
-
+        $personals = $this->personalRepository->findAllPersonalOnCampain();
 
         foreach ($personals as $personal) {
             $heureSupp = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
