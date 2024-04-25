@@ -18,17 +18,16 @@ class ProfileEditType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            //->add('firstName')
-            //->add('lastName')
-            //->add('fonction')
-            //->add('telephone')
             ->add('username')
             ->add('email')
             ->add('newPassword',PasswordType::class,[
                 'mapped'=>false
             ])
             ->add('holdPassword',PasswordType::class,[
-                'mapped'=>false
+                'mapped'=>false,
+                'constraints' => [
+                    new UserPassword()
+                ]
             ])
             ->add('confirmePassword',PasswordType::class,[
                 'mapped'=>false

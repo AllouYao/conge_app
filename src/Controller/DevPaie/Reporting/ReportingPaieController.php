@@ -51,11 +51,8 @@ class ReportingPaieController extends AbstractController
     #[Route('/regularisation_salaire_periodique', name: 'regularisation_salaire_periodique', methods: ['POST', 'GET'])]
     public function viewEtatPeriodiqueRegularisation(PersonalRepository $personalRepository): Response
     {
-        if ($this->isGranted('ROLE_RH')) {
-            $personals = $personalRepository->findAllPersonalOnCampain();
-        } else {
-            $personals = $personalRepository->findAllPersonalByEmployeRole();
-        }
+        $personals = $personalRepository->findAllPersonalOnCampain();
+
         return $this->render('dev_paie/reportings/regularisations/regul_periodique.html.twig', [
             'personals' => $personals
         ]);

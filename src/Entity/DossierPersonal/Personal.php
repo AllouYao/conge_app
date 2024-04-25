@@ -10,6 +10,8 @@ use App\Entity\Impots\ChargePersonals;
 use App\Entity\Paiement\Campagne;
 use App\Entity\Paiement\Payroll;
 use App\Entity\Settings\Category;
+use App\Entity\Settings\Job;
+use App\Entity\Settings\Service;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Utils\Horodatage;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -124,12 +126,6 @@ class Personal
     #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Absence::class)]
     private Collection $absences;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $fonction = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $service = null;
-
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     private ?string $older = null;
 
@@ -155,6 +151,13 @@ class Personal
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $numCmu = null;
+
+    #[ORM\ManyToOne(inversedBy: 'personals')]
+    private ?Job $job = null;
+
+    #[ORM\ManyToOne(inversedBy: 'personals')]
+    private ?Service $workplace = null;
+    
     public function __construct()
     {
         $this->chargePeople = new ArrayCollection();
@@ -738,30 +741,6 @@ class Personal
         return $this;
     }
 
-    public function getFonction(): ?string
-    {
-        return $this->fonction;
-    }
-
-    public function setFonction(?string $fonction): static
-    {
-        $this->fonction = $fonction;
-
-        return $this;
-    }
-
-    public function getService(): ?string
-    {
-        return $this->service;
-    }
-
-    public function setService(?string $service): static
-    {
-        $this->service = $service;
-
-        return $this;
-    }
-
     public function getOlder(): ?string
     {
         return $this->older;
@@ -934,6 +913,30 @@ class Personal
     public function setNumCmu(?string $numCmu): static
     {
         $this->numCmu = $numCmu;
+
+        return $this;
+    }
+
+    public function getJob(): ?Job
+    {
+        return $this->job;
+    }
+
+    public function setJob(?Job $job): static
+    {
+        $this->job = $job;
+
+        return $this;
+    }
+
+    public function getWorkplace(): ?Service
+    {
+        return $this->workplace;
+    }
+
+    public function setWorkplace(?Service $workplace): static
+    {
+        $this->workplace = $workplace;
 
         return $this;
     }

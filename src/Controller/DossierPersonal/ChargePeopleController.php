@@ -19,12 +19,7 @@ class ChargePeopleController extends AbstractController
     #[Route('/api_charge_peaple', name: 'api_charge_people', methods: ['GET'])]
     public function apiChargePeople(PersonalRepository $personalRepository): JsonResponse
     {
-        if ($this->isGranted('ROLE_RH')) {
-            $personals = $personalRepository->findPersonalWithChargePeaple();
-        } else {
-            $personals = $personalRepository->findPersonalWithChargePeapleByEmployeRole();
-        }
-
+        $personals = $personalRepository->findPersonalWithChargePeaple();
         $apiChargePeaple = [];
 
         foreach ($personals as $personal) {

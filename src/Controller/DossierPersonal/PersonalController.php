@@ -115,7 +115,7 @@ class PersonalController extends AbstractController
         if ($this->isGranted('ROLE_RH')) {
             $personal = $this->personalRepository->findPersonalSalaried();
         } else {
-            $personal = $this->personalRepository->findPersonalSalariedByEmployeRole();
+            $personal = $this->personalRepository->findPersonalSalaried();
         }
 
         $personalSalaried = [];
