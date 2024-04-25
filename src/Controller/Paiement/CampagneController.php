@@ -222,14 +222,14 @@ class CampagneController extends AbstractController
                     $dateEmbauche = $personal->getContract()->getDateEmbauche();
 
                     if (($dateEmbauche > $previousCampagne?->getStartedAt()) && $dateEmbauche <= $last_day_pr_camp) {
-                        //personnel arrivé avant le debut de la campagne passée
-                        $extra = $this->payrollService->setExtraMonthPayroll($personal, $campagne);
+                        //personnel arrivé avant le debut de la campagne passée extra
+                        $this->payrollService->setExtraMonthPayroll($personal, $campagne);
                     } elseif (($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt()) {
-                        //personnel arrivé au milieu de du mois de la campagne en cours
-                        $milieu = $this->payrollService->setProrataPayroll($personal, $campagne);
+                        //personnel arrivé au milieu de du mois de la campagne en cours milieu
+                        $this->payrollService->setProrataPayroll($personal, $campagne);
                     } elseif ((!($dateEmbauche > $campagne->getStartedAt())) or $dateEmbauche > $previousCampagne->getStartedAt()) {
                         //personnel normal
-                        $normal = $this->payrollService->setPayroll($personal, $campagne);
+                        $this->payrollService->setPayroll($personal, $campagne);
                     } else {
                         flash()->addInfo("Aucun salarié  n'est eligible pour participé à la paie de ce mois.");
                     }
