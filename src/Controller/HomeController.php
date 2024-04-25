@@ -3,15 +3,10 @@
 namespace App\Controller;
 
 use App\Repository\DossierPersonal\CongeRepository;
-use App\Repository\DossierPersonal\PersonalRepository;
-use App\Repository\Settings\JobRepository;
-use App\Repository\Settings\ServiceRepository;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
-use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class HomeController extends AbstractController
@@ -26,7 +21,7 @@ class HomeController extends AbstractController
     }
 
     #[Route(path: ['/home', '/'], name: 'app_home')]
-    public function index(MessageBusInterface $messageBus, PersonalRepository $personalRepository, JobRepository $jobRepository, ServiceRepository $serviceRepository): Response
+    public function index(): Response
     {
         //$messageBus->dispatch(new UpdateOlderPersonal());
         $today = Carbon::today();
@@ -41,7 +36,7 @@ class HomeController extends AbstractController
             $this->manager->flush();
 
         }
-        $directory = $this->getParameter('kernel.project_dir');
+        /*$directory = $this->getParameter('kernel.project_dir');
         $filePath = $directory. DIRECTORY_SEPARATOR. 'public'.DIRECTORY_SEPARATOR . 'personal.csv';
         $reader = new Csv();
         $spreadsheet = $reader->load($filePath);
@@ -60,7 +55,7 @@ class HomeController extends AbstractController
                 }
             }
         }
-        $this->manager->flush();
+        $this->manager->flush();*/
 
         return $this->render('home/index.html.twig');
     }

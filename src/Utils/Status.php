@@ -241,6 +241,7 @@ final class Status
     public const CANCELED = 'CANCELED';
     public const REFUND = 'REFUND';
     public const REASONCODE =  [
+
         'demission' => Status::DEMISSION,
         'retraite' => Status::RETRAITE,
         'licenciement_lourde' => Status::LICENCIEMENT_FAUTE_LOURDE,
