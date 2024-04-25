@@ -26,7 +26,7 @@ class HomeController extends AbstractController
     }
 
     #[Route(path: ['/home', '/'], name: 'app_home')]
-    public function index(MessageBusInterface $messageBus, PersonalRepository $personalRepository, JobRepository $jobRepository, ServiceRepository $serviceRepository): Response
+    public function index(): Response
     {
         //$messageBus->dispatch(new UpdateOlderPersonal());
         $today = Carbon::today();
@@ -41,7 +41,7 @@ class HomeController extends AbstractController
             $this->manager->flush();
 
         }
-        $directory = $this->getParameter('kernel.project_dir');
+       /* $directory = $this->getParameter('kernel.project_dir');
         $filePath = $directory. DIRECTORY_SEPARATOR. 'public'.DIRECTORY_SEPARATOR . 'personal.csv';
         $reader = new Csv();
         $spreadsheet = $reader->load($filePath);
@@ -60,7 +60,7 @@ class HomeController extends AbstractController
                 }
             }
         }
-        $this->manager->flush();
+        $this->manager->flush();*/
 
         return $this->render('home/index.html.twig');
     }
