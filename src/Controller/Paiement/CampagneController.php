@@ -876,6 +876,7 @@ class CampagneController extends AbstractController
             /** Element en rapport avec la methode de paiement */
             'mode_paiement' => $payroll->getPersonal()->getModePaiement() ?? '',
             'account_banks' => $accounBanks,
+            'workplace' => $payroll->getDepartement(),
             /** Element lieu au cumul des salaire */
             'salaire_brut' => (double)$payroll->getBrutAmount(),
             'charge_salarial' => (double)$payroll->getTotalRetenueSalarie(),
