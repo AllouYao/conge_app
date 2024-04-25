@@ -87,7 +87,7 @@ class OperationRepository extends ServiceEntityRepository
                 'o.id as operation_id'
             ])
             ->join('o.personal', 'personal')
-            ->join('personal.job', 'job')
+            ->leftJoin('personal.job', 'job')
             ->where('o.typeOperations =:types')
             ->andWhere('o.status IN (:status)')
             ->andWhere('YEAR(o.dateOperation) = :year')
