@@ -131,8 +131,8 @@ class ApiReportingPaieController extends AbstractController
     public function regulSalaire(): JsonResponse
     {
         $campagneActive = $this->campagneRepository->active();
-        $month = (int)$campagneActive->getDateDebut()->format('m');
-        $years = (int)$campagneActive->getDateDebut()->format('Y');
+        $month = (int)$campagneActive?->getDateDebut()->format('m');
+        $years = (int)$campagneActive?->getDateDebut()->format('Y');
         if ($this->isGranted('ROLE_RH')) {
             $requestOperationRegularisation = $this->payrollRepository->findOperationByPayroll([Status::RETENUES, Status::REMBOURSEMENT], Status::VALIDATED, $month, $years);
         } else {
