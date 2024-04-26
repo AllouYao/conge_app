@@ -814,7 +814,7 @@ class PayrollRepository extends ServiceEntityRepository
                 'personal.matricule as matricule_personal',
                 'personal.firstName as name_personal',
                 'personal.lastName as lastname_personal',
-                'personal.service as stations_personal',
+                'w.name as stations_personal',
                 'payroll.remboursNet as remboursement_net',
                 'payroll.remboursBrut as remboursement_brut',
                 'payroll.retenueNet as retenue_net',
@@ -825,15 +825,16 @@ class PayrollRepository extends ServiceEntityRepository
                 'lastCampagne.dateDebut as last_campagne_date_debut',
             ])
             ->join('payroll.personal', 'personal')
+            ->leftJoin('personal.workplace', 'w')
             ->join('personal.operations', 'op')
             ->join('payroll.campagne', 'campagne')
             ->join('op.campagne', 'lastCampagne')
             ->where('op.typeOperations IN (:types)')
             ->andWhere('op.status IN (:status)')
             ->andWhere('campagne.status =:campagne_status')
-            ->andWhere('op.dateOperation BETWEEN ?1 AND ?2 ')
+            ->andWhere('MONTH(op.dateOperation) IN (?1) AND YEAR(op.dateOperation) = ?2')
             ->orderBy('op.typeOperations');
-        $qb->setParameters(['1' => $start, '2' => $end, 'types' => [Status::REMBOURSEMENT, Status::RETENUES], 'status' => Status::VALIDATED, 'campagne_status' => Status::TERMINER]);
+        $qb->setParameters([1 => $start, 2 => $end, 'types' => [Status::REMBOURSEMENT, Status::RETENUES], 'status' => Status::VALIDATED, 'campagne_status' => Status::TERMINER]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
         }
@@ -850,7 +851,7 @@ class PayrollRepository extends ServiceEntityRepository
                 'personal.matricule as matricule_personal',
                 'personal.firstName as name_personal',
                 'personal.lastName as lastname_personal',
-                'personal.service as stations_personal',
+                'w.name as stations_personal',
                 'payroll.remboursNet as remboursement_net',
                 'payroll.remboursBrut as remboursement_brut',
                 'payroll.retenueNet as retenue_net',
@@ -861,6 +862,7 @@ class PayrollRepository extends ServiceEntityRepository
                 'lastCampagne.dateDebut as last_campagne_date_debut',
             ])
             ->join('payroll.personal', 'personal')
+            ->leftJoin('personal.workplace', 'w')
             ->join('payroll.campagne', 'campagne')
             ->join('op.campagne', 'lastCampagne')
             ->join('personal.operations', 'op')
@@ -868,7 +870,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->join('category.categorySalarie', 'category_salarie')
             ->where('op.typeOperations IN (:types)')
             ->andWhere('op.status IN (:status)')
-            ->andWhere('op.dateOperation BETWEEN ?1 AND ?2 ')
+            ->andWhere('MONTH(op.dateOperation) IN (?1) AND YEAR(op.dateOperation) = ?2')
             ->andWhere("category_salarie.code IN (:code)")
             ->andWhere('campagne.status =:campagne_status')
             ->orderBy('op.typeOperations');
