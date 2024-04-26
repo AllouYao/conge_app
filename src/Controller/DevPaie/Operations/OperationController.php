@@ -151,12 +151,13 @@ class OperationController extends AbstractController
     {
         $form = $this->createForm(OperationType::class, $operation);
         $form->handleRequest($request);
+        $lastCampagne = $this->campagneRepository->lastCampagne(true);
         /**
          * @var User $currentUser
          */
         $currentUser = $this->getUser();
         if ($form->isSubmitted() && $form->isValid()) {
-            $operation->setUser($currentUser)->setStatus(Status::EN_ATTENTE);
+            $operation->setUser($currentUser)->setStatus(Status::EN_ATTENTE)->setCampagne($lastCampagne);
             $entityManager->flush();
             flash()->addSuccess('Opération de ' . $operation->getTypeOperations() . ' modifier avec succès');
             return $this->redirectToRoute('dev_paie_operation_index', [], Response::HTTP_SEE_OTHER);
