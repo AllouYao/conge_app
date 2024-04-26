@@ -342,9 +342,8 @@ class HeureSupController extends AbstractController
                         $this->entityManager->persist($heureSup);
                     }
                     $this->entityManager->flush();
-                    flash()->addSuccess('Heure supplémentaire validé avec succès!');
-
                 }
+                flash()->addSuccess('Heure supplémentaire validé avec succès!');
             } else {
                 flash()->addWarning('Aucune heure supplementaire sélectionnées');
                 flash()->addInfo('Veillez s\'il vous plait sélectionner au moins une ligne merci !');

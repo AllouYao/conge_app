@@ -107,10 +107,10 @@ class OperationController extends AbstractController
                             $remboursement->setStatus(Status::VALIDATED);
                             $entityManager->persist($remboursement);
                             $entityManager->flush();
-                            flash()->addSuccess('Remboursement validé avec succès!');
                         }
                     }
                 }
+                flash()->addSuccess('Remboursement validé avec succès!');
             } else {
                 flash()->addWarning('Aucun remboursement en attente de validation sélectionner !');
                 return $this->redirectToRoute('reporting_paie_remboursement_salaires');
@@ -133,10 +133,10 @@ class OperationController extends AbstractController
                             $retenues->setStatus(Status::VALIDATED);
                             $entityManager->persist($retenues);
                             $entityManager->flush();
-                            flash()->addSuccess('Retenue sur salaire validé avec succès!');
                         }
                     }
                 }
+                flash()->addSuccess('Retenue sur salaire validé avec succès!');
             } else {
                 flash()->addWarning('Aucune retenue sur salaire en attente sélectionnées !');
                 return $this->redirectToRoute('reporting_paie_retenue_salaires');
