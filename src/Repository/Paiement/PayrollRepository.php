@@ -804,7 +804,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findOperationByPeriode(mixed $start, mixed $end, ?int $personalId): array
+    public function findOperationByPeriode(array $months, int $years, ?int $personalId): array
     {
         $qb = $this->createQueryBuilder('payroll');
         $qb
@@ -834,14 +834,14 @@ class PayrollRepository extends ServiceEntityRepository
             ->andWhere('campagne.status =:campagne_status')
             ->andWhere('MONTH(op.dateOperation) IN (?1) AND YEAR(op.dateOperation) = ?2')
             ->orderBy('op.typeOperations');
-        $qb->setParameters([1 => $start, 2 => $end, 'types' => [Status::REMBOURSEMENT, Status::RETENUES], 'status' => Status::VALIDATED, 'campagne_status' => Status::TERMINER]);
+        $qb->setParameters([1 => $months, 2 => $years, 'types' => [Status::REMBOURSEMENT, Status::RETENUES], 'status' => Status::VALIDATED, 'campagne_status' => Status::TERMINER]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
         }
         return $qb->getQuery()->getResult();
     }
 
-    public function findOperationByPeriodeByRoleEmployer(mixed $start, mixed $end, ?int $personalId): array
+    public function findOperationByPeriodeByRoleEmployer(array $months, int $years, ?int $personalId): array
     {
         $qb = $this->createQueryBuilder('payroll');
         $qb
@@ -874,7 +874,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->andWhere("category_salarie.code IN (:code)")
             ->andWhere('campagne.status =:campagne_status')
             ->orderBy('op.typeOperations');
-        $qb->setParameters(['1' => $start, '2' => $end, 'types' => [Status::REMBOURSEMENT, Status::RETENUES], 'status' => Status::VALIDATED, 'code' => ['OUVRIER / EMPLOYES', 'CHAUFFEURS'], 'campagne_status' => Status::TERMINER]);
+        $qb->setParameters(['1' => $months, '2' => $years, 'types' => [Status::REMBOURSEMENT, Status::RETENUES], 'status' => Status::VALIDATED, 'code' => ['OUVRIER / EMPLOYES', 'CHAUFFEURS'], 'campagne_status' => Status::TERMINER]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
         }

@@ -106,7 +106,7 @@ class CampagneRepository extends ServiceEntityRepository
             ->andWhere("c.ordinary = :value")
             ->andWhere("c.status = :statut")
             ->setParameter('value', $isOrdinaire)
-            ->setParameter('statut', Status::VALIDATED)
+            ->setParameter('statut', Status::TERMINER)
             ->orderBy("c.id", "DESC")
             ->setMaxResults(1)
             ->getQuery()
