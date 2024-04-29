@@ -210,29 +210,30 @@ class CampagneController extends AbstractController
             $month = $fullDate->format('m');
             $year = $fullDate->format('Y');
             $dateOfMonth = new DateTime($day . '-' . $month . '-' . $year);
-            $previousCampagne = $this->campagneRepository->findLast();
             $personals = $form->get('personal')->getData();
             $countPersonal = count($personals);
-            $last_month = $previousCampagne->getStartedAt()->format('m');
-            $last_day_pr_camp = new DateTime(31 . '-' . $last_month . '-' . $year);
+            $previousCampagne = $this->campagneRepository->findLast();
+            $last_day_pr_camp = null;
+            if ($previousCampagne) {
+                $last_month = $previousCampagne->getStartedAt()->format('m');
+                $last_day_pr_camp = new DateTime(31 . '-' . $last_month . '-' . $year);
+            }
 
 
             if ($countPersonal > 0) {
                 foreach ($personals as $personal) {
                     $dateEmbauche = $personal->getContract()->getDateEmbauche();
-
-                    if (($dateEmbauche > $previousCampagne?->getStartedAt()) && $dateEmbauche <= $last_day_pr_camp) {
-                        //personnel arrivé avant le debut de la campagne passée
-                        $extra = $this->payrollService->setExtraMonthPayroll($personal, $campagne);
-                    } elseif (($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt()) {
-                        //personnel arrivé au milieu de du mois de la campagne en cours
-                        $milieu = $this->payrollService->setProrataPayroll($personal, $campagne);
-                    } elseif ((!($dateEmbauche > $campagne->getStartedAt())) or $dateEmbauche > $previousCampagne->getStartedAt()) {
-                        //personnel normal
-                        $normal = $this->payrollService->setPayroll($personal, $campagne);
-                    } else {
-                        flash()->addInfo("Aucun salarié  n'est eligible pour participé à la paie de ce mois.");
+                    if ($previousCampagne) {
+                        if (($dateEmbauche > $previousCampagne->getStartedAt()) && ($dateEmbauche <= $last_day_pr_camp)) {
+                            $this->payrollService->setExtraMonthPayroll($personal, $campagne);
+                        } elseif ((!($dateEmbauche > $campagne->getStartedAt())) or $dateEmbauche > $previousCampagne->getStartedAt()) {
+                            $this->payrollService->setPayroll($personal, $campagne);
+                        }
                     }
+                    if (($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt()) {
+                        $this->payrollService->setProrataPayroll($personal, $campagne);
+                    }
+
                 }
                 $campagne
                     ->setLastCampagne($previousCampagne)
