@@ -53,12 +53,7 @@ class HeureSupController extends AbstractController
         $apiHeureSupp = [];
         $salaireHoraire = 0;
 
-        if ($this->isGranted('ROLE_RH')) {
-            $personals = $this->personalRepository->findAllPersonalOnCampain();
-        } else {
-            $personals = $this->personalRepository->findAllPersonalByEmployeRole();
-        }
-
+        $personals = $this->personalRepository->findAllPersonalOnCampain();
 
         foreach ($personals as $personal) {
             $heureSupp = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
@@ -347,9 +342,8 @@ class HeureSupController extends AbstractController
                         $this->entityManager->persist($heureSup);
                     }
                     $this->entityManager->flush();
-                    flash()->addSuccess('Heure supplémentaire validé avec succès!');
-
                 }
+                flash()->addSuccess('Heure supplémentaire validé avec succès!');
             } else {
                 flash()->addWarning('Aucune heure supplementaire sélectionnées');
                 flash()->addInfo('Veillez s\'il vous plait sélectionner au moins une ligne merci !');

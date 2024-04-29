@@ -114,50 +114,23 @@ class AuthController extends AbstractController
         ]);
     }
 
-    #[Route('/{uuid}/edit/profile', name: 'edit_profile', methods: ['GET', 'POST'])]
-    public function editProfile(User $user, Request $request): Response
+    #[Route('/profile', name: 'edit_profile', methods: ['GET', 'POST'])]
+    public function editProfile(Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
 
         $form = $this->createForm(ProfileEditType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $confirmePassword = $form->get('confirmePassword')->getData();
-            $holdPassword = $form->get('holdPassword')->getData();
             $newPassword = $form->get('newPassword')->getData();
-
-            if(!$this->userPasswordHasher->isPasswordValid($user,$holdPassword)) {
-
-                flash()->addWarning('Votre ancien mot de passe ne correspond pas !');
-
-                return $this->render('auth/user/edit_profile.html.twig', [
-                    'form' => $form,
-                ]);
-
-            }elseif($confirmePassword != $newPassword) {
-
-                flash()->addWarning('Erreur mot de passe de confirmation !');
-
-                return $this->render('auth/user/edit_profile.html.twig', [
-                    'form' => $form,
-                ]);
-
-            }else{
-
-                $user->setPassword(
-                    $this->userPasswordHasher->hashPassword(
-                        $user,
-                        $newPassword)
-                );
-    
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
-                flash()->addSuccess('Compte utilisateur modifié avec succès.');
-                return $this->redirectToRoute('app_home', [], Response::HTTP_SEE_OTHER);
- 
-            }
-            //dd($confirmePassword, $newPassword, $holdPassword, $password, $passwordHash);
+            $hashPassword = $this->userPasswordHasher->hashPassword($user, $newPassword);
+            $user->setPassword($hashPassword);
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+            flash()->addSuccess('Compte utilisateur modifié avec succès.');
+            return $this->redirectToRoute('app_home', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('auth/user/edit_profile.html.twig', [
@@ -165,9 +138,11 @@ class AuthController extends AbstractController
         ]);
     }
 
-    #[Route('/{uuid}/show/profile', name: 'show_profile', methods: ['GET', 'POST'])]
-    public function showProfile(User $user, Request $request): Response
+    #[Route('/profile/show', name: 'show_profile', methods: ['GET', 'POST'])]
+    public function showProfile(Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
         $form = $this->createForm(ProfileShowType::class, $user);
         $form->handleRequest($request);
 

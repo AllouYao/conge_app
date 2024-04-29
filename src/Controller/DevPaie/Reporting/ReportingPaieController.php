@@ -52,12 +52,29 @@ class ReportingPaieController extends AbstractController
     public function viewEtatPeriodiqueRegularisation(PersonalRepository $personalRepository): Response
     {
         if ($this->isGranted('ROLE_RH')) {
-            $personals = $personalRepository->findAllPersonalOnCampain();
+            $personals = $personalRepository->findPersoRequest();
         } else {
-            $personals = $personalRepository->findAllPersonalByEmployeRole();
+            $personals = $personalRepository->findPersoRequest();
         }
+
+        $months = array(
+            1 => "Janvier",
+            2 => "Février",
+            3 => "Mars",
+            4 => "Avril",
+            5 => "Mai",
+            6 => "Juin",
+            7 => "Juillet",
+            8 => "Août",
+            9 => "Septembre",
+            10 => "Octobre",
+            11 => "Novembre",
+            12 => "Décembre"
+        );
+
         return $this->render('dev_paie/reportings/regularisations/regul_periodique.html.twig', [
-            'personals' => $personals
+            'personals' => $personals,
+            'months' => $months
         ]);
     }
 }

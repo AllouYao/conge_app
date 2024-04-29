@@ -43,7 +43,7 @@
 
 .card-header,
 .card-footer {
-    padding: 0.5rem 1.25rem !important;
+    padding: 0.1rem 1.25rem !important;
     border-top: 1px solid $card-footer-border;
     background-color: $card-footer-bg;
 }
@@ -53,6 +53,10 @@
     margin-top: 0;
     background-color: $bg-navbar-light;
     color: $white;
+}
+
+.card-header {
+    border-radius: .5rem .5rem 0 0
 }
 
 

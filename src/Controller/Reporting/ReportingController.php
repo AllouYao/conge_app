@@ -52,7 +52,7 @@ class ReportingController extends AbstractController
         if ($this->isGranted('ROLE_RH')) {
             $personals = $personalRepository->findPersoRequest();
         } else {
-            $personals = $personalRepository->findPersoReqRole();
+            $personals = $personalRepository->findPersoRequest();
         }
 
         $months = array(
@@ -82,7 +82,7 @@ class ReportingController extends AbstractController
         if ($this->isGranted('ROLE_RH')) {
             $personals = $personalRepository->findPersoRequest();
         } else {
-            $personals = $personalRepository->findPersoReqRole();
+            $personals = $personalRepository->findPersoRequest();
         }
 
         $months = array(
@@ -106,6 +106,65 @@ class ReportingController extends AbstractController
         ]);
     }
 
+    #[Route('/etat_versement_caisse_annuels', name: 'etat_versement_caisse_annuel', methods: ['GET', 'POST'])]
+    public function viewEtatVersementCaisseAnnuel(PersonalRepository $personalRepository): Response
+    {
+        if ($this->isGranted('ROLE_RH')) {
+            $personals = $personalRepository->findPersoRequest();
+        } else {
+            $personals = $personalRepository->findPersoRequest();
+        }
+
+        $months = array(
+            1 => "Janvier",
+            2 => "Février",
+            3 => "Mars",
+            4 => "Avril",
+            5 => "Mai",
+            6 => "Juin",
+            7 => "Juillet",
+            8 => "Août",
+            9 => "Septembre",
+            10 => "Octobre",
+            11 => "Novembre",
+            12 => "Décembre"
+        );
+        return $this->render('reporting/etat_versement/caisse.annuel.html.twig', [
+            'personals' => $personals,
+            'months' => $months
+        ]);
+    }
+
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    #[Route('/etat_versement_caisse_mensuel', name: 'etat_versement_caisse', methods: ['GET', 'POST'])]
+    public function viewEtatVersementCaisse(CampagneRepository $campagneRepository): Response
+    {
+        $campagne = $campagneRepository->active();
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+        $date = $campagne ? $campagne->getDateDebut() : ' ';
+        $periode = $formatter->format($date);
+        return $this->render('reporting/etat_versement/caisse.html.twig', [
+            'periode' => $periode
+        ]);
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    #[Route('/etat_versement_mensuel', name: 'etat_versement', methods: ['GET', 'POST'])]
+    public function viewEtatVersement(CampagneRepository $campagneRepository): Response
+    {
+        $campagne = $campagneRepository->active();
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+        $date = $campagne ? $campagne->getDateDebut() : ' ';
+        $periode = $formatter->format($date);
+        return $this->render('reporting/etat_versement/versement.html.twig', [
+            'periode' => $periode
+        ]);
+    }
 
 
 
@@ -177,46 +236,7 @@ class ReportingController extends AbstractController
     }
 
 
-    #[Route('/etat_versement_caisse_annuels', name: 'etat_versement_caisse_annuel', methods: ['GET', 'POST'])]
-    public function viewEtatVersementCaisseAnnuel(PersonalRepository $personalRepository): Response
-    {
-        if ($this->isGranted('ROLE_RH')) {
-            $personals = $personalRepository->findAllPersonalOnCampain();
-        } else {
-            $personals = $personalRepository->findAllPersonalByEmployeRole();
-        }
-        return $this->render('reporting/etat_versement/caisse.annuel.html.twig', [
-            'personals' => $personals
-        ]);
-    }
 
-    /**
-     * @throws NonUniqueResultException
-     */
-    #[Route('/etat_versement_caisse_mensuel', name: 'etat_versement_caisse', methods: ['GET', 'POST'])]
-    public function viewEtatVersementCaisse(CampagneRepository $campagneRepository): Response
-    {
-        $campagne = $campagneRepository->active();
-        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
-        $date = $campagne ? $campagne->getDateDebut() : ' ';
-        $periode = $formatter->format($date);
-        return $this->render('reporting/etat_versement/caisse.html.twig', [
-            'periode' => $periode
-        ]);
-    }
 
-    /**
-     * @throws NonUniqueResultException
-     */
-    #[Route('/etat_versement_mensuel', name: 'etat_versement', methods: ['GET', 'POST'])]
-    public function viewEtatVersement(CampagneRepository $campagneRepository): Response
-    {
-        $campagne = $campagneRepository->active();
-        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
-        $date = $campagne ? $campagne->getDateDebut() : ' ';
-        $periode = $formatter->format($date);
-        return $this->render('reporting/etat_versement/versement.html.twig', [
-            'periode' => $periode
-        ]);
-    }
+
 }
