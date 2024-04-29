@@ -198,6 +198,9 @@ class AcompteController extends AbstractController
         if ( $form->isSubmitted() && $form->isValid()) {
             $this->manager->persist($operation);
             $this->manager->flush();
+
+            flash()->addSuccess($operation->getTypeOperations() . ' enregistré avec succès');
+            return $this->redirectToRoute('app_paiement_acompte_list');
         }
         return $this->render('paiement/acompte/edit.html.twig', [
             'form' => $form

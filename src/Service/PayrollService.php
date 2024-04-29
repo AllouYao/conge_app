@@ -62,9 +62,9 @@ class PayrollService
 
         /** Ajouter les Informations utile du salarié */
         $matricule = $personal->getMatricule();
-        $service = $personal->getService();
+        $service = $personal?->getJob()?->getName();
         $categorie = '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ') - ' . $personal->getCategorie()->getIntitule();
-        $departement = $personal->getFonction();
+        $departement = $personal?->getWorkplace()?->getName();
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
         $numeroCnps = $personal->getRefCNPS();
 
@@ -253,9 +253,9 @@ class PayrollService
 
         /** Ajouter les Informations utile du salarié */
         $matricule = $personal->getMatricule();
-        $service = $personal->getService();
+        $service = $personal?->getJob()?->getName();
         $categorie = '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ') - ' . $personal->getCategorie()->getIntitule();
-        $departement = $personal->getFonction();
+        $departement = $personal?->getWorkplace()?->getName();
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
         $numeroCnps = $personal->getRefCNPS();
 
@@ -409,9 +409,9 @@ class PayrollService
 
         /** Ajouter les Informations utile du salarié */
         $matricule = $personal->getMatricule();
-        $service = $personal->getService();
+        $service = $personal?->getJob()?->getName();
         $categorie = '(' . $personal->getCategorie()->getCategorySalarie()->getName() . ') - ' . $personal->getCategorie()->getIntitule();
-        $departement = $personal->getFonction();
+        $departement = $personal?->getWorkplace()?->getName();
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
         $numeroCnps = $personal->getRefCNPS();
 

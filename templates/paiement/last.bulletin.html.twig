@@ -67,7 +67,7 @@
                                             <td style="font-size: smaller">{{ payrolls.matricule }}</td>
                                         </tr>
                                         <tr class="small-text sans-bordure no-border-top no-border-button">
-                                            <th style="font-size: smaller; font-weight: bolder;">Service</th>
+                                            <th style="font-size: smaller; font-weight: bolder;">Lieu travail</th>
                                             <td style="font-size: smaller">{{ payrolls.workplace }}</td>
                                         </tr>
                                         <tr class="small-text sans-bordure no-border-top no-border-button">
@@ -112,8 +112,8 @@
                                             <td style="font-size: smaller">{{ payrolls.prenom|upper }}</td>
                                         </tr>
                                         <tr class="small-text sans-bordure no-border-top no-border-button">
-                                            <th style="font-size: smaller; font-weight: bolder;">Emploi</th>
-                                            <td style="font-size: smaller">{{ payrolls.departement|upper }}</td>
+                                            <th style="font-size: smaller; font-weight: bolder;">Fonction</th>
+                                            <td style="font-size: smaller">{{ payrolls.service|upper }}</td>
                                         </tr>
                                         <tr class="small-text sans-bordure no-border-top no-border-button">
                                             <th style="font-size: smaller; font-weight: bolder;">Mode Paiement</th>
@@ -618,7 +618,7 @@
                                             <td></td>
                                         </tr>
                                     {% endif %}
-                                    {% if payrolls.retenue_net != 0 %}
+                                    {% if payrolls.retenue_net and payrolls.retenue_net > 0 %}
                                         <tr class="small-text sans-bordure no-border-button no-border-top">
                                             <td>026</td>
                                             <td>Retenue sur salaire (Trop perçus)</td>
@@ -631,7 +631,7 @@
                                             <td></td>
                                         </tr>
                                     {% endif %}
-                                    {% if payrolls.remboursement_net != 0 %}
+                                    {% if payrolls.remboursement_net and payrolls.remboursement_net > 0 %}
                                         <tr class="small-text sans-bordure no-border-button no-border-top">
                                             <td>027</td>
                                             <td>Remboursement sur salaire (Moins perçus)</td>
@@ -644,7 +644,7 @@
                                             <td></td>
                                         </tr>
                                     {% endif %}
-                                    {% if payrolls.pret_mensuel %}
+                                    {% if payrolls.pret_mensuel and payrolls.pret_mensuel > 0 %}
                                         <tr class="small-text sans-bordure no-border-button no-border-top">
                                             <td>028</td>
                                             <td>Montant du prêt</td>
@@ -657,7 +657,7 @@
                                             <td></td>
                                         </tr>
                                     {% endif %}
-                                    {% if payrolls.acompte_mensuel %}
+                                    {% if payrolls.acompte_mensuel and payrolls.acompte_mensuel > 0 %}
                                         <tr class="small-text sans-bordure no-border-button no-border-top">
                                             <td>029</td>
                                             <td>Montant du acompte</td>

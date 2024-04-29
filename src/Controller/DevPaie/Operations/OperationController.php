@@ -107,10 +107,10 @@ class OperationController extends AbstractController
                             $remboursement->setStatus(Status::VALIDATED);
                             $entityManager->persist($remboursement);
                             $entityManager->flush();
-                            flash()->addSuccess('Remboursement validé avec succès!');
                         }
                     }
                 }
+                flash()->addSuccess('Remboursement validé avec succès!');
             } else {
                 flash()->addWarning('Aucun remboursement en attente de validation sélectionner !');
                 return $this->redirectToRoute('reporting_paie_remboursement_salaires');
@@ -133,10 +133,10 @@ class OperationController extends AbstractController
                             $retenues->setStatus(Status::VALIDATED);
                             $entityManager->persist($retenues);
                             $entityManager->flush();
-                            flash()->addSuccess('Retenue sur salaire validé avec succès!');
                         }
                     }
                 }
+                flash()->addSuccess('Retenue sur salaire validé avec succès!');
             } else {
                 flash()->addWarning('Aucune retenue sur salaire en attente sélectionnées !');
                 return $this->redirectToRoute('reporting_paie_retenue_salaires');
@@ -151,12 +151,13 @@ class OperationController extends AbstractController
     {
         $form = $this->createForm(OperationType::class, $operation);
         $form->handleRequest($request);
+        $lastCampagne = $this->campagneRepository->lastCampagne(true);
         /**
          * @var User $currentUser
          */
         $currentUser = $this->getUser();
         if ($form->isSubmitted() && $form->isValid()) {
-            $operation->setUser($currentUser)->setStatus(Status::EN_ATTENTE);
+            $operation->setUser($currentUser)->setStatus(Status::EN_ATTENTE)->setCampagne($lastCampagne);
             $entityManager->flush();
             flash()->addSuccess('Opération de ' . $operation->getTypeOperations() . ' modifier avec succès');
             return $this->redirectToRoute('dev_paie_operation_index', [], Response::HTTP_SEE_OTHER);

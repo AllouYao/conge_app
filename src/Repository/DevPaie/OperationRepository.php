@@ -80,13 +80,14 @@ class OperationRepository extends ServiceEntityRepository
                 'personal.matricule as matricule_personal',
                 'personal.firstName as name_personal',
                 'personal.lastName as lastname_personal',
-                'personal.service as stations_personal',
+                'job.name as stations_personal',
                 'o.amountBrut as montant_brut',
                 'o.amountNet as montant_net',
                 'o.status as status_operation',
                 'o.id as operation_id'
             ])
             ->join('o.personal', 'personal')
+            ->leftJoin('personal.job', 'job')
             ->where('o.typeOperations =:types')
             ->andWhere('o.status IN (:status)')
             ->andWhere('YEAR(o.dateOperation) = :year')

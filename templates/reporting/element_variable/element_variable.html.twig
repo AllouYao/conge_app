@@ -115,6 +115,11 @@
                 paging: {
                     pageSize: 10,
                 },
+                selection: {
+                    mode: "multiple",
+                    allowSelectAll: true,
+                    showCheckBoxesMode: "always"
+                },
                 allowColumnReordering: true,
                 allowColumnResizing: true,
                 columnAutoWidth: true,
@@ -145,11 +150,11 @@
                     },
 
                     {
-                        caption: 'Total Salaires Brut Payés',
+                        caption: 'Total salaire brut',
                         alignment: 'center',
                         columns: [
                             {
-                                caption: 'Mois -1',
+                                caption: 'Période précédente',
                                 dataType: 'number',
                                 dataField: 'before_brut_amount',
                                 alignment: 'right',
@@ -158,7 +163,7 @@
                                 },
                             },
                             {
-                                caption: 'Mois en cours',
+                                caption: 'Période en cours',
                                 dataType: 'number',
                                 dataField: 'last_brut_amount',
                                 alignment: 'right',
@@ -179,11 +184,11 @@
                     },
 
                     {
-                        caption: 'Total Salaires Net Payés',
+                        caption: 'Total salaire net',
                         alignment: 'center',
                         columns: [
                             {
-                                caption: 'Mois -1',
+                                caption: 'Période précédente',
                                 dataType: 'number',
                                 dataField: 'before_net_amount',
                                 alignment: 'right',
@@ -193,7 +198,7 @@
                                 },
                             },
                             {
-                                caption: 'Mois en cours',
+                                caption: 'Période en cours',
                                 dataType: 'number',
                                 dataField: 'last_net_amount',
                                 alignment: 'right',
@@ -221,7 +226,7 @@
                         {
                             column: 'matricule',
                             summaryType: 'count',
-                            displayFormat : 'Salariés : {0}'
+                            displayFormat: 'Salariés : {0}'
                         },
                         {
                             column: 'prenoms',
