@@ -25,6 +25,17 @@ class PersonalRepository extends ServiceEntityRepository
     /**
      * @return Personal[] Returns an array of Personal objects
      */
+    public function findDisablePersonal(): array
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->where('p.active = false')
+            ->orderBy('p.matricule', 'ASC')
+            ->getQuery()
+            ->getResult();
+        return array_map(function ($result) {
+            return $result;
+        }, $qb);
+    }
     public function findAllPersonalOnCampain(): array
     {
         $qb = $this->createQueryBuilder('p')
@@ -37,7 +48,7 @@ class PersonalRepository extends ServiceEntityRepository
             ->orderBy('p.matricule', 'ASC')
             ->getQuery()
             ->getResult();
-        return array_map(function ($result) {
+        return array_map(function ($result) { 
             return $result;
         }, $qb);
     }

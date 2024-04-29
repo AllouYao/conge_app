@@ -1,0 +1,171 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Cessation de contrat{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridDeparture {
+            border-width: 50px;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        CESSATION DE CONTRACT SUR LA PERIODE DE {{ date|upper }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="dataGridDeparture"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        $(document).ready(function () {
+            let debut;
+            let fin;
+            $("#dataGridDeparture").dxDataGrid({
+                dataSource: `{{ url('departure_api2') }}`,
+                showBorders: true,
+                height: 300,
+                scrolling: {
+                    columnRenderingMode: 'virtual',
+                    mode: "virtual"
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('CESSATION DE CONTRAT');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                            customizeCell: function (options) {
+                                const {gridCell, excelCell} = options;
+                                if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
+                                    excelCell.text = formatNumber(gridCell.value)
+                                    excelCell.font = {size: 9};
+                                    excelCell.alignment = {horizontal: 'left'};
+                                }
+                            }
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then(function (buffer) {
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `CESSATION DE CONTRAT ${debut ?? " "} - ${fin ?? " "}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    // width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                columns: [
+                    {
+                        caption: 'N°Ordre',
+                        alignment: 'center',
+                        dataType: 'number',
+                        dataField: 'index',
+                        fixed: true
+                    },
+                    {
+                        caption: 'Nom et prénoms',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'full_name',
+                        fixed: true
+                    },
+                    {
+                        caption: 'Catégorie',
+                        dataType: 'string',
+                        dataField: 'categorie',
+                        alignment: 'center',
+                        fixed: true
+
+                    },
+                    {
+                        caption: 'Fonction',
+                        dataType: 'string',
+                        dataField: 'fonction',
+                        alignment: 'left',
+                    },
+                    {
+                        caption: 'Type Contrat',
+                        dataType: 'string',
+                        dataField: 'type_contract',
+                        alignment: 'center',
+                    },
+                    {
+                        caption: 'Date Embauche',
+                        dataType: 'date',
+                        dataField: 'date_embauche',
+                        alignment: 'center',
+                        width: 120
+                    },
+                    {
+                        dataField: 'uuid',
+                        caption: 'Action',
+                        alignment: 'center',
+                        cellTemplate: function(container, options) {
+                        $("<div>")
+                            .dxDropDownButton ({ 
+                                text: "Consulter",
+                                icon: "eyeopen",
+                                alignment: 'center',
+                                items: ["Demission", "L. faute simple", "L. faute lourde", "Rétraite", "Décès"],
+                                onItemClick: function(e) {
+                                    var itemText = e.itemData; 
+                                    if (itemText === "Demission") {
+                                        window.location.href = `/dossier/personal/departure/new/${options.data.uuid}/demission`;
+                                    } else if (itemText === "Rétraite") {
+                                        window.location.href = `/dossier/personal/departure/new/${options.data.uuid}/Retraite`;
+                                    }else if (itemText === "L. faute lourde") {
+                                        window.location.href = `/dossier/personal/departure/new/${options.data.uuid}/licenciement_lourde`;
+                                    }else if (itemText === "L. faute simple") {
+                                        window.location.href = `/dossier/personal/departure/new/${options.data.uuid}/licenciement_simple`;
+                                    }else if (itemText === "Décès") {
+                                        window.location.href = `/dossier/personal/departure/new/${options.data.uuid}/deces`;
+                                    }
+                                }  
+                            })
+                            .appendTo(container);   
+                        }
+                    }
+                ],
+            })
+        })
+    </script>
+
+{% endblock %}

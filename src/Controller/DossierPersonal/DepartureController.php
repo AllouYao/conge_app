@@ -10,11 +10,13 @@ use IntlDateFormatter;
 use App\Service\DepartServices;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\DossierPersonal\Departure;
+use App\Entity\DossierPersonal\Personal;
 use App\Form\DossierPersonal\DepartureType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\DossierPersonal\DepartureRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -23,21 +25,51 @@ class DepartureController extends AbstractController
 {
     private DepartureRepository $departureRepository;
     private DepartServices $departServices;
+    private PersonalRepository $personalRepository;
+
 
     public function __construct(
         DepartureRepository $departureRepository,
         DepartServices      $departServices,
+        PersonalRepository $personalRepository
     )
     {
         $this->departureRepository = $departureRepository;
         $this->departServices = $departServices;
+        $this->personalRepository = $personalRepository;
+
     }
 
     /**
      * @throws Exception
      */
+    #[Route('/api/depart', name: 'api2', methods: ['GET'])]
+    public function apiDepart(): JsonResponse
+    {
+        $index = 0;
+        $apiDeparture = [];
+
+        $personals = $this->personalRepository->findDisablePersonal();
+        
+
+        foreach ($personals as $personal) {
+
+            $apiDeparture[] = [
+                'index' => ++$index,
+                'full_name' => $personal->getFirstName().' '.$personal->getLastName(),
+                'categorie' => $personal->getCategorie()->getCategorySalarie()->getName(),
+                'fonction' => $personal->getFonction(),
+                'type_contract' => $personal->getContract()->getTypeContrat(),
+                'date_embauche' => $personal->getContract()->getDateEmbauche(),
+                'uuid' => $personal->getUuid()
+
+            ];
+        }
+
+        return new JsonResponse($apiDeparture);
+    }
     #[Route('/api/{typeDepart}/depart', name: 'api', methods: ['GET'])]
-    public function apiDepart($typeDepart): JsonResponse
+    public function apiDepartType($typeDepart): JsonResponse
     {
         $codeDepart = Status::REASONCODE[$typeDepart];
         $index = 0;
@@ -111,8 +143,18 @@ class DepartureController extends AbstractController
         return new JsonResponse($apiDeparture);
     }
 
+    #[Route('/', name: 'index2', methods: ['GET'])]
+    public function index(): Response
+    {
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+        $today = Carbon::now();
+        $date = $formatter->format($today);
+        return $this->render('dossier_personal/departure/index2.html.twig', [
+            'date' => $date,
+        ]);
+    }
     #[Route('/{typeDepart}/index', name: 'index', methods: ['GET'])]
-    public function index(DepartureRepository $departureRepository, $typeDepart): Response
+    public function indexTypeDepart($typeDepart): Response
     {
         $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
         $today = Carbon::now();
@@ -164,7 +206,46 @@ class DepartureController extends AbstractController
             'typeDepart' => $typeDepart,
         ]);
     }
+    #[Route('/new/{uuid}/{typeDepart}', name: 'new_uuid_typeDepart', methods: ['GET', 'POST'])]
+    public function newByPersonal(Request $request, EntityManagerInterface $manager, Personal $personal, $typeDepart): Response
+    {
+        /**
+         * @var User $currentUser
+         */
 
+        $typeDeparts =  [
+            'demission'=>'Démission',
+            'retraite'=>'Retraite',
+            'licenciement_lourde' => 'Licenciement faute lourde',
+            'licenciement_simple' => 'Licenciement faute simple',
+            'deces'=>'Décès',
+        ];
+
+        $currentUser = $this->getUser();
+        $departure = new Departure();
+        $departure->setReason($typeDeparts[$typeDepart]);
+        $departure->setPersonal($personal);
+
+        $form = $this->createForm(DepartureType::class, $departure);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $departure->setReasonCode(Status::REASONCODE[$typeDepart]);
+            $this->departServices->calculeDroitsAndIndemnity($departure);
+            $departure->setUser($currentUser);
+            $manager->persist($departure);
+            $manager->flush();
+
+            flash()->addSuccess('Depart enregistrer avec succès.');
+            return $this->redirectToRoute('departure_index', ['typeDepart'=>$typeDepart], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->render('dossier_personal/departure/new.html.twig', [
+            'departure' => $departure,
+            'form' => $form->createView(),
+            'typeDepart' => $typeDepart,
+        ]);
+    }
     /**
      * @throws Exception
      */

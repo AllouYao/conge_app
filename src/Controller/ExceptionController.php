@@ -13,12 +13,10 @@ class ExceptionController extends AbstractController
     {
     }
 
-    #[Route('/exception', name: 'exception')]
+    #[Route('   /exception', name: 'app_exception')]
     public function catchException(): Response
     {
         flash()->addError("Oups! Une erreur est survenue lors du traitement.");
         return $this->render('exception/exception.htlm.twig');
-
-
-    } 
+    }
 }

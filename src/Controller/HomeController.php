@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Repository\DossierPersonal\CongeRepository;
-use App\Scheduler\UpdateOlderPersonal;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -36,8 +35,7 @@ class HomeController extends AbstractController
             }
             $this->manager->persist($enCour);
             $this->manager->flush();
-
         }
-        return $this->render('home/index.html.twig');
+        return $this->render('home/index.html.twig'); 
     }
 }
