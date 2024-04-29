@@ -45,6 +45,7 @@ class DepartureType extends AbstractType
                         ->join('p.contract', 'ct')
                         ->leftJoin('p.departures', 'departure')
                         ->where('departure.id IS NULL ')
+                        ->andWhere('p.active = 0')
                         ->orderBy('p.matricule', 'ASC');
                 },
                 'placeholder' => 'Sélectionner un matricule',
