@@ -58,8 +58,11 @@ class SalaryImpotsService implements SalaryInterface
         $month = $fullDate->format('m');
         $year = $fullDate->format('Y');
         $dateOfMonth = new DateTime($day . '-' . $month . '-' . $year);
-        $last_month = $previousCampagne->getStartedAt()->format('m');
-        $last_day_pr_camp = new DateTime(31 . '-' . $last_month . '-' . $year);
+        $last_day_pr_camp = null;
+        if ($previousCampagne) {
+            $last_month = $previousCampagne->getStartedAt()->format('m');
+            $last_day_pr_camp = new DateTime(31 . '-' . $last_month . '-' . $year);
+        }
 
         if (($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt()) {
             $part = $this->paieByPeriodService->getPartCampagne($personal);
@@ -75,7 +78,6 @@ class SalaryImpotsService implements SalaryInterface
             $amountCNPS = $this->paieByPeriodService->amountCNPSCampagne($personal, $campagne);
             $amountCMU = $this->paieByPeriodService->amountCMUCampagne($personal);
         } elseif (($dateEmbauche > $previousCampagne?->getStartedAt()) && $dateEmbauche <= $last_day_pr_camp) {
-            ($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt();
             $part = $this->paieProrataService->nombrePart($personal);
             $impotBrut = $this->paieProrataService->amountImpotBrut($personal, $campagne);
             $creditImpot = $this->paieProrataService->amountCreditImpot($personal);
@@ -142,8 +144,11 @@ class SalaryImpotsService implements SalaryInterface
         $month = $fullDate->format('m');
         $year = $fullDate->format('Y');
         $dateOfMonth = new DateTime($day . '-' . $month . '-' . $year);
-        $last_month = $previousCampagne->getStartedAt()->format('m');
-        $last_day_pr_camp = new DateTime(31 . '-' . $last_month . '-' . $year);
+        $last_day_pr_camp = null;
+        if ($previousCampagne) {
+            $last_month = $previousCampagne->getStartedAt()->format('m');
+            $last_day_pr_camp = new DateTime(31 . '-' . $last_month . '-' . $year);
+        }
         if (($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt()) {
             $montantIs = $this->paieByPeriodService->amountISCampagne($personal, $campagne);
             $montantFPC = $this->paieByPeriodService->amountFPCCampagne($personal, $campagne);
