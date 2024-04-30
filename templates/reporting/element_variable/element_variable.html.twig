@@ -21,6 +21,9 @@
                 <div class="card-body">
                     <div id="dataGridReleveComparSalaire"></div>
                 </div>
+                <div class="card-footer">
+                    <div id="consulte-contained" class="float-end mx-1"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -271,6 +274,15 @@
                             },
                         },
                     ],
+                }
+            })
+            $("#consulte-contained").dxButton({
+                stylingMode: 'contained',
+                text: 'Retour vers livre de paie',
+                type: 'default',
+                width: 120,
+                onClick() {
+                    window.location.href = '/campagne/index';
                 }
             })
         })

@@ -57,7 +57,7 @@ class PersonalRepository extends ServiceEntityRepository
 
     public function findAllPersonalByEmployeRole(): array
     {
-        $qb = $this->createQueryBuilder('p')
+        $qb = $this->createQueryBuilder('p');
         /** @var User $user */
         $user = $this->security->getUser();
         $qb = $this->createQueryBuilder('p');
