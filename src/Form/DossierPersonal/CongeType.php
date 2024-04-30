@@ -21,6 +21,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class CongeType extends AbstractType
 {
@@ -113,9 +114,11 @@ class CongeType extends AbstractType
                     $last_conges = $this->congeRepository->getLastCongeByID($personal->getId(), false);
                     $historique_conge = $this->oldCongeRepository->findOneByPerso($personal->getId());
                     $hist_date_retour = "";
+                    $hist_sal_moyen = 0;
                     if ($historique_conge) {
                         $hist_date_retour = $historique_conge->getDateRetour()->format('d/m/Y');
                         $work_month = $this->congeService->getWorkMonth($historique_conge->getDateRetour(), $today);
+                        $hist_sal_moyen = $historique_conge->getSalaryAverage();
                     } else {
                         $embauche = $personal->getContract()->getDateEmbauche();
                         $work_month = $this->congeService->getWorkMonth($embauche, $today);
@@ -125,7 +128,8 @@ class CongeType extends AbstractType
                         'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y'),
                         'data-category' => '( ' . $personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' . $personal->getCategorie()->getIntitule(),
                         'data-dernier-retour' => $last_conges ? date_format($last_conges->getDateDernierRetour(), 'd/m/Y') : $hist_date_retour,
-                        'data-remaining' => $last_conges ? ceil($last_conges->getRemainingVacation()) : ceil($work_month * 2.2 * 1.25)
+                        'data-remaining' => $last_conges ? ceil($last_conges->getRemainingVacation()) : ceil($work_month * 2.2 * 1.25),
+                        'data-salaire-moyen' => $last_conges ? null : $hist_sal_moyen
                     ];
                 }
             ])
@@ -162,7 +166,16 @@ class CongeType extends AbstractType
 
                 ]
             ])
-            ->add('dateReprise', DateCustomType::class);
+            ->add('dateReprise', DateCustomType::class)
+            ->add('salaireMoyen', TextType::class, [
+                'required' => true,
+                'constraints' => [
+                    new NotBlank(),
+                ],
+                'attr' => [
+                    'class' => 'separator text-end'
+                ]
+            ]);
 
         $builder
             ->addEventListener(
@@ -242,9 +255,11 @@ class CongeType extends AbstractType
                                 $last_conges = $this->congeRepository->getLastCongeByID($personal->getId(), false);
                                 $historique_conge = $this->oldCongeRepository->findOneByPerso($personal->getId());
                                 $hist_date_retour = "";
+                                $hist_sal_moyen = 0;
                                 if ($historique_conge) {
                                     $hist_date_retour = $historique_conge->getDateRetour()->format('d/m/Y');
                                     $work_month = $this->congeService->getWorkMonth($historique_conge->getDateRetour(), $today);
+                                    $hist_sal_moyen = $historique_conge->getSalaryAverage();
                                 } else {
                                     $embauche = $personal->getContract()->getDateEmbauche();
                                     $work_month = $this->congeService->getWorkMonth($embauche, $today);
@@ -254,7 +269,8 @@ class CongeType extends AbstractType
                                     'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y'),
                                     'data-category' => '( ' . $personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' . $personal->getCategorie()->getIntitule(),
                                     'data-dernier-retour' => $last_conges ? date_format($last_conges->getDateDernierRetour(), 'd/m/Y') : $hist_date_retour,
-                                    'data-remaining' => $last_conges ? ceil($last_conges->getRemainingVacation()) : ceil($work_month * 2.2 * 1.25)
+                                    'data-remaining' => $last_conges ? ceil($last_conges->getRemainingVacation()) : ceil($work_month * 2.2 * 1.25),
+                                    'data-salaire-moyen' => $last_conges ? null : $hist_sal_moyen
                                 ];
                             }
                         ]);

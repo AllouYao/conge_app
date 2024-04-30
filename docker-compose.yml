@@ -1,32 +1,31 @@
-version: '3'
-
 services:
   phpmyadmin:
     image: phpmyadmin
     restart: always
     ports:
-      - "3000:80"
+      - '8080:80'
     networks:
       - orbis_paie
     environment:
       PMA_HOST: database
-###> doctrine/doctrine-bundle ###
+  ###> doctrine/doctrine-bundle ###
   database:
     networks:
       - orbis_paie
-    image: mariadb:${POSTGRES_VERSION:-10.8.3}
+    image: mysql:8.0.35
     environment:
-      MARIADB_DATABASE: ${POSTGRES_DB:-orbis_paie}
-      # You should definitely change the password in production
-      MARIADB_ROOT_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-main}
+      MYSQL_USER: ${MYSQL_USER:-offset}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-!ChangeMe!}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-!ChangeMe!}
+    ports:
+      - '3307:3306'
     volumes:
       - paie_db:/var/lib/mysql:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
 ###< doctrine/doctrine-bundle ###
 
 volumes:
-###> doctrine/doctrine-bundle ###
+  ###> doctrine/doctrine-bundle ###
   paie_db:
 ###< doctrine/doctrine-bundle ###
 networks:

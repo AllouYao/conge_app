@@ -4,12 +4,15 @@ namespace App\Form\DossierPersonal;
 
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Settings\Category;
+use App\Entity\Settings\Job;
+use App\Entity\Settings\Service;
 use App\Form\CustomType\DateCustomType;
 use App\Repository\Settings\CategoryRepository;
 use App\Utils\Status;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -114,6 +117,13 @@ class PersonalType extends AbstractType
             ->add('numExtraitActe', TextType::class, [
                 'required' => false
             ])
+            ->add('isCmu', CheckboxType::class, [
+                'required' => false,
+                'label' => false,
+            ])
+            ->add('numCmu', TextType::class, [
+                'required' => false
+            ])
             ->add('etatCivil', ChoiceType::class, [
                 'choices' => [
                     'Célibataire' => Status::CELIBATAIRE,
@@ -164,65 +174,19 @@ class PersonalType extends AbstractType
                     new NotBlank()
                 ]
             ])
-            ->add('fonction', ChoiceType::class, [
+            ->add('job', EntityType::class, [
+                'class' => Job::class,
+                'placeholder' => '---- Selectionner une fonction ----',
                 'required' => false,
                 'attr' => [
                     'data-plugin' => 'customselect',
                 ],
-                'constraints' => [
-                    new NotBlank()
-                ],
-                'choices' => [
-                    'COMMERCIAL PISTE' => Status::COMMERCIAL_PISTE,
-                    'COMMERCIAL BOUTIQUE' => Status::COMMERCIAL_BOUTIQUE,
-                    'QHM' => Status::QHM,
-                    'SITE MANAGER' => Status::SITE_MANAGER,
-                    'LAVEUR (SE)' => Status::LAVEUR,
-                    'SEA' => Status::SEA,
-                    'OS' => Status::OS,
-                    'RESOURCE HUMAINE' => Status::RH,
-                    'ASSISTANT RH' => Status::ASSISTANT_RH,
-                    'TRESORERIE' => Status::TRESORERIE,
-                    'ASSISTANCE TRESORERIE' => Status::ASSISTANCE_TR,
-                    'GERANTE' => Status::GERANTE,
-                    'RESPONSABLE OPERATION' => Status::RESPONSABLE_SO,
-                    'ASSISTANT SERVICE OPERATION' => Status::ASSISTANT_SO,
-                    'ESCORTE' => Status::ESCORTE,
-                    'SUPERVISEUR' => Status::SUPERVISEUR,
-                    'RESPONSABLE DES MOYENS GENERAUX' => Status::RMG,
-                    'COMPTABLE' => Status::COMPTABLE,
-                    'ASSISTANT COMPTABLE' => Status::ASSISTANT_COMT,
-                ],
-                'placeholder' => 'Sélectionner une fonction'
             ])
-            ->add('service', ChoiceType::class, [
+            ->add('workplace', EntityType::class, [
+                'class' => Service::class,
                 'required' => false,
                 'attr' => [
                     'data-plugin' => 'customselect',
-                ],
-                'choices' => [
-                    'STATION AP MAGIC' => Status::STATION_AP_MAGIC,
-                    'STATION SHELL TREICHVILLE HABITAT' => Status::STATION_SHELL_TREICH_HABITAT,
-                    'DIRECTION' => Status::DIRECTION,
-                    'SHELL PARIS' => Status::SHELL_PARIS,
-                    'STATION AP BENSON' => Status::STATION_AP_BENSON,
-                    'STATION PO SONGON' => Status::STATION_PO_SONGON,
-                    'STATION SHELL RO GABON' => Status::STATION_SHELL_RO_GABON,
-                    'STATION IW YOPOUGON' => Status::STATION_IW_YOPOUGON,
-                    'BOUTIQUE AGBOVILLE' => status::BOUTIQUE_AGBOVILLE,
-                    'SHOP MANAGER' => status::SHOP_MANAGER,
-                    'BOUTIQUE SHELL ADZOPE' => status::BOUTIQUE_SHELL_ADZOPE,
-                    'BOUTIQUE TREICHVILLE HABITAT' => status::BOUTIQUE_TREICHVILLE_HABITAT,
-                    'STATION SHELL AGBOVILLE' => status::STATION_SHELL_AGBOVILLE,
-                    'STATION PO LOCODJORO' => status::STATION_PO_LOCODJORO,
-                    'STATION SHELL LAGUNAIRE' => status::STATION_SHELL_LAGUNAIRE,
-                    'SS RO GABON' => status::SS_RO_GABON,
-                    'SS LAGUNAIRE' => status::SS_LAGUNAIRE,
-                    'STATION SHELL ADZOPE' => status::STATION_SHELL_ADZOPE,
-                    'BOUTIQUE PO LOCCODJORO' => status::BOUTIQUE_PO_LOCODJORO,
-                    'SEA TOURNANT-ABIDJAN SUD' => Status::SEA_TOURNANT_ABIDJAN_SUD,
-
-
                 ],
                 'placeholder' => 'Sélectionner le site de travail',
                 'constraints' => [

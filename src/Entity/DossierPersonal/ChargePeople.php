@@ -50,6 +50,12 @@ class ChargePeople
     #[ORM\ManyToMany(targetEntity: DetailRetenueForfetaire::class, mappedBy: 'chargePeople')]
     private Collection $detailRetenueForfetaires;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $isCmu = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $numCmu = null;
+
     public function __construct()
     {
         $this->detailRetenueForfetaires = new ArrayCollection();
@@ -186,6 +192,30 @@ class ChargePeople
     public function __toString(): string
     {
         return $this->getFirstName() . ' ' . $this->getLastName();
+    }
+
+    public function isIsCmu(): ?bool
+    {
+        return $this->isCmu;
+    }
+
+    public function setIsCmu(?bool $isCmu): static
+    {
+        $this->isCmu = $isCmu;
+
+        return $this;
+    }
+
+    public function getNumCmu(): ?string
+    {
+        return $this->numCmu;
+    }
+
+    public function setNumCmu(?string $numCmu): static
+    {
+        $this->numCmu = $numCmu;
+
+        return $this;
     }
 
 

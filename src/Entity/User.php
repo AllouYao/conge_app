@@ -11,6 +11,7 @@ use App\Entity\DossierPersonal\Conge;
 use App\Entity\DossierPersonal\Departure;
 use App\Entity\DossierPersonal\DetailRetenueForfetaire;
 use App\Entity\DossierPersonal\HeureSup;
+use App\Entity\Settings\CategorySalarie;
 use App\Utils\Horodatage;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -72,6 +73,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Operation::class)]
     private Collection $operations;
+
+    #[ORM\ManyToMany(targetEntity: CategorySalarie::class)]
+    private Collection $categories;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $lastName = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $firstName = null;
+
     public function __construct()
     {
         $this->customRoles = new ArrayCollection();
@@ -83,6 +94,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->chargepeople = new ArrayCollection();
         $this->detailRetenueForfetaires = new ArrayCollection();
         $this->operations = new ArrayCollection();
+        $this->categories = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -431,6 +443,54 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $operation->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CategorySalarie>
+     */
+    public function getCategories(): Collection
+    {
+        return $this->categories;
+    }
+
+    public function addCategory(CategorySalarie $category): static
+    {
+        if (!$this->categories->contains($category)) {
+            $this->categories->add($category);
+        }
+
+        return $this;
+    }
+
+    public function removeCategory(CategorySalarie $category): static
+    {
+        $this->categories->removeElement($category);
+
+        return $this;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(?string $lastName): static
+    {
+        $this->lastName = $lastName;
+
+        return $this;
+    }
+
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(?string $firstName): static
+    {
+        $this->firstName = $firstName;
 
         return $this;
     }

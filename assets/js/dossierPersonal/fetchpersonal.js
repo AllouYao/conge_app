@@ -26,12 +26,14 @@ let conge = () => {
     const category = selectedOption.attr('data-category');
     const dernierRetour = selectedOption.attr('data-dernier-retour');
     const remaining = selectedOption.attr('data-remaining');
+    const salary_moyen = selectedOption.attr('data-salaire-moyen');
 
     $('#conge_name').val(name);
     $('#conge_hireDate').val(hireDate);
     $('#conge_category').val(category);
     $('#conge_dernierRetour').val(dernierRetour);
     $('#conge_remaining').val(remaining);
+    $('#conge_salaireMoyen').val(salary_moyen);
 }
 
 let heureSupp = () => {

@@ -25,17 +25,19 @@ class HeureSupController extends AbstractController
     private EntityManagerInterface $entityManager;
     private PersonalRepository $personalRepository;
     private HeureSupRepository $heureSupRepository;
+    private WorkTimeRepository $workTimeRepository;
 
 
     public function __construct(
         EntityManagerInterface $entityManager,
         PersonalRepository     $personalRepository,
-        HeureSupRepository     $heureSupRepository,
+        HeureSupRepository     $heureSupRepository, WorkTimeRepository $workTimeRepository,
     )
     {
         $this->entityManager = $entityManager;
         $this->personalRepository = $personalRepository;
         $this->heureSupRepository = $heureSupRepository;
+        $this->workTimeRepository = $workTimeRepository;
     }
 
     #[Route('/api/heure_supp_super_book', name: 'api_heure_supp_super_book', methods: ['GET'])]
@@ -51,12 +53,7 @@ class HeureSupController extends AbstractController
         $apiHeureSupp = [];
         $salaireHoraire = 0;
 
-        if ($this->isGranted('ROLE_RH')) {
-            $personals = $this->personalRepository->findAllPersonalOnCampain();
-        } else {
-            $personals = $this->personalRepository->findAllPersonalByEmployeRole();
-        }
-
+        $personals = $this->personalRepository->findAllPersonalOnCampain();
 
         foreach ($personals as $personal) {
             $heureSupp = $this->heureSupRepository->getHeureSupByDate($personal, $month, $years);
@@ -271,7 +268,15 @@ class HeureSupController extends AbstractController
                 flash()->addInfo('Veuillez s\'il vous plaît ajouter au moins une ligne pour continuer merci !');
                 return $this->redirectToRoute('personal_heure_sup_new', [], Response::HTTP_SEE_OTHER);
             }
-            $supService->heureSupp($data, $personal);
+
+            $work_time_params = $this->workTimeRepository->findWorkTimeObj();
+            if ($work_time_params) {
+                $supService->heureSupp($data, $personal);
+            } else {
+                flash()->addInfo("Veuillez s'il vous plaît avant toute operation configurer les heures de travail.");
+                return $this->redirectToRoute('work_time_normal_index', [], Response::HTTP_SEE_OTHER);
+            }
+
             $this->entityManager->flush();
             flash()->addSuccess('Heure suplementaire ajouté avec succès.');
             return $this->redirectToRoute('personal_heure_sup_index', [], Response::HTTP_SEE_OTHER);
@@ -337,9 +342,8 @@ class HeureSupController extends AbstractController
                         $this->entityManager->persist($heureSup);
                     }
                     $this->entityManager->flush();
-                    flash()->addSuccess('Heure supplémentaire validé avec succès!');
-
                 }
+                flash()->addSuccess('Heure supplémentaire validé avec succès!');
             } else {
                 flash()->addWarning('Aucune heure supplementaire sélectionnées');
                 flash()->addInfo('Veillez s\'il vous plait sélectionner au moins une ligne merci !');

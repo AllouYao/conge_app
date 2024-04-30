@@ -33,6 +33,7 @@ class AuthUserType extends AbstractType
                 ],
                 'multiple'=>true,
             ])
+            ->add('categories')
             ->add('active', ChoiceType::class, [
                 'choices' => [
                     'Oui' => true,

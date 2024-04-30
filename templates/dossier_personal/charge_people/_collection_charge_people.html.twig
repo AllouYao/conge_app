@@ -46,6 +46,14 @@
                 "class": 'form-control form-control-sm',
             }}) }}
         </td>
+        <td class="form-switch" style="align-content: center">
+            {{ form_widget(form.isCmu) }}
+        </td>
+        <td>
+            {{ form_widget(form.numCmu,{'attr': {
+                "class": 'form-control form-control-sm',
+            }}) }}
+        </td>
         <td class="text-center">
             <button type="button"
                     class="btn btn-danger btn-sm btn-rounded del_item_link"

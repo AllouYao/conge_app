@@ -65,11 +65,7 @@ class ApiReportingController extends AbstractController
     #[Route('/prime_indemnite', name: 'prime_indemnite', methods: ['GET'])]
     public function primeIndemnite(): JsonResponse
     {
-        if ($this->isGranted('ROLE_RH')) {
-            $personals = $this->personalRepository->findAllPersonalOnCampain();
-        } else {
-            $personals = $this->personalRepository->findAllPersonalByEmployeRole();
-        }
+        $personals = $this->personalRepository->findAllPersonalOnCampain();
         $personalPrime = [];
         foreach ($personals as $value => $personal) {
             $primePanier = $this->primesRepository->findOneBy(['code' => Status::PRIME_PANIER]);
@@ -118,46 +114,37 @@ class ApiReportingController extends AbstractController
         return new JsonResponse($personalPrime);
     }
 
-
     /**
      * @throws Exception
      */
     #[Route('/etat_salaire_globale', name: 'etat_salaire', methods: ['GET'])]
-    public function etatSalarialeGlobale(Request $request): JsonResponse
+    public function etatSalaireGbl(Request $request): JsonResponse
     {
-        $dateRequest = $request->get('dateDebut');
-        $startAt = $endAt = null;
-        if ($dateRequest) {
-            $dateRequestObj = DateTime::createFromFormat('Y-m', $dateRequest);
-            $dateDebut = $dateRequestObj->format('Y-m-01');
-            $dateFin = $dateRequestObj->format('Y-m-t');
-            $startAt = new DateTime($dateDebut);
-            $endAt = new DateTime($dateFin);
-        }
-        $personalID = (int)$request->get('personalsId');
+        $month_request = $request->get('months');
+        $personal_id = (int)$request->get('personalsId');
+        $years = (int)$request->get('year');
 
         if (!$request->isXmlHttpRequest()) {
             return $this->json(['data' => []]);
         }
 
-
-        $data = [];
+        $data_payroll = [];
         if ($this->isGranted('ROLE_RH')) {
-            $salaries = $this->payrollRepository->findEtatSalaire($startAt, $endAt, $personalID);
+            $salaries = $this->payrollRepository->findEtatSalaireClone($month_request, $years, $personal_id);
         } else {
-            $salaries = $this->payrollRepository->findEtatSalaireByRoleEmployer($startAt, $endAt, $personalID);
+            $salaries = $this->payrollRepository->findEtatSalaireByRoleEmployer($month_request, $years, $personal_id);
         }
 
         foreach ($salaries as $index => $salary) {
-            $url = $this->generateUrl('campagne_bulletin_incatif', ['uuid' => $salary['personal_uuid']]);
+            $url_salary = $this->generateUrl('campagne_bulletin_incatif', ['uuid' => $salary['payroll_uuid']]);
             $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
-            $date = $salary['periode_debut'];
-            $periode = $formatter->format($date);
-            $nbJourTravailler = $salary['dayOfPresence'];
-            $data[] = [
+            $date_salary = $salary['periode_debut'];
+            $periode = $formatter->format($date_salary);
+            $nb_jr_travailler = $salary['dayOfPresence'];
+            $data_payroll[] = [
                 'index' => ++$index,
                 'dateCreation' => date_format($salary['startedAt'], 'd/m/Y'),
-                'day_of_presence' => $nbJourTravailler,
+                'day_of_presence' => $nb_jr_travailler,
                 'nb_part' => $salary['numberPart'],
                 'periode' => $periode,
                 'nom_salarie' => $salary['nom'] . ' ' . $salary['prenoms'],
@@ -187,15 +174,200 @@ class ApiReportingController extends AbstractController
                 'assurance_patronales' => (int)$salary['employeurSante'],
                 'charge_patronal' => (int)$salary['totalRetenuePatronal'],
                 'masse_salariale' => (int)$salary['masseSalary'],
-                'print_bulletin' => $url,
+                'print_bulletin' => $url_salary,
                 'regul_moins_percus' => (int)$salary['remboursNet'] + (int)$salary['remboursBrut'],
                 'regul_plus_percus' => (int)$salary['retenueNet'] + $salary['retenueBrut'],
                 'amount_pret_mensuel' => (int)$salary['amountMensualityPret'],
                 'amount_acompte_mensuel' => (int)$salary['amountMensuelAcompt']
             ];
         }
-        return new JsonResponse($data);
+        return new JsonResponse($data_payroll);
     }
+
+    /**
+     * @throws Exception
+     */
+    #[Route('/etat_virements_annuel', name: 'etat_virements_annuel', methods: ['GET'])]
+    public function etatVirementAnl(Request $request): JsonResponse
+    {
+        $month_request = $request->get('months');
+        $personal_id = (int)$request->get('personalsId');
+        $years = (int)$request->get('year');
+
+        if (!$request->isXmlHttpRequest()) {
+            return $this->json(['data' => []]);
+        }
+
+        $data_virement = [];
+        if ($this->isGranted('ROLE_RH')) {
+            $request_viremts = $this->payrollRepository->findPayrollVirementAnnuel(Status::VIREMENT, false, true, $month_request, $years, $personal_id);
+        } else {
+            $request_viremts = $this->payrollRepository->findPayrollVirementAnnuelByRoleEmployeur(Status::VIREMENT, false, true, $month_request, $years, $personal_id);
+        }
+        foreach ($request_viremts as $virement) {
+            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+            $date_viremts = $virement['debut'];
+            $periode = $formatter->format($date_viremts);
+            $data_virement[] = [
+                'name_salaried' => $virement['nom_salaried'] . ' ' . $virement['prenoms_salaried'],
+                'nom_banque' => $virement['name_banque'],
+                'code_agence' => $virement['code_agence'],
+                'code_banque' => $virement['code_compte'],
+                'comptes' => $virement['num_compte'],
+                'cles' => $virement['rib_compte'],
+                'salaire_net' => (double)$virement['net_payes'],
+                'periode' => $periode,
+            ];
+        }
+        return new JsonResponse($data_virement);
+    }
+
+    #[Route('/element_variable', name: 'element_variable', methods: ['GET'])]
+    public function etatVariable(): JsonResponse
+    {
+        $dataElementVariable = [];
+        $campainBefore = $this->campagneRepository->findBeforeLast();
+        $campainLast = $this->campagneRepository->findLastCampagneForRecap();
+
+        if (!$campainBefore) {
+            return $this->json(['data' => []]);
+        }
+        $personals = $campainBefore->getPersonal();
+
+        foreach ($personals as $index => $personal) {
+            $payrollBefore = $this->payrollRepository->findOnePayroll($campainBefore, $personal);
+            $payrollLast = $this->payrollRepository->findOnePayroll($campainLast, $personal);
+
+            if (!$payrollBefore && !$payrollLast) {
+                return $this->json(['data' => []]);
+            }
+
+            $mois_persus_net = $payrollBefore?->getRemboursNet();
+            $mois_persus_brut = $payrollBefore?->getRemboursBrut();
+            $plus_persus_net = $payrollBefore?->getRetenueNet();
+            $plus_persus_brut = $payrollBefore?->getRetenueBrut();
+            $amountBrutBefore = $payrollBefore?->getBrutAmount() + $plus_persus_brut - ($mois_persus_brut);
+            $amountBrutLast = $payrollLast?->getBrutAmount();
+            $amountNetBefore = $payrollBefore?->getNetPayer() + $plus_persus_net - ($mois_persus_net);
+            $amountNetLast = $payrollLast?->getNetPayer();
+            $amountEcartBrut = $amountBrutLast - $amountBrutBefore;
+            $amountEcartNet = $amountNetLast - $amountNetBefore;
+
+            $dataElementVariable[] = [
+                'index' => ++$index,
+                'matricule' => $personal->getMatricule(),
+                'nom' => $personal->getFirstName(),
+                'prenoms' => $personal->getLastName(),
+                'before_brut_amount' => (int)$amountBrutBefore,
+                'last_brut_amount' => (int)$amountBrutLast,
+                'before_net_amount' => (int)$amountNetBefore,
+                'last_net_amount' => (int)$amountNetLast,
+                'ecart_brut_amount' => (int)$amountEcartBrut,
+                'ecart_net_amount' => (int)$amountEcartNet
+            ];
+        }
+
+        return new  JsonResponse($dataElementVariable);
+    }
+
+    /** Etat des versement (Virement et caisse) mensuel **/
+    #[Route('/etat_virements', name: 'etat_virements', methods: ['GET'])]
+    public function etatVersement(): JsonResponse
+    {
+        $dataVirement = [];
+        if ($this->isGranted('ROLE_RH')) {
+            $requestVirements = $this->payrollRepository->getPayrollVirement(Status::VIREMENT, true, true);
+        } else {
+            $requestVirements = $this->payrollRepository->getPayrollVirementByRoleEmployeur(Status::VIREMENT, true, true);
+        }
+        if (!$requestVirements) {
+            return $this->json(['data' => []]);
+        }
+
+        foreach ($requestVirements as $virement) {
+            $dataVirement[] = [
+                'name_salaried' => $virement['nom_salaried'] . ' ' . $virement['prenoms_salaried'],
+                'nom_banque' => $virement['name_banque'],
+                'code_agence' => $virement['code_agence'],
+                'code_banque' => $virement['code_compte'],
+                'comptes' => $virement['num_compte'],
+                'cles' => $virement['rib_compte'],
+                'salaire_net' => (double)$virement['net_payes'],
+            ];
+        }
+        return new JsonResponse($dataVirement);
+    }
+
+    #[Route('/etat_caisse', name: 'etat_versement_caisse', methods: ['GET'])]
+    public function etatCaisse(): JsonResponse
+    {
+        $dataCaisse = [];
+        if ($this->isGranted('ROLE_RH')) {
+            $requestVirements = $this->payrollRepository->getPayrollVirement(Status::CAISSE, true, true);
+        } else {
+            $requestVirements = $this->payrollRepository->getPayrollVirementByRoleEmployeur(Status::CAISSE, true, true);
+        }
+        if (!$requestVirements) {
+            return $this->json(['data' => []]);
+        }
+
+        foreach ($requestVirements as $index => $virement) {
+            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+            $date = $virement['debut'];
+            $periode = $formatter->format($date);
+            $dataCaisse[] = [
+                'ordre' => ++$index,
+                'emmolution' => 'ESPECE',
+                'name_salaried' => $virement['nom_salaried'] . ' ' . $virement['prenoms_salaried'],
+                'salaire_net' => (double)$virement['net_payes'],
+                'periode' => $periode,
+                'emargement' => '',
+                'stations' => $virement['station']
+            ];
+        }
+        return new JsonResponse($dataCaisse);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Route('/etat_caisse_annuel', name: 'etat_versement_caisse_annuel', methods: ['GET'])]
+    public function etatCaisseAnnel(Request $request): JsonResponse
+    {
+        $month_request = $request->get('months');
+        $personal_id = (int)$request->get('personalsId');
+        $years = (int)$request->get('year');
+
+        if (!$request->isXmlHttpRequest()) {
+            return $this->json(['data' => []]);
+        }
+
+        $data_request = [];
+        if ($this->isGranted('ROLE_RH')) {
+            $request_caisse = $this->payrollRepository->findPayrollVirementAnnuel(Status::CAISSE, false, true, $month_request, $years, $personal_id);
+        } else {
+            $request_caisse = $this->payrollRepository->findPayrollVirementAnnuelByRoleEmployeur(Status::CAISSE, false, true, $month_request, $years, $personal_id);
+        }
+        foreach ($request_caisse as $index => $virement) {
+            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+            $date_formater = $virement['debut'];
+            $periode = $formatter->format($date_formater);
+            $data_request[] = [
+                'ordre' => ++$index,
+                'emmolution' => 'ESPECE',
+                'name_salaried' => $virement['nom_salaried'] . ' ' . $virement['prenoms_salaried'],
+                'salaire_net' => (double)$virement['net_payes'],
+                'periode' => $periode,
+                'emargement' => '',
+                'stations' => $virement['station']
+            ];
+        }
+        return new JsonResponse($data_request);
+    }
+
+
+
+
 
 
     /**
@@ -465,194 +637,4 @@ class ApiReportingController extends AbstractController
         return new JsonResponse($data);
     }
 
-    #[Route('/element_variable', name: 'element_variable', methods: ['GET'])]
-    public function etatElementVariable(): JsonResponse
-    {
-        $dataElementVariable = [];
-        $campainBefore = $this->campagneRepository->findBeforeLast();
-        $campainLast = $this->campagneRepository->findLastCampagneForRecap();
-
-        if (!$campainBefore) {
-            return $this->json(['data' => []]);
-        }
-        $personals = $campainBefore->getPersonal();
-
-        foreach ($personals as $index => $personal) {
-            $payrollBefore = $this->payrollRepository->findOnePayroll($campainBefore, $personal);
-            $payrollLast = $this->payrollRepository->findOnePayroll($campainLast, $personal);
-
-            if (!$payrollBefore && !$payrollLast) {
-                return $this->json(['data' => []]);
-            }
-
-            $amountBrutBefore = $payrollBefore?->getBrutAmount();
-            $amountBrutLast = $payrollLast?->getBrutAmount();
-            $amountNetBefore = $payrollBefore?->getNetPayer();
-            $amountNetLast = $payrollLast?->getNetPayer();
-            $amountEcartBrut = $amountBrutLast - $amountBrutBefore;
-            $amountEcartNet = $amountNetLast - $amountNetBefore;
-
-            $dataElementVariable[] = [
-                'index' => ++$index,
-                'matricule' => $personal->getMatricule(),
-                'nom' => $personal->getFirstName(),
-                'prenoms' => $personal->getLastName(),
-                'before_brut_amount' => (int)$amountBrutBefore,
-                'last_brut_amount' => (int)$amountBrutLast,
-                'before_net_amount' => (int)$amountNetBefore,
-                'last_net_amount' => (int)$amountNetLast,
-                'ecart_brut_amount' => (int)$amountEcartBrut,
-                'ecart_net_amount' => (int)$amountEcartNet
-            ];
-        }
-
-        return new  JsonResponse($dataElementVariable);
-    }
-
-    /** Etat des versement (Virement et caisse) mensuel **/
-    #[Route('/etat_virements', name: 'etat_virements', methods: ['GET'])]
-    public function etatVersement(): JsonResponse
-    {
-        $dataVirement = [];
-        if ($this->isGranted('ROLE_RH')) {
-            $requestVirements = $this->payrollRepository->getPayrollVirement(Status::VIREMENT, true, true);
-        } else {
-            $requestVirements = $this->payrollRepository->getPayrollVirementByRoleEmployeur(Status::VIREMENT, true, true);
-        }
-        if (!$requestVirements) {
-            return $this->json(['data' => []]);
-        }
-
-        foreach ($requestVirements as $virement) {
-            $dataVirement[] = [
-                'name_salaried' => $virement['nom_salaried'] . ' ' . $virement['prenoms_salaried'],
-                'nom_banque' => $virement['name_banque'],
-                'code_agence' => $virement['code_agence'],
-                'code_banque' => $virement['code_compte'],
-                'comptes' => $virement['num_compte'],
-                'cles' => $virement['rib_compte'],
-                'salaire_net' => (double)$virement['net_payes'],
-            ];
-        }
-        return new JsonResponse($dataVirement);
-    }
-
-    #[Route('/etat_caisse', name: 'etat_versement_caisse', methods: ['GET'])]
-    public function etatVersementCaisse(): JsonResponse
-    {
-        $dataCaisse = [];
-        if ($this->isGranted('ROLE_RH')) {
-            $requestVirements = $this->payrollRepository->getPayrollVirement(Status::CAISSE, true, true);
-        } else {
-            $requestVirements = $this->payrollRepository->getPayrollVirementByRoleEmployeur(Status::CAISSE, true, true);
-        }
-        if (!$requestVirements) {
-            return $this->json(['data' => []]);
-        }
-
-        foreach ($requestVirements as $index => $virement) {
-            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
-            $date = $virement['debut'];
-            $periode = $formatter->format($date);
-            $dataCaisse[] = [
-                'ordre' => ++$index,
-                'emmolution' => 'ESPECE',
-                'name_salaried' => $virement['nom_salaried'] . ' ' . $virement['prenoms_salaried'],
-                'salaire_net' => (double)$virement['net_payes'],
-                'periode' => $periode,
-                'emargement' => '',
-                'stations' => $virement['station']
-            ];
-        }
-        return new JsonResponse($dataCaisse);
-    }
-
-    /**
-     * @throws Exception
-     */
-    #[Route('/etat_virements_annuel', name: 'etat_virements_annuel', methods: ['GET'])]
-    public function etatVirementAnnuel(Request $request): JsonResponse
-    {
-        $dateRequest = $request->get('dateDebut');
-        $startAt = $endAt = null;
-        if ($dateRequest) {
-            $dateRequestObj = DateTime::createFromFormat('Y-m', $dateRequest);
-            $dateDebut = $dateRequestObj->format('Y-m-01');
-            $dateFin = $dateRequestObj->format('Y-m-t');
-            $startAt = new DateTime($dateDebut);
-            $endAt = new DateTime($dateFin);
-        }
-        $personalID = (int)$request->get('personalsId');
-
-        if (!$request->isXmlHttpRequest()) {
-            return $this->json(['data' => []]);
-        }
-
-        $data = [];
-        if ($this->isGranted('ROLE_RH')) {
-            $requestVirements = $this->payrollRepository->findPayrollVirementAnnuel(Status::VIREMENT, false, true, $startAt, $endAt, $personalID);
-        } else {
-            $requestVirements = $this->payrollRepository->findPayrollVirementAnnuelByRoleEmployeur(Status::VIREMENT, false, true, $startAt, $endAt, $personalID);
-        }
-        foreach ($requestVirements as $virement) {
-            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
-            $date = $virement['debut'];
-            $periode = $formatter->format($date);
-            $data[] = [
-                'name_salaried' => $virement['nom_salaried'] . ' ' . $virement['prenoms_salaried'],
-                'nom_banque' => $virement['name_banque'],
-                'code_agence' => $virement['code_agence'],
-                'code_banque' => $virement['code_compte'],
-                'comptes' => $virement['num_compte'],
-                'cles' => $virement['rib_compte'],
-                'salaire_net' => (double)$virement['net_payes'],
-                'periode' => $periode,
-            ];
-        }
-        return new JsonResponse($data);
-    }
-
-    /**
-     * @throws Exception
-     */
-    #[Route('/etat_caisse_annuel', name: 'etat_versement_caisse_annuel', methods: ['GET'])]
-    public function etatVersementCaisseAnnel(Request $request): JsonResponse
-    {
-        $dateRequest = $request->get('dateDebut');
-        $startAt = $endAt = null;
-        if ($dateRequest) {
-            $dateRequestObj = DateTime::createFromFormat('Y-m', $dateRequest);
-            $dateDebut = $dateRequestObj->format('Y-m-01');
-            $dateFin = $dateRequestObj->format('Y-m-t');
-            $startAt = new DateTime($dateDebut);
-            $endAt = new DateTime($dateFin);
-        }
-        $personalID = (int)$request->get('personalsId');
-
-        if (!$request->isXmlHttpRequest()) {
-            return $this->json(['data' => []]);
-        }
-
-        $data = [];
-        if ($this->isGranted('ROLE_RH')) {
-            $requestVirements = $this->payrollRepository->findPayrollVirementAnnuel(Status::CAISSE, false, true, $startAt, $endAt, $personalID);
-        } else {
-            $requestVirements = $this->payrollRepository->findPayrollVirementAnnuelByRoleEmployeur(Status::CAISSE, false, true, $startAt, $endAt, $personalID);
-        }
-        foreach ($requestVirements as $index => $virement) {
-            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
-            $date = $virement['debut'];
-            $periode = $formatter->format($date);
-            $data[] = [
-                'ordre' => ++$index,
-                'emmolution' => 'ESPECE',
-                'name_salaried' => $virement['nom_salaried'] . ' ' . $virement['prenoms_salaried'],
-                'salaire_net' => (double)$virement['net_payes'],
-                'periode' => $periode,
-                'emargement' => '',
-                'stations' => $virement['station']
-            ];
-        }
-        return new JsonResponse($data);
-    }
 }

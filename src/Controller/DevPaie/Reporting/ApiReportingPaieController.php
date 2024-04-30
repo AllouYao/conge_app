@@ -131,8 +131,8 @@ class ApiReportingPaieController extends AbstractController
     public function regulSalaire(): JsonResponse
     {
         $campagneActive = $this->campagneRepository->active();
-        $month = (int)$campagneActive->getDateDebut()->format('m');
-        $years = (int)$campagneActive->getDateDebut()->format('Y');
+        $month = (int)$campagneActive?->getDateDebut()->format('m');
+        $years = (int)$campagneActive?->getDateDebut()->format('Y');
         if ($this->isGranted('ROLE_RH')) {
             $requestOperationRegularisation = $this->payrollRepository->findOperationByPayroll([Status::RETENUES, Status::REMBOURSEMENT], Status::VALIDATED, $month, $years);
         } else {
@@ -167,25 +167,18 @@ class ApiReportingPaieController extends AbstractController
     #[Route('/regularisation_periodique', 'regularisation_periodique', methods: ['GET'])]
     public function regulSalairePeriodique(Request $request): JsonResponse
     {
-        $dateRequest = $request->get('dateDebut');
-        $startAt = $endAt = null;
-        if ($dateRequest) {
-            $dateRequestObj = DateTime::createFromFormat('Y-m', $dateRequest);
-            $dateDebut = $dateRequestObj->format('Y-m-01');
-            $dateFin = $dateRequestObj->format('Y-m-t');
-            $startAt = new DateTime($dateDebut);
-            $endAt = new DateTime($dateFin);
-        }
-        $personalID = (int)$request->get('personalsId');
+        $month_request = $request->get('months');
+        $personal_id = (int)$request->get('personalsId');
+        $years = (int)$request->get('year');
 
-        if (!$request->isXmlHttpRequest()) {
+        /*if (!$request->isXmlHttpRequest()) {
             return $this->json(['data' => []]);
-        }
+        }*/
 
         if ($this->isGranted('ROLE_RH')) {
-            $requestOperationRegularisation = $this->payrollRepository->findOperationByPeriode($startAt, $endAt, $personalID);
+            $requestOperationRegularisation = $this->payrollRepository->findOperationByPeriode($month_request, $years, $personal_id);
         } else {
-            $requestOperationRegularisation = $this->payrollRepository->findOperationByPeriodeByRoleEmployer($startAt, $endAt, $personalID);
+            $requestOperationRegularisation = $this->payrollRepository->findOperationByPeriodeByRoleEmployer($month_request, $years, $personal_id);
         }
         $dataRegularisationPeriodique = [];
 

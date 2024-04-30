@@ -14,7 +14,7 @@ class SocietyService
 
     }
 
-    public function getSociety(): Society
+    public function info(): Society
     {
         $society = $this->societyRepository->getFirstResult();
 
