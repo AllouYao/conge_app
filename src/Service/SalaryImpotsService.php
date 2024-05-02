@@ -59,8 +59,11 @@ class SalaryImpotsService implements SalaryInterface
         $month = $fullDate->format('m');
         $year = $fullDate->format('Y');
         $dateOfMonth = new DateTime($day . '-' . $month . '-' . $year);
-        $last_month = $previousCampagne->getStartedAt()->format('m');
-        $last_day_pr_camp = new DateTime(31 . '-' . $last_month . '-' . $year);
+        $last_day_pr_camp = null;
+        if ($previousCampagne) {
+            $last_month = $previousCampagne->getStartedAt()->format('m');
+            $last_day_pr_camp = new DateTime(31 . '-' . $last_month . '-' . $year);
+        }
 
         if (($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt()) {
             $part = $this->paieByPeriodService->getPartCampagne($personal);
@@ -142,8 +145,11 @@ class SalaryImpotsService implements SalaryInterface
         $month = $fullDate->format('m');
         $year = $fullDate->format('Y');
         $dateOfMonth = new DateTime($day . '-' . $month . '-' . $year);
-        $last_month = $previousCampagne->getStartedAt()->format('m');
-        $last_day_pr_camp = new DateTime(31 . '-' . $last_month . '-' . $year);
+        $last_day_pr_camp = null;
+        if ($previousCampagne) {
+            $last_month = $previousCampagne->getStartedAt()->format('m');
+            $last_day_pr_camp = new DateTime(31 . '-' . $last_month . '-' . $year);
+        }
         if (($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt()) {
             $montantIs = $this->paieByPeriodService->amountISCampagne($personal, $campagne);
             $montantFPC = $this->paieByPeriodService->amountFPCCampagne($personal, $campagne);

@@ -2,11 +2,9 @@
 
 namespace App\Form\DossierPersonal;
 
-use App\Contract\SalaryInterface;
 use App\Entity\DossierPersonal\Departure;
 use App\Entity\DossierPersonal\Personal;
 use App\Form\CustomType\DateCustomType;
-use App\Repository\DossierPersonal\PersonalRepository;
 use App\Utils\Status;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -16,12 +14,10 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
-use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class DepartureType extends AbstractType
 {
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -39,12 +35,18 @@ class DepartureType extends AbstractType
                 'placeholder' => ""
             ])
             ->add('reason', TextType::class, [
-                'disabled' => true,
+                'disabled'=>true,
             ])
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
-                'query_builder' => function (PersonalRepository $repository) {
-                    return $repository->findPersonalOut();
+                'choice_label' => 'matricule',
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('p')
+                        ->join('p.contract', 'ct')
+                        ->leftJoin('p.departures', 'departure')
+                        ->where('departure.id IS NULL ')
+                        ->andWhere('p.active = 0')
+                        ->orderBy('p.matricule', 'ASC');
                 },
                 'placeholder' => 'Sélectionner un matricule',
                 'attr' => [
@@ -81,12 +83,12 @@ class DepartureType extends AbstractType
             ->addEventListener(
                 FormEvents::PRE_SET_DATA,
                 function (FormEvent $event) {
-                    /** @var Departure $data_d */
-                    $data_d = $event->getData();
-                    $forms = $event->getForm();
-                    $personal = $data_d->getPersonal();
-                    if ($data_d instanceof Departure && $data_d->getId()) {
-                        $forms->add('personal', EntityType::class, [
+                    /** @var Departure $data */
+                    $data = $event->getData();
+                    $form = $event->getForm();
+                    $personal = $data->getPersonal();
+                    if ($data instanceof Departure && $data->getId()) {
+                        $form->add('personal', EntityType::class, [
                             'class' => Personal::class,
                             'choice_label' => 'matricule',
                             'query_builder' => function (EntityRepository $er) use ($personal) {
@@ -114,8 +116,7 @@ class DepartureType extends AbstractType
             );
     }
 
-    public
-    function configureOptions(OptionsResolver $resolver): void
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Departure::class,

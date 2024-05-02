@@ -2,6 +2,8 @@
 
 namespace App\Form\Auth;
 
+use App\Entity\Settings\Category;
+use App\Entity\Settings\CategorySalarie;
 use App\Entity\User;
 use App\Entity\Auth\Role;
 use Symfony\Component\Form\AbstractType;
@@ -33,7 +35,13 @@ class AuthUserType extends AbstractType
                 ],
                 'multiple'=>true,
             ])
-            ->add('categories')
+            ->add('categories', EntityType::class, [
+                'class' => CategorySalarie::class,
+                'attr' => [
+                    'data-plugin' => 'customselect',
+                ],
+                'multiple' => true
+            ])
             ->add('active', ChoiceType::class, [
                 'choices' => [
                     'Oui' => true,
