@@ -74,6 +74,33 @@
             </div>
         </div>
     </form>
+     <form method="POST" action="{{ path('campagne_close') }}" id="formCampagneOpene">
+        <div class="modal fade" id="closeCampagneModal" tabindex="-1" role="dialog"
+             aria-labelledby="closeCampagneModal" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="closeCampagneModal">Confirmation de
+                            validation</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>La cloture de la paie est irreversible, êtes-vous sûr de vouloir clôturer la paie?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Annuler
+                        </button>
+                        <button type="submit" class="btn btn-success confirm" name="confirm"
+                                id="closeCampagneButton">
+                            Confirmer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -103,6 +130,9 @@
                                 <div id="canceled-contained" class="float-end mx-1"></div>
                             {% endif %}
                         {% endif %}
+
+                        <div id="cloture-contained" class="float-end mx-1"></div>
+                        <div id="consulte-contained" class="float-end mx-1"></div>
                     {% endif %}
                 </div>
             </div>
@@ -702,6 +732,24 @@
                             },
                         },
                     ]
+                }
+            })
+            $("#consulte-contained").dxButton({
+                stylingMode: 'contained',
+                text: 'Consulter etat rep salr',
+                type: 'default',
+                width: 120,
+                onClick() {
+                    window.location.href = '/reporting/element_variable';
+                }
+            })
+            $("#cloture-contained").dxButton({
+                stylingMode: 'contained',
+                text: 'Cloturer la paie',
+                type: 'danger',
+                width: 120,
+                onClick() {
+                    $('#closeCampagneModal').modal('show');
                 }
             })
             $("#print-contained").dxButton({

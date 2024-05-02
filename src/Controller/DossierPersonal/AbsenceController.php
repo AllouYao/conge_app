@@ -96,7 +96,7 @@ class AbsenceController extends AbstractController
         $form = $this->createForm(PersonalAbsenceType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $personalAbsence = $form->get('absence')->getData();
+            $personalAbsence = $form->get('absencess')->getData();
             $personal = $form->get('personal')->getData();
             if ($form->get('absence')->count() == 0) {
                 flash()->addInfo('Veuillez s\'il vous plaît ajouter au moins une ligne pour continuer merci !');

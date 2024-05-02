@@ -28,8 +28,37 @@ class PersonalRepository extends ServiceEntityRepository
     /**
      * @return Personal[] Returns an array of Personal objects
      */
+    public function findDisablePersonal(): array
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->where('p.active = false')
+            ->orderBy('p.matricule', 'ASC')
+            ->getQuery()
+            ->getResult();
+        return array_map(function ($result) {
+            return $result;
+        }, $qb);
+    }
     public function findAllPersonalOnCampain(): array
     {
+        $qb = $this->createQueryBuilder('p')
+            ->join('p.contract', 'contract')
+            ->leftJoin('p.departures', 'departures')
+            ->where('departures.id IS NULL')
+            ->andWhere('contract.typeContrat IN (:type)')
+            ->andWhere('p.active = true')
+            ->setParameter('type', [Status::CDI, Status::CDD, Status::CDDI])
+            ->orderBy('p.matricule', 'ASC')
+            ->getQuery()
+            ->getResult();
+        return array_map(function ($result) { 
+            return $result;
+        }, $qb);
+    }
+
+    public function findAllPersonalByEmployeRole(): array
+    {
+        $qb = $this->createQueryBuilder('p');
         /** @var User $user */
         $user = $this->security->getUser();
         $qb = $this->createQueryBuilder('p');
