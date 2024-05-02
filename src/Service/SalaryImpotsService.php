@@ -4,6 +4,7 @@ namespace App\Service;
 
 
 use App\Contract\SalaryInterface;
+use App\Entity\DossierPersonal\Departure;
 use App\Entity\DossierPersonal\Personal;
 use App\Entity\Impots\ChargeEmployeur;
 use App\Entity\Impots\ChargePersonals;
@@ -26,14 +27,14 @@ class SalaryImpotsService implements SalaryInterface
     private ChargePersonalsRepository $chargePersonalRt;
     private ChargeEmployeurRepository $chargeEmployeurRt;
     private PaieServices $paieServices;
-    private PaieOutService $departureCampagneService;
+    private PaieOutService $outServices;
 
     public function __construct(
         EntityManagerInterface               $manager,
         ChargePersonalsRepository            $chargePersonalsRepository,
         ChargeEmployeurRepository            $chargeEmployeurRepository,
         PaieServices                         $paieServices,
-        PaieOutService                       $departureCampagneService,
+        PaieOutService                       $paieOutService,
         private readonly PaieByPeriodService $paieByPeriodService,
         private readonly CampagneRepository  $campagneRepository,
         private readonly PaieProrataService  $paieProrataService
@@ -43,7 +44,7 @@ class SalaryImpotsService implements SalaryInterface
         $this->chargePersonalRt = $chargePersonalsRepository;
         $this->chargeEmployeurRt = $chargeEmployeurRepository;
         $this->paieServices = $paieServices;
-        $this->departureCampagneService = $departureCampagneService;
+        $this->outServices = $paieOutService;
     }
 
     /**
@@ -75,7 +76,6 @@ class SalaryImpotsService implements SalaryInterface
             $amountCNPS = $this->paieByPeriodService->amountCNPSCampagne($personal, $campagne);
             $amountCMU = $this->paieByPeriodService->amountCMUCampagne($personal);
         } elseif (($dateEmbauche > $previousCampagne?->getStartedAt()) && $dateEmbauche <= $last_day_pr_camp) {
-            ($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt();
             $part = $this->paieProrataService->nombrePart($personal);
             $impotBrut = $this->paieProrataService->amountImpotBrut($personal, $campagne);
             $creditImpot = $this->paieProrataService->amountCreditImpot($personal);
@@ -207,93 +207,101 @@ class SalaryImpotsService implements SalaryInterface
     }
 
     /**
+     * @param Departure $departure
      * @throws Exception
      */
-    public function chargePersonalByDeparture(Personal $personal, Campagne $campagne): void
+    public function chargPersonalOut(Departure $departure): void
     {
-        $netImposable = $this->departureCampagneService->netImposableByNbDayOfPresence($personal->getDepartures());
-        $part = $this->departureCampagneService->nbPartCampagneByDeparture($personal->getDepartures());
-        $impotBrut = $this->departureCampagneService->amountImpotBrutCampagneByDeparture($personal->getDepartures(), $campagne);
-        $creditImpot = $this->departureCampagneService->amountCreditImpotCampagneByDeparture($personal->getDepartures());
-        $impotNet = $impotBrut - $creditImpot;
-        if ($netImposable <= 75000 || $impotNet < 0) {
-            $impotNet = 0;
+        $majoration = (int)$this->outServices->getMajorations($departure);
+        $prime_anciennete = (int)$this->outServices->getPrimeAncien($departure);
+        $brut_imposable = (int)$this->outServices->getSalaires($departure)['brut_imposable_amount'];
+        $net_imposable = $majoration + $prime_anciennete + $brut_imposable;
+
+        $parts = $this->outServices->getNombrePart($departure);
+        $impot_brut = (int)$this->outServices->getImpotBrut($departure);
+        $credit_impot = (int)$this->outServices->getCreditImpot($departure);
+
+        $impot_net = $impot_brut - $credit_impot;
+        if ($net_imposable <= 75000 || $impot_net < 0) {
+            $impot_net = 0;
         }
-        $amountCNPS = $this->departureCampagneService->amountCNPSCampagneByDeparture($personal->getDepartures(), $campagne);
-        $amountCMU = $this->departureCampagneService->amountCMUCampagneByDeparture($personal->getDepartures());
-        $charge = $this->chargePersonalRt->findOneBy(['personal' => $personal, 'departure' => $personal->getDepartures()]);
+
+        $amount_cnps = (int)$this->outServices->getCnps($departure);
+        $amount_cmu = (int)$this->outServices->getCmu($departure);
+        $total_charge = $impot_net + $amount_cnps + $amount_cmu;
+        $charge = $this->chargePersonalRt->findOneBy(['personal' => $departure->getPersonal(), 'departure' => $departure]);
         if (!$charge) {
             $charge = (new ChargePersonals())
-                ->setPersonal($personal)
-                ->setDeparture($personal->getDepartures())
-                ->setNumPart($part)
-                ->setAmountImpotBrut($impotBrut)
-                ->setAmountCreditImpot($creditImpot)
-                ->setAmountIts($impotNet)
-                ->setAmountCMU($amountCMU)
-                ->setAmountCNPS($amountCNPS)
-                ->setAmountTotalChargePersonal($impotNet + $amountCMU + $amountCNPS);
+                ->setPersonal($departure->getPersonal())
+                ->setDeparture($departure)
+                ->setNumPart($parts)
+                ->setAmountImpotBrut($impot_brut)
+                ->setAmountCreditImpot($credit_impot)
+                ->setAmountIts($impot_net)
+                ->setAmountCMU($amount_cmu)
+                ->setAmountCNPS($amount_cnps)
+                ->setAmountTotalChargePersonal($total_charge);
         }
         $charge
-            ->setPersonal($personal)
-            ->setDeparture($personal->getDepartures())
-            ->setNumPart($part)
-            ->setAmountImpotBrut($impotBrut)
-            ->setAmountCreditImpot($creditImpot)
-            ->setAmountIts($impotNet)
-            ->setAmountCMU($amountCMU)
-            ->setAmountCNPS($amountCNPS)
-            ->setAmountTotalChargePersonal($impotNet + $amountCMU + $amountCNPS);
+            ->setPersonal($departure->getPersonal())
+            ->setDeparture($departure)
+            ->setNumPart($parts)
+            ->setAmountImpotBrut($impot_brut)
+            ->setAmountCreditImpot($credit_impot)
+            ->setAmountIts($impot_net)
+            ->setAmountCMU($amount_cmu)
+            ->setAmountCNPS($amount_cnps)
+            ->setAmountTotalChargePersonal($total_charge);
         $this->manager->persist($charge);
-        $this->manager->flush();
+        //$this->manager->flush();
     }
 
     /**
      * @throws Exception
      */
-    public function chargeEmployeurByDeparture(Personal $personal, Campagne $campagne): void
+    public function chargEmployerOut(Departure $departure): void
     {
-        $montantIs = $this->departureCampagneService->amountISCampagneByDeparture($personal->getDepartures(), $campagne);
-        $montantCR = $this->departureCampagneService->amountCRCampagneByDeparture($personal->getDepartures(), $campagne);
-        $montantPF = $this->departureCampagneService->amountPFCampagneByDeparture($personal->getDepartures());
-        $montantAT = $this->departureCampagneService->amountATCampagneByDeparture($personal->getDepartures());
-        $montantTA = $this->departureCampagneService->amountTACampagneByDeparture($personal->getDepartures(), $campagne);
-        $montantFPC = $this->departureCampagneService->amountFPCCampagneByDeparture($personal->getDepartures(), $campagne);
-        $montantFPCAnnuel = $this->departureCampagneService->amountFPCAnnuelCampagneByDeparture($personal->getDepartures(), $campagne);
-        $montantCMU = $this->departureCampagneService->amountCMUEmpCampagneByDeparture();
-        $montantRetenuCNPS = $montantCR + $montantPF + $montantAT;
-        $totalChargeEmployeur = $montantIs + $montantFPC + $montantFPCAnnuel + $montantTA + $montantRetenuCNPS + $montantCMU;
-        $chargeEmpl = $this->chargeEmployeurRt->findOneBy(['personal' => $personal, 'departure' => $personal->getDepartures()]);
-        if (!$chargeEmpl) {
-            $chargeEmpl = (new ChargeEmployeur())
-                ->setPersonal($personal)
-                ->setDeparture($personal->getDepartures())
-                ->setAmountIS($montantIs)
-                ->setAmountCR($montantCR)
-                ->setAmountPF($montantPF)
-                ->setAmountAT($montantAT)
-                ->setAmountCMU($montantCMU)
-                ->setAmountTA($montantTA)
-                ->setAmountFPC($montantFPC)
-                ->setAmountAnnuelFPC($montantFPCAnnuel)
-                ->setTotalRetenuCNPS($montantRetenuCNPS)
-                ->setTotalChargeEmployeur($totalChargeEmployeur);
+        $montant_is = $this->outServices->getIS($departure);
+        $montant_cr = $this->outServices->getCnpsRetraite($departure);
+        $montant_pf = $this->outServices->getPrestFamily($departure);
+        $montant_at = $this->outServices->getAccidentWorks($departure);
+        $montant_ta = $this->outServices->getTauxLearns($departure);
+        $montant_fpc = $this->outServices->getFpc($departure);
+        $montant_fpc_year = $this->outServices->getFpcAnnuel($departure);
+        $montant_cmu = $this->outServices->getCmuEmployer();
+        $total_rate_cnps = $montant_cr + $montant_pf + $montant_at;
+        $total_charge = $montant_is + $montant_fpc + $montant_fpc_year + $montant_ta + $total_rate_cnps + $montant_cmu;
+        $charge_employer = $this->chargeEmployeurRt->findOneBy(['personal' => $departure->getPersonal(), 'departure' => $departure]);
+        if (!$charge_employer) {
+            $charge_employer = (new ChargeEmployeur())
+                ->setPersonal($departure->getPersonal())
+                ->setDeparture($departure)
+                ->setAmountIS($montant_is)
+                ->setAmountCR($montant_cr)
+                ->setAmountPF($montant_pf)
+                ->setAmountAT($montant_at)
+                ->setAmountCMU($montant_cmu)
+                ->setAmountTA($montant_ta)
+                ->setAmountFPC($montant_fpc)
+                ->setAmountAnnuelFPC($montant_fpc_year)
+                ->setTotalRetenuCNPS($total_rate_cnps)
+                ->setTotalChargeEmployeur($total_charge);
         }
-        $chargeEmpl
-            ->setPersonal($personal)
-            ->setDeparture($personal->getDepartures())
-            ->setAmountIS($montantIs)
-            ->setAmountCR($montantCR)
-            ->setAmountPF($montantPF)
-            ->setAmountAT($montantAT)
-            ->setAmountCMU($montantCMU)
-            ->setAmountTA($montantTA)
-            ->setAmountFPC($montantFPC)
-            ->setAmountAnnuelFPC($montantFPCAnnuel)
-            ->setTotalRetenuCNPS($montantRetenuCNPS)
-            ->setTotalChargeEmployeur($totalChargeEmployeur);
-        $this->manager->persist($chargeEmpl);
-        $this->manager->flush();
+        $charge_employer
+            ->setPersonal($departure->getPersonal())
+            ->setDeparture($departure)
+            ->setAmountIS($montant_is)
+            ->setAmountCR($montant_cr)
+            ->setAmountPF($montant_pf)
+            ->setAmountAT($montant_at)
+            ->setAmountCMU($montant_cmu)
+            ->setAmountTA($montant_ta)
+            ->setAmountFPC($montant_fpc)
+            ->setAmountAnnuelFPC($montant_fpc_year)
+            ->setTotalRetenuCNPS($total_rate_cnps)
+            ->setTotalChargeEmployeur($total_charge);
+        $this->manager->persist($charge_employer);
+        //$this->manager->flush();
     }
 
 }

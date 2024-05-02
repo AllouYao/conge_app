@@ -6,6 +6,7 @@ use App\Entity\DossierPersonal\Personal;
 use App\Entity\User;
 use App\Utils\Status;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Query;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -102,19 +103,67 @@ class PersonalRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /**
-     * @return Personal[] Returns an array of Personal objects
-     */
-    public function findAllPersonalDepart(): array
+
+    public function findPersonalOut(): \Doctrine\ORM\QueryBuilder
     {
-        $qb = $this->createQueryBuilder('p')
-            ->join('p.departures', 'departures')
+        /** @var User $user */
+        $users = $this->security->getUser();
+        $query = $this->createQueryBuilder('p');
+        $manager = $query->getEntityManager();
+         $query
             ->join('p.contract', 'contract')
-            ->where('departures.id is not null')
-            ->andWhere('contract.id is not null')->getQuery()->getResult();
-        return array_map(function ($result) {
-            return $result;
-        }, $qb);
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->leftJoin('p.departures', 'departures')
+            ->where(
+                $query->expr()
+                    ->in(
+                        'category_salarie.id',
+                        $manager
+                            ->createQueryBuilder()
+                            ->select('c.id')
+                            ->from('App:User', 'u')
+                            ->join('u.categories', 'c')
+                            ->where($query->expr()->eq('u.id', $users->getId()))
+                            ->getDQL()
+                    )
+            )
+            ->andWhere('contract.typeContrat IN (:type)')
+            ->andWhere('p.active = false')
+            ->andWhere('departures.id IS NULL')
+            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
+            ->orderBy('p.firstName', 'ASC');
+        return $query;
+    }
+    public function findPersonalOutN(): \Doctrine\ORM\QueryBuilder
+    {
+        /** @var User $user */
+        $users = $this->security->getUser();
+        $query = $this->createQueryBuilder('p');
+        $manager = $query->getEntityManager();
+         $query
+            ->join('p.contract', 'contract')
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->join('p.departures', 'departures')
+            ->where(
+                $query->expr()
+                    ->in(
+                        'category_salarie.id',
+                        $manager
+                            ->createQueryBuilder()
+                            ->select('c.id')
+                            ->from('App:User', 'u')
+                            ->join('u.categories', 'c')
+                            ->where($query->expr()->eq('u.id', $users->getId()))
+                            ->getDQL()
+                    )
+            )
+            ->andWhere('contract.typeContrat IN (:type)')
+            ->andWhere('p.active = false')
+            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
+            ->orderBy('p.firstName', 'ASC');
+        return $query;
     }
 
 
@@ -196,7 +245,6 @@ class PersonalRepository extends ServiceEntityRepository
                     )
             )
             ->andWhere('contract.typeContrat IN (:type)')
-            //->andWhere('p.active = true')
             ->andWhere('departures.id IS NULL')
             ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
             ->orderBy('p.matricule', 'ASC')

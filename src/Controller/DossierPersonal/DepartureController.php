@@ -2,6 +2,7 @@
 
 namespace App\Controller\DossierPersonal;
 
+use App\Contract\SalaryInterface;
 use App\Entity\DossierPersonal\Departure;
 use App\Entity\User;
 use App\Form\DossierPersonal\DepartureType;
@@ -18,7 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/dossier/personal/departure', name: 'departure_')]
 class DepartureController extends AbstractController
@@ -30,7 +31,10 @@ class DepartureController extends AbstractController
 
     public function __construct(
         DepartureRepository $departureRepository,
-        DepartServices      $departServices, UtimeDepartServ $utimeDepartServ, PaieOutService $paieOutService,
+        DepartServices      $departServices,
+        UtimeDepartServ $utimeDepartServ,
+        PaieOutService $paieOutService,
+        private readonly SalaryInterface $salary_interface
     )
     {
         $this->departureRepository = $departureRepository;
@@ -133,7 +137,7 @@ class DepartureController extends AbstractController
      * @throws Exception
      */
     #[Route('/new/{typeDepart}', name: 'new', methods: ['GET', 'POST'])]
-    public function news(Request $request, EntityManagerInterface $manager, $typeDepart): Response
+    public function new(Request $request, EntityManagerInterface $manager, $typeDepart): Response
     {
         /**
          * @var User $current_user
@@ -155,12 +159,14 @@ class DepartureController extends AbstractController
 
         if ($forms->isSubmitted() && $forms->isValid()) {
             $departure->setReasonCode(Status::REASONCODE[$typeDepart]);
-            //$this->departServices->calculeDroitsAndIndemnity($departure);
-            //$dpees = $this->utimeDepartServ->getAnciennitySal($departure);
-            //$paie_out = $this->paieOutService->getCreditImpot($departure);
-            //dd(['depart' => $dpees, 'paie_out' => $paie_out]);
             $departure->setUser($current_user);
             $manager->persist($departure);
+            $this->salary_interface->chargPersonalOut($departure);
+            $this->salary_interface->chargEmployerOut($departure);
+            //$this->departServices->calculeDroitsAndIndemnity($departure);
+            $dpees = $this->utimeDepartServ->getIndemniteConges($departure);
+            $paie_out = $this->paieOutService->getAssurance($departure);
+            dd(['utime_depart' => $dpees, 'paie_out' => $paie_out, 'departure' => $departure]);
             $manager->flush();
 
             flash()->addSuccess('Depart enregistrer avec succès.');

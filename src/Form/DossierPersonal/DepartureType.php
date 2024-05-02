@@ -2,9 +2,11 @@
 
 namespace App\Form\DossierPersonal;
 
+use App\Contract\SalaryInterface;
 use App\Entity\DossierPersonal\Departure;
 use App\Entity\DossierPersonal\Personal;
 use App\Form\CustomType\DateCustomType;
+use App\Repository\DossierPersonal\PersonalRepository;
 use App\Utils\Status;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -14,17 +16,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class DepartureType extends AbstractType
 {
-
-    public function __construct(
-        private readonly AuthorizationCheckerInterface $authorizationChecker,
-    )
-    {
-    }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -47,23 +43,8 @@ class DepartureType extends AbstractType
             ])
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
-                'query_builder' => function (EntityRepository $er) {
-                    if ($this->authorizationChecker->isGranted('ROLE_RH')) {
-                        return $er->createQueryBuilder('p')
-                            ->join('p.contract', 'ct')
-                            ->leftJoin('p.departures', 'departure')
-                            ->where('departure.id IS NULL ')
-                            ->andWhere('ct.typeContrat IN (:type)')
-                            ->andWhere('p.active = false')
-                            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
-                            ->orderBy('p.firstName', 'ASC');
-                    } else {
-                        return $er->createQueryBuilder('p')
-                            ->join('p.contract', 'ct')
-                            ->leftJoin('p.departures', 'departure')
-                            ->where('departure.id IS NULL ')
-                            ->orderBy('p.matricule', 'ASC');
-                    }
+                'query_builder' => function (PersonalRepository $repository) {
+                    return $repository->findPersonalOut();
                 },
                 'placeholder' => 'Sélectionner un matricule',
                 'attr' => [
@@ -133,7 +114,8 @@ class DepartureType extends AbstractType
             );
     }
 
-    public function configureOptions(OptionsResolver $resolver): void
+    public
+    function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Departure::class,

@@ -317,11 +317,9 @@ class PayrollRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('payroll');
         $qb
-            ->select()
             ->join('payroll.campagne', 'campagnes')
             ->join('payroll.personal', 'personal')
             ->where('campagnes.active = false')
-            ->andWhere('personal.active = true')
             ->andWhere('campagnes.dateDebut BETWEEN ?1 AND ?2');
         $qb->setParameters(['1' => $mouth1, '2' => $mouth2]);
         if ($personalId) {
