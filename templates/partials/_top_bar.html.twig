@@ -278,22 +278,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Primes &
-                                Indemnités</a>
                             <a href="{{ path('salaire_inverse_net_inverser') }}" class="dropdown-item">Salaire
                                 Inverse</a>
-                        </div>
-                    </li>
-                    {# FIN GESTION DU PERSONNEL #}
-
-                    {# DEBUT REGULARISATION #}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
-                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i data-feather="rotate-cw"></i>REGULARISATIONS SALAIRES
-                            <div class="arrow-down"></div>
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="topnav-components">
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -320,8 +306,12 @@
                                        class="dropdown-item">Liste prêt & avance</a>
                                 </div>
                             </div>
+
                         </div>
                     </li>
+                    {# FIN GESTION DU PERSONNEL #}
+
+                    {# DEBUT REGULARISATION #}
                     {# FIN REGULARISATION #}
 
                     {# DEBUT GESTION DE LA  PAIE #}
@@ -513,6 +503,17 @@
                             <div class="arrow-down"></div>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="topnav-components">
+                            <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Primes &
+                                Indemnités</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i data-feather="layers"></i>ETATS
+                            <div class="arrow-down"></div>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="topnav-components">
                             <a href="{{ path('reporting_etat_salaire') }}"
                                class="dropdown-item">Etat périodique des salaires</a>
                             <a href="{{ path('reporting_etat_versement_annuel') }}"
@@ -521,6 +522,20 @@
                                class="dropdown-item">Etat périodique des salaires espèces</a>
                             <a href="{{ path('reporting_paie_regularisation_salaire_periodique') }}"
                                class="dropdown-item">Etat periodique des regularisations </a>
+                            <a href="{{ path('reporting_declaration_dgi_current_month') }}"
+                               class="dropdown-item">Etat mensuel déclaration DGI </a>
+                            <a href="{{ path('reporting_declaration_dgi') }}"
+                               class="dropdown-item">Etat déclaration DGI </a>
+                            <a href="{{ path('reporting_declaration_cnps_current_month') }}"
+                               class="dropdown-item">Etat mensuel déclaration CNPS </a>
+                            <a href="{{ path('reporting_declaration_cmu_current_month') }}"
+                               class="dropdown-item">Etat déclaration mensuel CMU </a>
+                            <a href="{{ path('reporting_declaration_fdfp_current_month') }}"
+                               class="dropdown-item">Etat mensuel déclaration FDFP </a>
+                            <a href="{{ path('reporting_declaration_fdfp') }}"
+                               class="dropdown-item">Etat déclaration FDFP </a>
+                            <a href="{{ path('reporting_declaration_disa_current_year') }}"
+                               class="dropdown-item">Etat déclaration DISA </a>
                         </div>
                     </li>
                     {# FIN EDITION #}
