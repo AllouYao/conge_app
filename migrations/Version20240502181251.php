@@ -22,7 +22,7 @@ final class Version20240502181251 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE personal ADD conjoint_num_ss VARCHAR(255) DEFAULT NULL, ADD num_ss VARCHAR(255) DEFAULT NULL');
         $this->addSql('ALTER TABLE charge_people ADD num_ss VARCHAR(255) DEFAULT NULL');
-        $this->addSql('ALTER TABLE charge_people ADD CONSTRAINT FK_1DB5E6D05D430949 FOREIGN KEY (personal_id) REFERENCES personal (id)');
+        //$this->addSql('ALTER TABLE charge_people ADD CONSTRAINT FK_1DB5E6D05D430949 FOREIGN KEY (personal_id) REFERENCES personal (id)');
     }
 
     public function down(Schema $schema): void
