@@ -111,7 +111,7 @@ class Personal
     #[ORM\OneToMany(mappedBy: 'personal', targetEntity: ChargeEmployeur::class)]
     private Collection $chargeEmployeurs;
 
-    #[ORM\ManyToMany(targetEntity: Campagne::class, mappedBy: 'personal')]
+    #[ORM\ManyToMany(targetEntity: Campagne::class, mappedBy: 'personal')] 
     private Collection $campagnes;
 
     #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Payroll::class)]

@@ -21,6 +21,12 @@ class CongePartiel
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?DateTimeInterface $dateRetour = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $allocationConge = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2, nullable: true)]
+    private ?string $days = null;
+
     #[ORM\ManyToOne(inversedBy: 'congePartiels')]
     private ?Conge $conge = null;
 
@@ -35,7 +41,7 @@ class CongePartiel
 
     public function setDateDepart(DateTimeInterface $dateDepart): static
     {
-        $this->dateDepart = $dateDepart;
+        $this->dateDepart = $dateDepart;  
 
         return $this;
     }
@@ -50,16 +56,40 @@ class CongePartiel
 
         return $this;
     }
-
-    public function getConge(): ?Conge
+    
+    public function getAllocationConge(): ?string
     {
-        return $this->conge;
+        return $this->allocationConge;
     }
 
+    public function setAllocationConge(?string $allocationConge): static
+    {
+        $this->allocationConge = $allocationConge;
+
+        return $this;
+    }
+    public function getDays(): ?string
+    {
+        return $this->days;
+    }
+
+    public function setDays(?string $days): static
+    {
+        $this->days = $days;
+
+        return $this;
+    }
     public function setConge(?Conge $conge): static
     {
         $this->conge = $conge;
 
         return $this;
     }
+
+    public function getConge(): ?Conge
+    {
+        return $this->conge;
+    }
+
+    
 }
