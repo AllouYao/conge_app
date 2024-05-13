@@ -56,6 +56,9 @@ class ChargePeople
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $numCmu = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $numSs = null;
+
     public function __construct()
     {
         $this->detailRetenueForfetaires = new ArrayCollection();
@@ -214,6 +217,18 @@ class ChargePeople
     public function setNumCmu(?string $numCmu): static
     {
         $this->numCmu = $numCmu;
+
+        return $this;
+    }
+
+    public function getNumSs(): ?string
+    {
+        return $this->numSs;
+    }
+
+    public function setNumSs(?string $numSs): static
+    {
+        $this->numSs = $numSs;
 
         return $this;
     }

@@ -514,6 +514,42 @@
                             <div class="arrow-down"></div>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="topnav-components">
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                   aria-expanded="false">
+                                    Etat Déclarations Fiscales
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('reporting_declaration_dgi_current_month') }}"
+                                       class="dropdown-item">DGI mensuel </a>
+                                    <a href="{{ path('reporting_declaration_dgi') }}"
+                                       class="dropdown-item">DGI périodique</a>
+                                    <a href="{{ path('reporting_declaration_fdfp_current_month') }}"
+                                       class="dropdown-item">FDFP mensuel</a>
+                                    <a href="{{ path('reporting_declaration_fdfp') }}"
+                                       class="dropdown-item">FDFP périodique</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                   aria-expanded="false">
+                                    Etat Déclarations sociales
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('reporting_declaration_cnps_current_month') }}"
+                                       class="dropdown-item">CNPS mensuel</a>
+                                    <a href="{{ path('reporting_declaration_cnps') }}"
+                                       class="dropdown-item">CNPS périodique </a>
+                                    <a href="{{ path('reporting_declaration_cmu_current_month') }}"
+                                       class="dropdown-item">CMU mensuel</a>
+                                    <a href="{{ path('reporting_declaration_cmu') }}"
+                                       class="dropdown-item">CMU périodique </a>
+                                </div>
+                            </div>
                             <a href="{{ path('reporting_etat_salaire') }}"
                                class="dropdown-item">Etat périodique des salaires</a>
                             <a href="{{ path('reporting_etat_versement_annuel') }}"
@@ -522,18 +558,9 @@
                                class="dropdown-item">Etat périodique des salaires espèces</a>
                             <a href="{{ path('reporting_paie_regularisation_salaire_periodique') }}"
                                class="dropdown-item">Etat periodique des regularisations </a>
-                            <a href="{{ path('reporting_declaration_dgi_current_month') }}"
-                               class="dropdown-item">Etat mensuel déclaration DGI </a>
-                            <a href="{{ path('reporting_declaration_dgi') }}"
-                               class="dropdown-item">Etat déclaration DGI </a>
-                            <a href="{{ path('reporting_declaration_cnps_current_month') }}"
-                               class="dropdown-item">Etat mensuel déclaration CNPS </a>
-                            <a href="{{ path('reporting_declaration_cmu_current_month') }}"
-                               class="dropdown-item">Etat déclaration mensuel CMU </a>
-                            <a href="{{ path('reporting_declaration_fdfp_current_month') }}"
-                               class="dropdown-item">Etat mensuel déclaration FDFP </a>
-                            <a href="{{ path('reporting_declaration_fdfp') }}"
-                               class="dropdown-item">Etat déclaration FDFP </a>
+                            <a href="{{ path('reporting_etat_rbm_month') }}" class="dropdown-item">
+                                Etat des remunerations brutes mensuelles
+                            </a>
                             <a href="{{ path('reporting_declaration_disa_current_year') }}"
                                class="dropdown-item">Etat déclaration DISA </a>
                         </div>

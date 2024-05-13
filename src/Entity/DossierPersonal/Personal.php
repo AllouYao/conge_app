@@ -157,6 +157,12 @@ class Personal
 
     #[ORM\ManyToOne(inversedBy: 'personals')]
     private ?Service $workplace = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $conjointNumSs = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $numSs = null;
     
     public function __construct()
     {
@@ -937,6 +943,30 @@ class Personal
     public function setWorkplace(?Service $workplace): static
     {
         $this->workplace = $workplace;
+
+        return $this;
+    }
+
+    public function getConjointNumSs(): ?string
+    {
+        return $this->conjointNumSs;
+    }
+
+    public function setConjointNumSs(?string $conjointNumSs): static
+    {
+        $this->conjointNumSs = $conjointNumSs;
+
+        return $this;
+    }
+
+    public function getNumSs(): ?string
+    {
+        return $this->numSs;
+    }
+
+    public function setNumSs(?string $numSs): static
+    {
+        $this->numSs = $numSs;
 
         return $this;
     }
