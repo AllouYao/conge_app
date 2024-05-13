@@ -1,0 +1,326 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Etat rémuneration brute mensuelle {% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridRemunerationBrute {
+            height: 500px;
+            border-width: 50px;
+
+        }
+    </style>
+{% endblock %}
+{% block body %}
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        ETAT DES REMUNERATIONS BRUTES MENSUELLES
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="dataGridRemunerationBrute"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+
+        $(document).ready(function () {
+            let debut;
+            let fin;
+
+            $('#dataGridRemunerationBrute').dxDataGrid({
+                dataSource: `{{ url('api_reporting_remuneration_brute') }}`,
+                showBorders: true,
+                scrolling: {
+                    mode: 'virtual',
+                    columnRenderingMode: 'virtual'
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('Employees');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then((buffer) => {
+                                saveAs(new Blob([buffer], {type: 'application /octet-stream'}), `Etat declaration dgi ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                columns: [
+                    {
+                        dataField: "index",
+                        dataType: "number",
+                        caption: "#",
+                        alignment: "center",
+                        fixed: true,
+                    },
+                    {
+                        caption: "N° CNPS",
+                        dataField: "num_cnps",
+                        dataType: "string",
+                        alignment: "left",
+                        fixed: true,
+                    },
+                    {
+                        dataField: 'nom_prenoms',
+                        dataType: 'string',
+                        caption: 'Nom et Prénoms',
+                        alignment: 'left',
+                        fixed: true,
+                    },
+                    {
+                        dataField: 'type_work',
+                        dataType: 'string',
+                        caption: 'Type travailleur',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'emp_q',
+                        dataType: 'string',
+                        caption: 'Emploi ou Qualité',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'code_emp',
+                        dataType: 'string',
+                        caption: 'Code emploi',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'regime',
+                        dataType: 'string',
+                        caption: 'Régime',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'genre',
+                        dataType: 'string',
+                        caption: 'Sexe',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'nationalite',
+                        dataType: 'string',
+                        caption: 'Nationalité',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'local',
+                        dataType: 'string',
+                        caption: 'Local \ Expatrié',
+                        alignment: 'center',
+                    },
+                    {
+                        alignment: 'center',
+                        caption: 'Situation familiale',
+                        columns: [
+                            {
+                                dataField: 'etat_civil',
+                                dataType: 'string',
+                                caption: 'Etat civil',
+                                alignment: 'center',
+                            },
+                            {
+                                dataField: 'nb_enfant',
+                                dataType: 'string',
+                                caption: 'Nombre d\'enfants à charge',
+                                alignment: 'center',
+                            }
+                        ]
+                    },
+                    {
+                        dataField: 'nbPart',
+                        dataType: 'string',
+                        caption: 'Nombre de parts',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'day_work',
+                        dataType: 'string',
+                        caption: 'Nombre de jours d\'application de paiements',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'salary_brut',
+                        dataType: 'string',
+                        caption: 'Montant des salaires et rémunérations accessoires',
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        dataField: 'amount_avantage_bareme',
+                        dataType: 'string',
+                        caption: 'Montant des avantages en nature suivant barème réglementaire',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        dataField: 'amount_avantage_reelle',
+                        dataType: 'string',
+                        caption: 'Montant des avantages en nature selon valeur réelle',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        dataField: 'total_brut',
+                        dataType: 'string',
+                        caption: 'Rémuneration total brut',
+                        alignment: 'right',
+                        summaryType: 'sum',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        dataField: 'revenu_non_imposable',
+                        dataType: 'string',
+                        caption: 'Révenus non imposables',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Rémuneration brut imposable',
+                        dataField: "brut_imposable",
+                        dataType: 'number',
+                        alignment: 'right',
+                    },
+                    {
+                        dataField: 'credit_impot',
+                        dataType: 'string',
+                        caption: 'Réduction d\'impôt',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        alignment: 'center',
+                        caption: 'ITS Salariés',
+                        columns: [
+                            {
+                                dataField: 'its_salarie_brut',
+                                dataType: 'string',
+                                caption: 'Brut',
+                                alignment: 'right',
+                                summaryType: 'sum',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                dataField: 'its_salarie_net',
+                                dataType: 'string',
+                                caption: 'Net',
+                                alignment: 'right',
+                                summaryType: 'sum',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            }
+                        ]
+                    },
+                    {
+                        alignment: 'center',
+                        caption: 'Indemnités pour frais d\'emploi considérées comme exonérées',
+                        columns: [
+                            {
+                                dataField: 'exonere_amount',
+                                dataType: 'string',
+                                caption: 'Montant',
+                                alignment: 'right',
+                                summaryType: 'sum',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                dataField: 'exonere_designation',
+                                dataType: 'string',
+                                caption: 'Désignation',
+                                alignment: 'center',
+                            }
+                        ]
+                    },
+                ],
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'index',
+                            summaryType: 'count',
+                        },
+                        {
+                            column: 'salary_brut', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'total_brut', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'brut_imposable', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'its_salarie_net', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                    ],
+                }
+            });
+        });
+    </script>
+{% endblock %}

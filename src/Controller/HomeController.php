@@ -39,8 +39,8 @@ class HomeController extends AbstractController
             }
             $this->manager->persist($enCour);
             $this->manager->flush();
-
         }
+        return $this->render('home/index.html.twig'); 
        /* $directory = $this->getParameter('kernel.project_dir');
         $filePath = $directory. DIRECTORY_SEPARATOR. 'public'.DIRECTORY_SEPARATOR . 'personal.csv';
         $reader = new Csv();
@@ -60,8 +60,9 @@ class HomeController extends AbstractController
                 }
             }
         }
-        $this->manager->flush();*/
+        $this->manager->flush();
 
         return $this->render('home/index.html.twig');
+        */
     }
 }

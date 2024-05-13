@@ -167,34 +167,80 @@ class ReportingController extends AbstractController
     }
 
 
-
-
-
-
-
-
-
     #[Route('/declaration_dgi', name: 'declaration_dgi', methods: ['GET', 'POST'])]
     public function viewDeclarationDgi(PersonalRepository $personalRepository): Response
     {
+        $today = Carbon::today();
+        $months = array(
+            1 => "Janvier",
+            2 => "Février",
+            3 => "Mars",
+            4 => "Avril",
+            5 => "Mai",
+            6 => "Juin",
+            7 => "Juillet",
+            8 => "Août",
+            9 => "Septembre",
+            10 => "Octobre",
+            11 => "Novembre",
+            12 => "Décembre"
+        );
+        $years = $today->year;
         return $this->render('reporting/declaration_dgi/declaration.dgi.html.twig', [
-            'personals' => $personalRepository->findPersonalWithContract()
+            'personals' =>  $personalRepository->findPersoRequest(),
+            'months' => $months
         ]);
     }
 
     #[Route('/declaration_cnps', name: 'declaration_cnps', methods: ['GET', 'POST'])]
     public function viewDeclarationCnps(PersonalRepository $personalRepository): Response
     {
-        return $this->render('reporting/declaration_fdfp/declaration.cnps.html.twig', [
-            'personals' => $personalRepository->findPersonalWithContract()
+        $today = Carbon::today();
+        $months = array(
+            1 => "Janvier",
+            2 => "Février",
+            3 => "Mars",
+            4 => "Avril",
+            5 => "Mai",
+            6 => "Juin",
+            7 => "Juillet",
+            8 => "Août",
+            9 => "Septembre",
+            10 => "Octobre",
+            11 => "Novembre",
+            12 => "Décembre"
+        );
+        $years = $today->year;
+        return $this->render('reporting/declaration_cnps/declaration.cnps.html.twig', [
+            'personals' => $personalRepository->findPersonalWithContract(),
+            'months' => $months,
+            'annee' => $years
         ]);
     }
 
     #[Route('/declaration_fdfp', name: 'declaration_fdfp', methods: ['GET', 'POST'])]
     public function viewDeclarationFdfp(PersonalRepository $personalRepository): Response
     {
-        return $this->render('reporting/declaration_cnps/declaration.fdfp.html.twig', [
-            'personals' => $personalRepository->findPersonalWithContract()
+        $today = Carbon::today();
+        $months = array(
+            1 => "Janvier",
+            2 => "Février",
+            3 => "Mars",
+            4 => "Avril",
+            5 => "Mai",
+            6 => "Juin",
+            7 => "Juillet",
+            8 => "Août",
+            9 => "Septembre",
+            10 => "Octobre",
+            11 => "Novembre",
+            12 => "Décembre"
+        );
+        $years = $today->year;
+        return $this->render('reporting/declaration_fdfp/declaration.fdfp.html.twig', [
+            'personals' => $personalRepository->findPersonalWithContract(),
+            'months' => $months,
+            'annee' => $years
         ]);
     }
 
@@ -222,7 +268,7 @@ class ReportingController extends AbstractController
     #[Route('/declaration_cnps_current_month', name: 'declaration_cnps_current_month', methods: ['GET', 'POST'])]
     public function viewDeclarationMensuelCnps(PersonalRepository $personalRepository): Response
     {
-        return $this->render('reporting/declaration_fdfp/declaration_mensuelle.cnps.html.twig', [
+        return $this->render('reporting/declaration_cnps/declaration_mensuelle.cnps.html.twig', [
             'personals' => $personalRepository->findPersonalWithContract()
         ]);
     }
@@ -230,13 +276,64 @@ class ReportingController extends AbstractController
     #[Route('/declaration_fdfp_current_month', name: 'declaration_fdfp_current_month', methods: ['GET', 'POST'])]
     public function viewDeclarationMensuelFdfp(PersonalRepository $personalRepository): Response
     {
-        return $this->render('reporting/declaration_cnps/declaration_mensuelle.fdfp.html.twig', [
+        return $this->render('reporting/declaration_fdfp/declaration_mensuelle.fdfp.html.twig', [
             'personals' => $personalRepository->findPersonalWithContract()
         ]);
     }
 
+    #[Route('/declaration_cmu_current_month', name: 'declaration_cmu_current_month', methods: ['GET', 'POST'])]
+    public function viewDeclarationMensuelCMU(PersonalRepository $personalRepository): Response
+    {
+        return $this->render('reporting/declaration_cmu/declaration_mensuelle_cmu.html.twig', [
+            'personals' => $personalRepository->findPersonalWithContract()
+        ]);
+    }
 
+    #[Route('/declaration_cmu', name: 'declaration_cmu', methods: ['GET', 'POST'])]
+    public function viewDeclarationCmu(PersonalRepository $personalRepository): Response
+    {
+        $today = Carbon::today();
+        $months = array(
+            1 => "Janvier",
+            2 => "Février",
+            3 => "Mars",
+            4 => "Avril",
+            5 => "Mai",
+            6 => "Juin",
+            7 => "Juillet",
+            8 => "Août",
+            9 => "Septembre",
+            10 => "Octobre",
+            11 => "Novembre",
+            12 => "Décembre"
+        );
+        $years = $today->year;
+        return $this->render('reporting/declaration_cmu/declaration_cmu.html.twig', [
+            'personals' => $personalRepository->findPersonalWithContract(),
+            'months' => $months,
+            'annee' => $years
+        ]);
+    }
 
+    #[Route('/declaration_disa_current_year', name: 'declaration_disa_current_year', methods: ['GET', 'POST'])]
+    public function viewDeclarationYearDisa(): Response
+    {
+        $today = Carbon::today();
+        $year = $today->year;
+        return $this->render('reporting/disa/disa.html.twig',[
+            'annee' => $year
+        ]);
+    }
 
+    #[Route('/remuneration_brute_month', name: 'etat_rbm_month', methods: ['GET', 'POST'])]
+    public function viewEtatMensuelRbm(): Response
+    {
+        return $this->render('reporting/remuneration_brute/remuneration_brute_mensuelle.html.twig');
+    }
 
+    #[Route('/global_cotisation_month', name: 'global_cotisation_month', methods: ['GET', 'POST'])]
+    public function viewGlobalCotisationMonth(): Response
+    {
+        return $this->render('reporting/global_cotisation/global_cotisation_mensuel.html.twig');
+    }
 }

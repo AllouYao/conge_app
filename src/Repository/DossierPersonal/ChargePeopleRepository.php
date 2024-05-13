@@ -29,5 +29,15 @@ class ChargePeopleRepository extends ServiceEntityRepository
             ->setParameter('personal', $personalId);
     }
 
+    public function findPeopleAssureByPersonalId(?int $personalId): \Doctrine\ORM\QueryBuilder
+    {
+        return $this->createQueryBuilder('ch')
+            ->join('ch.personal', 'personal')
+            ->where('personal.id = :personal')
+            ->andWhere('ch.isCmu = :bool')
+            ->setParameter('personal', $personalId)->setParameter('bool',true);
+    }
+
+
 
 }

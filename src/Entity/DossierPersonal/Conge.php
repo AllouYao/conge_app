@@ -43,6 +43,9 @@ class Conge
 
     #[ORM\Column]
     private ?bool $isConge = null;
+    
+    #[ORM\Column]
+    private ?bool $complete = null;
 
     #[ORM\ManyToOne(inversedBy: 'conges')]
     #[ORM\JoinColumn(nullable: false)]
@@ -55,6 +58,10 @@ class Conge
 
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $gratification = null;
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $allocationPayer = null;
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $allocationReste = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2, nullable: true)]
     private ?string $days = null;
@@ -180,6 +187,17 @@ class Conge
 
         return $this;
     }
+    public function isComplete(): ?bool
+    {
+        return $this->complete;
+    }
+
+    public function setComplete(bool $complete): static
+    {
+        $this->complete = $complete;
+
+        return $this;
+    }
 
     public function getPersonal(): ?Personal
     {
@@ -217,6 +235,28 @@ class Conge
     }
 
 
+    public function getAllocationPayer(): ?string
+    {
+        return $this->allocationPayer;
+    }
+
+    public function setAllocationPayer(?string $allocationPayer): static
+    {
+        $this->allocationPayer = $allocationPayer;
+
+        return $this;
+    }
+    public function getAllocationReste(): ?string
+    {
+        return $this->allocationReste;
+    }
+
+    public function setAllocationReste(?string $allocationReste): static
+    {
+        $this->allocationReste = $allocationReste;
+
+        return $this;
+    }
     public function getGratification(): ?string
     {
         return $this->gratification;

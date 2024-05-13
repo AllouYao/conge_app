@@ -5,17 +5,19 @@
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a href="{{ path('app_home') }}" class="nav-link">
-                            <i data-feather="home"></i> ACCUEIL
+                            <i data-feather="home"></i> Accueil
                         </a>
                     </li>
                     {# DEBUT PARAMETRAGE #}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i data-feather="settings"></i>PARAMETRAGE
+                            <i data-feather="settings"></i>Paramétrage
                             <div class="arrow-down"></div>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="topnav-components">
+                            <a href="{{ path('old_conge_index') }}"
+                               class="dropdown-item">Historique congés</a>
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -167,14 +169,14 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i data-feather="users"></i>GESTION PERSONNEL
+                            <i data-feather="users"></i>Dossier salarié
                             <div class="arrow-down"></div>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="topnav-components">
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Dossier du personnel
+                                    Fiche d'identifcation salarié
                                     <div class="arrow-down"></div>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
@@ -182,7 +184,7 @@
                                         <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                            role="button" data-bs-toggle="dropdown" aria-haspopup="true"
                                            aria-expanded="false">
-                                            Fiches de personnel
+                                            Salarié
                                             <div class="arrow-down"></div>
                                         </a>
                                         <div class="dropdown-menu" aria-labelledby="topnav-map">
@@ -278,22 +280,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Primes &
-                                Indemnités</a>
-                            <a href="{{ path('salaire_inverse_net_inverser') }}" class="dropdown-item">Salaire
-                                Inverse</a>
-                        </div>
-                    </li>
-                    {# FIN GESTION DU PERSONNEL #}
-
-                    {# DEBUT REGULARISATION #}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
-                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i data-feather="rotate-cw"></i>REGULARISATIONS SALAIRES
-                            <div class="arrow-down"></div>
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="topnav-components">
+                            <a href="{{ path('salaire_inverse_net_inverser') }}" class="dropdown-item">Simulation de salaire</a>
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -320,45 +307,43 @@
                                        class="dropdown-item">Liste prêt & avance</a>
                                 </div>
                             </div>
+
                         </div>
                     </li>
+                    {# FIN GESTION DU PERSONNEL #}
+
+                    {# DEBUT REGULARISATION #}
                     {# FIN REGULARISATION #}
 
                     {# DEBUT GESTION DE LA  PAIE #}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i data-feather="dollar-sign"></i>GESTION PAIE
+                            <i data-feather="dollar-sign"></i>Gestion paie
                             <div class="arrow-down"></div>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="topnav-components">
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Heures supplémentaires
+                                    Traitement en attente
                                     <div class="arrow-down"></div>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                    <a href="{{ path('personal_heure_sup_pending') }}"
-                                       class="dropdown-item">En attentes</a>
-                                    <a href="{{ path('personal_heure_sup_validated') }}"
-                                       class="dropdown-item">Validées</a>
-                                </div>
-                            </div>
-                            <div class="dropdown">
-                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Prêts & Avances
-                                    <div class="arrow-down"></div>
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                    <a href="{{ path('app_paiement_acompte_index') }}"
-                                       class="dropdown-item">En attentes</a>
-                                    <a href="{{ path('app_paiement_acompte_validated') }}"
-                                       class="dropdown-item">Validées</a>
-                                </div>
-                            </div>
-                            <div class="dropdown">
+                                    <div class="dropdown">
+                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Heures supplémentaires
+                                            <div class="arrow-down"></div>
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                            <a href="{{ path('personal_heure_sup_pending') }}"
+                                            class="dropdown-item">En attentes</a>
+                                            <a href="{{ path('personal_heure_sup_validated') }}"
+                                            class="dropdown-item">Validées</a>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Régularisations
@@ -394,41 +379,111 @@
                                         </div>
                                     </div>
                                 </div>
+                                </div>
+                                </div>
                             </div>
                             <a href="{{ path('campagne_open_campagne') }}"
                                class="dropdown-item"> Ouverture paie</a>
                             <a href="{{ path('campagne_livre') }}"
                                class="dropdown-item">Livre de paie</a>
-                            <a href="{{ path('reporting_element_variable') }}"
-                               class="dropdown-item">Relevé comparatif salr.</a>
-                            <a href="{{ path('reporting_etat_versement') }}"
-                               class="dropdown-item">Fiche des virements</a>
-                            <a href="{{ path('reporting_etat_versement_caisse') }}"
-                               class="dropdown-item">Fiche salaires espèces</a>
-                            <a href="{{ path('reporting_paie_regularisation_salaire') }}"
-                               class="dropdown-item">Fiche des régularisations</a>
                             <a href="{{ path('campagne_close') }}"
                                class="dropdown-item">Clôture paie</a>
                         </div>
                     </li>
                     {# FIN GESTION DE LA PAIE #}
 
-                    {# DEBUT CESSATION TRAVAIL #}
+                    {# DEBUT EDITION #}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i data-feather="user-minus"></i>CESSATION CONTRAT
+                            <i data-feather="layers"></i>Edition
+                            <div class="arrow-down"></div>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="topnav-components">
+                            <a href="{{ path('reporting_element_variable') }}"
+                               class="dropdown-item">Etat mensuel comparatif salr.</a>
+                            <a href="{{ path('reporting_etat_versement') }}"
+                               class="dropdown-item">Etat mensuel des virements</a>
+                            <a href="{{ path('reporting_etat_versement_caisse') }}"
+                               class="dropdown-item">Etat mensuel salaires espèces</a>
+                            <a href="{{ path('reporting_paie_regularisation_salaire') }}"
+                               class="dropdown-item">Etat mensuel des régularisations</a>
+                            <a href="{{ path('reporting_prime_indemnite') }}" class="dropdown-item">Primes &
+                                Indemnités</a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i data-feather="layers"></i>Etats
                             <div class="arrow-down"></div>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="topnav-components">
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Départs personnel
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                   aria-expanded="false">
+                                    Etat Déclarations Fiscales
                                     <div class="arrow-down"></div>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                    <div class="dropdown">
+                                    <a href="{{ path('reporting_declaration_dgi_current_month') }}"
+                                       class="dropdown-item">DGI mensuel </a>
+                                    <a href="{{ path('reporting_declaration_dgi') }}"
+                                       class="dropdown-item">DGI périodique</a>
+                                    <a href="{{ path('reporting_declaration_fdfp_current_month') }}"
+                                       class="dropdown-item">FDFP mensuel</a>
+                                    <a href="{{ path('reporting_declaration_fdfp') }}"
+                                       class="dropdown-item">FDFP périodique</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                   aria-expanded="false">
+                                    Etat Déclarations sociales
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('reporting_declaration_cnps_current_month') }}"
+                                       class="dropdown-item">CNPS mensuel</a>
+                                    <a href="{{ path('reporting_declaration_cnps') }}"
+                                       class="dropdown-item">CNPS périodique </a>
+                                    <a href="{{ path('reporting_declaration_cmu_current_month') }}"
+                                       class="dropdown-item">CMU mensuel</a>
+                                    <a href="{{ path('reporting_declaration_cmu') }}"
+                                       class="dropdown-item">CMU périodique </a>
+                                </div>
+                            </div>
+                            <a href="{{ path('reporting_etat_salaire') }}"
+                               class="dropdown-item">Etat périodique des salaires</a>
+                            <a href="{{ path('reporting_etat_versement_annuel') }}"
+                               class="dropdown-item">Etat périodique des virements</a>
+                            <a href="{{ path('reporting_etat_versement_caisse_annuel') }}"
+                               class="dropdown-item">Etat périodique des salaires espèces</a>
+                            <a href="{{ path('reporting_paie_regularisation_salaire_periodique') }}"
+                               class="dropdown-item">Etat periodique des regularisations </a>
+                            <a href="{{ path('reporting_etat_rbm_month') }}" class="dropdown-item">
+                                Etat des remunerations brutes mensuelles
+                            </a>
+                            <a href="{{ path('reporting_declaration_disa_current_year') }}"
+                               class="dropdown-item">Etat déclaration DISA </a>
+                        </div>
+                    </li>
+                    {# FIN EDITION #}
+    
+                    {# DEBUT CESSATION TRAVAIL #}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i data-feather="user-minus"></i>Départ salarié
+                            <div class="arrow-down"></div>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="topnav-components">
+                            <a href="{{ path('departure_index2') }}"
+                               class="dropdown-item">Liste</a>
+
+                             <div class="dropdown">
                                         <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                            role="button" data-bs-toggle="dropdown" aria-haspopup="true"
                                            aria-expanded="false">
@@ -442,34 +497,45 @@
                                                class="dropdown-item">Liste</a>
                                         </div>
                                     </div>
-                                    <div class="dropdown">
-                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                           aria-expanded="false">
-                                            Licenciement faute simple
-                                            <div class="arrow-down"></div>
-                                        </a>
-                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                            <a href="{{ path('departure_new', {'typeDepart' : 'licenciement_simple' }) }}"
-                                               class="dropdown-item">Créer</a>
-                                            <a href="{{ path('departure_index', {'typeDepart' : 'licenciement_simple' }) }}"
-                                               class="dropdown-item">Liste</a>
+                                        <div class="dropdown">
+                                            <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                            role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false">
+                                                Licenciement
+                                                <div class="arrow-down"></div>
+                                            </a>
+                                            <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                                <div class="dropdown">
+                                            <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                            role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false">
+                                                Faute Simple
+                                                <div class="arrow-down"></div>
+                                            </a>
+                                            <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                                <a href="{{ path('departure_new', {'typeDepart' : 'licenciement_simple' }) }}"
+                                                class="dropdown-item">Créer</a>
+                                                <a href="{{ path('departure_index', {'typeDepart' : 'licenciement_simple' }) }}"
+                                                class="dropdown-item">Liste</a>
+                                            </div>
+                                        </div>
+                                        <div class="dropdown">
+                                            <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                            role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                            aria-expanded="false">
+                                                Faute lourde
+                                                <div class="arrow-down"></div>
+                                            </a>
+                                            <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                                <a href="{{ path('departure_new', {'typeDepart' : 'licenciement_lourde' }) }}"
+                                                class="dropdown-item">Créer</a>
+                                                <a href="{{ path('departure_index', {'typeDepart' : 'licenciement_lourde' }) }}"
+                                                class="dropdown-item">Liste</a>
+                                            </div>
+                                        </div>
                                         </div>
                                     </div>
-                                    <div class="dropdown">
-                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                           aria-expanded="false">
-                                            Licenciement faute lourde
-                                            <div class="arrow-down"></div>
-                                        </a>
-                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                            <a href="{{ path('departure_new', {'typeDepart' : 'licenciement_lourde' }) }}"
-                                               class="dropdown-item">Créer</a>
-                                            <a href="{{ path('departure_index', {'typeDepart' : 'licenciement_lourde' }) }}"
-                                               class="dropdown-item">Liste</a>
-                                        </div>
-                                    </div>
+                                    
                                     <div class="dropdown">
                                         <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                            role="button" data-bs-toggle="dropdown" aria-haspopup="true"
@@ -496,34 +562,14 @@
                                                class="dropdown-item">Créer</a>
                                             <a href="{{ path('departure_index', {'typeDepart' : 'deces' }) }}"
                                                class="dropdown-item">Liste</a>
-                                        </div>
+                                        </div>  
                                     </div>
-                                </div>
-                            </div>
 
                         </div>
                     </li>
                     {# FIN CESSATION TRAVAIL #}
 
-                    {# DEBUT EDITION #}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
-                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i data-feather="layers"></i>EDITION
-                            <div class="arrow-down"></div>
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="topnav-components">
-                            <a href="{{ path('reporting_etat_salaire') }}"
-                               class="dropdown-item">Etat périodique des salaires</a>
-                            <a href="{{ path('reporting_etat_versement_annuel') }}"
-                               class="dropdown-item">Etat périodique des virements</a>
-                            <a href="{{ path('reporting_etat_versement_caisse_annuel') }}"
-                               class="dropdown-item">Etat périodique des salaires espèces</a>
-                            <a href="{{ path('reporting_paie_regularisation_salaire_periodique') }}"
-                               class="dropdown-item">Etat periodique des regularisations </a>
-                        </div>
-                    </li>
-                    {# FIN EDITION #}
+                    
                 </ul>
             </div>
         </nav>

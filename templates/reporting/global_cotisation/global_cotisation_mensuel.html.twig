@@ -3,7 +3,7 @@
 {% block title %}Livre de paie{% endblock %}
 {% block stylesheets %}
     <style>
-        #dataGridDeclarationCnps {
+        #dataGridCotisationMonth {
             height: 500px;
             border-width: 50px;
 
@@ -17,11 +17,11 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        ETAT DES DECLARATION MENSUEL CNPS
+                        ETAT RESUME DES COTISATIONS MENSUEL
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div id="dataGridDeclarationCnps">Cliquer sur recherche pour afficher le tableau</div>
+                    <div id="dataGridCotisationMonth"></div>
                 </div>
             </div>
         </div>
@@ -39,8 +39,8 @@
                 return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
             }
 
-            $('#dataGridDeclarationCnps').dxDataGrid({
-                dataSource: `{{ url('api_reporting_declaration_cnps_current_month') }}`,
+            $('#dataGridCotisationMonth').dxDataGrid({
+                dataSource: `{{ url('api_reporting_declaration_cmu_current_month') }}`,
                 showBorders: true,
                 scrolling: {
                     mode: 'virtual',
@@ -80,7 +80,7 @@
                             autoFilterEnabled: true,
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then((buffer) => {
-                                saveAs(new Blob([buffer], {type: 'application /octet-stream'}), `Etat declaration cnps ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application /octet-stream'}), `Etat declaration fdfp ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')}.xlsx`);
                             });
                         });
                         e.cancel = true;
@@ -95,101 +95,86 @@
                         fixed: true,
                     },
                     {
-                        dataField: 'date_ouverture',
+                        dataField: 'matricule',
                         dataType: 'string',
-                        caption: 'Date',
-                        alignment: 'center',
+                        caption: 'Matricule',
+                        alignment: 'left',
                         fixed: true,
                     },
                     {
-                        dataField: 'numero_cnps',
+                        dataField: 'num_cnps_assure',
                         dataType: 'string',
-                        caption: 'Numéro CNPS',
-                        alignment: 'center',
+                        caption: 'N° CNPS assure',
+                        alignment: 'left',
                         fixed: true,
                     },
                     {
-                        dataField: 'nom',
+                        dataField: 'num_sec_assure',
+                        dataType: 'string',
+                        caption: 'Numéro Sécurité sociale Assure',
+                        alignment: 'left',
+                    },
+                    {
+                        dataField: 'nom_assure',
                         dataType: 'string',
                         caption: 'Nom',
                         alignment: 'left',
-                        fixed: true,
                     },
                     {
-                        dataField: 'prenoms',
+                        dataField: 'pnom_assure',
                         dataType: 'string',
                         caption: 'Prénoms',
                         alignment: 'left',
-                        fixed: true,
                     },
                     {
-                        dataField: 'annee_naissance',
-                        dataType: 'string',
-                        caption: 'Année de naissance',
-                        alignment: 'center',
-                        fixed: true,
-                    },
-                    {
-                        dataField: 'date_embauche',
+                        dataField: 'birthday',
                         dataType: 'date',
-                        caption: 'Date d\'embauche',
+                        caption: 'Date de naissance assure',
                         alignment: 'center',
-                        fixed: true,
                     },
                     {
-                        dataField: 'dateDepart',
-                        dataType: 'date',
-                        caption: 'Date de depart',
-                        alignment: 'center',
-                        fixed: true,
-                    },
-                    {
-                        dataField: 'typeSalarie',
+                        dataField: 'num_cnps_benef',
                         dataType: 'string',
-                        caption: 'Type Salarié',
+                        caption: 'Numéro CNPS Beneficiaire',
+                        alignment: 'left',
+                    },
+                    {
+                        dataField: 'num_sec_benef',
+                        dataType: 'string',
+                        caption: 'Numéro Sécurité sociale Beneficiaire',
+                        alignment: 'left',
+                    },
+                    {
+                        dataField: 'type_benef',
+                        dataType: 'string',
+                        caption: 'Type Beneficiaire',
                         alignment: 'center',
-                        fixed: true,
                     },
                     {
-                        dataField: "anciennete",
-                        dataType: 'number',
-                        caption: 'Durée travaillée',
-                        alignment: 'right',
-                        summaryType: 'sum',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
+                        dataField: 'nom_benef',
+                        dataType: 'string',
+                        caption: 'Nom beneficiaire',
+                        alignment: 'left',
                     },
                     {
-                        dataField: "revenusNetImposable",
-                        dataType: 'number',
-                        caption: 'Remuneration net imposable',
-                        alignment: 'right',
-                        summaryType: 'sum',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
+                        dataField: 'pnom_benef',
+                        dataType: 'string',
+                        caption: 'Prénom beneficiaire',
+                        alignment: 'left',
                     },
-
+                    {
+                        dataField: 'birthday_benef',
+                        dataType: 'date',
+                        caption: 'Date de naissance beneficiaire',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'genre_benef',
+                        dataType: 'string',
+                        caption: 'Genre beneficiaire',
+                        alignment: 'center',
+                    },
                 ],
-                summary: {
-                    totalItems: [
-                        {
-                            column: 'index',
-                            summaryType: "count",
-                            customizeTex() {
-                                return 'Total';
-                            }
-
-                        },
-                        {
-                            column: 'revenusNetImposable', summaryType: 'sum',
-                            customizeText: (data) => {
-                                return new Intl.NumberFormat('fr-FR').format(data.value)
-                            },
-                        },
-                    ],
-                }
             });
         });
     </script>

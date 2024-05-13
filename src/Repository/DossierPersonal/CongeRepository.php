@@ -44,6 +44,10 @@ class CongeRepository extends ServiceEntityRepository
                 'co.days',
                 'co.remainingVacation',
                 'co.typeConge',
+                'co.allocationPayer',
+                'co.allocationReste',
+                'co.dateReprise',
+
 
             ])
             ->join('co.personal', 'p')
@@ -96,6 +100,16 @@ class CongeRepository extends ServiceEntityRepository
             ->setParameter('personal', $personal)
             ->setParameter('value', $active)
             ->orderBy('co.id', 'DESC')
+            ->getQuery()->getOneOrNullResult();
+    }
+    public function getLastCongeIncomplete(Personal $personal): ?Conge
+    {
+        return $this->createQueryBuilder('co')
+            ->join('co.personal', 'personal')
+            ->where('personal = :personal')
+            ->andWhere('co.oneMonth = false')
+            ->setMaxResults(1)
+            ->setParameter('personal', $personal)
             ->getQuery()->getOneOrNullResult();
     }
 
