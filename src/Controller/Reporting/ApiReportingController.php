@@ -143,6 +143,7 @@ class ApiReportingController extends AbstractController
             $nb_jr_travailler = $salary['dayOfPresence'];
             $data_payroll[] = [
                 'index' => ++$index,
+                'payroll_id' => $salary['payroll_id'],
                 'dateCreation' => date_format($salary['startedAt'], 'd/m/Y'),
                 'day_of_presence' => $nb_jr_travailler,
                 'nb_part' => $salary['numberPart'],

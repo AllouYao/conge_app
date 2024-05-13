@@ -77,6 +77,78 @@ class Departure
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     private ?string $dayOfPresence = null;
 
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateRetourConge = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $cumulSalaire = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $nbPart = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $impotBrut = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $creditImpot = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $impotNet = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountCmu = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountCnps = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $totatChargePersonal = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountIs = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountCr = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountPf = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountAt = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountTa = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountfpc = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountFpcYear = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $amountCmuE = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $totalChargeEmployer = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $netPayer = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $periodeReferences = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $congesOuvrable = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $globalMoyen = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
+    private ?string $gratificationCorresp = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $olderPersonal = null;
+
     public function __construct()
     {
         $this->chargePersonals = new ArrayCollection();
@@ -335,6 +407,294 @@ class Departure
     public function setDayOfPresence(?string $dayOfPresence): static
     {
         $this->dayOfPresence = $dayOfPresence;
+
+        return $this;
+    }
+
+    public function getDateRetourConge(): ?\DateTimeInterface
+    {
+        return $this->dateRetourConge;
+    }
+
+    public function setDateRetourConge(?\DateTimeInterface $dateRetourConge): static
+    {
+        $this->dateRetourConge = $dateRetourConge;
+
+        return $this;
+    }
+
+    public function getCumulSalaire(): ?string
+    {
+        return $this->cumulSalaire;
+    }
+
+    public function setCumulSalaire(?string $cumulSalaire): static
+    {
+        $this->cumulSalaire = $cumulSalaire;
+
+        return $this;
+    }
+
+    public function getNbPart(): ?string
+    {
+        return $this->nbPart;
+    }
+
+    public function setNbPart(?string $nbPart): static
+    {
+        $this->nbPart = $nbPart;
+
+        return $this;
+    }
+
+    public function getImpotBrut(): ?string
+    {
+        return $this->impotBrut;
+    }
+
+    public function setImpotBrut(?string $impotBrut): static
+    {
+        $this->impotBrut = $impotBrut;
+
+        return $this;
+    }
+
+    public function getCreditImpot(): ?string
+    {
+        return $this->creditImpot;
+    }
+
+    public function setCreditImpot(?string $creditImpot): static
+    {
+        $this->creditImpot = $creditImpot;
+
+        return $this;
+    }
+
+    public function getImpotNet(): ?string
+    {
+        return $this->impotNet;
+    }
+
+    public function setImpotNet(?string $impotNet): static
+    {
+        $this->impotNet = $impotNet;
+
+        return $this;
+    }
+
+    public function getAmountCmu(): ?string
+    {
+        return $this->amountCmu;
+    }
+
+    public function setAmountCmu(?string $amountCmu): static
+    {
+        $this->amountCmu = $amountCmu;
+
+        return $this;
+    }
+
+    public function getAmountCnps(): ?string
+    {
+        return $this->amountCnps;
+    }
+
+    public function setAmountCnps(?string $amountCnps): static
+    {
+        $this->amountCnps = $amountCnps;
+
+        return $this;
+    }
+
+    public function getTotatChargePersonal(): ?string
+    {
+        return $this->totatChargePersonal;
+    }
+
+    public function setTotatChargePersonal(?string $totatChargePersonal): static
+    {
+        $this->totatChargePersonal = $totatChargePersonal;
+
+        return $this;
+    }
+
+    public function getAmountIs(): ?string
+    {
+        return $this->amountIs;
+    }
+
+    public function setAmountIs(?string $amountIs): static
+    {
+        $this->amountIs = $amountIs;
+
+        return $this;
+    }
+
+    public function getAmountCr(): ?string
+    {
+        return $this->amountCr;
+    }
+
+    public function setAmountCr(?string $amountCr): static
+    {
+        $this->amountCr = $amountCr;
+
+        return $this;
+    }
+
+    public function getAmountPf(): ?string
+    {
+        return $this->amountPf;
+    }
+
+    public function setAmountPf(?string $amountPf): static
+    {
+        $this->amountPf = $amountPf;
+
+        return $this;
+    }
+
+    public function getAmountAt(): ?string
+    {
+        return $this->amountAt;
+    }
+
+    public function setAmountAt(?string $amountAt): static
+    {
+        $this->amountAt = $amountAt;
+
+        return $this;
+    }
+
+    public function getAmountTa(): ?string
+    {
+        return $this->amountTa;
+    }
+
+    public function setAmountTa(?string $amountTa): static
+    {
+        $this->amountTa = $amountTa;
+
+        return $this;
+    }
+
+    public function getAmountfpc(): ?string
+    {
+        return $this->amountfpc;
+    }
+
+    public function setAmountfpc(?string $amountfpc): static
+    {
+        $this->amountfpc = $amountfpc;
+
+        return $this;
+    }
+
+    public function getAmountFpcYear(): ?string
+    {
+        return $this->amountFpcYear;
+    }
+
+    public function setAmountFpcYear(?string $amountFpcYear): static
+    {
+        $this->amountFpcYear = $amountFpcYear;
+
+        return $this;
+    }
+
+    public function getAmountCmuE(): ?string
+    {
+        return $this->amountCmuE;
+    }
+
+    public function setAmountCmuE(?string $amountCmuE): static
+    {
+        $this->amountCmuE = $amountCmuE;
+
+        return $this;
+    }
+
+    public function getTotalChargeEmployer(): ?string
+    {
+        return $this->totalChargeEmployer;
+    }
+
+    public function setTotalChargeEmployer(?string $totalChargeEmployer): static
+    {
+        $this->totalChargeEmployer = $totalChargeEmployer;
+
+        return $this;
+    }
+
+    public function getNetPayer(): ?string
+    {
+        return $this->netPayer;
+    }
+
+    public function setNetPayer(?string $netPayer): static
+    {
+        $this->netPayer = $netPayer;
+
+        return $this;
+    }
+
+    public function getPeriodeReferences(): ?string
+    {
+        return $this->periodeReferences;
+    }
+
+    public function setPeriodeReferences(?string $periodeReferences): static
+    {
+        $this->periodeReferences = $periodeReferences;
+
+        return $this;
+    }
+
+    public function getCongesOuvrable(): ?string
+    {
+        return $this->congesOuvrable;
+    }
+
+    public function setCongesOuvrable(?string $congesOuvrable): static
+    {
+        $this->congesOuvrable = $congesOuvrable;
+
+        return $this;
+    }
+
+    public function getGlobalMoyen(): ?string
+    {
+        return $this->globalMoyen;
+    }
+
+    public function setGlobalMoyen(?string $globalMoyen): static
+    {
+        $this->globalMoyen = $globalMoyen;
+
+        return $this;
+    }
+
+    public function getGratificationCorresp(): ?string
+    {
+        return $this->gratificationCorresp;
+    }
+
+    public function setGratificationCorresp(?string $gratificationCorresp): static
+    {
+        $this->gratificationCorresp = $gratificationCorresp;
+
+        return $this;
+    }
+
+    public function getOlderPersonal(): ?string
+    {
+        return $this->olderPersonal;
+    }
+
+    public function setOlderPersonal(?string $olderPersonal): static
+    {
+        $this->olderPersonal = $olderPersonal;
 
         return $this;
     }

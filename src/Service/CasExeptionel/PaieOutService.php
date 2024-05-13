@@ -32,11 +32,21 @@ class PaieOutService
         private readonly DetailRetenueForfetaireRepository $detailRetenueForfetaireRepository,
         private readonly AbsenceRepository                 $absenceRepository,
         private readonly CongeService                      $congeService,
-        private readonly PrimesRepository                  $primesRepository
-
-
+        private readonly PrimesRepository                  $primesRepository,
     )
     {
+    }
+
+    /** Fonction qui permet d'obtenir le nombre de mois de travail effectuée par le salarié au cours de l'année de depart */
+    public function getMonthPresence(mixed $start, mixed $end): int|null
+    {
+        $interval = new DateInterval('P1M');
+        $periode = new DatePeriod($start, $interval, $end);
+        $month = [];
+        foreach ($periode as $period) {
+            $month[] = $period->format('F');
+        }
+        return count($month) - 1;
     }
 
     /** Fonction qui permet d'obtenir le nombre de jour de présence effectuée par le salarié au cours du mois de depart */
@@ -452,56 +462,61 @@ class PaieOutService
         return ceil(count($day) / 1.25);
     }
 
-
-    public function getLastConges(Departure $departure): void
+    /** Determiner l'allocation conges du salarié qui est sur le départ et qui à déjà un congés pris préalablement */
+    public function getLastConges(Departure $departure): array
     {
         /** Information du salarié sujet au congés */
         $personal = $departure->getPersonal();
-        $anciennity = (int)($this->outService->getAnciennitySal($departure) / 12);
+        $anciennity = (int)($this->getAnciennitySal($departure) / 12);
         $date_depart = $departure->getDate();
         $genre = $personal->getGenre();
         $charge_peaple = $personal->getChargePeople();
+        $date_last_conges = $departure->getDateRetourConge();
 
-        $date_dernier_retour = null;
-        $nb_work_month_in_year = null;
-
-        $last_conges = $this->congeRepository->getLastCongeByID($personal->getId(), false);
-        $historique_conge = $this->oldCongeRepository->findOneByPerso($personal->getId());
-        $date_last_conges = $last_conges ? $last_conges->getDateDernierRetour() : $historique_conge->getDateRetour();
-        /** Jour de congé supplémentaire en fonction du sex et des enfant à charge */
-        $dr_conge_supp_1 = round($this->congeService->suppConger($genre, $charge_peaple, $date_depart), 2);
-        /** Jour supplémentaire de congé en fonction de l'ancienneté du salarié */
-        $dr_conge_supp_2 = round($this->congeService->echelonConge($anciennity), 2);
         /** Obtenir le nombre de mois de presence depuis le retour du conges jusqu'à la fin du mois précédent le mois de depart */
-        $month_works = $this->outService->getPeriodeConges($date_last_conges, $date_depart);
+        $month_works = $this->getPeriodeConges($date_last_conges, $date_depart);
         /** Nombre de jour de présence éffectué pendant le mois actuel, jour ouvrable */
-        $day_works_current_month = $this->outService->getDaysPresence($departure);
+        $day_works_current_month = $this->getDaysPresence($departure);
         /** Nombre total de mois travailler par le salaire depuis sont dernier retour de congés */
         $total_works_month = round($month_works + ($day_works_current_month * 1.25 / 30));
         /** Determiner nombre de jour ouvrable de congés */
         $day_ouvrable_cgs = ceil($total_works_month * self::JOUR_CONGE_OUVRABLE);
-        /** Determiner nombre de jour calandaire de congés */
-        $day_calandre_cgs = ceil($day_ouvrable_cgs * self::JOUR_CONGE_CALANDAIRE);
+        /** Jour de congé supplémentaire en fonction du sex et des enfant à charge */
+        $dr_conge_supp_1 = round($this->congeService->suppConger($genre, $charge_peaple, $date_depart), 2);
+        /** Jour supplémentaire de congé en fonction de l'ancienneté du salarié */
+        $dr_conge_supp_2 = round($this->congeService->echelonConge($anciennity), 2);
         /** Nombre de jours total de congés */
-        $total_day_conges = $day_ouvrable_cgs + $dr_conge_supp_1 + $dr_conge_supp_2;
+        $total_day_ouvrable = $day_ouvrable_cgs + $dr_conge_supp_1 + $dr_conge_supp_2;
+        /** Determiner le nombre de jour calandaire */
+        $duree_conges = ceil($total_day_ouvrable * self::JOUR_CONGE_CALANDAIRE);
         /** Quote-part de la prime de fin d'année de la periode de présence */
         $taux_gratif = (int)$this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux() / 100;
-        $base_periode = $this->outService->getSalaires($departure)['salaire_categoriel'];
+        $categoriel_periode = $this->getSalaires($departure)['salaire_categoriel'];
         /** nombre de jour ouvrable de présence dans l'annee actuel depuis le debut de l'année */
-        $day_presence = $this->outService->getPeriodePresence($departure);
-        $quotePartCorrespondent = round($base_periode * $taux_gratif * $day_presence * 1.25 / 360);
+        $day_ouvrable_vigueure = $this->getPeriodePresence($departure);
+        /** Gratification au prorata du nombre de jour ouvrable effectuer pendant l'année en vigueure */
+        $gratification = round($categoriel_periode * $taux_gratif * $day_ouvrable_vigueure * 1.25 / 360);
+        $gratification_correspondent = round($categoriel_periode * $total_works_month / 12);
+        $gratification_mensuel = (double)($categoriel_periode * $taux_gratif) / 12;
+        /** Salaire brut de la période */
+        $cumul_periode = round($this->getSalaires($departure)['brut_imposable_amount'] + $this->getPrimeAncien($departure) + $gratification_mensuel);
+        /** Allocation congés du salarié */
+        $allocation_conges = round($cumul_periode * $duree_conges / 30);
 
-        /** Determiner le salaire brut de la periode */
-        if ($last_conges) {
-            $sal_brut_periode = round((int)$this->payrollRepository->getPeriodiqueSalary2($personal, $date_last_conges) / 12);
-        } else {
-            $sal_brut_periode = (int)$historique_conge->getSalaryAverage();
-        }
-        /** Determiner le salaire moyen mensuel (SMM) des 12 dernier mois travailler par le salarie */
-        $somme = round($sal_brut_periode, 2);
+        return [
+            'cumul_salaire' => $cumul_periode,
+            'periode_reference' => $total_works_month,
+            'jour_ouvrable' => $total_day_ouvrable,
+            'jour_calandaire' => $duree_conges,
+            'gratification' => $gratification,
+            'gratification_correspondent' => $gratification_correspondent,
+            'indemnite_conges' => $allocation_conges,
+        ];
+
     }
 
-    public function getFirstConges(Departure $departure): void
+    /** Determiner l'allocation conges du salarié qui est sur le départ et qui depuis sont entré dans l'entreprise na jamais éffectuer de congés */
+    public function getFirstConges(Departure $departure): array
     {
         /** Donnee sur le salarié */
         $personal = $departure->getPersonal();
@@ -519,22 +534,156 @@ class PaieOutService
         $total_month_works = (int)($month_works + ($day_actual_month * 1.25 / 30));
         /** Determiner le nombre de jour ouvrable */
         $day_ouvrable = ceil($total_month_works * self::JOUR_CONGE_OUVRABLE);
-        /** Determiner le nombre de jour calandaire */
-        $day_calandaire = ceil($day_ouvrable * self::JOUR_CONGE_CALANDAIRE);
         /** Jour de congé supplémentaire en fonction du sex et des enfant à charge */
         $dr_conge_supp_1 = round($this->congeService->suppConger($genre, $charge_peaple, $date_depart), 2);
         /** Jour supplémentaire de congé en fonction de l'ancienneté du salarié */
         $dr_conge_supp_2 = round($this->congeService->echelonConge($anciennity), 2);
         /** Nombre total de jour de conges */
-        $total_day_conges = $day_calandaire + $dr_conge_supp_1 + $dr_conge_supp_2;
+        $total_day_ouvrable = $day_ouvrable + $dr_conge_supp_1 + $dr_conge_supp_2;
+        /** Determiner le nombre de jour calandaire */
+        $duree_conges = ceil($total_day_ouvrable * self::JOUR_CONGE_CALANDAIRE);
         /** Quote-part de la prime de fin d'année de la periode de présence */
         $taux_gratif = (int)$this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux() / 100;
         $categoriel_periode = $this->getSalaires($departure)['salaire_categoriel'];
         /** Nombre de jour ouvrable effectuer pas le salarié au cours de l'année en vigueure */
         $day_ouvrable_vigueure = $this->getPeriodePresence($departure);
         /** Gratification au prorata du nombre de jour ouvrable effectuer pendant l'année en vigueure */
+        $gratification = round($categoriel_periode * $taux_gratif * $day_ouvrable_vigueure * 1.25 / 360);
+        $gratification_mensuel = (double)($categoriel_periode * $taux_gratif) / 12;
+        $gratification_correspondent = round($categoriel_periode * $total_month_works / 12);
+        /** Salaire brut de la période */
+        $cumul_periode = round($this->getSalaires($departure)['brut_imposable_amount'] + $this->getPrimeAncien($departure) + $gratification_mensuel);
+        /** Allocation congés du salarié */
+        $allocation_conges = round($cumul_periode * $duree_conges / 30);
 
-        dd($taux_gratif, $categoriel_periode, $day_ouvrable_vigueure);
+
+        return [
+            'cumul_salaire' => $cumul_periode,
+            'periode_reference' => $total_month_works,
+            'jour_ouvrable' => $total_day_ouvrable,
+            'jour_calandaire' => $duree_conges,
+            'gratification' => $gratification,
+            'gratification_correspondent' => $gratification_correspondent,
+            'indemnite_conges' => $allocation_conges,
+        ];
     }
 
+    /** Determnier l'impôt brut à partir montant net_imposable donner */
+    public function getImpotBrutByIndemnite(float $indemniteImposable): float
+    {
+        $tranchesImposition = [
+            ['min' => 0, 'limite' => 75000, 'taux' => 0],
+            ['min' => 75001, 'limite' => 240000, 'taux' => 0.16],
+            ['min' => 240001, 'limite' => 800000, 'taux' => 0.21],
+            ['min' => 800001, 'limite' => 2400000, 'taux' => 0.24],
+            ['min' => 2400001, 'limite' => 8000000, 'taux' => 0.28],
+            ['min' => 8000001, 'limite' => PHP_INT_MAX, 'taux' => 0.32],
+        ];
+
+        $impotBrut = 0;
+
+        foreach ($tranchesImposition as $tranche) {
+            $limiteMin = $tranche['min'];
+            $limiteMax = $tranche['limite'];
+            $taux = $tranche['taux'];
+
+            if ($indemniteImposable > $limiteMin && $indemniteImposable >= $limiteMax) {
+                $montantImposable = ($limiteMax - $limiteMin) * $taux;
+                $impotBrut += $montantImposable;
+            } else if ($indemniteImposable > $limiteMin) {
+                $montantImposable = ($indemniteImposable - $limiteMin) * $taux;
+                $impotBrut += $montantImposable;
+                break;
+            }
+
+        }
+        return round($impotBrut, 2);
+    }
+
+    /** Determiner le credit d'impôt a déduire de l'impôt brut et cela à partir du nombre de part donner */
+    public function getCreditImpotByPart(float $nombre_part): float
+    {
+        $creditImpot = null;
+        switch ($nombre_part) {
+            case 1;
+                $creditImpot = 0;
+                break;
+            case 1.5;
+                $creditImpot = 5500;
+                break;
+            case 2;
+                $creditImpot = 11000;
+                break;
+            case 2.5;
+                $creditImpot = 16500;
+                break;
+            case 3;
+                $creditImpot = 22000;
+                break;
+            case 3.5;
+                $creditImpot = 27500;
+                break;
+            case 4;
+                $creditImpot = 33000;
+                break;
+            case 4.5;
+                $creditImpot = 38500;
+                break;
+            case 5;
+                $creditImpot = 44000;
+                break;
+        }
+        return $creditImpot;
+    }
+
+    /** Montant de l'ITS du depart */
+    public function getImpotNet($impot_brut, $credit_impot): float
+    {
+        return $impot_brut - $credit_impot;
+    }
+
+    /** Montant de la Cnps de 6,3 % */
+    public function getAmountCNPS(float $indemniteImposable): float
+    {
+        if ($indemniteImposable > 1647314) {
+            $indemniteImposable = 1647314;
+        }
+        $categoryRate = $this->categoryChargeRepository->findOneBy(['codification' => 'CNPS']);
+        return round($indemniteImposable * $categoryRate->getValue() / 100, 2);
+    }
+
+    /** Determiner le montant de la part patronal I.S locaux, de 1,20 % */
+    public function getAmountIS(float $indemniteImposable): float
+    {
+        $categoryRate = $this->categoryChargeRepository->findOneBy(['codification' => 'IS']);
+        return round($indemniteImposable * $categoryRate?->getValue() / 100, 2);
+    }
+
+    /** Determiner le montant de la caisse de retraite du salarie, de 7,70 % */
+    public function getAmountRCNPS_CR(float $indemniteImposable): float
+    {
+        $categoryRateRCNPS_CR = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_CR']);
+        return round($indemniteImposable * $categoryRateRCNPS_CR->getValue() / 100, 2);
+    }
+
+    /** Determiner le montant du taux d'apprentissage, charge patronal */
+    public function getAmountTA(float $indemniteImposable): float
+    {
+        $categoryRateFDFP_TA = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_TA']);
+        return round($indemniteImposable * $categoryRateFDFP_TA->getValue() / 100, 2);
+    }
+
+    /** Determiner le montant de la FPC, charge patronal */
+    public function getAmountFPC(float $indemniteImposable): float
+    {
+        $categoryRateFDFP_FPC = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC']);
+        return round($indemniteImposable * $categoryRateFDFP_FPC->getValue() / 100, 2);
+    }
+
+    /** Determiner le montant de la FPC complement annuel */
+    public function getAmountFPCAnnuel(float $indemniteImposable): float
+    {
+        $categoryRateFDFP_FPC_VER = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC_VER']);
+        return round($indemniteImposable * $categoryRateFDFP_FPC_VER->getValue() / 100, 2);
+    }
 }

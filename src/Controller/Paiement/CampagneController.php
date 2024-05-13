@@ -186,44 +186,35 @@ class CampagneController extends AbstractController
         $campagne = new Campagne();
 
         // setter the value of dateDebut and dateFin in campagne entity
-        $dateRequest = $request->request->get('dateDebut');
-        if ($dateRequest) {
-            $dateRequestObj = DateTime::createFromFormat('Y-m', $dateRequest);
-            $dateDebut = $dateRequestObj->format('Y-m-01');
-            $dateFin = $dateRequestObj->format('Y-m-t');
-            $campagne->setDateDebut(new DateTime($dateDebut))->setDateFin(new DateTime($dateFin));
+        $fullDate = new DateTime();
+        $day = 1;
+        $month = $fullDate->format('m');
+        $year = $fullDate->format('Y');
+        $dateOfMonth = new DateTime($day . '-' . $month . '-' . $year);
+        $last_day_pr_camp = null;
+        $previousCampagne = $this->campagneRepository->findLast();
+        if ($previousCampagne) {
+            $lastCampagneDetail = $this->payrollRepository->findLastCamapagne($previousCampagne);
+            $last_day_pr_camp = $previousCampagne->getStartedAt()->format('Y-m-d');
         }
-
-
-        $lastCampagne = $this->getDetailOfLastCampagne($campagne, true);
         $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
-        $periode = $lastCampagne['periode'];
-        $date = $formatter->format($periode);
+        $last_periode = $formatter->format($previousCampagne->getDateDebut());
 
         $form = $this->createForm(CampagneType::class, $campagne);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $fullDate = new DateTime();
-            $day = 1;
-            $month = $fullDate->format('m');
-            $year = $fullDate->format('Y');
-            $dateOfMonth = new DateTime($day . '-' . $month . '-' . $year);
+            $dateRequest = $form->get('startedAt')->getData();
+            $dateRequestObj = DateTime::createFromFormat('Y-m', $dateRequest);
+            $dateDebut = $dateRequestObj->format('Y-m-01');
+            $dateFin = $dateRequestObj->format('Y-m-t');
+            $campagne->setDateDebut(new DateTime($dateDebut))->setDateFin(new DateTime($dateFin));
             $personals = $form->get('personal')->getData();
             $countPersonal = count($personals);
-            $previousCampagne = $this->campagneRepository->findLast();
-            $last_day_pr_camp = null;
-            if ($previousCampagne) {
-                $last_month = $previousCampagne->getStartedAt()->format('m');
-                $last_day_pr_camp = new DateTime(31 . '-' . $last_month . '-' . $year);
-            }
-
-
             if ($countPersonal > 0) {
                 foreach ($personals as $personal) {
                     $dateEmbauche = $personal->getContract()->getDateEmbauche();
-
-                    if (($dateEmbauche > $previousCampagne?->getStartedAt()) && $dateEmbauche <= $last_day_pr_camp) {
+                    if (($dateEmbauche > $previousCampagne->getStartedAt()) && $dateEmbauche <= $last_day_pr_camp) {
                         //personnel arrivé avant le debut de la campagne passée extra
                         $this->payrollService->setExtraMonthPayroll($personal, $campagne);
                     } elseif (($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt()) {
@@ -254,10 +245,11 @@ class CampagneController extends AbstractController
 
         return $this->render('paiement/campagne/open.html.twig', [
             'form' => $form->createView(),
-            'campagne' => $campagne,
-            'lastCampagne' => $lastCampagne,
-            'periode_paie' => $date,
-            'today' => new DateTime()
+            'lastCampagne' => $lastCampagneDetail,
+            'periode_paie' => $last_periode,
+            'today' => new DateTime(),
+            'started_at' => $previousCampagne->getStartedAt(),
+            'closed_at' => $previousCampagne->getClosedAt()
         ]);
 
     }
@@ -810,7 +802,6 @@ class CampagneController extends AbstractController
     {
         $payrolls = [];
         if ($request->request->has('printEtatSalaireInput') && $request->isMethod('POST')) {
-
             $dateRequest = $request->request->get('printEtatSalaireInput');
             if ($dateRequest) {
                 $dateRequestObj = DateTime::createFromFormat('Y-m', $dateRequest);
@@ -971,6 +962,163 @@ class CampagneController extends AbstractController
         }
         return $this->render('paiement/last.bulletin.html.twig', [
             'payroll_data' => $payBookData,
+            'caisse' => Status::CAISSE,
+            'virement' => Status::VIREMENT
+        ]);
+    }
+
+    #[Route('/bulletin/printer/etat/salaire', name: 'printer_bulletin_etat_salaire', methods: ['POST'])]
+    public function printer(array $payroll, Request $request): Response
+    {
+        $payrolls[] = null;
+        if ($request->request->has('printEtatSalaireInput') && $request->isMethod('POST')) {
+            $payrolls[] = $payroll;
+        }
+        $printer_data = [];
+        foreach ($payrolls as $payroll) {
+            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
+            $periode = $payroll->getCampagne()->getDateDebut();
+            $date = $formatter->format($periode);
+            $personal = $payroll->getPersonal();
+            $accountNumber = null;
+            $nameBanque = null;
+            $accountBanque = $payroll->getPersonal()->getAccountBanks();
+            foreach ($accountBanque as $value) {
+                $accountNumber = $value->getCode() . ' ' . $value->getCodeAgence() . ' ' . $value->getNumCompte() . ' ' . $value->getRib();
+                $nameBanque = $value->getName();
+            }
+
+            $month = $periode->format('m');
+            $year = $periode->format('Y');
+            $nbHeureSupp = $this->heureSupRepository->getNbHeursSupp($personal, $month, $year);
+            $nbHeure = 0;
+            $JourNormalOrFerie = null;
+            $jourOrNuit = null;
+            $amountHeureSup15 = $amountHeureSup50 = $amountHeureSup75A = $amountHeureSup75B = $amountHeureSup100 = null;
+            foreach ($nbHeureSupp as $item) {
+                $nbHeure += $item?->getTotalHorraire();
+                $jourOrNuit = $item->getTypeJourOrNuit();
+                $JourNormalOrFerie = $item->getTypeDay();
+            }
+
+            if ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $nbHeure <= 6) {
+                // 15% jour normal ~ 115%
+                $amountHeureSup15 = $payroll->getMajorationAmount();
+            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::JOUR && $nbHeure > 6) {
+                // 50% jour normal ~ 150%
+                $amountHeureSup50 = $payroll->getMajorationAmount();
+            } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::JOUR) {
+                // 75% jour ferié or dimanche jour ~ 175%
+                $amountHeureSup75A = $payroll->getMajorationAmount();
+            } elseif ($JourNormalOrFerie == Status::NORMAL && $jourOrNuit == Status::NUIT) {
+                // 75% jour normal or dimanche nuit ~ 175%
+                $amountHeureSup75B = $payroll->getMajorationAmount();
+            } elseif ($JourNormalOrFerie == Status::DIMANCHE_FERIE && $jourOrNuit == Status::NUIT) {
+                // 100% jour ferié et dimanche nuit ~ 200%
+                $amountHeureSup100 = $payroll->getMajorationAmount();
+            }
+
+            $personalConges = $payroll->getPersonal();
+            $conges = $this->congeRepository->getLastCongeByID($personalConges->getId(), false);
+            $dernierRetour = $conges?->getDateDernierRetour();
+
+            $tauxCnpsSalarial = $this->categoryChargeRepository->findOneBy(['codification' => 'CNPS'])->getValue();
+            $tauxCrEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_CR'])->getValue();
+            $tauxPfEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_PF'])->getValue();
+            $tauxAtEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_AT'])->getValue();
+            $tauxIsEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'IS'])->getValue();
+            $tauxTaEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_TA'])->getValue();
+            $tauxFPCEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC'])->getValue();
+            $tauxFPCAnnuelEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC_VER'])->getValue();
+
+            $printer_data[] = [
+                /** Information de congés */
+                'date_dernier_conges' => $dernierRetour,
+                'nombre_jour_travailler' => $payroll->getDayOfPresence(),
+                /** Element en rapport avec le personal */
+                'matricule' => $payroll->getMatricule(),
+                'service' => $payroll->getService(),
+                'categorie' => $payroll->getCategories(),
+                'Salaire_categoriel' => $payroll->getPersonal()->getCategorie()->getAmount(),
+                'nombre_part' => $payroll->getNumberPart(),
+                'date_embauche' => date_format($payroll->getDateEmbauche(), 'd/m/Y'),
+                'numero_cnps' => $payroll->getNumCnps(),
+                'periode_paie' => $date,
+                'date_edition' => date_format($payroll->getCampagne()->getStartedAt(), 'd/m/Y'),
+                'nom' => $payroll->getPersonal()->getFirstName(),
+                'prenom' => $payroll->getPersonal()->getLastName(),
+                'departement' => $payroll->getDepartement(),
+                /** Element en rapport avec la methode de paiement */
+                'mode_paiement' => $payroll->getPersonal()->getModePaiement() ?? '',
+                'account_number' => $accountNumber,
+                'banque_name' => $nameBanque,
+                /** Element lieu au cumul des salaire */
+                'salaire_brut' => (double)$payroll->getBrutAmount(),
+                'charge_salarial' => (double)$payroll->getTotalRetenueSalarie(),
+                'charge_patronal' => (double)$payroll->getTotalRetenuePatronal(),
+                'amount_avantage' => (double)$payroll->getAventageNonImposable(),
+                'net_imposable' => (double)$payroll->getImposableAmount(),
+                'heure_travailler' => Status::TAUX_HEURE,
+                'nb_heure_supp' => (double)$nbHeure,
+                'net_payes' => (double)$payroll->getNetPayer(),
+                /** Element en rapport avec le salaire du salarié */
+                'salaire_base' => $payroll->getBaseAmount(),
+                'sursalaire' => $payroll->getSursalaire(),
+                'majoration_heure_sup_15' => $amountHeureSup15,
+                'majoration_heure_sup_50' => $amountHeureSup50,
+                'majoration_heure_sup_75_A' => $amountHeureSup75A,
+                'majoration_heure_sup_75_B' => $amountHeureSup75B,
+                'majoration_heure_sup_100' => $amountHeureSup100,
+                'transport_imposable' => (double)$payroll->getAmountTransImposable(),
+                'avantage_imposable' => (double)$payroll->getAmountAvantageImposable(),
+                'prime_fonction' => (double)$payroll->getPrimeFonctionAmount(),
+                'prime_logement' => (double)$payroll->getPrimeLogementAmount(),
+                'indemnite_fonction' => (double)$payroll->getIndemniteFonctionAmount(),
+                'indemnite_logement' => (double)$payroll->getIndemniteLogementAmount(),
+                'prime_anciennete' => (double)$payroll->getAncienneteAmount(),
+                'total_brut' => (double)$payroll->getImposableAmount(),
+                'taux_its' => '0 à 32 %',
+                'smig' => (double)$payroll->getPersonal()->getSalary()->getSmig(),
+                'amount_its_salarial' => (double)$payroll->getSalaryIts(),
+                'taux_cnps_salarial' => (double)$tauxCnpsSalarial,
+                'amount_cnps_salarial' => (double)$payroll->getSalaryCnps(),
+                'taux_cr_employeur' => (double)$tauxCrEmployeur,
+                'amount_cr_employeur' => (double)$payroll->getEmployeurCr(),
+                'taux_pf_employeur' => (double)$tauxPfEmployeur,
+                'amount_pf_employeur' => (double)$payroll->getEmployeurPf(),
+                'taux_at_employeur' => (double)$tauxAtEmployeur,
+                'amount_at_employeur' => (double)$payroll->getEmployeurAt(),
+                'taux_is_employeur' => (double)$tauxIsEmployeur,
+                'amount_is_employeur' => (double)$payroll->getEmployeurIs(),
+                'taux_ta_employeur' => (double)$tauxTaEmployeur,
+                'amount_ta_employeur' => (double)$payroll->getAmountTA(),
+                'taux_fpc_employeur' => (double)$tauxFPCEmployeur,
+                'amount_fpc_employeur' => (double)$payroll->getAmountFPC(),
+                'taux_fpc_annuel_employeur' => (double)$tauxFPCAnnuelEmployeur,
+                'amount_fpc_annuel_employeur' => (double)$payroll->getAmountAnnuelFPC(),
+                'amount_cmu_salarial' => (double)$payroll->getSalaryCmu(),
+                'amount_cmu_patronal' => (double)$payroll->getEmployeurCmu(),
+                'assurance_salariale' => (double)$payroll->getSalarySante(),
+                'assurance_patronales' => (double)$payroll->getEmployeurSante(),
+                'prime_transport' => (double)$payroll->getSalaryTransport(),
+                'amount_prime_panier' => (double)$payroll->getAmountPrimePanier(),
+                'amount_prime_salissure' => (double)$payroll->getAmountPrimeSalissure(),
+                'amount_prime_tt' => (double)$payroll->getAmountPrimeTenueTrav(),
+                'amount_prime_outi' => (double)$payroll->getAmountPrimeOutillage(),
+                'amount_prime_rendement' => (double)$payroll->getAmountPrimeRendement(),
+                'debut_exercise' => $payroll->getCampagne()->getDateDebut() ? date_format($payroll->getCampagne()->getDateDebut(), 'd/m/Y') : '',
+                'fin_exercise' => $payroll->getCampagne()->getDateFin() ? date_format($payroll->getCampagne()->getDateFin(), 'd/m/Y') : '',
+                'retenue_net' => $payroll->getRetenueNet(),
+                'retenue_brut' => $payroll->getRetenueBrut(),
+                'remboursement_net' => $payroll->getRemboursNet(),
+                'remboursement_brut' => $payroll->getRemboursBrut(),
+                'pret_mensuel' => $payroll->getAmountMensualityPret(),
+                'acompte_mensuel' => $payroll->getAmountMensuelAcompt()
+            ];
+
+        }
+        return $this->render('paiement/last.bulletin.html.twig', [
+            'payroll_data' => $printer_data,
             'caisse' => Status::CAISSE,
             'virement' => Status::VIREMENT
         ]);

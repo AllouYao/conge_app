@@ -41,7 +41,7 @@ class ChargePersonals
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private ?string $numPart = null;
 
-    #[ORM\ManyToOne(inversedBy: 'chargePersonals')]
+    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'chargePersonals')]
     private ?Departure $departure = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]

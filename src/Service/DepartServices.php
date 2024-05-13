@@ -467,7 +467,7 @@ class DepartServices
             case $reason === Status::ABANDON_DE_POST || $reason === Status::LICENCIEMENT_FAUTE_LOURDE:
                 $totalIndemniteImposable = $soldePresence + $soldeConges + $gratification;
                 break;
-            case $reason === Status::LICENCIEMENT_COLLECTIF || $reason === Status::LICENCIEMENT_FAIT_EMPLOYEUR || $reason === Status::MALADIE || $reason === Status::RETRAITE:
+            case $reason === Status::LICENCIEMENT_COLLECTIF || $reason === Status::LICENCIEMENT_FAUTE_SIMPLE || $reason === Status::MALADIE || $reason === Status::RETRAITE:
                 $totalIndemniteImposable = $soldePresence + $soldePreavis + $soldeConges + $gratification + $indemniteLicenciement;
                 break;
             case $reason === Status::DECES:
@@ -536,7 +536,7 @@ class DepartServices
         }
 
 
-        if ($reason === Status::LICENCIEMENT_COLLECTIF || $reason === Status::LICENCIEMENT_FAIT_EMPLOYEUR || $reason === Status::MALADIE || $reason === Status::RETRAITE) {
+        if ($reason === Status::LICENCIEMENT_COLLECTIF || $reason === Status::LICENCIEMENT_FAUTE_SIMPLE || $reason === Status::MALADIE || $reason === Status::RETRAITE) {
             $departure
                 ->setSalaryDue($salaireDue)
                 ->setGratification($gratification)

@@ -22,30 +22,15 @@ class AccountBankRepository extends ServiceEntityRepository
         parent::__construct($registry, AccountBank::class);
     }
 
-    public function findByEmployeRole(): ?array
-    {
-        return $this->createQueryBuilder('acc')
-            ->join('acc.personal', 'p')
-            ->join('p.categorie', 'category')
-            ->join('category.categorySalarie', 'categorySalarie')
-            ->where('p.modePaiement = :mode_paiement')
-            ->andWhere('categorySalarie.code IN (:code)')
-            ->andWhere('p.active = true')
-            ->setParameter('mode_paiement', Status::VIREMENT)
-            ->setParameter('code', ['OUVRIER / EMPLOYES', 'CHAUFFEURS'])
-            ->orderBy('p.matricule', 'ASC')
-            ->getQuery()->getResult();
-    }
-
     public function findAccountBank(): ?array
     {
         return $this->createQueryBuilder('acc')
             ->join('acc.personal', 'p')
             ->join('p.contract', 'contract')
-            ->where('p.modePaiement = :mode_paiement')
+            ->where('p.modePaiement IN (:mode_paiement)')
             ->andWhere('p.active = true')
             ->andWhere('contract.typeContrat IN (:type)')
-            ->setParameter('mode_paiement', Status::VIREMENT)
+            ->setParameter('mode_paiement', [Status::VIREMENT, Status::CHEQUE])
             ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
             ->orderBy('p.matricule', 'ASC')
             ->getQuery()->getResult();

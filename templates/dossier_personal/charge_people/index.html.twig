@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        PERSONNES A CHARGE PAR SALARIES
+                        Liste salariés & personnes à charges
                     </h5>
                 </div>
                 <div class="card-body">
@@ -51,10 +51,15 @@
                 allowColumnResizing: true,
                 columnAutoWidth: true,
                 rowAlternationEnabled: true,
-                height: 355,
+                height: 400,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual"
+                },
+                selection: {
+                    mode: "multiple",
+                    allowSelectAll: true,
+                    showCheckBoxesMode: "always"
                 },
                 groupPanel: {
                     visible: true,
@@ -119,25 +124,25 @@
                         dataField: 'last_name',
                     },
                     {
-                        caption: 'Date Naissance',
+                        caption: 'Date naissance',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_naissance',
                     },
                     {
-                        caption: 'Catégorie Salarié',
+                        caption: 'Catégorie salarié',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'categorie_salarie',
                     },
                     {
-                        caption: 'Date Embauche',
+                        caption: 'Date embauche',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_embauche',
                     },
                     {
-                        caption: 'Nombres Enfants à Charge',
+                        caption: 'Nombres enfants à charge',
                         alignment: 'center',
                         dataType: 'number',
                         dataField: 'number_children',
@@ -168,6 +173,7 @@
                     totalItems: [{
                         column: 'matricule',
                         summaryType: 'count',
+                        displayFormat: 'Salariés : {0}'
                     },],
                 }
             })

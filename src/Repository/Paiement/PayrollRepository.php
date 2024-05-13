@@ -26,6 +26,29 @@ class PayrollRepository extends ServiceEntityRepository
         parent::__construct($registry, Payroll::class);
     }
 
+    /*
+     * Information
+     */
+    public function findLastCamapagne(?Campagne $campagne)
+    {
+        $qb = $this->createQueryBuilder('p');
+        return $qb
+            ->select([
+                'SUM(p.masseSalary) as global_salaire_brut',
+                'SUM(p.fixcalAmount + p.socialAmount) as global_charge_personal',
+                'SUM(p.fixcalAmountEmployeur + p.socialAmountEmployeur) as global_charge_employeur',
+                'SUM(p.salaryIts) as fiscale_salariale',
+                'SUM(p.employeurIs + p.amountTA) as fiscale_patronale',
+                'SUM(p.salaryCmu + p.salaryCnps) as sociale_salariale',
+                'SUM(p.employeurCr + p.employeurPf + p.amountTA) as sociale_patronale',
+                'count(p.id) as nombre_personal',
+            ])
+            ->where('p.campagne = :p_campagne')
+            ->setParameter('p_campagne', $campagne->getId())
+            ->getQuery()
+            ->getSingleResult();
+    }
+
     /**
      * @param bool $active
      * @param Personal $personal
@@ -166,6 +189,7 @@ class PayrollRepository extends ServiceEntityRepository
                 'w.name as station',
                 'personal.uuid as personal_uuid',
                 'YEAR(personal.birthday) as personal_birthday',
+                'payroll.id as payroll_id',
                 'payroll.uuid as payroll_uuid',
                 'payroll.matricule',
                 'payroll.dayOfPresence',

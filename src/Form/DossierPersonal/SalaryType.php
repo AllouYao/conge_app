@@ -33,7 +33,7 @@ class SalaryType extends AbstractType
         $builder
             ->add('avantage', EntityType::class, [
                 'class' => Avantage::class,
-                'placeholder' => "Sélectionner le nombre de pièce principale",
+                'placeholder' => "--- Sélectionner le nombre de pièce principale ---",
                 'attr' => [
                     'data-plugin' => 'customselect'
                 ],

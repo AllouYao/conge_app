@@ -137,26 +137,18 @@ final class Status
         "DÉCÈS PEAU PÈRE OU BELLE-MÈRE (2 JOURS)"
     ];
 
-    public const REASON_DEPARTURE = [
-        "DEMISSION",
-        "RETRAITE",
-        "LICENCIEMENT",
-        "ABANDON DE POST",
-        "MALADIE",
-        "DECES"
-    ];
 
     /**
      * Reason of departure
      */
-    public const DEMISSION = 'DEMISSION';
-    public const RETRAITE = 'RETRAITE';
+    public const DEMISSION = 'Demission';
+    public const RETRAITE = 'Retraite';
     public const LICENCIEMENT_COLLECTIF = 'LICENCIEMENT COLLECTIF';
-    public const LICENCIEMENT_FAUTE_LOURDE = 'LICENCIEMENT FAUTE LOURDE';
-    public const LICENCIEMENT_FAIT_EMPLOYEUR = 'LICENCIEMENT DU FAIT DE EMPLOYEUR';
+    public const LICENCIEMENT_FAUTE_LOURDE = 'Licenciement faute lourde';
+    public const LICENCIEMENT_FAUTE_SIMPLE = 'Licenciement faute simple';
     public const ABANDON_DE_POST = 'ABANDON DE POST';
     public const MALADIE = 'MALADIE';
-    public const DECES = 'DECES';
+    public const DECES = 'Deces';
 
     /**
      * Type de charge
@@ -244,7 +236,7 @@ final class Status
         'demission' => Status::DEMISSION,
         'retraite' => Status::RETRAITE,
         'licenciement_lourde' => Status::LICENCIEMENT_FAUTE_LOURDE,
-        'licenciement_simple' => Status::LICENCIEMENT_FAUTE_LOURDE,
+        'licenciement_simple' => Status::LICENCIEMENT_FAUTE_SIMPLE,
         'deces' => Status::DECES
     ];
 

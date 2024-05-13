@@ -25,7 +25,7 @@ class ContractType extends AbstractType
                     'CDI' => Status::CDI,
                     'CDDI' => Status::CDDI,
                 ],
-                'placeholder' => 'Sélectionner votre type de contrat',
+                'placeholder' => '--- Sélectionner votre type de contrat ---',
                 'required' => true,
                 'constraints' => [
                     new NotBlank()
@@ -51,7 +51,7 @@ class ContractType extends AbstractType
                     'Temps plein' => Status::TEMPS_PLEIN,
                     'Temps partiel' => Status::TEMPS_PARTIEL,
                 ],
-                'placeholder' => 'Sélectionner votre temps contractuel',
+                'placeholder' => '--- Sélectionner votre temps contractuel ---',
                 'required' => false,
             ])
             ->add('refContract');

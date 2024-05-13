@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20240404115426 extends AbstractMigration
+final class Version20240510100541 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,12 +20,12 @@ final class Version20240404115426 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE payroll ADD amount_mensuality_pret NUMERIC(20, 2) DEFAULT NULL');
+        $this->addSql('ALTER TABLE departure ADD periode_references NUMERIC(10, 2) DEFAULT NULL, ADD conges_ouvrable NUMERIC(10, 2) DEFAULT NULL');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE payroll DROP amount_mensuality_pret');
+        $this->addSql('ALTER TABLE departure DROP periode_references, DROP conges_ouvrable');
     }
 }

@@ -1,4 +1,4 @@
-{% if campagne.lastCampagne %}
+{% if lastCampagne %}
     <fieldset>
         <legend>Situation de paie précédente</legend>
         <table class="table table-bordered table-responsive table-sm">
@@ -33,10 +33,10 @@
             </thead>
             <tbody>
             <tr>
-                <td class="text-center">{{ campagne.lastCampagne.startedAt | date("d/m/Y") }}</td>
-                <td class="text-center">{{ campagne.lastCampagne.startedAt | date("H:i") }}</td>
-                <td class="text-center">{{ campagne.lastCampagne.closedAt | date("d/m/Y") }}</td>
-                <td class="text-center">{{ campagne.lastCampagne.closedAt | date("H:i") }}</td>
+                <td class="text-center">{{ started_at | date("d/m/Y") }}</td>
+                <td class="text-center">{{ started_at | date("H:i") }}</td>
+                <td class="text-center">{{ closed_at | date("d/m/Y") }}</td>
+                <td class="text-center">{{ closed_at | date("H:i") }}</td>
                 <td class="text-center">{{ periode_paie|capitalize }}</td>
                 <td class="text-center">{{ lastCampagne.nombre_personal | number_format(0, ",", " ") }}</td>
                 <td class="text-end">{{ lastCampagne.fiscale_salariale | number_format(0, ",", " ") }}</td>
@@ -97,14 +97,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="mb-2 row">
+                {#<div class="mb-2 row">
                     <label class="col-md-2 col-form-label required">Salariés
                         <span class="text-danger">*</span></label>
                     <div class="col-md-10">
                         {{ form_widget(form.personal) }}
                         {{ form_help(form.personal) }}
                     </div>
-                </div>
+                </div>#}
             </div>
         </fieldset>
     </div>

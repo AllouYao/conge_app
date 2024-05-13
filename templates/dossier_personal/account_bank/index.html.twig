@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        LISTE COMPTE EN BANQUE PAR SALARIES
+                        Liste salariés & comptes bancaires
                     </h5>
                 </div>
                 <div class="card-body">
@@ -52,10 +52,15 @@
                 showColumnLines: true,
                 showRowLines: true,
                 rowAlternationEnabled: true,
-                height: 355,
+                height: 400,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual"
+                },
+                selection: {
+                    mode: "multiple",
+                    allowSelectAll: true,
+                    showCheckBoxesMode: "always"
                 },
                 groupPanel: {
                     visible: true,
@@ -120,37 +125,37 @@
                         dataField: 'last_name',
                     },
                     {
-                        caption: 'Date Naissance',
+                        caption: 'Date naissance',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_naissance',
                     },
                     {
-                        caption: 'Catégorie Salarié',
+                        caption: 'Catégorie salarié',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'categorie_salarie',
                     },
                     {
-                        caption: 'Date Embauche',
+                        caption: 'Date embauche',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_embauche',
                     },
                     {
-                        caption: 'Intitulé  Banque',
+                        caption: 'Intitulé banque',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'nom_banque',
                     },
                     {
-                        caption: 'Code Banque',
+                        caption: 'Code banque',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'code_banque',
                     },
                     {
-                        caption: 'Code Agence',
+                        caption: 'Code agence',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'code_agence',
@@ -190,7 +195,8 @@
                     totalItems: [
                         {
                             column: 'matricule',
-                            summaryType: 'count'
+                            summaryType: 'count',
+                            displayFormat: 'Salariés : {0}'
                         }
                     ]
                 }

@@ -54,16 +54,8 @@ class SalaryImpotsService implements SalaryInterface
     {
         $previousCampagne = $this->campagneRepository->findLast();
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
-        $fullDate = new DateTime();
-        $day = 1;
-        $month = $fullDate->format('m');
-        $year = $fullDate->format('Y');
-        $dateOfMonth = new DateTime($day . '-' . $month . '-' . $year);
-        $last_day_pr_camp = null;
-        if ($previousCampagne) {
-            $last_month = $previousCampagne->getStartedAt()->format('m');
-            $last_day_pr_camp = new DateTime(31 . '-' . $last_month . '-' . $year);
-        }
+        $dateOfMonth = (new DateTime())->format('Y-m-d');
+        $last_day_pr_camp = $previousCampagne?->getDateFin();
 
         if (($dateEmbauche > $dateOfMonth) && $dateEmbauche < $campagne->getStartedAt()) {
             $part = $this->paieByPeriodService->getPartCampagne($personal);
@@ -259,7 +251,7 @@ class SalaryImpotsService implements SalaryInterface
             ->setAmountCNPS($amount_cnps)
             ->setAmountTotalChargePersonal($total_charge);
         $this->manager->persist($charge);
-        //$this->manager->flush();
+        $this->manager->flush();
     }
 
     /**
@@ -307,7 +299,7 @@ class SalaryImpotsService implements SalaryInterface
             ->setTotalRetenuCNPS($total_rate_cnps)
             ->setTotalChargeEmployeur($total_charge);
         $this->manager->persist($charge_employer);
-        //$this->manager->flush();
+        $this->manager->flush();
     }
 
 }

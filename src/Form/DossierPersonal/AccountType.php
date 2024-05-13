@@ -2,64 +2,30 @@
 
 namespace App\Form\DossierPersonal;
 
+use App\Entity\DossierPersonal\AccountBank;
 use App\Entity\DossierPersonal\Personal;
-use App\Utils\Status;
-use Doctrine\ORM\EntityRepository;
+use App\Repository\DossierPersonal\PersonalRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class AccountType extends AbstractType
 {
-
-
-    public function __construct(private readonly AuthorizationCheckerInterface $authorizationChecker)
-    {
-    }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
-                'query_builder' => function (EntityRepository $er) {
-                    if ($this->authorizationChecker->isGranted('ROLE_RH')) {
-                        return $er->createQueryBuilder('p')
-                            ->join('p.contract', 'contract')
-                            ->leftJoin('p.accountBanks', 'account_banks')
-                            ->leftJoin('p.departures', 'departures')
-                            ->where('p.modePaiement in (:modePaiement)')
-                            ->andWhere('departures.id IS NULL')
-                            ->andWhere('account_banks.id IS NULL')
-                            ->andWhere('p.active = true')
-                            ->andWhere('contract.typeContrat IN (:type)')
-                            ->setParameter('modePaiement', [Status::VIREMENT, Status::CHEQUE])
-                            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
-                            ->orderBy('p.matricule', 'ASC');
-                    } else {
-                        return $er->createQueryBuilder('p')
-                            ->join('p.contract', 'contract')
-                            ->join('p.categorie', 'category')
-                            ->join('category.categorySalarie', 'category_salarie')
-                            ->leftJoin('p.accountBanks', 'account_banks')
-                            ->leftJoin('p.departures', 'departures')
-                            ->where('p.modePaiement in (:modePaiement)')
-                            ->andWhere('departures.id IS NULL')
-                            ->andWhere('account_banks.id IS NULL')
-                            ->andWhere('p.active = true')
-                            ->andWhere('contract.typeContrat IN (:type)')
-                            ->andWhere("category_salarie.code IN (:code)")
-                            ->setParameter('modePaiement', [Status::VIREMENT, Status::CHEQUE])
-                            ->setParameter('type', [Status::CDD, Status::CDI, Status::CDDI])
-                            ->setParameter('code', ['OUVRIER / EMPLOYES', 'CHAUFFEURS'])
-                            ->orderBy('p.matricule', 'ASC');
-                    }
+                'query_builder' => function (PersonalRepository $er) {
+                    return $er->findPersonalWithAcompteBank();
                 },
-                'placeholder' => 'Sélectionner un salarié',
+                'placeholder' => '--- Sélectionner un salarié ---',
                 'attr' => [
                     'data-plugin' => 'customselect',
                 ],
@@ -97,6 +63,43 @@ class AccountType extends AbstractType
                 'allow_add' => true,
                 'allow_delete' => true,
             ]);
+
+        $builder
+            ->addEventListener(
+                FormEvents::PRE_SET_DATA,
+                function (FormEvent $event) {
+                    /** @var AccountBank $data */
+                    $data = $event->getData();
+                    $form = $event->getForm();
+                    $personal = $data['personal'] ?? null;
+                    $arrayAccountBank = $data['accountBanks'] ?? null;
+                    if ($arrayAccountBank) {
+                        foreach ($data['accountBanks'] as $accountBank) {
+                            if ($accountBank instanceof AccountBank && $accountBank->getId()
+                            ) {
+                                $form->add('personal', EntityType::class, [
+                                    'class' => Personal::class,
+                                    'query_builder' => function (PersonalRepository $er) use ($personal) {
+                                        return $er->findEditPersonalWithAcompteBank($personal);
+                                    },
+                                    'placeholder' => '--- Sélectionner un matricule ---',
+                                    'attr' => [
+                                        'data-plugin' => 'customselect',
+                                    ],
+                                    'choice_attr' => function (Personal $personal) {
+                                        return [
+                                            'data-id' => $personal->getId(),
+                                            'data-name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
+                                            'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y'),
+                                            'data-category' => '( ' . $personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' . $personal->getCategorie()
+                                        ];
+                                    }
+                                ]);
+                            }
+                        }
+                    }
+                }
+            );
     }
 
     public function configureOptions(OptionsResolver $resolver): void

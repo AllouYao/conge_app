@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        RECAPITULATIF DE MAJORATIONS DES HEURES SUPP PAR TRANCHE SUR LA PERIODE DE {{ date|upper }}
+                        Récapitulatif des majorations des heures supplémentaire par tranche de la periode de {{ date }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -51,7 +51,7 @@
                 allowColumnReordering: true,
                 allowColumnResizing: true,
                 columnAutoWidth: true,
-                height: 355,
+                height: 400,
                 selection: {
                   mode: "multiple",
                   allowSelectAll: true,
@@ -114,7 +114,7 @@
                         fixed: true
                     },
                     {
-                        caption: 'Nom et Prénoms',
+                        caption: 'Nom et prénoms',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'full_name',
@@ -122,14 +122,14 @@
                         fixed: true
                     },
                     {
-                        caption: 'Heures Normales',
+                        caption: 'Heures normales',
                         dataType: 'number',
                         dataField: 'heure_normal',
                         alignment: 'center',
                         width: 120,
                     },
                     {
-                        caption: 'Total Heures',
+                        caption: 'Total heures',
                         dataType: 'number',
                         dataField: 'total_heure',
                         alignment: 'center',
@@ -171,7 +171,7 @@
                         width: 120,
                     },
                     {
-                        caption: 'Salaire Horaire',
+                        caption: 'Salaire horaire',
                         dataType: 'number',
                         dataField: 'taux_horaire',
                         alignment: 'right',
@@ -181,7 +181,7 @@
                         },
                     },
                     {
-                        caption: 'Montant Majoration',
+                        caption: 'Montant majoration',
                         dataType: 'number',
                         dataField: 'montant_heure_supp',
                         alignment: 'right',
@@ -201,9 +201,14 @@
                 summary: {
                     totalItems: [
                         {
+                            column: 'index',
+                            summaryType: 'count',
+                            displayFormat: 'Salariés : {0}'
+                        },
+                        {
                             column: 'taux_horaire',
                             customizeText() {
-                                return 'Cumul majoration :'
+                                return 'Cumul :'
                             }
                         },
                         {

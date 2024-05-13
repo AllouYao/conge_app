@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        HEURES SUPPLEMENTAIRES DE LA PERIODE DE {{ date|upper }}
+                        Liste salarié & heures supplémentaires de la periode de {{ date }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -52,7 +52,7 @@
                 allowColumnReordering: true,
                 allowColumnResizing: true,
                 columnAutoWidth: true,
-                height: 355,
+                height: 400,
                 selection: {
                     mode: "multiple",
                     allowSelectAll: true,
@@ -119,55 +119,55 @@
                         dataField: 'name',
                     },
                     {
-                        caption: 'Prénom(s)',
+                        caption: 'Prénoms',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'last_name',
                     },
                     {
-                        caption: 'Date Naissance',
+                        caption: 'Date naissance',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_naissance',
                     },
                     {
-                        caption: 'Catégorie Salarié',
+                        caption: 'Catégorie salarié',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'categorie_salarie',
                     },
                     {
-                        caption: 'Date Embauche',
+                        caption: 'Date embauche',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_embauche',
                     },
                     {
-                        caption: 'Date Début',
+                        caption: 'Date début',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_debut',
                     },
                     {
-                        caption: 'Heure Début',
+                        caption: 'Heure début',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'heure_debut',
                     },
                     {
-                        caption: 'Date Fin',
+                        caption: 'Date fin',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'date_fin',
                     },
                     {
-                        caption: 'Heure Fin',
+                        caption: 'Heure fin',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'heure_fin',
                     },
                     {
-                        caption: 'Total Horraire',
+                        caption: 'Total horraire',
                         alignment: 'center',
                         dataType: 'number',
                         dataField: 'total_horaire',

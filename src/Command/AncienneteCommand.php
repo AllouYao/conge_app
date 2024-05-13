@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Repository\DossierPersonal\PersonalRepository;
+use App\Repository\DossierPersonal\ContractRepository;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -19,7 +19,7 @@ class AncienneteCommand extends Command
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly PersonalRepository     $personalRepository
+        private readonly ContractRepository     $contractRepository
     )
     {
         parent::__construct();
@@ -33,12 +33,12 @@ class AncienneteCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $personals = $this->personalRepository->findAll();
+        $contracts = $this->contractRepository->findAll();
         $today = new Carbon();
-        foreach ($personals as $personal) {
-            $dateEmbauche = $personal->getContract()->getDateEmbauche();
+        foreach ($contracts as $contract) {
+            $dateEmbauche = $contract->getDateEmbauche();
             $anciennete = $today->diff($dateEmbauche)->days / 360;
-            $personal->setOlder($anciennete);
+            $personal = $contract->getPersonal()->setOlder($anciennete);
             $this->entityManager->persist($personal);
         }
         $this->entityManager->flush();

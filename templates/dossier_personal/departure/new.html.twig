@@ -28,4 +28,18 @@
     </div>
 {% endblock %}
 
+{% block javascripts %}
+{#
+    <script>
+        function afficherModal() {
+            $('#messageModal').modal('show'); // Afficher le modal
+
+            $('#messageModal').on('hidden.bs.modal', function (e) {
+                // Renvoyer le focus au champ de saisie
+                $('#departure_cumulSalaire').focus();
+            });
+        }
+    </script>#}
+{% endblock %}
+
 

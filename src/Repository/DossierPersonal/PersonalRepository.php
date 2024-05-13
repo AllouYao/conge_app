@@ -6,7 +6,6 @@ use App\Entity\DossierPersonal\Personal;
 use App\Entity\User;
 use App\Utils\Status;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\DBAL\Query;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -39,6 +38,7 @@ class PersonalRepository extends ServiceEntityRepository
             return $result;
         }, $qb);
     }
+
     public function findAllPersonalOnCampain(): array
     {
         $qb = $this->createQueryBuilder('p')
@@ -51,43 +51,9 @@ class PersonalRepository extends ServiceEntityRepository
             ->orderBy('p.matricule', 'ASC')
             ->getQuery()
             ->getResult();
-        return array_map(function ($result) { 
+        return array_map(function ($result) {
             return $result;
         }, $qb);
-    }
-
-    public function findAllPersonalByEmployeRole(): array
-    {
-        $qb = $this->createQueryBuilder('p');
-        /** @var User $user */
-        $user = $this->security->getUser();
-        $qb = $this->createQueryBuilder('p');
-        $em = $qb->getEntityManager();
-        return $qb
-            ->join('p.contract', 'contract')
-            ->join('p.categorie', 'category')
-            ->join('category.categorySalarie', 'category_salarie')
-            ->leftJoin('p.departures', 'departures')
-            ->where(
-                $qb->expr()
-                    ->in(
-                        'category_salarie.id',
-                        $em
-                            ->createQueryBuilder()
-                            ->select('c.id')
-                            ->from('App:User', 'u')
-                            ->join('u.categories', 'c')
-                            ->where($qb->expr()->eq('u.id', $user->getId()))
-                            ->getDQL()
-                    )
-            )
-            ->andWhere('contract.typeContrat IN (:type)')
-            ->andWhere('p.active = true')
-            ->andWhere('departures.id IS NULL')
-            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
-            ->orderBy('p.matricule', 'ASC')
-            ->getQuery()
-            ->getResult();
     }
 
     /**
@@ -131,70 +97,6 @@ class PersonalRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-
-
-    public function findPersonalOut(): \Doctrine\ORM\QueryBuilder
-    {
-        /** @var User $user */
-        $users = $this->security->getUser();
-        $query = $this->createQueryBuilder('p');
-        $manager = $query->getEntityManager();
-         $query
-            ->join('p.contract', 'contract')
-            ->join('p.categorie', 'category')
-            ->join('category.categorySalarie', 'category_salarie')
-            ->leftJoin('p.departures', 'departures')
-            ->where(
-                $query->expr()
-                    ->in(
-                        'category_salarie.id',
-                        $manager
-                            ->createQueryBuilder()
-                            ->select('c.id')
-                            ->from('App:User', 'u')
-                            ->join('u.categories', 'c')
-                            ->where($query->expr()->eq('u.id', $users->getId()))
-                            ->getDQL()
-                    )
-            )
-            ->andWhere('contract.typeContrat IN (:type)')
-            ->andWhere('p.active = false')
-            ->andWhere('departures.id IS NULL')
-            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
-            ->orderBy('p.firstName', 'ASC');
-        return $query;
-    }
-    public function findPersonalOutN(): \Doctrine\ORM\QueryBuilder
-    {
-        /** @var User $user */
-        $users = $this->security->getUser();
-        $query = $this->createQueryBuilder('p');
-        $manager = $query->getEntityManager();
-         $query
-            ->join('p.contract', 'contract')
-            ->join('p.categorie', 'category')
-            ->join('category.categorySalarie', 'category_salarie')
-            ->join('p.departures', 'departures')
-            ->where(
-                $query->expr()
-                    ->in(
-                        'category_salarie.id',
-                        $manager
-                            ->createQueryBuilder()
-                            ->select('c.id')
-                            ->from('App:User', 'u')
-                            ->join('u.categories', 'c')
-                            ->where($query->expr()->eq('u.id', $users->getId()))
-                            ->getDQL()
-                    )
-            )
-            ->andWhere('contract.typeContrat IN (:type)')
-            ->andWhere('p.active = false')
-            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
-            ->orderBy('p.firstName', 'ASC');
-        return $query;
-    }
-
 
     /**
      * @return Personal[] Returns an array of Personal objects
@@ -281,7 +183,6 @@ class PersonalRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-
     /**
      * @return Personal[] Returns an array of Personal objects
      */
@@ -296,6 +197,103 @@ class PersonalRepository extends ServiceEntityRepository
             ->setParameter('status', Status::VALIDATED)
             ->getQuery()
             ->getResult();
+    }
+
+
+    public function findLastId(): float|bool|int|string|null
+    {
+        return $this->createQueryBuilder('t')
+            ->select('MAX(t.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function areAllUsersActivated(): bool
+    {
+        $countActivatedUsers = $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.active = :isActive')
+            ->setParameter('isActive', true)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $countAllUsers = $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $countActivatedUsers == $countAllUsers;
+    }
+
+
+    /** Gestion du formulaire d'ajout du personal au niveau des charge people  */
+    public function findPersonalWithChargePeople(): \Doctrine\ORM\QueryBuilder
+    {
+        /** @var User $user */
+        $users = $this->security->getUser();
+        $query = $this->createQueryBuilder('p');
+        $manager = $query->getEntityManager();
+        $query
+            ->join('p.contract', 'contract')
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->leftJoin('p.departures', 'departures')
+            ->leftJoin('p.chargePeople', 'charge_people')
+            ->where(
+                $query->expr()
+                    ->in(
+                        'category_salarie.id',
+                        $manager
+                            ->createQueryBuilder()
+                            ->select('c.id')
+                            ->from('App:User', 'u')
+                            ->join('u.categories', 'c')
+                            ->where($query->expr()->eq('u.id', $users->getId()))
+                            ->getDQL()
+                    )
+            )
+            ->andWhere('p.active = true')
+            ->andWhere('contract.typeContrat IN (:type)')
+            ->andWhere('departures.id IS NULL')
+            ->andWhere('charge_people.id IS NULL')
+            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
+            ->orderBy('p.firstName', 'ASC');
+        return $query;
+    }
+
+    public function findEditPersonalWithChargePeople(Personal $personal): \Doctrine\ORM\QueryBuilder
+    {
+        /** @var User $user */
+        $users = $this->security->getUser();
+        $query = $this->createQueryBuilder('p');
+        $manager = $query->getEntityManager();
+        $query
+            ->join('p.contract', 'contract')
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->leftJoin('p.departures', 'departures')
+            ->leftJoin('p.chargePeople', 'charge_people')
+            ->where(
+                $query->expr()
+                    ->in(
+                        'category_salarie.id',
+                        $manager
+                            ->createQueryBuilder()
+                            ->select('c.id')
+                            ->from('App:User', 'u')
+                            ->join('u.categories', 'c')
+                            ->where($query->expr()->eq('u.id', $users->getId()))
+                            ->getDQL()
+                    )
+            )
+            ->andWhere('contract.typeContrat IN (:type)')
+            ->andWhere('p.active = true')
+            ->andWhere('charge_people.id IS NOT NULL')
+            ->andWhere('p.id = :personal_id')
+            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
+            ->setParameter('personal_id', $personal->getId())
+            ->orderBy('p.firstName', 'ASC');
+        return $query;
     }
 
     /**
@@ -333,29 +331,112 @@ class PersonalRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findLastId(): float|bool|int|string|null
+    /** Gestion du formulaire d'ajout du personal au niveau des charge people  */
+    public function findPersonalWithAcompteBank(): \Doctrine\ORM\QueryBuilder
     {
-        return $this->createQueryBuilder('t')
-            ->select('MAX(t.id)')
-            ->getQuery()
-            ->getSingleScalarResult();
+        /** @var User $user */
+        $users = $this->security->getUser();
+        $query = $this->createQueryBuilder('p');
+        $manager = $query->getEntityManager();
+        $query
+            ->join('p.contract', 'contract')
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->leftJoin('p.departures', 'departures')
+            ->leftJoin('p.accountBanks', 'account_banks')
+            ->where(
+                $query->expr()
+                    ->in(
+                        'category_salarie.id',
+                        $manager
+                            ->createQueryBuilder()
+                            ->select('c.id')
+                            ->from('App:User', 'u')
+                            ->join('u.categories', 'c')
+                            ->where($query->expr()->eq('u.id', $users->getId()))
+                            ->getDQL()
+                    )
+            )
+            ->andWhere('p.active = true')
+            ->andWhere('p.modePaiement IN (:mode_paiement)')
+            ->andWhere('contract.typeContrat IN (:type)')
+            ->andWhere('departures.id IS NULL')
+            ->andWhere('account_banks.id IS NULL')
+            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
+            ->setParameter('mode_paiement', [Status::VIREMENT, Status::CHEQUE])
+            ->orderBy('p.firstName', 'ASC');
+        return $query;
     }
 
-    public function areAllUsersActivated(): bool
+    public function findEditPersonalWithAcompteBank(Personal $personal): \Doctrine\ORM\QueryBuilder
     {
-        $countActivatedUsers = $this->createQueryBuilder('p')
-            ->select('COUNT(p.id)')
-            ->andWhere('p.active = :isActive')
-            ->setParameter('isActive', true)
-            ->getQuery()
-            ->getSingleScalarResult();
+        /** @var User $user */
+        $users = $this->security->getUser();
+        $query = $this->createQueryBuilder('p');
+        $manager = $query->getEntityManager();
+        $query
+            ->join('p.contract', 'contract')
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->leftJoin('p.departures', 'departures')
+            ->leftJoin('p.accountBanks', 'account_banks')
+            ->where(
+                $query->expr()
+                    ->in(
+                        'category_salarie.id',
+                        $manager
+                            ->createQueryBuilder()
+                            ->select('c.id')
+                            ->from('App:User', 'u')
+                            ->join('u.categories', 'c')
+                            ->where($query->expr()->eq('u.id', $users->getId()))
+                            ->getDQL()
+                    )
+            )
+            ->andWhere('contract.typeContrat IN (:type)')
+            ->andWhere('p.active = true')
+            ->andWhere('p.modePaiement IN (:mode_paiement)')
+            ->andWhere('p.id = :personal_id')
+            ->andWhere('account_banks.id IS NOT NULL')
+            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
+            ->setParameter('personal_id', $personal->getId())
+            ->setParameter('mode_paiement', [Status::VIREMENT, Status::CHEQUE])
+            ->orderBy('p.firstName', 'ASC');
+        return $query;
+    }
 
-        $countAllUsers = $this->createQueryBuilder('p')
-            ->select('COUNT(p.id)')
-            ->getQuery()
-            ->getSingleScalarResult();
+    /** Gestion du formulaire d'ajout du personal dans les formulaire non specific */
+    public function findPersoBuilder(): \Doctrine\ORM\QueryBuilder
+    {
+        /** @var User $user */
+        $user = $this->security->getUser();
+        $qb = $this->createQueryBuilder('p');
+        $em = $qb->getEntityManager();
 
-        return $countActivatedUsers == $countAllUsers;
+        $qb
+            ->join('p.contract', 'contract')
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->leftJoin('p.departures', 'departures')
+            ->where(
+                $qb->expr()
+                    ->in(
+                        'category_salarie.id',
+                        $em
+                            ->createQueryBuilder()
+                            ->select('c.id')
+                            ->from('App:User', 'u')
+                            ->join('u.categories', 'c')
+                            ->where($qb->expr()->eq('u.id', $user->getId()))
+                            ->getDQL()
+                    )
+            )
+            ->andWhere('contract.typeContrat IN (:type)')
+            ->andWhere('p.active = true')
+            ->andWhere('departures.id IS NULL')
+            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
+            ->orderBy('p.firstName', 'ASC');
+        return $qb;
     }
 
 }
