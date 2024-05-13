@@ -4,21 +4,20 @@
         <select name="months[]" id="months" class="form-select form-select-sm full-width-fix"
                 data-placeholder="Sélectionner le mois"
                 multiple
-                data-plugin="customselect">
+                data-plugin="customselect" required>
             {% for id,m in months %}
                 <option value="{{ id }}">{{ m }}</option>
             {% endfor %}
         </select>
     </div>
-    <label class="col-md-1 col-form-label" for="example-month">Année</label>
+    <label class="col-md-1 col-form-label" for="example-month">Années</label>
     <div class="col-md-3">
         <input type="text" class="form-control-sm form-control yearpicker" name="year" id="year">
     </div>
-    <label class="col-md-1 col-form-label" for="personalsId">Personnels</label>
+    <label class="col-md-1 control-label" for="personalsId">Personnel </label>
     <div class="col-md-3">
-        <select name="personalsId" id="personalsId" placeholder="Sélectionner un salarier"
-                class="form-select form-select-sm full-width-fix" data-placeholder="Sélectionner un salarier"
-                data-plugin="customselect">
+        <select name="personalsId" id="personalsId" placeholder="Sélectionner personal"
+                class="form-select form-select-sm full-width-fix" data-plugin="customselect">
             <option value="" selected></option>
             <option value="">Tous</option>
             {% for p in personals %}
@@ -27,3 +26,4 @@
         </select>
     </div>
 </div>
+

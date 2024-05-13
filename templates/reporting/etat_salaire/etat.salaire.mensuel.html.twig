@@ -6,7 +6,6 @@
         #dataGridSalarialeEtat {
             height: 500px;
             border-width: 50px;
-
         }
     </style>
 {% endblock %}
@@ -89,9 +88,7 @@
                 },
                 showColumnLines: true,
                 showRowLines: true,
-                paging: {
-                    pageSize: 10,
-                },
+
                 allowColumnReordering: true,
                 allowColumnResizing: true,
                 columnAutoWidth: true,
@@ -145,7 +142,6 @@
                         },
                         width: 120
                     },
-
                     {
                         caption: "Autre primes et indemnités",
                         alignment: 'center',
@@ -295,70 +291,70 @@
                     },
 
                     {
-                      caption: 'Charge patronale',
-                      alignment: 'center',
-                      columns: [
-                          {
-                              caption: "CNPS (7,7%)",
-                              dataField: "amount_cnps_patronal",
-                              dataType: "number",
-                              alignment: 'right',
-                              summaryType: 'sum',
-                              customizeText: function (data) {
-                                  return new Intl.NumberFormat('fr-FR').format(data.value);
-                              },
-                          },
-                          {
-                              caption: "ITS patronal (1,2%)",
-                              dataField: "amount_is_patronal",
-                              dataType: 'number',
-                              alignment: 'right',
-                              summaryType: 'sum',
-                              customizeText: function (data) {
-                                  return new Intl.NumberFormat('fr-FR').format(data.value);
-                              },
-                          },
-                          {
-                              caption: "TA(0,4%)",
-                              dataField: "amount_ta_patronal",
-                              dataType: 'number',
-                              alignment: 'right',
-                              summaryType: 'sum',
-                              customizeText: function (data) {
-                                  return new Intl.NumberFormat('fr-FR').format(data.value);
-                              },
-                          },
-                          {
-                              caption: "TFC(0,6%)",
-                              dataField: "amount_fpc_patronal",
-                              dataType: 'number',
-                              alignment: 'right',
-                              summaryType: 'sum',
-                              customizeText: function (data) {
-                                  return new Intl.NumberFormat('fr-FR').format(data.value);
-                              },
-                          },
-                          {
-                              caption: "Accident de travail (2%)",
-                              dataField: "amount_at_patronal",
-                              dataType: 'number',
-                              alignment: 'right',
-                              summaryType: 'sum',
-                              customizeText: function (data) {
-                                  return new Intl.NumberFormat('fr-FR').format(data.value);
-                              },
-                          },
-                          {
-                              caption: "Prestation familiale (5,75%)",
-                              dataField: "amount_pf_patronal",
-                              dataType: 'number',
-                              alignment: 'right',
-                              summaryType: 'sum',
-                              customizeText: function (data) {
-                                  return new Intl.NumberFormat('fr-FR').format(data.value);
-                              },
-                          },
-                      ]
+                        caption: 'Charge patronale',
+                        alignment: 'center',
+                        columns: [
+                            {
+                                caption: "CNPS (7,7%)",
+                                dataField: "amount_cnps_patronal",
+                                dataType: "number",
+                                alignment: 'right',
+                                summaryType: 'sum',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: "ITS patronal (1,2%)",
+                                dataField: "amount_is_patronal",
+                                dataType: 'number',
+                                alignment: 'right',
+                                summaryType: 'sum',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: "TA(0,4%)",
+                                dataField: "amount_ta_patronal",
+                                dataType: 'number',
+                                alignment: 'right',
+                                summaryType: 'sum',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: "TFC(0,6%)",
+                                dataField: "amount_fpc_patronal",
+                                dataType: 'number',
+                                alignment: 'right',
+                                summaryType: 'sum',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: "Accident de travail (2%)",
+                                dataField: "amount_at_patronal",
+                                dataType: 'number',
+                                alignment: 'right',
+                                summaryType: 'sum',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                            {
+                                caption: "Prestation familiale (5,75%)",
+                                dataField: "amount_pf_patronal",
+                                dataType: 'number',
+                                alignment: 'right',
+                                summaryType: 'sum',
+                                customizeText: function (data) {
+                                    return new Intl.NumberFormat('fr-FR').format(data.value);
+                                },
+                            },
+                        ]
                     },
                 ],
                 summary: {
