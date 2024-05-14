@@ -959,6 +959,7 @@ class PayrollRepository extends ServiceEntityRepository
                 'personal.conjointNumSs as conjoint_num_ss',
                 'personal.conjoint as conjoint_name',
                 'chargePeople.numCmu as cp_numCmu',
+                'IF(personal.etatCivil) as is_married'
             ])
             ->join('payroll.campagne', 'campagnes')
             ->join('payroll.personal', 'personal')
@@ -1063,6 +1064,44 @@ class PayrollRepository extends ServiceEntityRepository
             ->andWhere('YEAR(campagnes.dateDebut) = :year')
             ->andWhere('MONTH(campagnes.dateDebut) = :month')
             ->groupBy('personal.firstName', 'personal.lastName', 'personal.birthday', 'payroll.id');
+        $qb
+            ->setParameter('active', $campagne)
+            ->setParameter('year', $years)
+            ->setParameter('month', $month);
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findCampagneCmuNew(bool $isActive, mixed $year, mixed $month)
+    {
+        $qb = $this->createQueryBuilder('p');
+        $qb
+            ->select([
+                'personal.id as personal_id',
+                'personal.firstName as nom',
+                'personal.lastName as prenoms',
+                'personal.refCNPS',
+                'personal.genre',
+                'YEAR(personal.birthday) as personal_birthday',
+                'payroll.matricule',
+                'payroll.numCnps',
+                'payroll.dateEmbauche',
+                'payroll.createdAt',
+                'campagnes.startedAt',
+                'personal.numSs as num_ss',
+                'personal.isCmu as is_cmu',
+                'personal.numCmu as personal_cmu',
+                'personal.conjointNumSs as conjoint_num_ss',
+                'personal.conjoint as conjoint_name',
+                'chargePeople.numCmu as cp_numCmu',
+                'CONCAT(chargePeople.firstName, chargePeople.lastName) as beneficaire',
+            ])
+            ->join('p.campagne', 'campagnes')
+            ->join('p.personal', 'personal')
+            ->leftJoin('personal.chargePeople', 'chargePeople')
+            ->where('campagnes.active = :active')
+            ->andWhere('YEAR(campagnes.dateDebut) = :year')
+            ->andWhere('chargePeople.isCmu = true')
+            ->andWhere('MONTH(campagnes.dateDebut) = :month');
         $qb
             ->setParameter('active', $campagne)
             ->setParameter('year', $years)

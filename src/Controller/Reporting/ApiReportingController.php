@@ -20,7 +20,6 @@ use DateTime;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use IntlDateFormatter;
-use JetBrains\PhpStorm\NoReturn;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -54,7 +53,7 @@ class ApiReportingController extends AbstractController
         DetailPrimeSalaryRepository $detailPrimeSalaryRepository,
         CampagneRepository          $campagneRepository,
         ChargePeopleRepository      $chargePeopleRepository,
-        PaieServices $paieServices
+        PaieServices                $paieServices
     )
     {
         $this->payrollRepository = $payrollRepository;
@@ -627,48 +626,11 @@ class ApiReportingController extends AbstractController
         $month = $today->month;
         $year = $today->year;
         $data = [];
-        $declarationCmu = $this->payrollRepository->findCmuCampagne(true, $year, $month);
+        $declarationCmu = $this->payrollRepository->findCampagneCmuNew(true, $year, $month);
         if (!$declarationCmu) {
             return $this->json(['data' => []]);
         }
         foreach ($declarationCmu as $index => $declaration) {
-            $data[] = [
-                'index' => ++$index,
-                'matricule' => $declaration['matricule'],
-                'num_cnps_assure' => $declaration['refCNPS'],
-                'num_sec_assure' => $declaration['num_ss'],
-                'nom_assure' => $declaration['nom'],
-                'pnom_assure' => $declaration['prenoms'],
-                'birthday' => $declaration['personal_birthday'],
-                'num_cnps_benef' => $declaration['refCNPS'],
-                'num_sec_benef' => $declaration['num_ss'],
-                'type_benef' => 'T',
-                'nom_benef' => $declaration['nom'],
-                'pnom_benef' => $declaration['prenoms'],
-                'birthday_benef' => $declaration['personal_birthday'],
-                'genre_benef' => $declaration['genre']
-            ];
-            if ($declaration['cp_numCmu']) {
-                $chargePeoples = $this->chargePeopleRepository->findPeopleAssureByPersonalId($declaration['personal_id']);
-                foreach ($chargePeoples->getQuery()->getResult() as $chargePerson) {
-                    $data[] = [
-                        'index' => ++$index,
-                        'matricule' => $declaration['matricule'],
-                        'num_cnps_assure' => $declaration['refCNPS'],
-                        'num_sec_assure' => $declaration['num_ss'],
-                        'nom_assure' => $declaration['nom'],
-                        'pnom_assure' => $declaration['prenoms'],
-                        'birthday' => $declaration['personal_birthday'],
-                        'num_cnps_benef' => $declaration['refCNPS'],
-                        'num_sec_benef' => $chargePerson->getNumss(),
-                        'type_benef' => 'E',
-                        'nom_benef' => $chargePerson->getFirstName(),
-                        'pnom_benef' => $chargePerson->getLastName(),
-                        'birthday_benef' => date_format($chargePerson->getBirthday(), 'd/m/y'),
-                        'genre_benef' => $chargePerson->getGender(),
-                    ];
-                }
-            }
             if ($declaration['is_cmu']) {
                 $data[] = [
                     'index' => ++$index,
@@ -681,12 +643,27 @@ class ApiReportingController extends AbstractController
                     'num_cnps_benef' => $declaration['refCNPS'],
                     'num_sec_benef' => $declaration['conjoint_num_ss'],
                     'type_benef' => 'C',
-                    'nom_benef' => $declaration['conjoint_name'],
-                    'pnom_benef' => $declaration['conjoint_name'],
+                    'full_name' => $declaration['conjoint_name'],
                     'birthday_benef' => '',
                     'genre_benef' => 'M',
                 ];
             }
+            $data[] = [
+                'index' => ++$index,
+                'matricule' => $declaration['matricule'],
+                'num_cnps_assure' => $declaration['refCNPS'],
+                'num_sec_assure' => $declaration['num_ss'],
+                'nom_assure' => $declaration['nom'],
+                'pnom_assure' => $declaration['prenoms'],
+                'birthday' => $declaration['personal_birthday'],
+                'num_cnps_benef' => $declaration['refCNPS'],
+                'num_sec_benef' => $declaration['num_ss'],
+                'type_benef' => empty($declaration['beneficaire']) ? 'T' : 'E',
+                'full_name' => $declaration['beneficaire'] ?? $declaration['nom'] . ' ' . $declaration['prenoms'],
+                'birthday_benef' => $declaration['personal_birthday'],
+                'genre_benef' => $declaration['genre']
+            ];
+
         }
         return new JsonResponse($data);
     }
@@ -720,27 +697,27 @@ class ApiReportingController extends AbstractController
                 'genre_benef' => $declaration['genre']
             ];
 
-                $chargePeoples = $this->chargePeopleRepository->findPeopleAssureByPersonalId($declaration['personal_id']);
-                if (!empty($chargePeoples->getQuery()->getResult())) {
-                    foreach ($chargePeoples->getQuery()->getResult() as $chargePerson) {
-                        $data[] = [
-                            'index' => ++$index,
-                            'matricule' => $declaration['matricule'],
-                            'num_cnps_assure' => $declaration['refCNPS'],
-                            'num_sec_assure' => $declaration['num_ss'],
-                            'nom_assure' => $declaration['nom'],
-                            'pnom_assure' => $declaration['prenoms'],
-                            'birthday' => $declaration['personal_birthday'],
-                            'num_cnps_benef' => $declaration['refCNPS'],
-                            'num_sec_benef' => $chargePerson->getNumss(),
-                            'type_benef' => 'E',
-                            'nom_benef' => $chargePerson->getFirstName(),
-                            'pnom_benef' => $chargePerson->getLastName(),
-                            'birthday_benef' => date_format($chargePerson->getBirthday(), 'd/m/y'),
-                            'genre_benef' => $chargePerson->getGender(),
-                        ];
-                    }
+            $chargePeoples = $this->chargePeopleRepository->findPeopleAssureByPersonalId($declaration['personal_id']);
+            if (!empty($chargePeoples->getQuery()->getResult())) {
+                foreach ($chargePeoples->getQuery()->getResult() as $chargePerson) {
+                    $data[] = [
+                        'index' => ++$index,
+                        'matricule' => $declaration['matricule'],
+                        'num_cnps_assure' => $declaration['refCNPS'],
+                        'num_sec_assure' => $declaration['num_ss'],
+                        'nom_assure' => $declaration['nom'],
+                        'pnom_assure' => $declaration['prenoms'],
+                        'birthday' => $declaration['personal_birthday'],
+                        'num_cnps_benef' => $declaration['refCNPS'],
+                        'num_sec_benef' => $chargePerson->getNumss(),
+                        'type_benef' => 'E',
+                        'nom_benef' => $chargePerson->getFirstName(),
+                        'pnom_benef' => $chargePerson->getLastName(),
+                        'birthday_benef' => date_format($chargePerson->getBirthday(), 'd/m/y'),
+                        'genre_benef' => $chargePerson->getGender(),
+                    ];
                 }
+            }
             if ($declaration['is_cmu'] !== null) {
                 $data[] = [
                     'index' => ++$index,
@@ -807,7 +784,7 @@ class ApiReportingController extends AbstractController
         $year = $today->year;
         $month = $today->month;
         $data = [];
-        $remunerations = $this->payrollRepository->findSalarialeCampagne(true, $year,$month);
+        $remunerations = $this->payrollRepository->findSalarialeCampagne(true, $year, $month);
         foreach ($remunerations as $index => $remuneration) {
             $personal = $this->personalRepository->findOneBy(['id' => $remuneration['personal_id']]);
             $creditImpot = $this->paieServices->amountCreditImpotCampagne($personal);
@@ -850,7 +827,7 @@ class ApiReportingController extends AbstractController
         $year = $today->year;
         $month = $today->month;
         $data = [];
-        
+
 
         return new JsonResponse($data);
     }
