@@ -1100,7 +1100,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->leftJoin('personal.chargePeople', 'chargePeople')
             ->where('campagnes.active = :active')
             ->andWhere('YEAR(campagnes.dateDebut) = :year')
-            ->andWhere('chargePeople.isCmu = true')
+            ->orWhere('chargePeople.isCmu = true')
             ->andWhere('MONTH(campagnes.dateDebut) = :month');
         $qb
             ->setParameter('active', $isActive)
