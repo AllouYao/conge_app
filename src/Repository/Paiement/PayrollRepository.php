@@ -1073,7 +1073,7 @@ class PayrollRepository extends ServiceEntityRepository
 
     public function findCampagneCmuNew(bool $isActive, mixed $year, mixed $month)
     {
-        $qb = $this->createQueryBuilder('p');
+        $qb = $this->createQueryBuilder('payroll');
         $qb
             ->select([
                 'personal.id as personal_id',
@@ -1095,8 +1095,8 @@ class PayrollRepository extends ServiceEntityRepository
                 'chargePeople.numCmu as cp_numCmu',
                 'CONCAT(chargePeople.firstName, chargePeople.lastName) as beneficaire',
             ])
-            ->join('p.campagne', 'campagnes')
-            ->join('p.personal', 'personal')
+            ->join('payroll.campagne', 'campagnes')
+            ->join('payroll.personal', 'personal')
             ->leftJoin('personal.chargePeople', 'chargePeople')
             ->where('campagnes.active = :active')
             ->andWhere('YEAR(campagnes.dateDebut) = :year')
