@@ -8,6 +8,7 @@ use App\Entity\Paiement\Payroll;
 use App\Utils\Status;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 
@@ -26,19 +27,6 @@ class PayrollRepository extends ServiceEntityRepository
         parent::__construct($registry, Payroll::class);
     }
 
-    /**
-     * @param bool $active
-     * @param Personal $personal
-     * @return Payroll[]|null
-     * Retourne le dictionnaire des salaire de la campagne en fonction du type et du status de la campagne pour les bulletins
-     */
-    public function findBulletinByCampaign(bool $active, Payroll $payroll): ?Payroll
-    {
-        return $this->createQueryBuilder('pr')
-            ->setParameter('active', $active)
-            ->setParameter('is', $personal->getId())
-            ->getQuery()->getResult();
-    }
 
     /**
      * @param bool $active
@@ -68,89 +56,6 @@ class PayrollRepository extends ServiceEntityRepository
             ->setParameter('code', ['OUVRIER / EMPLOYES', 'CHAUFFEURS'])
             ->setParameter('active', $active)
             ->getQuery()->getResult();
-    }
-
-    /** Etat des salaire periodique en fonction des rôles */
-    public function findEtatSalaire(array $month, int $year, ?int $personalId): array
-    {
-        $qb = $this->createQueryBuilder('payroll');
-        $qb
-            ->select([
-                'personal.id as personal_id',
-                'personal.firstName as nom',
-                'personal.lastName as prenoms',
-                'personal.refCNPS',
-                'personal.older',
-                'personal.service as station',
-                'personal.uuid as personal_uuid',
-                'YEAR(personal.birthday) as personal_birthday',
-                'payroll.uuid as payroll_uuid',
-                'payroll.matricule',
-                'payroll.dayOfPresence',
-                'payroll.baseAmount',
-                'payroll.sursalaire',
-                'payroll.AncienneteAmount',
-                'payroll.primeFonctionAmount',
-                'payroll.primeLogementAmount',
-                'payroll.indemniteFonctionAmount',
-                'payroll.indemniteLogementAmount',
-                'payroll.majorationAmount',
-                'payroll.congesPayesAmount',
-                'payroll.brutAmount',
-                'payroll.imposableAmount',
-                'payroll.salaryCnps',
-                'payroll.salaryIts',
-                'payroll.fixcalAmount',
-                'payroll.salaryCmu',
-                'payroll.salarySante',
-                'payroll.totalRetenueSalarie',
-                'payroll.netPayer',
-                'payroll.employeurCr',
-                'payroll.employeurIs',
-                'payroll.employeurCmu',
-                'payroll.amountTA',
-                'payroll.amountFPC',
-                'payroll.employeurFdfp',
-                'payroll.employeurAt',
-                'payroll.employeurPf',
-                'payroll.employeurSante',
-                'payroll.totalRetenuePatronal',
-                'payroll.masseSalary',
-                'payroll.salaryTransport',
-                'payroll.amountPrimePanier',
-                'payroll.amountPrimeSalissure',
-                'payroll.amountPrimeOutillage',
-                'payroll.amountPrimeTenueTrav',
-                'payroll.amountPrimeRendement',
-                'payroll.amountPrimeRendement',
-                'payroll.aventageNonImposable',
-                'payroll.numberPart',
-                'payroll.numCnps',
-                'payroll.dateEmbauche',
-                'payroll.createdAt',
-                'payroll.remboursNet',
-                'payroll.remboursBrut',
-                'payroll.retenueNet',
-                'payroll.retenueBrut',
-                'payroll.amountMensualityPret',
-                'payroll.amountMensuelAcompt',
-                'campagnes.startedAt',
-                'campagnes.dateDebut as periode_debut',
-                'campagnes.dateFin as periode_fin',
-                'campagnes.ordinary'
-            ])
-            ->join('payroll.campagne', 'campagnes')
-            ->join('payroll.personal', 'personal')
-            ->where('campagnes.active = false')
-            //->andWhere('personal.active = true')
-            ->andWhere('campagnes.status = :status')
-            ->andWhere('payroll.status = :payroll_status')
-            ->andWhere('campagnes.dateDebut BETWEEN ?1 AND ?2');
-        $qb->setParameters(['1' => $mouth1, '2' => $mouth2, 'status' => Status::TERMINER, 'payroll_status' => Status::PAYE]);
-        if ($personalId) {
-            $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
-        }
-        return $qb->getQuery()->getResult();
     }
 
     public function findEtatSalaireClone(array $months, int $year, ?int $personalId): array
@@ -305,7 +210,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->andWhere('campagnes.status = :status')
             ->andWhere('payroll.status = :payroll_status')
             ->andWhere('category_salarie.code = :code')
-            ->andWhere('MONTH(campagnes.dateDebut) IN (?1) AND YEAR(campagnes.dateDebut) = ?2');;
+            ->andWhere('MONTH(campagnes.dateDebut) IN (?1) AND YEAR(campagnes.dateDebut) = ?2');
         $qb->setParameters([1 => $mouths, 2 => $year, 'status' => Status::TERMINER, 'payroll_status' => Status::PAYE, 'code' => ['OUVRIER / EMPLOYES', 'CHAUFFEURS']]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
@@ -492,23 +397,6 @@ class PayrollRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
-    /** Determiner le dernier salaire payer au salarie */
-    public function getLastAmountMensuel(Personal $personal): float|int|null
-    {
-        $query = $this->createQueryBuilder('pr')
-            ->select('(pr.brutAmount + pr.AncienneteAmount + pr.majorationAmount - pr.salaryTransport) as cumulSalaries')
-            ->join('pr.personal', 'personal')
-            ->join('pr.campagne', 'campagnes')
-            ->where('pr.personal = :personal')
-            ->andWhere('campagnes.ordinary = true')
-            ->orderBy('pr.dateCreated', 'DESC')
-            ->setMaxResults(1)
-            ->setParameter('personal', $personal)
-            ->getQuery();
-        $result = $query->getSingleResult();
-        return $result['cumulSalaries'];
-    }
-
     /** Determiner le salaire global des 12 dernier mois  */
     public function getSalaireGlobal(Personal $personal, mixed $start): float|int|null
     {
@@ -535,7 +423,9 @@ class PayrollRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
-    /** Determiner le salaire net du salarié */
+    /** Determiner le salaire net du salarié
+     * @throws NonUniqueResultException
+     */
     public function getAmountNetPayer(Personal $personal): float|int|null
     {
         $query = $this->createQueryBuilder('pr')
@@ -551,28 +441,6 @@ class PayrollRepository extends ServiceEntityRepository
             ->getQuery();
         $result = $query->getOneOrNullResult();
         return $result['netPayer'] ?? null;
-    }
-
-    /** Retourne le dictionnaire  de salaire en fonction de l'id de la campagne */
-    public function findPayrollByCampainId(?int $campainId): ?array
-    {
-        return $this->createQueryBuilder('pr')
-            ->select([
-                'p.id as personal_id',
-                'p.matricule as matricule',
-                'p.firstName as first_name',
-                'p.lastName as last_name',
-                'pr.brutAmount as brut_amount',
-                'pr.netPayer as net_payer',
-            ])
-            ->join('pr.personal', 'p')
-            ->join('pr.campagne', 'c')
-            ->where('c.ordinary = true')
-            ->andWhere('c.active = false')
-            ->andWhere('c.id = :campain_id')
-            ->setParameter('campain_id', $campainId)
-            ->orderBy('pr.id', 'ASC')
-            ->getQuery()->getResult();
     }
 
     /** Retourner les elements pour l'état des virement */
@@ -888,6 +756,9 @@ class PayrollRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * @throws NonUniqueResultException
+     */
     public function findOnePayroll(?Campagne $campagne, ?Personal $personal): ?Payroll
     {
         return $this->createQueryBuilder('pr')
@@ -937,44 +808,6 @@ class PayrollRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findCmuCampagne(bool $campagne, mixed $years, mixed $month): array
-    {
-        $qb = $this->createQueryBuilder('payroll');
-        $qb
-            ->select([
-                'personal.id as personal_id',
-                'personal.firstName as nom',
-                'personal.lastName as prenoms',
-                'personal.refCNPS',
-                'personal.genre',
-                'YEAR(personal.birthday) as personal_birthday',
-                'payroll.matricule',
-                'payroll.numCnps',
-                'payroll.dateEmbauche',
-                'payroll.createdAt',
-                'campagnes.startedAt',
-                'personal.numCmu as personal_cmu',
-                'personal.numSs as num_ss',
-                'personal.isCmu as is_cmu',
-                'personal.conjointNumSs as conjoint_num_ss',
-                'personal.conjoint as conjoint_name',
-                'chargePeople.numCmu as cp_numCmu',
-                'IF(personal.etatCivil) as is_married'
-            ])
-            ->join('payroll.campagne', 'campagnes')
-            ->join('payroll.personal', 'personal')
-            ->leftJoin('personal.chargePeople', 'chargePeople')
-            ->where('campagnes.active = :active')
-            ->andWhere('YEAR(campagnes.dateDebut) = :year')
-            ->andWhere('MONTH(campagnes.dateDebut) = :month')
-            ->groupBy('personal.firstName', 'personal.lastName', 'personal.birthday', 'payroll.id');
-        $qb
-            ->setParameter('active', $campagne)
-            ->setParameter('year', $years)
-            ->setParameter('month', $month);
-        return $qb->getQuery()->getResult();
-    }
-
     public function findEtatDeclaration(array $months, int $year, ?int $personalId): array
     {
         $qb = $this->createQueryBuilder('p');
@@ -992,8 +825,6 @@ class PayrollRepository extends ServiceEntityRepository
                 'personal.isCmu as is_cmu',
                 'personal.conjointNumSs as conjoint_num_ss',
                 'personal.conjoint as conjoint_name',
-                'chargePeople.numCmu as cp_numCmu',
-                'chargePeople.id as cp_id',
                 'p.uuid as payroll_uuid',
                 'p.matricule',
                 'personal.genre',
@@ -1022,52 +853,13 @@ class PayrollRepository extends ServiceEntityRepository
             ])
             ->join('p.campagne', 'campagnes')
             ->join('p.personal', 'personal')
-            ->leftJoin('personal.chargePeople', 'chargePeople')
             ->where('campagnes.active = false')
             ->andWhere('campagnes.status = :status')
-            ->andWhere('MONTH(campagnes.dateDebut) IN (?1) AND YEAR(campagnes.dateDebut) = ?2')
-            ->groupBy('campagnes.dateDebut', 'p.id', 'personal');
+            ->andWhere('MONTH(campagnes.dateDebut) IN (?1) AND YEAR(campagnes.dateDebut) = ?2');
         $qb->setParameters(['1' => $months, '2' => $year, 'status' => Status::TERMINER]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
         }
-        return $qb->getQuery()->getResult();
-    }
-
-    public function findCotisationMensuel(bool $campagne, mixed $years, mixed $month): array
-    {
-        $qb = $this->createQueryBuilder('payroll');
-        $qb
-            ->select([
-                'personal.id as personal_id',
-                'personal.firstName as nom',
-                'personal.lastName as prenoms',
-                'personal.refCNPS',
-                'personal.genre',
-                'YEAR(personal.birthday) as personal_birthday',
-                'payroll.matricule',
-                'payroll.numCnps',
-                'payroll.dateEmbauche',
-                'payroll.createdAt',
-                'campagnes.startedAt',
-                'personal.numCmu as personal_cmu',
-                'personal.numSs as num_ss',
-                'personal.isCmu as is_cmu',
-                'personal.conjointNumSs as conjoint_num_ss',
-                'personal.conjoint as conjoint_name',
-                'chargePeople.numCmu as cp_numCmu',
-            ])
-            ->join('payroll.campagne', 'campagnes')
-            ->join('payroll.personal', 'personal')
-            ->leftJoin('personal.chargePeople', 'chargePeople')
-            ->where('campagnes.active = :active')
-            ->andWhere('YEAR(campagnes.dateDebut) = :year')
-            ->andWhere('MONTH(campagnes.dateDebut) = :month')
-            ->groupBy('personal.firstName', 'personal.lastName', 'personal.birthday', 'payroll.id');
-        $qb
-            ->setParameter('active', $campagne)
-            ->setParameter('year', $years)
-            ->setParameter('month', $month);
         return $qb->getQuery()->getResult();
     }
 

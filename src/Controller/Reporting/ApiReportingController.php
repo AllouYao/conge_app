@@ -23,7 +23,7 @@ use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api_reporting', name: 'api_reporting_')]
 class ApiReportingController extends AbstractController
@@ -753,7 +753,7 @@ class ApiReportingController extends AbstractController
                     'nom_benef' => $declaration['conjoint_name'],
                     'pnom_benef' => $declaration['conjoint_name'],
                     'birthday_benef' => '',
-                    'genre_benef' => 'M',
+                    'genre_benef' => $declaration['genre'] = 'M' ? 'FEMME' : 'HOMME',
                 ];
             }
         }
@@ -837,18 +837,6 @@ class ApiReportingController extends AbstractController
                 'exonere_designation' => 'TRANSPORT',
             ];
         }
-        return new JsonResponse($data);
-    }
-
-    #[Route('/global_cotisation_month', name: 'global_cotisation_month', methods: ['GET'])]
-    public function CotisationMonth(): JsonResponse
-    {
-        $today = Carbon::today();
-        $year = $today->year;
-        $month = $today->month;
-        $data = [];
-
-
         return new JsonResponse($data);
     }
 }
