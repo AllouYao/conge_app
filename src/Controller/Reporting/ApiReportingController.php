@@ -631,7 +631,7 @@ class ApiReportingController extends AbstractController
             return $this->json(['data' => []]);
         }
         foreach ($declarationCmu as $index => $declaration) {
-            if ($declaration['is_cmu']) {
+            if ($declaration['is_cmu'] == 1) {
                 $data[] = [
                     'index' => ++$index,
                     'matricule' => $declaration['matricule'],
@@ -648,7 +648,7 @@ class ApiReportingController extends AbstractController
                     'genre_benef' => 'M',
                 ];
             }
-            if ($declaration['is_cmu_charge']) {
+            if ($declaration['is_cmu_charge'] == 1) {
                 $data[] = [
                     'index' => ++$index,
                     'matricule' => $declaration['matricule'],
