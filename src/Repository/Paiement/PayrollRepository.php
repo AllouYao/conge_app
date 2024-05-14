@@ -405,7 +405,7 @@ class PayrollRepository extends ServiceEntityRepository
             ])
             ->join('payroll.campagne', 'campagnes')
             ->join('payroll.personal', 'personal')
-            ->leftJoin('personal.chargePeople','chargePeople')
+            ->leftJoin('personal.chargePeople', 'chargePeople')
             ->where('campagnes.active = :active')
             ->andWhere('YEAR(campagnes.dateDebut) = :year')
             ->andWhere('MONTH(campagnes.dateDebut) = :month')
@@ -922,13 +922,12 @@ class PayrollRepository extends ServiceEntityRepository
             ->join('payroll.personal', 'personal')
             ->join('personal.contract', 'contract')
             ->leftJoin('personal.departures', 'departure')
-            ->join('personal.salary','salary')
+            ->join('personal.salary', 'salary')
             ->where('campagnes.status = :status')
             ->andWhere('YEAR(payroll.dateCreated) = :year')
             ->andWhere('contract.typeContrat in (:type_contrat)')
             ->groupBy('personal.firstName', 'personal.lastName', 'personal.birthday', 'contract.dateEmbauche', 'departure.date', 'payroll.matricule', 'payroll.id')
-            ->orderBy('personal.refCNPS')
-        ;
+            ->orderBy('personal.refCNPS');
         $qb
             ->setParameters([
                 'year' => $years,
@@ -963,12 +962,11 @@ class PayrollRepository extends ServiceEntityRepository
             ])
             ->join('payroll.campagne', 'campagnes')
             ->join('payroll.personal', 'personal')
-            ->leftJoin('personal.chargePeople','chargePeople')
+            ->leftJoin('personal.chargePeople', 'chargePeople')
             ->where('campagnes.active = :active')
             ->andWhere('YEAR(campagnes.dateDebut) = :year')
             ->andWhere('MONTH(campagnes.dateDebut) = :month')
-            ->groupBy('personal.firstName', 'personal.lastName', 'personal.birthday', 'payroll.id')
-        ;
+            ->groupBy('personal.firstName', 'personal.lastName', 'personal.birthday', 'payroll.id');
         $qb
             ->setParameter('active', $campagne)
             ->setParameter('year', $years)
@@ -1023,13 +1021,11 @@ class PayrollRepository extends ServiceEntityRepository
             ])
             ->join('p.campagne', 'campagnes')
             ->join('p.personal', 'personal')
-            ->leftJoin('personal.chargePeople','chargePeople')
+            ->leftJoin('personal.chargePeople', 'chargePeople')
             ->where('campagnes.active = false')
-            //->andWhere('personal.active = true')
             ->andWhere('campagnes.status = :status')
             ->andWhere('MONTH(campagnes.dateDebut) IN (?1) AND YEAR(campagnes.dateDebut) = ?2')
-            ->groupBy('campagnes.dateDebut','personal.firstName', 'p.id')
-            ;
+            ->groupBy('campagnes.dateDebut', 'p.id', 'personal');
         $qb->setParameters(['1' => $months, '2' => $year, 'status' => Status::TERMINER]);
         if ($personalId) {
             $qb->andWhere($qb->expr()->eq('personal.id', $personalId));
@@ -1062,12 +1058,11 @@ class PayrollRepository extends ServiceEntityRepository
             ])
             ->join('payroll.campagne', 'campagnes')
             ->join('payroll.personal', 'personal')
-            ->leftJoin('personal.chargePeople','chargePeople')
+            ->leftJoin('personal.chargePeople', 'chargePeople')
             ->where('campagnes.active = :active')
             ->andWhere('YEAR(campagnes.dateDebut) = :year')
             ->andWhere('MONTH(campagnes.dateDebut) = :month')
-            ->groupBy('personal.firstName', 'personal.lastName', 'personal.birthday', 'payroll.id')
-        ;
+            ->groupBy('personal.firstName', 'personal.lastName', 'personal.birthday', 'payroll.id');
         $qb
             ->setParameter('active', $campagne)
             ->setParameter('year', $years)
