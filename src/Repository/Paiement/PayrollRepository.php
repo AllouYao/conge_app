@@ -1103,8 +1103,8 @@ class PayrollRepository extends ServiceEntityRepository
             ->andWhere('chargePeople.isCmu = true')
             ->andWhere('MONTH(campagnes.dateDebut) = :month');
         $qb
-            ->setParameter('active', $campagne)
-            ->setParameter('year', $years)
+            ->setParameter('active', $isActive)
+            ->setParameter('year', $year)
             ->setParameter('month', $month);
         return $qb->getQuery()->getResult();
     }
