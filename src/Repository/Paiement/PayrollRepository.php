@@ -1092,13 +1092,9 @@ class PayrollRepository extends ServiceEntityRepository
                 'personal.numCmu as personal_cmu',
                 'personal.conjointNumSs as conjoint_num_ss',
                 'personal.conjoint as conjoint_name',
-                'chargePeople.numCmu as cp_numCmu',
-                'CONCAT(chargePeople.firstName, chargePeople.lastName) as beneficaire',
-                'chargePeople.isCmu as is_cmu_charge'
             ])
             ->join('payroll.campagne', 'campagnes')
             ->join('payroll.personal', 'personal')
-            ->leftJoin('personal.chargePeople', 'chargePeople')
             ->where('campagnes.active = :active')
             ->andWhere('YEAR(campagnes.dateDebut) = :year')
             ->andWhere('MONTH(campagnes.dateDebut) = :month');

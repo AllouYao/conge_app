@@ -631,6 +631,7 @@ class ApiReportingController extends AbstractController
             return $this->json(['data' => []]);
         }
         foreach ($declarationCmu as $index => $declaration) {
+            $chargePeoples = $this->chargePeopleRepository->findBy(['personal' => $declaration['personal_id'], 'isCmu' => true]);
             if ($declaration['is_cmu'] == 1) {
                 $data[] = [
                     'index' => ++$index,
@@ -648,22 +649,24 @@ class ApiReportingController extends AbstractController
                     'genre_benef' => 'M',
                 ];
             }
-            if ($declaration['is_cmu_charge'] == 1) {
-                $data[] = [
-                    'index' => ++$index,
-                    'matricule' => $declaration['matricule'],
-                    'num_cnps_assure' => $declaration['refCNPS'],
-                    'num_sec_assure' => $declaration['num_ss'],
-                    'nom_assure' => $declaration['nom'],
-                    'pnom_assure' => $declaration['prenoms'],
-                    'birthday' => $declaration['personal_birthday'],
-                    'num_cnps_benef' => $declaration['refCNPS'],
-                    'num_sec_benef' => $declaration['num_ss'],
-                    'type_benef' => 'E',
-                    'full_name' => $declaration['beneficaire'],
-                    'birthday_benef' => $declaration['personal_birthday'],
-                    'genre_benef' => $declaration['genre']
-                ];
+            if (count($chargePeoples) > 0) {
+                foreach ($chargePeoples as $item) {
+                    $data[] = [
+                        'index' => ++$index,
+                        'matricule' => $declaration['matricule'],
+                        'num_cnps_assure' => $declaration['refCNPS'],
+                        'num_sec_assure' => $declaration['num_ss'],
+                        'nom_assure' => $declaration['nom'],
+                        'pnom_assure' => $declaration['prenoms'],
+                        'birthday' => $declaration['personal_birthday'],
+                        'num_cnps_benef' => $declaration['refCNPS'],
+                        'num_sec_benef' => $declaration['num_ss'],
+                        'type_benef' => 'E',
+                        'full_name' => $item->getFirstName() . ' ' . $item->getLastName(),
+                        'birthday_benef' => $declaration['personal_birthday'],
+                        'genre_benef' => $declaration['genre']
+                    ];
+                }
             }
             $data[] = [
                 'index' => ++$index,
