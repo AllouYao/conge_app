@@ -648,6 +648,23 @@ class ApiReportingController extends AbstractController
                     'genre_benef' => 'M',
                 ];
             }
+            if ($declaration['is_cmu_charge']) {
+                $data[] = [
+                    'index' => ++$index,
+                    'matricule' => $declaration['matricule'],
+                    'num_cnps_assure' => $declaration['refCNPS'],
+                    'num_sec_assure' => $declaration['num_ss'],
+                    'nom_assure' => $declaration['nom'],
+                    'pnom_assure' => $declaration['prenoms'],
+                    'birthday' => $declaration['personal_birthday'],
+                    'num_cnps_benef' => $declaration['refCNPS'],
+                    'num_sec_benef' => $declaration['num_ss'],
+                    'type_benef' => 'E',
+                    'full_name' => $declaration['beneficaire'],
+                    'birthday_benef' => $declaration['personal_birthday'],
+                    'genre_benef' => $declaration['genre']
+                ];
+            }
             $data[] = [
                 'index' => ++$index,
                 'matricule' => $declaration['matricule'],
@@ -658,8 +675,8 @@ class ApiReportingController extends AbstractController
                 'birthday' => $declaration['personal_birthday'],
                 'num_cnps_benef' => $declaration['refCNPS'],
                 'num_sec_benef' => $declaration['num_ss'],
-                'type_benef' => empty($declaration['beneficaire']) ? 'T' : 'E',
-                'full_name' => $declaration['beneficaire'] ?? $declaration['nom'] . ' ' . $declaration['prenoms'],
+                'type_benef' => 'T',
+                'full_name' => $declaration['nom'] . ' ' . $declaration['prenoms'],
                 'birthday_benef' => $declaration['personal_birthday'],
                 'genre_benef' => $declaration['genre']
             ];
