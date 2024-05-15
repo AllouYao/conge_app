@@ -593,11 +593,8 @@ class ApiReportingController extends AbstractController
     #[Route('/declaration_cmu/current/month', name: 'declaration_cmu_current_month', methods: ['GET'])]
     public function declarationMonthCmu(): JsonResponse
     {
-        $today = Carbon::today();
-        $month = $today->month;
-        $year = $today->year;
         $data = [];
-        $declarationCmu = $this->payrollRepository->findCampagneCmuNew(true, $year, $month);
+        $declarationCmu = $this->payrollRepository->findCampagneCmuNew(true);
         if (!$declarationCmu) {
             return $this->json(['data' => []]);
         }

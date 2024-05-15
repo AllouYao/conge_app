@@ -312,13 +312,9 @@ class PayrollRepository extends ServiceEntityRepository
             ->join('payroll.personal', 'personal')
             ->leftJoin('personal.chargePeople', 'chargePeople')
             ->where('campagnes.active = :active')
-            ->andWhere('YEAR(campagnes.dateDebut) = :year')
-            ->andWhere('MONTH(campagnes.dateDebut) = :month')
             ->groupBy('campagnes.dateDebut', 'personal.lastName', 'payroll.id');
         $qb
             ->setParameter('active', $campagne);
-            //->setParameter('year', $years)
-            //->setParameter('month', $month);
         return $qb->getQuery()->getResult();
     }
 
@@ -864,7 +860,7 @@ class PayrollRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findCampagneCmuNew(bool $isActive, mixed $year, mixed $month)
+    public function findCampagneCmuNew(bool $isActive)
     {
         $qb = $this->createQueryBuilder('payroll');
         $qb
@@ -888,13 +884,9 @@ class PayrollRepository extends ServiceEntityRepository
             ])
             ->join('payroll.campagne', 'campagnes')
             ->join('payroll.personal', 'personal')
-            ->where('campagnes.active = :active')
-            ->andWhere('YEAR(campagnes.dateDebut) = :year')
-            ->andWhere('MONTH(campagnes.dateDebut) = :month');
+            ->where('campagnes.active = :active');
         $qb
-            ->setParameter('active', $isActive)
-            ->setParameter('year', $year)
-            ->setParameter('month', $month);
+            ->setParameter('active', $isActive);
         return $qb->getQuery()->getResult();
     }
 }
