@@ -785,6 +785,7 @@ class PayrollRepository extends ServiceEntityRepository
                 'payroll.createdAt',
                 'campagnes.startedAt'
             ])
+            ->distinct()
             ->join('payroll.campagne', 'campagnes')
             ->join('payroll.personal', 'personal')
             ->join('personal.contract', 'contract')
@@ -793,9 +794,8 @@ class PayrollRepository extends ServiceEntityRepository
             ->where('campagnes.status = :status')
             ->andWhere('YEAR(payroll.dateCreated) = :year')
             ->andWhere('contract.typeContrat in (:type_contrat)')
-            ->groupBy('personal.firstName', 'personal.lastName', 'personal.refCNPS', 'personal.birthday', 'contract.dateEmbauche', 'departure.date', 'salary.smig')
-            ->orderBy('personal.refCNPS')
-            ->distinct();
+            ->groupBy('personal.firstName', 'personal.lastName', 'personal.refCNPS', 'personal.birthday', 'contract.dateEmbauche', 'departure.date', 'payroll.matricule', 'payroll.id', 'salary.smig', 'payroll.createdAt', 'campagnes.startedAt')
+            ->orderBy('personal.refCNPS');
         $qb
             ->setParameters([
                 'year' => $years,
