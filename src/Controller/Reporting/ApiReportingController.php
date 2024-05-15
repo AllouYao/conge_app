@@ -30,9 +30,6 @@ class ApiReportingController extends AbstractController
 {
     private PayrollRepository $payrollRepository;
     private EtatService $etatService;
-    private HeureSupService $heureSupService;
-    private CongeRepository $congeRepository;
-    private CategoryChargeRepository $categoryChargeRepository;
     private PrimesRepository $primesRepository;
     private DetailSalaryRepository $detailSalaryRepository;
     private PersonalRepository $personalRepository;
@@ -44,9 +41,6 @@ class ApiReportingController extends AbstractController
     public function __construct(
         PayrollRepository           $payrollRepository,
         EtatService                 $etatService,
-        HeureSupService             $heureSupService,
-        CongeRepository             $congeRepository,
-        CategoryChargeRepository    $categoryChargeRepository,
         PrimesRepository            $primesRepository,
         DetailSalaryRepository      $detailSalaryRepository,
         PersonalRepository          $personalRepository,
@@ -58,9 +52,6 @@ class ApiReportingController extends AbstractController
     {
         $this->payrollRepository = $payrollRepository;
         $this->etatService = $etatService;
-        $this->heureSupService = $heureSupService;
-        $this->congeRepository = $congeRepository;
-        $this->categoryChargeRepository = $categoryChargeRepository;
         $this->primesRepository = $primesRepository;
         $this->detailSalaryRepository = $detailSalaryRepository;
         $this->personalRepository = $personalRepository;
@@ -377,11 +368,8 @@ class ApiReportingController extends AbstractController
     #[Route('/declaration_dgi/current/month', name: 'declaration_dgi_current_month', methods: ['GET'])]
     public function declarationMonthDgi(): JsonResponse
     {
-        $today = Carbon::today();
-        $month = $today->month;
-        $year = $today->year;
         $data = [];
-        $declarationDgi = $this->payrollRepository->findSalarialeCampagne(true, $year, $month);
+        $declarationDgi = $this->payrollRepository->findSalarialeCampagne(true);
         if (!$declarationDgi) {
             return $this->json(['data' => []]);
         }
@@ -413,9 +401,7 @@ class ApiReportingController extends AbstractController
         return new JsonResponse($data);
     }
 
-    /**
-     * @throws NonUniqueResultException
-     */
+
     #[Route('/declaration_dgi', name: 'declaration_dgi', methods: ['GET'])]
     public function declarationDgi(Request $request): JsonResponse
     {
@@ -461,11 +447,8 @@ class ApiReportingController extends AbstractController
     #[Route('/declaration_cnps/current/month', name: 'declaration_cnps_current_month', methods: ['GET'])]
     public function declarationMonthCnps(): JsonResponse
     {
-        $today = Carbon::today();
-        $month = $today->month;
-        $year = $today->year;
         $data = [];
-        $declarationCnps = $this->payrollRepository->findSalarialeCampagne(true, $year, $month);
+        $declarationCnps = $this->payrollRepository->findSalarialeCampagne(true);
         if (!$declarationCnps) {
             return $this->json(['data' => []]);
         }
@@ -487,9 +470,6 @@ class ApiReportingController extends AbstractController
         return new JsonResponse($data);
     }
 
-    /**
-     * @throws NonUniqueResultException
-     */
     #[Route('/declaration_cnps', name: 'declaration_cnps', methods: ['GET'])]
     public function declarationCnps(Request $request): JsonResponse
     {
@@ -527,11 +507,8 @@ class ApiReportingController extends AbstractController
     #[Route('/declaration_fdfp/current/month', name: 'declaration_fdfp_current_month', methods: ['GET'])]
     public function declarationMonthFdfp(): JsonResponse
     {
-        $today = Carbon::today();
-        $month = $today->month;
-        $year = $today->year;
         $data = [];
-        $declarationFdfp = $this->payrollRepository->findSalarialeCampagne(true, $year, $month);
+        $declarationFdfp = $this->payrollRepository->findSalarialeCampagne(true);
         if (!$declarationFdfp) {
             return $this->json(['data' => []]);
         }
@@ -549,9 +526,6 @@ class ApiReportingController extends AbstractController
         return new JsonResponse($data);
     }
 
-    /**
-     * @throws NonUniqueResultException
-     */
     #[Route('/declaration_fdfp', name: 'declaration_fdfp', methods: ['GET'])]
     public function declarationFdfp(Request $request): JsonResponse
     {
@@ -582,11 +556,8 @@ class ApiReportingController extends AbstractController
     #[Route('/etat_salariale_mensuel', name: 'salariale_etat', methods: ['GET'])]
     public function etatSalarialeMensuel(): JsonResponse
     {
-        $today = Carbon::today();
-        $month = $today->month;
-        $year = $today->year;
         $data = [];
-        $requestEtatSalary = $this->payrollRepository->findSalarialeCampagne(true, $year, $month);
+        $requestEtatSalary = $this->payrollRepository->findSalarialeCampagne(true);
         foreach ($requestEtatSalary as $index => $salaryEtat) {
             $data[] = [
                 'index' => ++$index,
@@ -800,11 +771,8 @@ class ApiReportingController extends AbstractController
     #[Route('/remuneration_brute', name: 'remuneration_brute', methods: ['GET'])]
     public function etatRbm(): JsonResponse
     {
-        $today = Carbon::today();
-        $year = $today->year;
-        $month = $today->month;
         $data = [];
-        $remunerations = $this->payrollRepository->findSalarialeCampagne(true, $year, $month);
+        $remunerations = $this->payrollRepository->findSalarialeCampagne(true);
         foreach ($remunerations as $index => $remuneration) {
             $personal = $this->personalRepository->findOneBy(['id' => $remuneration['personal_id']]);
             $creditImpot = $this->paieServices->amountCreditImpotCampagne($personal);

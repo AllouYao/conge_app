@@ -256,7 +256,7 @@ class PayrollRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findSalarialeCampagne(bool $campagne, mixed $years, mixed $month): array
+    public function findSalarialeCampagne(bool $campagne): array
     {
         $qb = $this->createQueryBuilder('payroll');
         $qb
@@ -316,9 +316,9 @@ class PayrollRepository extends ServiceEntityRepository
             ->andWhere('MONTH(campagnes.dateDebut) = :month')
             ->groupBy('campagnes.dateDebut', 'personal.lastName', 'payroll.id');
         $qb
-            ->setParameter('active', $campagne)
-            ->setParameter('year', $years)
-            ->setParameter('month', $month);
+            ->setParameter('active', $campagne);
+            //->setParameter('year', $years)
+            //->setParameter('month', $month);
         return $qb->getQuery()->getResult();
     }
 
@@ -797,8 +797,9 @@ class PayrollRepository extends ServiceEntityRepository
             ->where('campagnes.status = :status')
             ->andWhere('YEAR(payroll.dateCreated) = :year')
             ->andWhere('contract.typeContrat in (:type_contrat)')
-            ->groupBy('personal.firstName', 'personal.lastName', 'personal.birthday', 'contract.dateEmbauche', 'departure.date', 'payroll.matricule', 'payroll.id')
-            ->orderBy('personal.refCNPS');
+            ->groupBy('personal.firstName', 'personal.lastName', 'personal.refCNPS', 'personal.birthday', 'contract.dateEmbauche', 'departure.date', 'payroll.matricule', 'payroll.id', 'salary.smig', 'payroll.createdAt', 'campagnes.startedAt')
+            ->orderBy('personal.refCNPS')
+            ->distinct();
         $qb
             ->setParameters([
                 'year' => $years,
