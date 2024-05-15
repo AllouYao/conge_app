@@ -144,7 +144,7 @@
                     {
                         dataField: 'local',
                         dataType: 'string',
-                        caption: 'Local \ Expatrié',
+                        caption: 'Local / Expatrié',
                         alignment: 'center',
                     },
                     {
@@ -297,6 +297,36 @@
                 summary: {
                     totalItems: [
                         {
+                            column: 'its_salarie_brut', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'credit_impot', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'revenu_non_imposable', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'amount_avantage_bareme', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'amount_avantage_reelle', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
                             column: 'index',
                             summaryType: 'count',
                         },
@@ -324,6 +354,13 @@
                                 return new Intl.NumberFormat('fr-FR').format(data.value)
                             },
                         },
+                        {
+                            column: 'exonere_amount', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+
                     ],
                 }
             });
