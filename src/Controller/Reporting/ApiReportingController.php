@@ -773,7 +773,7 @@ class ApiReportingController extends AbstractController
         foreach ($remunerations as $index => $remuneration) {
             $personal = $this->personalRepository->findOneBy(['id' => $remuneration['personal_id']]);
             $creditImpot = $this->paieServices->amountCreditImpotCampagne($personal);
-            $autrePrime = $remuneration['amountPrimePanier'] + $remuneration['amountPrimeSalissure'] + $remuneration['amountPrimeOutillage'] + $remuneration['amountPrimeRendement'];
+            $autrePrime = (int)$remuneration['amountPrimePanier'] + $remuneration['amountPrimeSalissure'] + $remuneration['amountPrimeOutillage'] + $remuneration['amountPrimeRendement'] +$remuneration['amountPrimeTenueTrav'];
             $data[] = [
                 'index' => ++$index,
                 'num_cnps' => $remuneration['refCNPS'],
