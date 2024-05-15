@@ -170,12 +170,18 @@
                         dataType: 'string',
                         caption: 'Nombre de parts',
                         alignment: 'center',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
                     },
                     {
                         dataField: 'day_work',
                         dataType: 'string',
                         caption: 'Nombre de jours d\'application de paiements',
                         alignment: 'center',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
                     },
                     {
                         dataField: 'salary_brut',
