@@ -787,9 +787,9 @@ class ApiReportingController extends AbstractController
             $data[] = [
                 'index' => ++$index,
                 'num_cnps' => $remuneration['refCNPS'],
-                'nom_prenoms' => $remuneration['nom'] . $remuneration['prenoms'],
+                'nom_prenoms' => $remuneration['nom'] .' '. $remuneration['prenoms'],
                 'type_work' => 'Salarié',
-                'emp_q' => '',
+                'emp_q' => $remuneration['emploie'],
                 'code_emp' => 'EQ',
                 'regime' => 'G',
                 'genre' => $remuneration['genre'] === Status::MASCULIN ? 'M':'F',

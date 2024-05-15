@@ -269,6 +269,7 @@ class PayrollRepository extends ServiceEntityRepository
                 'YEAR(personal.birthday) as personal_birthday',
                 'personal.genre',
                 'personal.etatCivil',
+                'job.name as emploie',
                 'payroll.id',
                 'payroll.matricule',
                 'payroll.baseAmount',
@@ -310,6 +311,7 @@ class PayrollRepository extends ServiceEntityRepository
             ])
             ->join('payroll.campagne', 'campagnes')
             ->join('payroll.personal', 'personal')
+            ->join('personal.job', 'job')
             ->leftJoin('personal.chargePeople', 'chargePeople')
             ->where('campagnes.active = :active')
             ->groupBy('campagnes.dateDebut', 'personal.lastName', 'payroll.id');
