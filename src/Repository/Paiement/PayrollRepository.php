@@ -793,7 +793,7 @@ class PayrollRepository extends ServiceEntityRepository
             ->where('campagnes.status = :status')
             ->andWhere('YEAR(payroll.dateCreated) = :year')
             ->andWhere('contract.typeContrat in (:type_contrat)')
-            ->groupBy('personal.firstName', 'personal.lastName', 'personal.refCNPS', 'personal.birthday', 'contract.dateEmbauche', 'departure.date', 'payroll.matricule', 'payroll.id', 'salary.smig', 'payroll.createdAt', 'campagnes.startedAt')
+            ->groupBy('personal.firstName', 'personal.lastName')
             ->orderBy('personal.refCNPS')
             ->distinct();
         $qb
