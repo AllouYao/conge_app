@@ -771,6 +771,16 @@ class ApiReportingController extends AbstractController
         $data = [];
         $remunerations = $this->payrollRepository->findSalarialeCampagne(true);
         foreach ($remunerations as $index => $remuneration) {
+            $etat_civil = null;
+            if($remuneration['etatCivil'] === Status::CELIBATAIRE) {
+                $etat_civil = 'C';
+            }elseif ($remuneration['etatCivil'] === Status::DIVORCE) {
+                $etat_civil = 'D';
+            }elseif ($remuneration['etatCivil'] === Status::MARIEE) {
+                $etat_civil = 'M';
+            }elseif ($remuneration['etatCivil'] === Status::VEUF) {
+                $etat_civil = 'V';
+            }
             $personal = $this->personalRepository->findOneBy(['id' => $remuneration['personal_id']]);
             $creditImpot = $this->paieServices->amountCreditImpotCampagne($personal);
             $autrePrime = (int)$remuneration['amountPrimePanier'] + $remuneration['amountPrimeSalissure'] + $remuneration['amountPrimeOutillage'] + $remuneration['amountPrimeRendement'] +$remuneration['amountPrimeTenueTrav'];
@@ -782,10 +792,10 @@ class ApiReportingController extends AbstractController
                 'emp_q' => '',
                 'code_emp' => 'EQ',
                 'regime' => 'G',
-                'genre' => $remuneration['genre'],
+                'genre' => $remuneration['genre'] === Status::MASCULIN ? 'M':'F',
                 'nationalite' => 'I',
                 'local' => 'L',
-                'etat_civil' => $remuneration['etatCivil'],
+                'etat_civil' => $etat_civil,
                 'nb_enfant' => $remuneration['nb_enfant'],
                 'nbPart' => $remuneration['numberPart'],
                 'day_work' => $remuneration['day_work'],
