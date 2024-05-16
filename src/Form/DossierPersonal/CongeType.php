@@ -44,19 +44,6 @@ class CongeType extends AbstractType
 
 
         $builder
-            ->add('typeConge', ChoiceType::class, [
-                'choices' => [
-                    'Effectif' => Status::EFFECTIF,
-                    'Partiel' => Status::PARTIEL,
-                ],
-                'expanded' => true,
-                'multiple' => false,
-                'label_attr' => [
-                    'class' => 'radio-inline'
-                ],
-                "data" => "Effectif"
-                //'required' => false
-            ])
             ->add('typePayementConge', ChoiceType::class, [
                 'choices' => [
                     'Immédiat' => Status::IMMEDIAT,
@@ -76,7 +63,7 @@ class CongeType extends AbstractType
                 'query_builder' => function (EntityRepository $er) {
                     if ($this->authorizationChecker->isGranted('ROLE_RH')) {
                         return $er->createQueryBuilder('p')
-                            ->join('p.contract', 'ct')
+                            ->join('p.contract', 'ct')   
                             ->leftJoin('p.departures', 'departures')
                             ->leftJoin('p.conges', 'c')
                             ->where('c.id IS NULL OR c.dateDernierRetour < :today AND c.isConge = false ')
@@ -166,16 +153,8 @@ class CongeType extends AbstractType
 
                 ]
             ])
-            ->add('dateReprise', DateCustomType::class)
-            ->add('salaireMoyen', TextType::class, [
-                'required' => true,
-                'constraints' => [
-                    new NotBlank(),
-                ],
-                'attr' => [
-                    'class' => 'separator text-end'
-                ]
-            ]);
+            ->add('dateReprise', DateCustomType::class);
+            
 
         $builder
             ->addEventListener(
@@ -238,8 +217,8 @@ class CongeType extends AbstractType
                                     ->join('p.contract', 'ct')
                                     ->leftJoin('p.departures', 'departures')
                                     ->leftJoin('p.conges', 'c')
-                                    ->andWhere('conges.isConge = true')
-                                    ->andWhere('departures.id IS NULL')
+                                    //->where('c.isConge = true OR c.isConge = true')
+                                    ->where('departures.id IS NULL')
                                     ->andWhere('ct.typeContrat IN (:type)')
                                     ->andWhere('p.active = true')
                                     ->andWhere('p.id = :personal')

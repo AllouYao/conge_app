@@ -3,18 +3,17 @@
 {% block title %}Livre de paie{% endblock %}
 {% block stylesheets %}
     <style>
-        #dataGridDeclarationFdfp {
+        #dataGridDeclarationCmu {
             height: 500px;
             border-width: 50px;
-
         }
     </style>
 {% endblock %}
 {% block body %}
     <div class="row">
         <div class="col-12">
-            <form action="{{ url('api_reporting_declaration_fdfp') }}" method="get" class="form-horizontal"
-                  name="form_reporting_declaration_fdfp" id="form_reporting_declaration_fdfp">
+            <form action="{{ url('api_reporting_declaration_cmu') }}" method="get" class="form-horizontal"
+                  name="form_reporting_declaration_cmu" id="form_reporting_declaration_cmu">
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title-custom" style="color: white">
@@ -23,7 +22,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        {{ include('reporting/declaration_fdfp/form.html.twig') }}
+                        {{ include('reporting/form.html.twig') }}
                     </div>
                     <div class="card-footer">
                         <button class="btn btn-primary float-end">Rechercher</button>
@@ -38,11 +37,11 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        ETAT DES DECLARATIONS FDFP
+                        ETAT DES DECLARATIONS CMU
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div id="dataGridDeclarationFdfp">Cliquer sur recherche pour afficher le tableau</div>
+                    <div id="dataGridDeclarationCmu">Cliquer sur recherche pour afficher le tableau</div>
                 </div>
             </div>
         </div>
@@ -52,7 +51,7 @@
 {% block javascripts %}
     <script>
 
-        const $form = $(`form[name="form_reporting_declaration_fdfp"]`);
+        const $form = $(`form[name="form_reporting_declaration_cmu"]`);
         $form.submit(function (e) {
             e.preventDefault();
             const form = $(e.currentTarget);
@@ -65,13 +64,8 @@
 
             $('#head').html(`du ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')} `);
 
-
-            function formatNumber(num) {
-                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-            }
-
-            $('#dataGridDeclarationFdfp').dxDataGrid({
-                dataSource: `{{ url('api_reporting_declaration_fdfp') }}?${$data}`,
+            $('#dataGridDeclarationCmu').dxDataGrid({
+                dataSource: `{{ url('api_reporting_declaration_cmu') }}?${$data}`,
                 showBorders: true,
                 scrolling: {
                     mode: 'virtual',
@@ -126,85 +120,80 @@
                         fixed: true,
                     },
                     {
-                        dataField: 'dateCreation',
-                        dataType: 'date',
-                        caption: 'Date',
-                        alignment: 'center',
-                        fixed: true,
-                    },
-                    {
                         dataField: 'matricule',
                         dataType: 'string',
                         caption: 'Matricule',
-                        alignment: 'center',
-                        fixed: true,
-                    },
-                    {
-                        dataField: 'fullName',
-                        dataType: 'string',
-                        caption: 'Nom et Prénoms',
                         alignment: 'left',
                         fixed: true,
                     },
-
                     {
-                        dataField: "revenusNetImposable",
-                        dataType: 'number',
-                        caption: 'Remuneration net imposable',
-                        alignment: 'right',
-                        summaryType: 'sum',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
+                        dataField: 'num_cnps_assure',
+                        dataType: 'string',
+                        caption: 'N° CNPS assure',
+                        alignment: 'left',
+                        fixed: true,
                     },
                     {
-                        dataField: "taux_apprentissage",
-                        dataType: 'number',
-                        caption: 'TA (0,4)',
-                        alignment: 'right',
-                        summaryType: 'sum',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
+                        dataField: 'num_sec_assure',
+                        dataType: 'string',
+                        caption: 'Numéro Sécurité sociale Assure',
+                        alignment: 'left',
                     },
                     {
-                        dataField: "tfc",
-                        dataType: 'number',
-                        caption: 'TFC (0,6)',
-                        alignment: 'right',
-                        summaryType: 'sum',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
+                        dataField: 'nom_assure',
+                        dataType: 'string',
+                        caption: 'Nom',
+                        alignment: 'left',
                     },
-
+                    {
+                        dataField: 'pnom_assure',
+                        dataType: 'string',
+                        caption: 'Prénoms',
+                        alignment: 'left',
+                    },
+                    {
+                        dataField: 'birthday',
+                        dataType: 'date',
+                        caption: 'Date de naissance assure',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'num_cnps_benef',
+                        dataType: 'string',
+                        caption: 'Numéro CNPS Beneficiaire',
+                        alignment: 'left',
+                    },
+                    {
+                        dataField: 'num_sec_benef',
+                        dataType: 'string',
+                        caption: 'Numéro Sécurité sociale Beneficiaire',
+                        alignment: 'left',
+                    },
+                    {
+                        dataField: 'type_benef',
+                        dataType: 'string',
+                        caption: 'Type Beneficiaire',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'full_name',
+                        dataType: 'string',
+                        caption: 'Nom beneficiaire',
+                        alignment: 'left',
+                    },
+                    {
+                        dataField: 'birthday_benef',
+                        dataType: 'date',
+                        caption: 'Date de naissance beneficiaire',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'genre_benef',
+                        dataType: 'string',
+                        caption: 'Genre beneficiaire',
+                        alignment: 'center',
+                    },
                 ],
-                summary: {
-                    totalItems: [
-                        {
-                            column: 'numeroCnps',
-                            summaryType: 'count',
-                        },
-                        {
-                            column: 'revenusNetImposable', summaryType: 'sum',
-                            customizeText: (data) => {
-                                return new Intl.NumberFormat('fr-FR').format(data.value)
-                            },
-                        },
-                        {
-                            column: 'taux_apprentissage', summaryType: 'sum',
-                            customizeText: (data) => {
-                                return new Intl.NumberFormat('fr-FR').format(data.value)
-                            },
-                        },
-                        {
-                            column: 'tfc', summaryType: 'sum',
-                            customizeText: (data) => {
-                                return new Intl.NumberFormat('fr-FR').format(data.value)
-                            },
-                        },
-                    ],
-                }
             });
         });
     </script>

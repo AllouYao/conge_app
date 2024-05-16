@@ -24,22 +24,11 @@
 <fieldset>
     <legend>Détail du congé</legend>
     <div class="mb-2 row">
-        <label class="col-md-2 col-form-label">Type de congé <span class="text-danger">*</span></label>
-        <div class="col-md-4">
-            {{ form_widget(form.typeConge) }}
-        </div>
-        <label class="col-md-2 col-form-label">Mode de paiement de l'allocation<span
-                    class="text-danger">*</span></label>
-        <div class="col-md-4">
-            {{ form_widget(form.typePayementConge) }}
-        </div>
-    </div>
-    <div class="mb-2 row">
         <label class="col-md-2 col-form-label">Date dernier retour <span class="text-danger">*</span></label>
         <div class="col-md-4">
             {{ form_widget(form.dernierRetour) }}
         </div>
-        <label class="col-md-2 col-form-label">Congés disponible (jrs)<span class="text-danger">*</span></label>
+        <label class="col-md-2 col-form-label">Congés disponible (jrs calendaire)<span class="text-danger">*</span></label>
         <div class="col-md-4">
             {{ form_widget(form.remaining) }}
         </div>
@@ -56,13 +45,14 @@
         </div>
     </div>
     <div class="mb-2 row">
+    <label class="col-md-2 col-form-label">Mode de paiement de l'allocation<span
+                    class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.typePayementConge) }}
+        </div>
         <label class="col-md-2 col-form-label">Date réprise <span class="text-danger">*</span></label>
         <div class="col-md-4">
             {{ form_widget(form.dateReprise) }}
-        </div>
-        <label class="col-md-2 col-form-label">Salaire moyen <span class="text-danger">*</span></label>
-        <div class="col-md-4">
-            {{ form_widget(form.salaireMoyen) }}
         </div>
     </div>
 </fieldset>

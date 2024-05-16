@@ -3,7 +3,7 @@
 {% block title %}Livre de paie{% endblock %}
 {% block stylesheets %}
     <style>
-        #dataGridDeclarationFdfp {
+        #dataGridDisa {
             height: 500px;
             border-width: 50px;
 
@@ -17,11 +17,11 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        ETAT DES DECLARATIONS MENSUEL FDFP
+                        ETAT DES DECLARATIONS DES SALAIRES ANNUELS (DISA) POUR L'ANNEE {{ annee }}
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div id="dataGridDeclarationFdfp">Cliquer sur recherche pour afficher le tableau</div>
+                    <div id="dataGridDisa">Cliquer sur recherche pour afficher le tableau</div>
                 </div>
             </div>
         </div>
@@ -39,8 +39,8 @@
                 return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
             }
 
-            $('#dataGridDeclarationFdfp').dxDataGrid({
-                dataSource: `{{ url('api_reporting_declaration_fdfp_current_month') }}`,
+            $('#dataGridDisa').dxDataGrid({
+                dataSource: `{{ url('api_reporting_declaration_disa_current_year') }}`,
                 showBorders: true,
                 scrolling: {
                     mode: 'virtual',
@@ -80,7 +80,7 @@
                             autoFilterEnabled: true,
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then((buffer) => {
-                                saveAs(new Blob([buffer], {type: 'application /octet-stream'}), `Etat declaration fdfp ${moment(debut).format('DD/MM/Y')} au ${moment(fin).format('DD/MM/Y')}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application /octet-stream'}), `Etat declaration individuelle des salaires annuels DISA {{annee}}.xlsx`);
                             });
                         });
                         e.cancel = true;
@@ -95,31 +95,53 @@
                         fixed: true,
                     },
                     {
-                        dataField: 'date_ouverture',
-                        dataType: 'string',
-                        caption: 'Date',
-                        alignment: 'center',
-                        fixed: true,
-                    },
-                    {
                         dataField: 'matricule',
                         dataType: 'string',
                         caption: 'Matricule',
-                        alignment: 'center',
-                        fixed: true,
-                    },
-                    {
-                        dataField: 'fullName',
-                        dataType: 'string',
-                        caption: 'Nom et Prénoms',
                         alignment: 'left',
                         fixed: true,
                     },
-
                     {
-                        dataField: "revenusNetImposable",
+                        dataField: 'nom&prenoms',
+                        dataType: 'string',
+                        caption: 'Nom & prénoms',
+                        alignment: 'left',
+                        fixed: true,
+                    },
+                    {
+                        dataField: 'num_cnps',
+                        dataType: 'string',
+                        caption: 'Numéro CNPS',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'birthday',
+                        dataType: 'string',
+                        caption: 'Année de naissance',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'hire_day',
+                        dataType: 'date',
+                        caption: 'Date d\'embauche',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'Dismiss_day',
+                        dataType: 'date',
+                        caption: 'Date de depart',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'type_salarie',
+                        dataType: 'string',
+                        caption: 'Type Salarié',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: "salary_brut_annuel",
                         dataType: 'number',
-                        caption: 'Remuneration net imposable',
+                        caption: 'Salaire brut',
                         alignment: 'right',
                         summaryType: 'sum',
                         customizeText: function (data) {
@@ -127,9 +149,15 @@
                         },
                     },
                     {
-                        dataField: "taux_apprentissage",
+                        dataField: "work_month",
                         dataType: 'number',
-                        caption: 'TA (0,4)',
+                        caption: 'Duree travaillee',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: "salary_with_pf_at",
+                        dataType: 'number',
+                        caption: 'Montant PF/AT',
                         alignment: 'right',
                         summaryType: 'sum',
                         customizeText: function (data) {
@@ -137,40 +165,46 @@
                         },
                     },
                     {
-                        dataField: "tfc",
+                        dataField: "salary_with_retraite",
                         dataType: 'number',
-                        caption: 'TFC (0,6)',
+                        caption: 'Montant retraite',
                         alignment: 'right',
                         summaryType: 'sum',
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
                     },
-
+                    {
+                        dataField: "choice_sociale",
+                        dataType: 'string',
+                        caption: 'Regime',
+                        alignment: 'center',
+                    },
                 ],
                 summary: {
                     totalItems: [
                         {
                             column: 'index',
-                            summaryType: 'count',
-                            customizeText() {
-                                return 'Total'
+                            summaryType: "count",
+                            customizeTex() {
+                                return 'Salariés';
                             }
+
                         },
                         {
-                            column: 'revenusNetImposable', summaryType: 'sum',
+                            column: 'salary_with_retraite', summaryType: 'sum',
                             customizeText: (data) => {
                                 return new Intl.NumberFormat('fr-FR').format(data.value)
                             },
                         },
                         {
-                            column: 'taux_apprentissage', summaryType: 'sum',
+                            column: 'salary_brut_annuel', summaryType: 'sum',
                             customizeText: (data) => {
                                 return new Intl.NumberFormat('fr-FR').format(data.value)
                             },
                         },
                         {
-                            column: 'tfc', summaryType: 'sum',
+                            column: 'salary_with_pf_at', summaryType: 'sum',
                             customizeText: (data) => {
                                 return new Intl.NumberFormat('fr-FR').format(data.value)
                             },

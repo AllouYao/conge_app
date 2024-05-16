@@ -165,9 +165,36 @@
                         },
                     },
                     {
+                        caption: 'Allocation  congé payé ',
+                        dataType: 'number',
+                        dataField: 'allocation_payer',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Allocation  congé restant',
+                        dataType: 'number',
+                        dataField: 'allocation_reste',
+                        alignment: 'right',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
                         caption: 'Jours de congé restant',
                         dataType: 'number',
                         dataField: 'jour_restant',
+                        alignment: 'center',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Date de reprise',
+                        dataType: 'number',
+                        dataField: 'date_reprise',
                         alignment: 'center',
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);

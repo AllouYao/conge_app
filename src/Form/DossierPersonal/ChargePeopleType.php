@@ -34,7 +34,9 @@ class ChargePeopleType extends AbstractType
                 'label' => false,
                 'required' => false
             ])
-            ->add('numCmu');
+            ->add('numCmu')
+            ->add('numSs')
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

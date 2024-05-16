@@ -19,8 +19,12 @@ class EtatService
 
     public function getPrimeAnciennete($personal): float|int
     {
-        $salaireCategoriel = (int)$personal->getCategorie()->getAmount();
-        $anciennete = (double)$personal->getOlder();
+        $salaireCategoriel = null;
+        $personals = $this->personalRepository->findBy(['id' => $personal]);
+        foreach ($personals as $personal) {
+            $salaireCategoriel = $personal->getCategorie()->getAmount();
+            $anciennete = $personal->getOlder();
+        }
         if ($anciennete >= 2 && $anciennete < 3) {
             $primeAnciennete = $salaireCategoriel * 2 / 100;
         } elseif ($anciennete >= 3 && $anciennete <= 25) {
