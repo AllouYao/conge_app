@@ -36,4 +36,12 @@
             {{ form_errors(form.salaryAverage) }}
         </div>
     </div>
+    <div class="mb-2 row">
+        
+        <label class="col-md-2 col-form-label">Stock de conge restant <span class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.stock) }}
+            {{ form_errors(form.stock) }}   
+        </div>
+    </div>
 </fieldset>

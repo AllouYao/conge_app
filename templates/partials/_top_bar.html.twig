@@ -384,10 +384,12 @@
                             </div>
                             <a href="{{ path('campagne_open_campagne') }}"
                                class="dropdown-item"> Ouverture paie</a>
-                            <a href="{{ path('campagne_livre') }}"
-                               class="dropdown-item">Livre de paie</a>
                             <a href="{{ path('campagne_close') }}"
                                class="dropdown-item">Clôture paie</a>
+                               <a href="{{ path('campagne_livre') }}"
+                               class="dropdown-item">Livre de paie</a>
+                               <a href="{{ path('reporting_element_variable') }}"
+                               class="dropdown-item">Etat mensuel comparatif salr.</a>
                         </div>
                     </li>
                     {# FIN GESTION DE LA PAIE #}
@@ -400,8 +402,6 @@
                             <div class="arrow-down"></div>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="topnav-components">
-                            <a href="{{ path('reporting_element_variable') }}"
-                               class="dropdown-item">Etat mensuel comparatif salr.</a>
                             <a href="{{ path('reporting_etat_versement') }}"
                                class="dropdown-item">Etat mensuel des virements</a>
                             <a href="{{ path('reporting_etat_versement_caisse') }}"
@@ -484,92 +484,87 @@
                                class="dropdown-item">Liste</a>
 
                              <div class="dropdown">
-                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                           aria-expanded="false">
-                                            Demission
-                                            <div class="arrow-down"></div>
-                                        </a>
-                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                            <a href="{{ path('departure_new', {'typeDepart' : 'demission' }) }}"
-                                               class="dropdown-item">Créer</a>
-                                            <a href="{{ path('departure_index', {'typeDepart' : 'demission' }) }}"
-                                               class="dropdown-item">Liste</a>
-                                        </div>
-                                    </div>
-                                        <div class="dropdown">
-                                            <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                            role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                            aria-expanded="false">
-                                                Licenciement
-                                                <div class="arrow-down"></div>
-                                            </a>
-                                            <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                                <div class="dropdown">
-                                            <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                            role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                            aria-expanded="false">
-                                                Faute Simple
-                                                <div class="arrow-down"></div>
-                                            </a>
-                                            <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                                <a href="{{ path('departure_new', {'typeDepart' : 'licenciement_simple' }) }}"
-                                                class="dropdown-item">Créer</a>
-                                                <a href="{{ path('departure_index', {'typeDepart' : 'licenciement_simple' }) }}"
-                                                class="dropdown-item">Liste</a>
-                                            </div>
-                                        </div>
-                                        <div class="dropdown">
-                                            <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                            role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                            aria-expanded="false">
-                                                Faute lourde
-                                                <div class="arrow-down"></div>
-                                            </a>
-                                            <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                                <a href="{{ path('departure_new', {'typeDepart' : 'licenciement_lourde' }) }}"
-                                                class="dropdown-item">Créer</a>
-                                                <a href="{{ path('departure_index', {'typeDepart' : 'licenciement_lourde' }) }}"
-                                                class="dropdown-item">Liste</a>
-                                            </div>
-                                        </div>
-                                        </div>
-                                    </div>
-                                    
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false">
+                                    Demission
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('departure_new', {'typeDepart' : 'demission' }) }}"
+                                        class="dropdown-item">Créer</a>
+                                    <a href="{{ path('departure_index', {'typeDepart' : 'demission' }) }}"
+                                        class="dropdown-item">Liste</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false">
+                                    Retraite
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('departure_new', {'typeDepart' : 'retraite' }) }}"
+                                        class="dropdown-item">Créer</a>
+                                    <a href="{{ path('departure_index', {'typeDepart' : 'retraite' }) }}"
+                                        class="dropdown-item">Liste</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false">
+                                    Décès
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('departure_new', {'typeDepart' : 'deces' }) }}"
+                                        class="dropdown-item">Créer</a>
+                                    <a href="{{ path('departure_index', {'typeDepart' : 'deces' }) }}"
+                                        class="dropdown-item">Liste</a>
+                                </div>  
+                            </div>
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false">
+                                    Licenciement
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
                                     <div class="dropdown">
                                         <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                           aria-expanded="false">
-                                            Retraite
+                                        role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false">
+                                            Faute Simple
                                             <div class="arrow-down"></div>
                                         </a>
                                         <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                            <a href="{{ path('departure_new', {'typeDepart' : 'retraite' }) }}"
-                                               class="dropdown-item">Créer</a>
-                                            <a href="{{ path('departure_index', {'typeDepart' : 'retraite' }) }}"
-                                               class="dropdown-item">Liste</a>
+                                            <a href="{{ path('departure_new', {'typeDepart' : 'licenciement_simple' }) }}"
+                                            class="dropdown-item">Créer</a>
+                                            <a href="{{ path('departure_index', {'typeDepart' : 'licenciement_simple' }) }}"
+                                            class="dropdown-item">Liste</a>
                                         </div>
+                                </div>
+                                <div class="dropdown">
+                                    <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false">
+                                        Faute lourde
+                                        <div class="arrow-down"></div>
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                        <a href="{{ path('departure_new', {'typeDepart' : 'licenciement_lourde' }) }}"
+                                        class="dropdown-item">Créer</a>
+                                        <a href="{{ path('departure_index', {'typeDepart' : 'licenciement_lourde' }) }}"
+                                        class="dropdown-item">Liste</a>
                                     </div>
-                                    <div class="dropdown">
-                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                           aria-expanded="false">
-                                            Décès
-                                            <div class="arrow-down"></div>
-                                        </a>
-                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                            <a href="{{ path('departure_new', {'typeDepart' : 'deces' }) }}"
-                                               class="dropdown-item">Créer</a>
-                                            <a href="{{ path('departure_index', {'typeDepart' : 'deces' }) }}"
-                                               class="dropdown-item">Liste</a>
-                                        </div>  
-                                    </div>
-
+                                </div>
+                            </div>
                         </div>
                     </li>
                     {# FIN CESSATION TRAVAIL #}
-
-                    
                 </ul>
             </div>
         </nav>

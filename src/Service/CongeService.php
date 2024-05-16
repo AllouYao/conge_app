@@ -87,23 +87,26 @@ class CongeService
 
         $allocationPayer = round($day_cgs_exploied*$allocation_cgs / 30, 2);
 
+        if ($allocationPayer<=0) { 
+            $this->messages = 'Calcule de congé impossible, veillez recommencer svp !';
 
-        if ($works_months >= 12) { 
+        }elseif ($works_months >= 12) { 
             $conge
                 ->setWorkMonths($works_months)
                 ->setDaysPlus($dr_conge_supp_1 + $dr_conge_supp_2)
-                ->setTotalDays($total_day_cgs)
+                ->setTotalDays($remaining_vacat)
                 ->setDays($day_cgs_exploied)
-                ->setAllocationConge($allocation_cgs)
-                ->setAllocationPayer($allocationPayer)
-                ->setRemainingVacation($remaining_vacat);
-            $this->success = true;
-           // dd($conge);
+                ->setAllocationConge($allocationPayer)
+                ->setRemainingVacation($remaining_vacat)
+                ->setComplete($remaining_vacat == 0 ? true:false)
+                ->setDayAuthOnYear($remaining_vacat);
+                $this->success = true;
         } else {
             $this->messages = 'Mr/Mdm ' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' 
                  n\'est pas éligible pour une acquisition de congés, nombre de mois travailler depuis la date de debut d\'exercice insufisant: '
                 . ceil($works_months) . ' mois';
         }
+        
     }
 
     /**
@@ -131,8 +134,11 @@ class CongeService
 
         /** Determiner le salaire brut de la periode */
         if ($last_conges) {
+
             $sal_brut_periode = round((int)$this->payrollRepository->getPeriodiqueSalary2($personal, $date_last_conges) / 12);
+
         } else {
+            
             $sal_brut_periode = (int)$historique_conge->getSalaryAverage();
         }
 
@@ -160,20 +166,92 @@ class CongeService
         /** Determiner le nombre de jours restant après expiration des jours de congés exploités */
         $remaining_vacat = round($total_day_cgs - $day_cgs_exploied, 2);
 
-        if ($works_months >= 11) {
+        /** Montant allocation congé au prorata payé */
+
+        $allocationPayer = round($day_cgs_exploied*$allocation_cgs / 30, 2);
+
+        if ($allocationPayer<=0) { 
+            $this->messages = 'Calcule de congé impossible, veillez recommencer svp !';
+
+        }elseif($works_months >= 11) {
             $conge
                 ->setWorkMonths($works_months)
                 ->setSalaireMoyen($somme)
                 ->setDaysPlus($dr_conge_supp_1 + $dr_conge_supp_2)
                 ->setTotalDays($total_day_cgs)
                 ->setDays($day_cgs_exploied)
-                ->setAllocationConge($allocation_cgs)
-                ->setRemainingVacation($remaining_vacat);
+                ->setAllocationConge($allocationPayer)
+                ->setRemainingVacation($remaining_vacat)
+                ->setComplete($remaining_vacat == 0 ? true:false)
+                ->setDayAuthOnYear($remaining_vacat);
             $this->success = true;
         } else {
             $this->messages = 'Mr/Mdm ' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' 
                  n\'est pas éligible pour une acquisition de congés, nombre de mois travailler depuis le retour de congés insufisant: '
                 . ceil($works_months) . ' mois';
+        }
+    }
+    public function congesPayeInSameYear(Conge $conge, Conge $lastConge): void
+    {
+        /** Information du salarié sujet au congés */
+        $personal = $conge->getPersonal();
+        $anciennete = $personal->getOlder(); // anciennete en années
+        $genre = $personal->getGenre();
+        $charge_peaple = $personal->getChargePeople();
+
+        /** Information du conges */
+        $date_depart_cgs = $conge->getDateDepart();
+        $date_retour_cgs = $conge->getDateRetour();
+
+        /** Jour de congé supplémentaire en fonction du sex et des enfant à charge */
+        $dr_conge_supp_1 = round($this->suppConger($genre, $charge_peaple, $lastConge->getDateDepart()), 2);
+        /** Jour supplémentaire de congé en fonction de l'ancienneté du salarié */
+        $dr_conge_supp_2 = round($this->echelonConge($anciennete), 2);
+
+        /** Determiner le salaire brut de la periode */
+
+        $sal_brut_periode = $lastConge->getSalaireMoyen();
+
+        /** Determiner le nombre de mois travail depuis la date du dernier retour de congés jusqu'à la date de depart en congés actuel */
+        $works_months = $lastConge->getWorkMonths() ;
+
+        /** Determiner le salaire moyen mensuel (SMM) des 12 dernier mois travailler par le salarie */
+        $somme = round($sal_brut_periode, 2);
+
+        /** Determiner l'allocation de congé du salarié */
+        $allocation_cgs = round(($somme * self::JOUR_CONGE_OUVRABLE * self::JOUR_CONGE_CALANDAIRE * $works_months) / 30, 2);
+
+        $total_day_cgs = $lastConge->getRemainingVacation();
+
+        /** Durée total de congés pris par le salarié */
+        $day_cgs_exploied = $date_retour_cgs?->diff($date_depart_cgs)->days;
+
+        /** Determiner le nombre de jours restant après expiration des jours de congés exploités */
+        $remaining_vacat = round($total_day_cgs - $day_cgs_exploied, 2);
+
+        /** Determiner le nombre de jours restant après expiration des jours de congés exploités dans la meme année */
+        $dayAuthOnYear = round($lastConge->getdayAuthOnYear() - $day_cgs_exploied , 2);
+        /** Montant allocation congé au prorata payé */
+        
+        $allocationPayer = round($day_cgs_exploied*$allocation_cgs / 30, 2);
+
+        if ($allocationPayer<=0) { 
+            $this->messages = 'Calcule de congé impossible, veillez recommencer svp !';
+        }elseif($dayAuthOnYear >= 0) {
+            $conge
+                ->setWorkMonths($works_months)
+                ->setSalaireMoyen($somme)
+                ->setDaysPlus($dr_conge_supp_1 + $dr_conge_supp_2)
+                ->setTotalDays($total_day_cgs)
+                ->setDays($day_cgs_exploied)
+                ->setAllocationConge($allocationPayer)
+                ->setRemainingVacation($remaining_vacat)
+                ->setComplete($dayAuthOnYear == 0 ? true:false)
+                ->setDayAuthOnYear($dayAuthOnYear);
+            $this->success = true;
+        } else {
+            $this->messages = 'Mr/Mdm ' . $personal->getFirstName() . ' ' . $personal->getLastName() . ' 
+                    n\'est pas éligible pour une acquisition de congé de plus '.$dayAuthOnYear.' dans la même année';
         }
     }
 
@@ -231,11 +309,7 @@ class CongeService
         $workDays = $dateDepart->diff($dateEmbauche)->days;
         return $workDays / 30;
     }
-    public function calculResteAllocation(Conge $conge): int|float|null
-    {
-        $newAllocationConge = ceil(($conge->getDays()*$$conge->getAllocationConge())/30);
-        return $newAllocationConge;
-    }
+   
     public function countTotalDayInMonth(Conge $conge): int|float|null
     {
         $countDays = 0;

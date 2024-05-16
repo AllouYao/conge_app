@@ -27,8 +27,7 @@ class CongePartiel
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2, nullable: true)]
     private ?string $days = null;
 
-    #[ORM\ManyToOne(inversedBy: 'congePartiels')]
-    private ?Conge $conge = null;
+ 
 
     public function getId(): ?int
     {
@@ -79,17 +78,5 @@ class CongePartiel
 
         return $this;
     }
-    public function setConge(?Conge $conge): static
-    {
-        $this->conge = $conge;
-
-        return $this;
-    }
-
-    public function getConge(): ?Conge
-    {
-        return $this->conge;
-    }
-
     
 }

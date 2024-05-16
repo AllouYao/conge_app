@@ -28,7 +28,7 @@
         <div class="col-md-4">
             {{ form_widget(form.dernierRetour) }}
         </div>
-        <label class="col-md-2 col-form-label">Congés disponible (jrs calendaire)<span class="text-danger">*</span></label>
+        <label class="col-md-2 col-form-label">Congés disponible (jrs calendaires)<span class="text-danger">*</span></label>
         <div class="col-md-4">
             {{ form_widget(form.remaining) }}
         </div>
@@ -45,7 +45,7 @@
         </div>
     </div>
     <div class="mb-2 row">
-    <label class="col-md-2 col-form-label">Mode de paiement de l'allocation<span
+        <label class="col-md-2 col-form-label">Mode de paiement de l'allocation<span
                     class="text-danger">*</span></label>
         <div class="col-md-4">
             {{ form_widget(form.typePayementConge) }}
@@ -53,6 +53,17 @@
         <label class="col-md-2 col-form-label">Date réprise <span class="text-danger">*</span></label>
         <div class="col-md-4">
             {{ form_widget(form.dateReprise) }}
+        </div>
+    </div>
+     <div class="mb-2 row">
+        <label class="col-md-2 col-form-label">Nbre jour à prendre (jrs calendaires)<span
+                    class="text-danger">*</span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.days) }}
+        </div>
+        <label class="col-md-2 col-form-label">Congés restant (jrs calendaires) <span class="text-danger"></span></label>
+        <div class="col-md-4">
+            {{ form_widget(form.congeReste) }}
         </div>
     </div>
 </fieldset>

@@ -60,8 +60,8 @@ class Conge
     private ?string $gratification = null;
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $allocationPayer = null;
-    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
-    private ?string $allocationReste = null;
+    #[ORM\Column]
+    private ?int $dayAuthOnYear = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2, nullable: true)]
     private ?string $days = null;
@@ -86,18 +86,10 @@ class Conge
 
     #[ORM\ManyToOne(inversedBy: 'conges')]
     private ?User $user = null;
-
-    #[ORM\OneToMany(mappedBy: 'conge', targetEntity: CongePartiel::class)]
-    private Collection $congePartiels;
+    
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $status = null;
-
-    public function __construct()
-    {
-        $this->congePartiels = new ArrayCollection();
-    }
-
 
     public function getId(): ?int
     {
@@ -246,14 +238,14 @@ class Conge
 
         return $this;
     }
-    public function getAllocationReste(): ?string
+    public function getdayAuthOnYear(): ?int
     {
-        return $this->allocationReste;
+        return $this->dayAuthOnYear;
     }
 
-    public function setAllocationReste(?string $allocationReste): static
+    public function setDayAuthOnYear(?int $dayAuthOnYear): static
     {
-        $this->allocationReste = $allocationReste;
+        $this->dayAuthOnYear = $dayAuthOnYear;
 
         return $this;
     }
@@ -364,37 +356,6 @@ class Conge
 
         return $this;
     }
-
-    /**
-     * @return Collection<int, CongePartiel>
-     */
-    public function getCongePartiels(): Collection
-    {
-        return $this->congePartiels;
-    }
-
-    public function addCongePartiel(CongePartiel $congePartiel): static
-    {
-        if (!$this->congePartiels->contains($congePartiel)) {
-            $this->congePartiels->add($congePartiel);
-            $congePartiel->setConge($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCongePartiel(CongePartiel $congePartiel): static
-    {
-        if ($this->congePartiels->removeElement($congePartiel)) {
-            // set the owning side to null (unless already changed)
-            if ($congePartiel->getConge() === $this) {
-                $congePartiel->setConge(null);
-            }
-        }
-
-        return $this;
-    }
-
     public function getStatus(): ?string
     {
         return $this->status;

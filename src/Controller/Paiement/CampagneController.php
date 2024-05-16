@@ -9,6 +9,7 @@ use App\Form\Paiement\CampagneType;
 use App\Repository\DevPaie\OperationRepository;
 use App\Repository\DossierPersonal\CongeRepository;
 use App\Repository\DossierPersonal\HeureSupRepository;
+use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\Impots\CategoryChargeRepository;
 use App\Repository\Paiement\CampagneRepository;
 use App\Repository\Paiement\PayrollRepository;
@@ -54,7 +55,8 @@ class CampagneController extends AbstractController
         HeureSupRepository                      $heureSupRepository,
         CongeRepository                         $congeRepository,
         private readonly EntityManagerInterface $manager,
-        private readonly OperationRepository    $operationRepository
+        private readonly OperationRepository    $operationRepository,
+        private readonly PersonalRepository $personalRepository
     )
     {
         $this->payrollService = $payrollService;
@@ -204,6 +206,7 @@ class CampagneController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
             $fullDate = new DateTime();
             $day = 1;
             $month = $fullDate->format('m');
@@ -975,5 +978,6 @@ class CampagneController extends AbstractController
             'virement' => Status::VIREMENT
         ]);
     }
+
 
 }

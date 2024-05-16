@@ -24,6 +24,8 @@
                 <div class="card-footer">
                     <a href="{{ path('conge_new') }}" class="btn btn-primary float-end"
                        style="color: white">Nouveau</a>
+                    <a href="{{ path('app_home') }}"
+                       class="btn btn-info float-end me-2" style="color: white">Retour</a>
                 </div>
             </div>
         </div>
@@ -123,7 +125,7 @@
                         alignment: 'center',
                     },
                     {
-                        caption: 'Durée congé à prendre (en jours)',
+                        caption: 'Stock congé disponible (en jours)',
                         dataType: 'number',
                         dataField: 'conges_annuel_jour',
                         alignment: 'center',
@@ -132,7 +134,7 @@
                         },
                     },
                     {
-                        caption: 'Durée congé pris (en jours)',
+                        caption: 'Nbre congé pris (en jours)',
                         dataType: 'number',
                         dataField: 'conges_jour_pris',
                         alignment: 'center',
@@ -165,35 +167,17 @@
                         },
                     },
                     {
-                        caption: 'Allocation  congé payé ',
-                        dataType: 'number',
-                        dataField: 'allocation_payer',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                    },
-                    {
-                        caption: 'Allocation  congé restant',
-                        dataType: 'number',
-                        dataField: 'allocation_reste',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                    },
-                    {
-                        caption: 'Jours de congé restant',
+                        caption: 'Stock de congé restant',
                         dataType: 'number',
                         dataField: 'jour_restant',
                         alignment: 'center',
-                        customizeText: function (data) {
+                        customizeText: function (data) { 
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
                     },
                     {
                         caption: 'Date de reprise',
-                        dataType: 'number',
+                        dataType: 'string',
                         dataField: 'date_reprise',
                         alignment: 'center',
                         customizeText: function (data) {

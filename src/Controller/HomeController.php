@@ -35,6 +35,8 @@ class HomeController extends AbstractController
             $dateFin = $enCour->getDateRetour();
             if ($dateFin <= $today) {
                 $enCour->setIsConge(false);
+                $enCour->setDateDernierRetour($enCour->getDateRetour());
+
                 flash()->addInfo('le salarié ' . $enCour->getPersonal()->getFirstName() . ' ' . $enCour->getPersonal()->getLastName() . ' est de retour de congé.');
             }
             $this->manager->persist($enCour);

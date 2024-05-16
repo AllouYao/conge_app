@@ -62,8 +62,6 @@ class CongeController extends AbstractController
                 'allocation_annuel' => $item['allocation_conge'],
                 'status' => $item['en_conge'] === true ? 'OUI' : 'NON',
                 'jour_restant' => $item['remainingVacation'],
-                'allocation_payer' => $item['allocationPayer'],
-                'allocation_reste' => $item['allocationReste'],
                 'date_reprise' => $item['dateReprise'],
                 'modifier' => $modifier 
             ];
@@ -105,25 +103,8 @@ class CongeController extends AbstractController
         if ($forms->isSubmitted() && $forms->isValid()) {
             $personal = $conge->getPersonal();
 
-            /** Verifier si le salarié sélectionner a deja un conge non epuisé pour l'annnée */
-
-            $lastCongeIncomplete = $this->congeRepository->findOneBy([
-                "personal"=>$personal,
-                "complete"=>false
-            ]);
-
-            if($lastCongeIncomplete){
-                $toDay = new DateTime();
-                $countDate = $lastCongeIncomplete->getDays();
-                $dateRetour = $toDay->modify("+$countDate days");
-                $lastCongeIncomplete->setDateDepart($toDay);
-                $lastCongeIncomplete->setDateRetour($dateRetour);
-                flash()->addInfo('Mr/Mdm' . $personal->getFirstName() . ' ' . $personal->getLastName() . ", Vous devez epuisé totalement vos congé avant de beneficier d'un autre congé merci.");
-                return $this->redirectToRoute('conge_edit_reste', [ "uuid"=>$lastCongeIncomplete->getUuid()]);
-            }
-
             $last_conge = $congeRepository->getLastCongeByID($personal->getId(), false);
-            $historique_conge = $this->oldCongeRepository->findOneByPerso($personal->getId());
+            $historique_conge = $this->oldCongeRepository->findOneByPerso($personal->getId()); 
 
             /** Verifier si le salarié sélectionner est déjà en congés */
             $conge_active = $congeRepository->getLastCongeByID($personal->getId(), true);
@@ -134,36 +115,40 @@ class CongeController extends AbstractController
             }
 
             $last_date_retour = null;
-            if ($last_conge or $historique_conge) {
 
+           
+            /** Verifier si le salarié sélectionner a deja pris un congé pour la meme annnée */
+
+            $lasConge = $this->congeRepository->findOneBy([
+                "personal"=>$personal,
+                "complete"=>false
+            ]);
+
+
+            $lastCongeDate = $lasConge?->getDateDepart();
+            $currentCongeDate = $conge?->getDateDepart();
+
+            if( $lasConge && ($lastCongeDate->format("Y") == $currentCongeDate->format("Y"))){
+                $congeService->congesPayeInSameYear($conge, $lasConge);
+            }elseif ($last_conge or $historique_conge) {
                 $last_date_retour = $last_conge ? $last_conge->getDateRetour() or $historique_conge->getDateRetour() : null;
-                $congeService->$conge;
+                $congeService->congesPayeByLast($conge);
 
             } else {
-
                 $congeService->congesPayeFirst($conge);
             }
             if (!$congeService->success) {
 
                 flash()->addInfo($congeService->messages);
                 return $this->redirectToRoute('conge_new');
-
-            }
-
-            if($conge->getDays()<30){
-
-                $conge->setComplete(false);
-
-            }else{
-
-                $conge->setComplete(true);
+ 
             }
 
             $conge
                 ->setDateDernierRetour($last_date_retour)
                 ->setIsConge(true)
                 ->setUser($current_user);
-
+  
             $entityManager->persist($conge);
             $entityManager->flush();
 
@@ -223,83 +208,7 @@ class CongeController extends AbstractController
             'form' => $forms->createView(),
         ]);
     }
-    /**
-     * @throws Exception
-     */
-    #[Route('/{uuid}/reste/edit', name: 'edit_reste', methods: ['GET', 'POST'])]
-    public function editCongeReste(
-        Request                $request,
-        Conge                  $conge,
-        EntityManagerInterface $entityManager,
-    ): Response
-    {
-        /**
-         * @var User $current_user
-         */
-        $current_user = $this->getUser();
-
-        $toDay = new DateTime();
-        $countDate = $conge->getDays();
-        $dateRetour = $toDay->modify(+$countDate."days");
-        $conge->setDateDepart(new DateTime());
-        $conge->setDateRetour($dateRetour);
-        $conge->setDateReprise($dateRetour);
-        $forms = $this->createForm(CongeType::class, $conge);
-        $forms->handleRequest($request);
-
-        if ($forms->isSubmitted() && $forms->isValid()) {
-
-            dd();
-            $personal = $conge->getPersonal();
-
-            $dateDepart = $conge->getDateDepart();
-            $dateRetour = $conge->getDateRetour();
-            $difference = $dateRetour->diff($dateDepart);
-            $countCongeDay = $difference->days;
-
-            if(($this->congeService->countTotalDayInMonth($conge) + $countCongeDay) > 30){
-                dd();
-
-                flash()->addInfo('Mr/Mdm' . $personal->getFirstName() . ' ' . $personal->getLastName() . ", Vous n'êtes pas autorisé à prendre plus de 30 jours merci.");
-                return $this->redirectToRoute('conge_edit_reste', [ "uuid"=>$conge->getUuid()]);
-            }
-
-            if(($this->congeService->countTotalDayInMonth($conge) + $countCongeDay) == 30){
-
-                dd();
-
-                $conge->setComplete(true);
-                
-            }
-            $conge->setComplete(false);
-
-            
-            $conge->setUser($current_user);
-            $conge->setDays($countCongeDay);
-            $conge->setIsConge(true);
-
-            // set congé partiel
-            $allocationPayer = $this->congeService->calculResteAllocation($conge);
-            $congePartiel =  new CongePartiel();
-            $congePartiel->setAllocationConge($allocationPayer)
-                         ->setDateDepart($conge->getDateDepart())
-                         ->setDateRetour($conge->getDateRetour())
-                         ->setDays($conge->getDays());
-            $entityManager->persist($congePartiel);
-
-            $conge->addCongePartiel($congePartiel);
-
-            $entityManager->persist($conge);
-            $entityManager->flush();
-            flash()->addSuccess('Congé ajouter avec succès.');
-            return $this->redirectToRoute('conge_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('dossier_personal/conge/edit.html.twig', [
-            'conge' => $conge,
-            'form' => $forms->createView(),
-        ]);
-    }
+   
  
 
 }
