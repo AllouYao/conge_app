@@ -308,11 +308,11 @@
                         columns: [
                             {
                                 dataField: 'modifier',
-                                caption: 'Modifier',
+                                caption: 'Consulter',
                                 alignment: 'center',
                                 cellTemplate: function (container, options) {
                                     $("<a>")
-                                        .html('<i data-feather="edit" style="color: #C9971C"></i>')
+                                        .html('<i data-feather="eye" style="color: #C9971C"></i>')
                                         .attr("href", options.data.modifier)
                                         .appendTo(container);
                                     feather.replace();

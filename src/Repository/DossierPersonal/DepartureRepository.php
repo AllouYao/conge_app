@@ -59,6 +59,7 @@ class DepartureRepository extends ServiceEntityRepository
                 'departure.netPayer as net_payer_indemnite',
                 'departure.uuid',
                 'departure.reason',
+                'departure.reasonCode as type_depart',
                 'departure.fraisFuneraire as frais_funeraire',
             ])
             ->join('departure.personal', 'p')
@@ -71,35 +72,6 @@ class DepartureRepository extends ServiceEntityRepository
             ->orderBy('departure.date', 'ASC')
             ->getQuery()
             ->getResult();
-    }
-
-    public function getDepartureByDateByEmployeRole(int $month, int $year, $typeDepart): array
-    {
-        return $this->createQueryBuilder('departure')
-            ->join('departure.personal', 'personal')
-            ->join('personal.categorie', 'category') 
-            ->join('category.categorySalarie', 'categorySalarie') 
-            ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
-            ->andWhere('YEAR(departure.date) = :year')
-            ->andWhere('MONTH(departure.date) = :month')
-            ->andWhere('departure.reason = :typeDepart')
-            ->setParameter('year', $year)
-            ->setParameter('month', $month)
-            ->setParameter('code_employe', 'OE') 
-            ->setParameter('code_chauffeur', 'CH')
-            ->setParameter('typeDepart', $typeDepart)
-            ->orderBy('departure.date', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findDeparturesByPersonal($personal): ?Departure
-    {
-        return $this->createQueryBuilder('d')
-            ->where('d.personal = :personal')
-            ->setParameter('personal', $personal)
-            ->getQuery()
-            ->getOneOrNullResult();
     }
 
     /** Obtenir le depart qui est entre les 15 jours qui suivent la date de retour en congé */
@@ -140,12 +112,6 @@ class DepartureRepository extends ServiceEntityRepository
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
-    }
-
-    public function findDeparture(): ?Departure
-    {
-        return $this->createQueryBuilder('departure')
-            ->getQuery()->getOneOrNullResult();
     }
 
 }

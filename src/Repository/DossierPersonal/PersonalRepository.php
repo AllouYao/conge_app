@@ -439,4 +439,72 @@ class PersonalRepository extends ServiceEntityRepository
         return $qb;
     }
 
+    public function findPersoBuilderForDepart(): \Doctrine\ORM\QueryBuilder
+    {
+        /** @var User $user */
+        $user = $this->security->getUser();
+        $qb = $this->createQueryBuilder('p');
+        $em = $qb->getEntityManager();
+
+        $qb
+            ->join('p.contract', 'contract')
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->leftJoin('p.departures', 'departures')
+            ->where(
+                $qb->expr()
+                    ->in(
+                        'category_salarie.id',
+                        $em
+                            ->createQueryBuilder()
+                            ->select('c.id')
+                            ->from('App:User', 'u')
+                            ->join('u.categories', 'c')
+                            ->where($qb->expr()->eq('u.id', $user->getId()))
+                            ->getDQL()
+                    )
+            )
+            ->andWhere('contract.typeContrat IN (:type)')
+            ->andWhere('p.active = false')
+            ->andWhere('departures.id IS NULL')
+            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
+            ->orderBy('p.firstName', 'ASC');
+        return $qb;
+    }
+
+    public function findPersoBuilderEditDepart(Personal $personal): \Doctrine\ORM\QueryBuilder
+    {
+        /** @var User $user */
+        $user = $this->security->getUser();
+        $qb = $this->createQueryBuilder('p');
+        $em = $qb->getEntityManager();
+
+        $qb
+            ->join('p.contract', 'contract')
+            ->join('p.categorie', 'category')
+            ->join('category.categorySalarie', 'category_salarie')
+            ->leftJoin('p.departures', 'departures')
+            ->where(
+                $qb->expr()
+                    ->in(
+                        'category_salarie.id',
+                        $em
+                            ->createQueryBuilder()
+                            ->select('c.id')
+                            ->from('App:User', 'u')
+                            ->join('u.categories', 'c')
+                            ->where($qb->expr()->eq('u.id', $user->getId()))
+                            ->getDQL()
+                    )
+            )
+            ->andWhere('contract.typeContrat IN (:type)')
+            ->andWhere('p.active = false')
+            ->andWhere('departures.id IS NOT NULL')
+            ->andWhere('p.id = :personal_id')
+            ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
+            ->setParameter('personal_id', $personal->getId())
+            ->orderBy('p.firstName', 'ASC');
+        return $qb;
+    }
+
 }

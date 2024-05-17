@@ -149,6 +149,9 @@ class Departure
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     private ?string $olderPersonal = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $statut = null;
+
     public function __construct()
     {
         $this->chargePersonals = new ArrayCollection();
@@ -695,6 +698,18 @@ class Departure
     public function setOlderPersonal(?string $olderPersonal): static
     {
         $this->olderPersonal = $olderPersonal;
+
+        return $this;
+    }
+
+    public function getStatut(): ?string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(?string $statut): static
+    {
+        $this->statut = $statut;
 
         return $this;
     }

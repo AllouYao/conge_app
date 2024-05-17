@@ -7,6 +7,7 @@ use App\Entity\DossierPersonal\Personal;
 use App\Form\CustomType\DateCustomType;
 use App\Repository\DossierPersonal\CongeRepository;
 use App\Repository\DossierPersonal\OldCongeRepository;
+use App\Repository\DossierPersonal\PersonalRepository;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -33,13 +34,8 @@ class DepartureType extends AbstractType
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
                 'choice_label' => 'matricule',
-                'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('p')
-                        ->join('p.contract', 'ct')
-                        ->leftJoin('p.departures', 'departure')
-                        ->where('departure.id IS NULL ')
-                        ->andWhere('p.active = false')
-                        ->orderBy('p.matricule', 'ASC');
+                'query_builder' => function (PersonalRepository $er) {
+                    return $er->findPersoBuilderForDepart();
                 },
                 'placeholder' => 'Sélectionner un matricule',
                 'attr' => [
@@ -95,23 +91,22 @@ class DepartureType extends AbstractType
                         $form->add('personal', EntityType::class, [
                             'class' => Personal::class,
                             'choice_label' => 'matricule',
-                            'query_builder' => function (EntityRepository $er) use ($personal) {
-                                return $er->createQueryBuilder('p')
-                                    ->join('p.contract', 'ct')
-                                    ->leftJoin('p.departures', 'departure')
-                                    ->andWhere('departure.id IS NOT NULL')
-                                    ->andWhere('p.id = :personal')
-                                    ->setParameter('personal', $personal->getId());
+                            'query_builder' => function (PersonalRepository $er) use ($personal) {
+                                return $er->findPersoBuilderEditDepart($personal);
                             },
                             'placeholder' => 'Sélectionner un matricule',
                             'attr' => [
                                 'data-plugin' => 'customselect',
                             ],
                             'choice_attr' => function (Personal $personal) {
+                                $last_conges = $this->congeRepository->getLastCongeByID($personal->getId(), false);
+                                $historique_conge = $this->oldCongeRepository->findOneByPerso($personal->getId());
+                                $hist_date_retour = $last_conges ? $last_conges->getDateDernierRetour()->format('Y-m-d') : $historique_conge?->getDateRetour()->format('Y-m-d');
                                 return [
                                     'data-name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
                                     'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y'),
                                     'data-category' => '( ' . $personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' . $personal->getCategorie()->getIntitule(),
+                                    'data-dernier-retour' => $hist_date_retour === "" ? null : $hist_date_retour
                                 ];
                             }
                         ]);

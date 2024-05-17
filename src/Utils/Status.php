@@ -232,12 +232,12 @@ final class Status
     public const PENDING = 'PENDING';
     public const CANCELED = 'CANCELED';
     public const REFUND = 'REFUND';
-    public const REASONCODE =  [
-        'demission' => Status::DEMISSION,
-        'retraite' => Status::RETRAITE,
-        'licenciement_lourde' => Status::LICENCIEMENT_FAUTE_LOURDE,
-        'licenciement_simple' => Status::LICENCIEMENT_FAUTE_SIMPLE,
-        'deces' => Status::DECES
+    public const REASONCODE = [
+        'demission' => 'demission',
+        'retraite' => 'retraite',
+        'licenciement_lourde' => 'licenciement_lourde',
+        'licenciement_simple' => 'licenciement_simple',
+        'deces' => 'deces'
     ];
 
 

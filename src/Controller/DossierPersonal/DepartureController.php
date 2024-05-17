@@ -27,13 +27,11 @@ use Symfony\Component\Routing\Attribute\Route;
 class DepartureController extends AbstractController
 {
     private DepartureRepository $departureRepository;
-    private DepartServices $departServices;
     private PersonalRepository $personalRepository;
 
 
     public function __construct(
         DepartureRepository                 $departureRepository,
-        DepartServices                      $departServices,
         PersonalRepository                  $personalRepository,
         private readonly DepartureInterface $departureInterface,
         private readonly SalaryInterface    $salaryInterface,
@@ -41,7 +39,6 @@ class DepartureController extends AbstractController
     )
     {
         $this->departureRepository = $departureRepository;
-        $this->departServices = $departServices;
         $this->personalRepository = $personalRepository;
     }
 
@@ -85,6 +82,7 @@ class DepartureController extends AbstractController
             $time_preavis = $this->utimeDepartServ->getTimePreavis((int)$departure['older'], $departure['intitule']);
             $url_solde = $this->generateUrl('departure_sold_of_all_compte', ['uuid' => $departure['uuid']]);
             $url_certificat = $this->generateUrl('departure_certificat_travail', ['uuid' => $departure['uuid']]);
+            $link_show = $this->generateUrl('departure_show', ['uuid' => $departure['uuid']]);
             $apiDeparture[] = [
                 'index' => ++$count,
                 'nom_salarie' => $departure['firstName'],
@@ -113,6 +111,7 @@ class DepartureController extends AbstractController
                 'frais_funeraire' => (int)$departure['frais_funeraire'],
                 'url_solde_all_compte' => $url_solde,
                 'url_certificat' => $url_certificat,
+                'modifier' => $link_show
             ];
         }
 
@@ -168,7 +167,55 @@ class DepartureController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $departure
-                ->setReasonCode(strtoupper(Status::REASONCODE[$typeDepart]))
+                ->setReasonCode(Status::REASONCODE[$typeDepart])
+                ->setOlderPersonal($departure->getPersonal()->getOlder())
+                ->setStatut(Status::PENDING)
+                ->setUser($currentUser);
+            $this->salaryInterface->chargPersonalOut($departure);
+            $this->salaryInterface->chargEmployerOut($departure);
+            $this->departureInterface->departurePersonalCharge($departure);
+            $this->departureInterface->departureEmployeurCharge($departure);
+            $this->departureInterface->droitIndemnityByDeparture($departure);
+            $manager->persist($departure);
+            $manager->flush();
+
+            flash()->addSuccess('Depart enregistrer avec succès.');
+            return $this->redirectToRoute('departure_index', ['typeDepart' => $typeDepart], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->render('dossier_personal/departure/new.html.twig', [
+            'departure' => $departure,
+            'form' => $form->createView(),
+            'typeDepart' => $typeDepart,
+        ]);
+    }
+
+    #[Route('/new/{uuid}/{typeDepart}', name: 'new_uuid_typeDepart', methods: ['GET', 'POST'])]
+    public function newByPersonal(Request $request, EntityManagerInterface $manager, Personal $personal, $typeDepart): Response
+    {
+        /**
+         * @var User $currentUser
+         */
+
+        $typeDeparts = [
+            'demission' => 'Demission',
+            'retraite' => 'Retraite',
+            'licenciement_lourde' => 'Licenciement faute lourde',
+            'licenciement_simple' => 'Licenciement faute simple',
+            'deces' => 'Deces',
+        ];
+
+        $currentUser = $this->getUser();
+        $departure = new Departure();
+        $departure->setReason($typeDeparts[$typeDepart]);
+        $departure->setPersonal($personal);
+
+        $form = $this->createForm(DepartureType::class, $departure);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $departure
+                ->setReasonCode(Status::REASONCODE[$typeDepart])
                 ->setOlderPersonal($departure->getPersonal()->getOlder())
                 ->setUser($currentUser);
             $this->salaryInterface->chargPersonalOut($departure);
@@ -190,54 +237,54 @@ class DepartureController extends AbstractController
         ]);
     }
 
+    #[Route('/show/{uuid}/', name: 'show', methods: ['GET', 'POST'])]
+    public function show(Departure $departure): Response
+    {
+        $reason = $departure->getReason();
+        $departure = $time_preavis = null;
+        $departures = $this->departureRepository->getDepartureByDate($reason);
+        foreach ($departures as $value) {
+            $departure = $value;
+            $time_preavis = $this->utimeDepartServ->getTimePreavis((int)$departure['older'], $departure['intitule']);
+        }
+        return $this->render('dossier_personal/departure/show.html.twig', [
+            'departure' => $departure,
+            'duree_preavis' => $time_preavis
+        ]);
+    }
 
-    #[Route('/new/{uuid}/{typeDepart}', name: 'new_uuid_typeDepart', methods: ['GET', 'POST'])]
-    public function newByPersonal(Request $request, EntityManagerInterface $manager, Personal $personal, $typeDepart): Response
+    #[Route('/edit/{uuid}/{typeDepart}', name: 'edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, EntityManagerInterface $manager, $typeDepart, Departure $departure): Response
     {
         /**
          * @var User $currentUser
          */
-
-        $typeDeparts = [
-            'demission' => 'Démission',
-            'retraite' => 'Retraite',
-            'licenciement_lourde' => 'Licenciement faute lourde',
-            'licenciement_simple' => 'Licenciement faute simple',
-            'deces' => 'Décès',
-        ];
-
         $currentUser = $this->getUser();
-        $departure = new Departure();
-        $departure->setReason($typeDeparts[$typeDepart]);
-        $departure->setPersonal($personal);
-
         $form = $this->createForm(DepartureType::class, $departure);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $departure->setReasonCode(Status::REASONCODE[$typeDepart]);
-            $this->departServices->calculeDroitsAndIndemnity($departure);
-            $departure->setUser($currentUser);
+            $departure
+                ->setReasonCode(Status::REASONCODE[$typeDepart])
+                ->setOlderPersonal($departure->getPersonal()->getOlder())
+                ->setStatut(Status::PENDING)
+                ->setUser($currentUser);
+            $this->salaryInterface->chargPersonalOut($departure);
+            $this->salaryInterface->chargEmployerOut($departure);
+            $this->departureInterface->departurePersonalCharge($departure);
+            $this->departureInterface->departureEmployeurCharge($departure);
+            $this->departureInterface->droitIndemnityByDeparture($departure);
             $manager->persist($departure);
-            //$manager->flush();
+            $manager->flush();
 
-            flash()->addSuccess('Depart enregistrer avec succès.');
+            flash()->addSuccess('Depart modifier avec succès.');
             return $this->redirectToRoute('departure_index', ['typeDepart' => $typeDepart], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('dossier_personal/departure/new.html.twig', [
+        return $this->render('dossier_personal/departure/edit.html.twig', [
             'departure' => $departure,
             'form' => $form->createView(),
             'typeDepart' => $typeDepart,
-        ]);
-    }
-
-    #[Route('/show/{uuid}/', name: 'show', methods: ['GET', 'POST'])]
-    public function show(Departure $departure): Response {
-        $reason = $departure->getReason();
-        $departures = $this->departureRepository->getDepartureByDate($reason);
-        return $this->render('dossier_personal/departure/show.html.twig', [
-            'departure' => $departures,
         ]);
     }
 
@@ -259,7 +306,6 @@ class DepartureController extends AbstractController
             $embauche = $departure['date_embauche'];
             $date_depart = $departure['departure_date'];
         }
-
 
 
         return $this->render('dossier_personal/departure/sold.html.twig', [
