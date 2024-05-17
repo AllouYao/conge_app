@@ -25,6 +25,9 @@ class OldConge
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2, nullable: true)]
     private ?string $salaryAverage = null;
 
+    #[ORM\Column]
+    private ?int $stock = null;
+
     #[ORM\OneToOne(inversedBy: 'oldConge', cascade: ['persist', 'remove'])]
     private ?Personal $personal = null;
 
@@ -53,6 +56,17 @@ class OldConge
     public function setSalaryAverage(?string $salaryAverage): static
     {
         $this->salaryAverage = $salaryAverage;
+
+        return $this;
+    }
+    public function getStock(): ?int
+    {
+        return $this->stock;
+    }
+
+    public function setStock(?int $stock): static
+    {
+        $this->stock = $stock;
 
         return $this;
     }

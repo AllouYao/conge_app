@@ -18,8 +18,8 @@ class SmigType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('dateDebut', DateCustomType::class)
-            ->add('dateFin', DateCustomType::class)
+            //->add('dateDebut', DateCustomType::class)
+           // ->add('dateFin', DateCustomType::class)
             ->add('categorySalaries', EntityType::class, [
                 'class' => CategorySalarie::class,
                 'placeholder' => "Sélectionner une categorie de salarié",

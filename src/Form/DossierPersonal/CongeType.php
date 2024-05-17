@@ -2,26 +2,28 @@
 
 namespace App\Form\DossierPersonal;
 
-use App\Entity\DossierPersonal\Conge;
-use App\Entity\DossierPersonal\Personal;
-use App\Form\CustomType\DateCustomType;
-use App\Repository\DossierPersonal\CongeRepository;
-use App\Repository\DossierPersonal\OldCongeRepository;
-use App\Service\CongeService;
-use App\Utils\Status;
-use Carbon\Carbon;
 use DateTime;
+use Carbon\Carbon;
+use App\Utils\Status;
+use DateTimeInterface;
+use App\Service\CongeService;
 use Doctrine\ORM\EntityRepository;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\FormBuilderInterface;
+use App\Entity\DossierPersonal\Conge;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use App\Form\CustomType\DateCustomType;
+use App\Entity\DossierPersonal\Personal;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use App\Repository\DossierPersonal\CongeRepository;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use App\Repository\DossierPersonal\OldCongeRepository;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+
 
 class CongeType extends AbstractType
 {
@@ -56,6 +58,28 @@ class CongeType extends AbstractType
                 ],
                 "data" => "Immédiat"
             ])
+            ->add('days', TextType::class, [
+                'attr' => [
+                    'class' => 'separator text-end',
+                    'readonly' => 'readonly'
+
+                ],
+                'required' => false,
+                'constraints' => [
+                    new NotBlank()
+                ]
+            ])
+            ->add('congeReste', TextType::class, [
+                'attr' => [
+                    'class' => 'separator text-end',
+                    'readonly' => 'readonly'
+                ],
+                'mapped'=>false,
+                'required' => false,
+                'constraints' => [
+                    new NotBlank()
+                ]
+            ])
             ->add('dateDepart', DateCustomType::class,)
             ->add('dateRetour', DateCustomType::class)
             ->add('personal', EntityType::class, [
@@ -66,11 +90,10 @@ class CongeType extends AbstractType
                             ->join('p.contract', 'ct')   
                             ->leftJoin('p.departures', 'departures')
                             ->leftJoin('p.conges', 'c')
-                            ->where('c.id IS NULL OR c.dateDernierRetour < :today AND c.isConge = false ')
+                            ->where('c.id IS NULL OR c.isConge = false ')
                             ->andWhere('departures.id IS NULL')
                             ->andWhere('ct.typeContrat IN (:type)')
                             ->andWhere('p.active = true')
-                            ->setParameter('today', new DateTime())
                             ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
                             ->orderBy('p.matricule', 'ASC');
                     } else {
@@ -114,7 +137,8 @@ class CongeType extends AbstractType
                         'data-name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
                         'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y'),
                         'data-category' => '( ' . $personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' . $personal->getCategorie()->getIntitule(),
-                        'data-dernier-retour' => $last_conges ? date_format($last_conges->getDateDernierRetour(), 'd/m/Y') : $hist_date_retour,
+                        //'data-dernier-retour' => $last_conges ? date_format($last_conges->getDateDernierRetour(), 'd/m/Y') : $hist_date_retour,
+                        'data-dernier-retour' => ($last_conges && $last_conges->getDateDernierRetour() instanceof DateTimeInterface) ? date_format($last_conges->getDateDernierRetour(), 'd/m/Y') : $hist_date_retour,
                         'data-remaining' => $last_conges ? ceil($last_conges->getRemainingVacation()) : ceil($work_month * 2.2 * 1.25),
                         'data-salaire-moyen' => $last_conges ? null : $hist_sal_moyen
                     ];
@@ -154,25 +178,6 @@ class CongeType extends AbstractType
                 ]
             ])
             ->add('dateReprise', DateCustomType::class);
-            
-
-        $builder
-            ->addEventListener(
-                FormEvents::SUBMIT,
-                function (FormEvent $event) {
-                    /** @var Conge $data_c */
-                    $data_c = $event->getData();
-                    $personal = $data_c->getPersonal();
-                    $last_conges = $this->congeRepository->getLastCongeByID($personal->getId(), false);
-                    $historique_conge = $this->oldCongeRepository->findOneByPerso($personal->getId());
-
-                    if ($last_conges or $historique_conge) {
-                        $this->congeService->congesPayeByLast($data_c);
-                    } else {
-                        $this->congeService->congesPayeFirst($data_c);
-                    }
-                }
-            );
 
         $builder
             ->addEventListener(

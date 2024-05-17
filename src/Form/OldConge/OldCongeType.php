@@ -50,6 +50,12 @@ class OldCongeType extends AbstractType
                     'readonly' => 'readonly'
                 ]
             ])
+            ->add('stock',TextType::class, [
+                'attr' => [
+                    'class' => 'text-end separator'
+                ],
+                'data'=>0
+            ])
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
                 'query_builder' => function (EntityRepository $er) {

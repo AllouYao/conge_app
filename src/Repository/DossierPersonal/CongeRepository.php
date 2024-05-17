@@ -44,8 +44,6 @@ class CongeRepository extends ServiceEntityRepository
                 'co.days',
                 'co.remainingVacation',
                 'co.typeConge',
-                'co.allocationPayer',
-                'co.allocationReste',
                 'co.dateReprise',
 
 
