@@ -33,7 +33,6 @@ class DepartureType extends AbstractType
             ])
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
-                'choice_label' => 'matricule',
                 'query_builder' => function (PersonalRepository $er) {
                     return $er->findPersoBuilderForDepart();
                 },
@@ -42,9 +41,13 @@ class DepartureType extends AbstractType
                     'data-plugin' => 'customselect',
                 ],
                 'choice_attr' => function (Personal $personal) {
-                    $last_conges = $this->congeRepository->getLastCongeByID($personal->getId(), false);
-                    $historique_conge = $this->oldCongeRepository->findOneByPerso($personal->getId());
-                    $hist_date_retour = $last_conges ? $last_conges->getDateDernierRetour()->format('Y-m-d') : $historique_conge?->getDateRetour()->format('Y-m-d');
+                    $historique_retour = null;
+                    $last_conges = $this->congeRepository->findCongesBuilder($personal->getId(), false);
+                    $historique_conge = $this->oldCongeRepository->findOneByPersoBuilder($personal->getId());
+                    if ($historique_conge) {
+                        $historique_retour = $historique_conge['older_retour']->format('Y-m-d');
+                    }
+                    $hist_date_retour = $last_conges ? $last_conges['dernier_retour']->format('Y-m-d') : $historique_retour;
 
                     return [
                         'data-name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
@@ -90,7 +93,6 @@ class DepartureType extends AbstractType
                     if ($data instanceof Departure && $data->getId()) {
                         $form->add('personal', EntityType::class, [
                             'class' => Personal::class,
-                            'choice_label' => 'matricule',
                             'query_builder' => function (PersonalRepository $er) use ($personal) {
                                 return $er->findPersoBuilderEditDepart($personal);
                             },
@@ -99,9 +101,13 @@ class DepartureType extends AbstractType
                                 'data-plugin' => 'customselect',
                             ],
                             'choice_attr' => function (Personal $personal) {
-                                $last_conges = $this->congeRepository->getLastCongeByID($personal->getId(), false);
-                                $historique_conge = $this->oldCongeRepository->findOneByPerso($personal->getId());
-                                $hist_date_retour = $last_conges ? $last_conges->getDateDernierRetour()->format('Y-m-d') : $historique_conge?->getDateRetour()->format('Y-m-d');
+                                $historique_retour = null;
+                                $last_conges = $this->congeRepository->findCongesBuilder($personal->getId(), false);
+                                $historique_conge = $this->oldCongeRepository->findOneByPersoBuilder($personal->getId());
+                                if ($historique_conge) {
+                                    $historique_retour = $historique_conge['older_retour']->format('Y-m-d');
+                                }
+                                $hist_date_retour = $last_conges ? $last_conges['dernier_retour']->format('Y-m-d') : $historique_retour;
                                 return [
                                     'data-name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
                                     'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y'),

@@ -137,19 +137,6 @@ final class Status
         "DÉCÈS PEAU PÈRE OU BELLE-MÈRE (2 JOURS)"
     ];
 
-
-    /**
-     * Reason of departure
-     */
-    public const DEMISSION = 'Demission';
-    public const RETRAITE = 'Retraite';
-    public const LICENCIEMENT_COLLECTIF = 'LICENCIEMENT COLLECTIF';
-    public const LICENCIEMENT_FAUTE_LOURDE = 'Licenciement faute lourde';
-    public const LICENCIEMENT_FAUTE_SIMPLE = 'Licenciement faute simple';
-    public const ABANDON_DE_POST = 'ABANDON DE POST';
-    public const MALADIE = 'MALADIE';
-    public const DECES = 'Deces';
-
     /**
      * Type de charge
      */
@@ -233,12 +220,24 @@ final class Status
     public const CANCELED = 'CANCELED';
     public const REFUND = 'REFUND';
     public const REASONCODE = [
-        'demission' => 'demission',
-        'retraite' => 'retraite',
-        'licenciement_lourde' => 'licenciement_lourde',
-        'licenciement_simple' => 'licenciement_simple',
-        'deces' => 'deces'
+        'démissions' => 'Démission',
+        'retraites' => 'Rétraite',
+        'licenciements_faute_lourde' => 'Licenciement faute lourde',
+        'licenciements_faute_simple' => 'Licenciement faute simple',
+        'décès' => 'Décès',
     ];
+
+    /**
+     * Reason of departure
+     */
+    public const DEMISSION = 'Démission';
+    public const RETRAITE = 'Rétraite';
+    public const LICENCIEMENT_COLLECTIF = 'LICENCIEMENT COLLECTIF';
+    public const LICENCIEMENT_FAUTE_LOURDE = 'Licenciement faute lourde';
+    public const LICENCIEMENT_FAUTE_SIMPLE = 'Licenciement faute simple';
+    public const ABANDON_DE_POST = 'ABANDON DE POST';
+    public const MALADIE = 'MALADIE';
+    public const DECES = 'Décès';
 
 
 }

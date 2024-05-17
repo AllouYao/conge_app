@@ -58,12 +58,12 @@ class CongeRepository extends ServiceEntityRepository
 
     }
 
-    public function findCongeByEmployeRole(string $typeConges): array
+    public function findCongesBuilder(int $personal, bool $active): array
     {
         return $this->createQueryBuilder('co')
             ->select([
-                'p.firstName as nom',
-                'p.lastName as prenoms',
+                'personal.firstName as nom',
+                'personal.lastName as prenoms',
                 'co.dateRetour as retour',
                 'co.dateDepart as depart',
                 'co.salaireMoyen as salaire_moyen',
@@ -75,18 +75,14 @@ class CongeRepository extends ServiceEntityRepository
                 'co.days',
                 'co.remainingVacation',
             ])
-            ->join('co.personal', 'p')
-            ->join('p.categorie', 'category')
-            ->join('category.categorySalarie', 'categorySalarie')
-            ->where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')
-            ->andWhere('co.personal is not null')
-            ->andWhere('co.typeConge = :type_conge')
-            ->setParameter('code_employe', 'OE')
-            ->setParameter('code_chauffeur', 'CH')
-            ->setParameter('type_conge', $typeConges)
-            ->orderBy('co.dateDernierRetour', 'DESC')
-            ->getQuery()
-            ->getResult();
+            ->join('co.personal', 'personal')
+            ->where('personal.id = :personal')
+            ->andWhere('co.isConge = :value')
+            ->setMaxResults(1)
+            ->setParameter('personal', $personal)
+            ->setParameter('value', $active)
+            ->orderBy('co.id', 'DESC')
+            ->getQuery()->getResult();
 
     }
 

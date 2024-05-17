@@ -53,17 +53,15 @@ class DepartureController extends AbstractController
 
         $personals = $this->personalRepository->findDisablePersonal();
 
-
         foreach ($personals as $personal) {
-
             $apiDeparture[] = [
                 'index' => ++$index,
-                'full_name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
-                'categorie' => $personal->getCategorie()->getCategorySalarie()->getName(),
-                'fonction' => $personal->getJob()->getName(),
-                'type_contract' => $personal->getContract()->getTypeContrat(),
-                'date_embauche' => $personal->getContract()->getDateEmbauche(),
-                'uuid' => $personal->getUuid()
+                'full_name' => $personal['firstName'] . ' ' . $personal['lastName'],
+                'categorie' => $personal['category_name'],
+                'fonction' => $personal['job_name'],
+                'type_contract' => $personal['typeContrat'],
+                'date_embauche' => $personal['dateEmbauche']->format('d/m/Y'),
+                'uuid' => $personal['uuid']
 
             ];
         }
@@ -121,22 +119,13 @@ class DepartureController extends AbstractController
     #[Route('/', name: 'index2', methods: ['GET'])]
     public function index(): Response
     {
-        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
-        $today = Carbon::now();
-        $date = $formatter->format($today);
-        return $this->render('dossier_personal/departure/index2.html.twig', [
-            'date' => $date,
-        ]);
+        return $this->render('dossier_personal/departure/index2.html.twig');
     }
 
     #[Route('/{typeDepart}/index', name: 'index', methods: ['GET'])]
     public function indexTypeDepart($typeDepart): Response
     {
-        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
-        $today = Carbon::now();
-        $date = $formatter->format($today);
         return $this->render('dossier_personal/departure/index.html.twig', [
-            'date' => $date,
             'typeDepart' => $typeDepart,
         ]);
     }
@@ -152,11 +141,11 @@ class DepartureController extends AbstractController
          */
 
         $typeDeparts = [
-            'demission' => 'Demission',
-            'retraite' => 'Retraite',
-            'licenciement_lourde' => 'Licenciement faute lourde',
-            'licenciement_simple' => 'Licenciement faute simple',
-            'deces' => 'Deces',
+            'démissions' => 'Démission',
+            'retraites' => 'Rétraite',
+            'licenciements_faute_lourde' => 'Licenciement faute lourde',
+            'licenciements_faute_simple' => 'Licenciement faute simple',
+            'décès' => 'Décès',
         ];
 
         $currentUser = $this->getUser();
@@ -198,11 +187,11 @@ class DepartureController extends AbstractController
          */
 
         $typeDeparts = [
-            'demission' => 'Demission',
-            'retraite' => 'Retraite',
-            'licenciement_lourde' => 'Licenciement faute lourde',
-            'licenciement_simple' => 'Licenciement faute simple',
-            'deces' => 'Deces',
+            'démissions' => 'Démission',
+            'retraites' => 'Rétraite',
+            'licenciements_faute_lourde' => 'Licenciement faute lourde',
+            'licenciements_faute_simple' => 'Licenciement faute simple',
+            'décès' => 'Décès',
         ];
 
         $currentUser = $this->getUser();

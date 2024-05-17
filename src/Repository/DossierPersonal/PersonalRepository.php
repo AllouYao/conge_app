@@ -30,7 +30,23 @@ class PersonalRepository extends ServiceEntityRepository
     public function findDisablePersonal(): array
     {
         $qb = $this->createQueryBuilder('p')
+            ->select([
+                'p.id',
+                'p.firstName',
+                'p.lastName',
+                'p.uuid',
+                'category_salarie.name as category_name',
+                'job.name as job_name',
+                'contract.typeContrat',
+                'contract.dateEmbauche',
+            ])
+            ->leftJoin('p.departures', 'departures')
+            ->join('p.categorie', 'categorie')
+            ->join('categorie.categorySalarie', 'category_salarie')
+            ->join('p.job', 'job')
+            ->join('p.contract', 'contract')
             ->where('p.active = false')
+            ->andWhere('departures.id IS NULL')
             ->orderBy('p.matricule', 'ASC')
             ->getQuery()
             ->getResult();

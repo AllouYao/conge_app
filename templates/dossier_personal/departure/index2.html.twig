@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        CESSATION DE CONTRACT SUR LA PERIODE DE {{ date|upper }}
+                        Liste des salariés apte à un départ
                     </h5>
                 </div>
                 <div class="card-body">
@@ -39,7 +39,8 @@
             $("#dataGridDeparture").dxDataGrid({
                 dataSource: `{{ url('departure_api2') }}`,
                 showBorders: true,
-                height: 300,
+                height: 400,
+                rowAlternationEnabled: true,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual"
@@ -129,7 +130,7 @@
                     },
                     {
                         caption: 'Date Embauche',
-                        dataType: 'date',
+                        dataType: 'string',
                         dataField: 'date_embauche',
                         alignment: 'center',
                         width: 120
@@ -148,15 +149,15 @@
                                 onItemClick: function(e) {
                                     var itemText = e.itemData; 
                                     if (itemText === "Demission") {
-                                        window.location.href = `/dossier/personal/departure/new/${options.data.uuid}/demission`;
+                                        window.location.href = `/dossier/personal/departure/new/${options.data.uuid}/démissions`;
                                     } else if (itemText === "Rétraite") {
-                                        window.location.href = `/dossier/personal/departure/new/${options.data.uuid}/Retraite`;
-                                    }else if (itemText === "L. faute lourde") {
-                                        window.location.href = `/dossier/personal/departure/new/${options.data.uuid}/licenciement_lourde`;
+                                        window.location.href = `/dossier/personal/departure/new/${options.data.uuid}/retraites`;
                                     }else if (itemText === "L. faute simple") {
-                                        window.location.href = `/dossier/personal/departure/new/${options.data.uuid}/licenciement_simple`;
+                                        window.location.href = `/dossier/personal/departure/new/${options.data.uuid}/licenciements_faute_simple`;
+                                    }else if (itemText === "L. faute lourde") {
+                                        window.location.href = `/dossier/personal/departure/new/${options.data.uuid}/licenciements_faute_lourde`;
                                     }else if (itemText === "Décès") {
-                                        window.location.href = `/dossier/personal/departure/new/${options.data.uuid}/deces`;
+                                        window.location.href = `/dossier/personal/departure/new/${options.data.uuid}/décès`;
                                     }
                                 }  
                             })
