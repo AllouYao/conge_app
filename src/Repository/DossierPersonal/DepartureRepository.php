@@ -35,11 +35,14 @@ class DepartureRepository extends ServiceEntityRepository
                 'p.firstName',
                 'p.lastName',
                 'p.older',
+                'p.refCNPS',
+                'p.modePaiement',
                 'categorie.intitule',
                 'contract.dateEmbauche as date_embauche',
                 'contract.typeContrat as type_contrat',
                 'job.name as job_name',
                 'workplace.name as workplace_name',
+                'salary.smig',
                 'departure.date as departure_date',
                 'departure.dayOfPresence as day_of_presence',
                 'departure.salaryDue as salaire_presence',
@@ -61,12 +64,29 @@ class DepartureRepository extends ServiceEntityRepository
                 'departure.reason',
                 'departure.reasonCode as type_depart',
                 'departure.fraisFuneraire as frais_funeraire',
+                'departure.nbPart as nombre_part',
+                'departure.createdAt',
+                'departure.totalChargeEmployer as total_charge_employer',
+                'departure.amountCmuE',
+                'departure.amountCmu',
+                'departure.amountfpc',
+                'departure.amountFpcYear',
+                'departure.amountTa',
+                'departure.amountIs',
+                'departure.amountAt',
+                'departure.amountPf',
+                'departure.amountCr',
+                'departure.amountCnps',
+                'departure.impotNet',
+                'SUM(departure.salaryDue + departure.gratification + departure.congeAmount + departure.noticeAmount + departure.dissmissalAmount) as indemnite_brut'
+
             ])
             ->join('departure.personal', 'p')
             ->join('p.categorie', 'categorie')
             ->join('p.contract', 'contract')
             ->join('p.job', 'job')
             ->join('p.workplace', 'workplace')
+            ->join('p.salary', 'salary')
             ->andWhere('departure.reason = :typeDepart')
             ->setParameter('typeDepart', $typeDepart)
             ->orderBy('departure.date', 'ASC')

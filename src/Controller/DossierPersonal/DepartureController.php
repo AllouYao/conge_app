@@ -22,6 +22,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Repository\Impots\CategoryChargeRepository;
 
 #[Route('/dossier/personal/departure', name: 'departure_')]
 class DepartureController extends AbstractController
@@ -36,6 +37,7 @@ class DepartureController extends AbstractController
         private readonly DepartureInterface $departureInterface,
         private readonly SalaryInterface    $salaryInterface,
         private readonly UtimeDepartServ    $utimeDepartServ,
+        private readonly CategoryChargeRepository $categoryChargeRepository
     )
     {
         $this->departureRepository = $departureRepository;
@@ -81,6 +83,7 @@ class DepartureController extends AbstractController
             $url_solde = $this->generateUrl('departure_sold_of_all_compte', ['uuid' => $departure['uuid']]);
             $url_certificat = $this->generateUrl('departure_certificat_travail', ['uuid' => $departure['uuid']]);
             $link_show = $this->generateUrl('departure_show', ['uuid' => $departure['uuid']]);
+            $link_bulletin = $this->generateUrl('departure_bulletin', ['uuid' => $departure['uuid']]);
             $apiDeparture[] = [
                 'index' => ++$count,
                 'nom_salarie' => $departure['firstName'],
@@ -109,7 +112,8 @@ class DepartureController extends AbstractController
                 'frais_funeraire' => (int)$departure['frais_funeraire'],
                 'url_solde_all_compte' => $url_solde,
                 'url_certificat' => $url_certificat,
-                'modifier' => $link_show
+                'modifier' => $link_show,
+                'bulletin' => $link_bulletin
             ];
         }
 
@@ -315,5 +319,88 @@ class DepartureController extends AbstractController
     public function certificateTravail(): Response
     {
         return $this->render('dossier_personal/departure/certificate.html.twig');
+    }
+
+    #[Route('/{uuid}/bulletin', name: 'bulletin', methods: ['GET'])]
+    public function makeBulletin(Departure $departure) 
+    {
+        $departures = $this->departureRepository->getDepartureByDate($departure->getReason());
+        $time_preavis = null;
+        $tauxCnpsSalarial = $this->categoryChargeRepository->findOneBy(['codification' => 'CNPS'])->getValue();
+        $tauxCrEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_CR'])->getValue();
+        $tauxPfEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_PF'])->getValue();
+        $tauxAtEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'RCNPS_AT'])->getValue();
+        $tauxIsEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'IS'])->getValue();
+        $tauxTaEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_TA'])->getValue();
+        $tauxFPCEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC'])->getValue();
+        $tauxFPCAnnuelEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC_VER'])->getValue();
+        $accountBanque = $departure->getPersonal()->getAccountBanks();
+            foreach ($accountBanque as $value) {
+                $accountNumber = $value->getCode() . ' ' . $value->getCodeAgence() . ' ' . $value->getNumCompte() . ' ' . $value->getRib();
+                $nameBanque = $value->getName();
+            }
+        $api_bulletin = [];
+        foreach ($departures as $key => $value) {
+            $time_preavis = $this->utimeDepartServ->getTimePreavis((int)$value['older'], $value['intitule']);
+            $api_bulletin = [
+                'matricule' => $value['matricule'],
+                'workplace' => $value['workplace_name'],
+                'categorie' => $value['intitule'],
+                'nombre_part' => $value['nombre_part'],
+                'date_embauche' => $value['date_embauche']->format('d/m/Y'),
+                'numero_cnps' => $value['refCNPS'],
+                'date_depart' => $value['departure_date']->format('d/m/Y'),
+                'date_edition' => $value['createdAt']->format('d/m/Y'),
+                'nom' => $value['firstName'],
+                'prenom' => $value['lastName'],
+                'service' => $value['job_name'],
+                'mode_paiement' => $value['modePaiement'],
+                'frais_funeraire' => $value['frais_funeraire'],
+                'charge_salarial' => $value['total_charge_personal'],
+                'charge_patronal' => $value['total_charge_employer'],
+                'amount_cmu_salarial' => $value['amountCmu'],
+                'amount_cmu_patronal' => $value['amountCmuE'],
+                'total_brut' => $value['total_indemnite_imposable'],
+                'amount_fpc_annuel_employeur' => $value['amountFpcYear'],
+                'amount_fpc_employeur' => $value['amountfpc'],
+                'amount_ta_employeur' => $value['amountTa'],
+                'amount_is_employeur' => $value['amountIs'],
+                'amount_at_employeur' => $value['amountAt'],
+                'smig' => $value['smig'], 
+                'amount_pf_employeur' => $value['amountPf'],
+                'amount_cr_employeur' => $value['amountCr'],
+                'amount_cnps_salarial' => $value['amountCnps'],
+                'amount_its_salarial' => $value['impotNet'],
+                'nombre_jour_travailler' => $value['day_of_presence'],
+                'salaire_presence' => $value['salaire_presence'],
+                'gratification' => $value['gratification_prorata'],
+                'indemnite_conge' => $value['conges_amount'],
+                'indemnite_preavis' => $value['indemnite_preavis'],
+                'indemnite_licenciement' => $value['quotite_imposable'],
+                'day_conges' => $value['conges_ouvrable'],
+                'time_preavis' => $time_preavis,
+                'licenciement_not_impose' => $value['quotite_non_imposable'],
+                'taux_cnps_salarial' => (float)$tauxCnpsSalarial,
+                'taux_cr_employeur' => (float)$tauxCrEmployeur,
+                'taux_pf_employeur' => (float)$tauxPfEmployeur,
+                'taux_at_employeur' => (float)$tauxAtEmployeur,
+                'taux_is_employeur' => (float)$tauxIsEmployeur,
+                'taux_ta_employeur' => (float)$tauxTaEmployeur,
+                'taux_fpc_employeur' => (float)$tauxFPCEmployeur,
+                'taux_fpc_annuel_employeur' => (float)$tauxFPCAnnuelEmployeur,
+                'taux_its' => '0 à 32 %',
+                'indemnite_brut' => $value['indemnite_brut'],
+                'net_payes' => $value['net_payer_indemnite'],
+                'account_number' => $accountNumber,
+                'banque_name' => $nameBanque,
+                'raison_depart' => $value['reason']
+            ];
+        }
+        //dd($departures, $api_bulletin);
+        return $this->render('dossier_personal/departure/bulletin.html.twig', [
+            'payrolls' =>  $api_bulletin,
+            'caisse' => Status::CAISSE,
+            'virement' => Status::VIREMENT
+        ]);
     }
 }

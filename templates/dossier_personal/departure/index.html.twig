@@ -344,6 +344,18 @@
                                     feather.replace();
                                 },
                             },
+                             {
+                                dataField: 'bulletin',
+                                caption: 'Bulletin',
+                                alignment: 'center',
+                                cellTemplate: function (container, options) {
+                                    $("<a>")
+                                        .html('<i data-feather="printer" style="color: black"></i>')
+                                        .attr("href", options.data.bulletin)
+                                        .appendTo(container);
+                                    feather.replace();
+                                },
+                            },
                         ]
                     }
                 ],
