@@ -448,4 +448,41 @@ class UtimeDepartServ implements DepartureInterface
                 ->setTotalIndemniteImposable($total_indemnite_imposable);
         }
     }
+
+    public function getIndemniteRuptureCdd(Departure $departure): float|int|null
+    {
+        $personal = $departure->getPersonal();
+        $contrat = $personal->getContract();
+        $typeContrat = $contrat->getTypeContrat();
+        $indemniteFinContract = $gratification = $conge = null;
+        if ($typeContrat === Status::CDD) {
+            $embauche = $contrat->getDateEmbauche();
+            $finEmbauche = $departure->getDate();
+            $dureeContract = $finEmbauche->diff($embauche)->days / 30;
+            $element = $this->utimePaiementService->getAmountSalaireBrutAndImposable($personal);
+            $brut = $element['brut_amount'];
+            $totalRemuneration = $brut * $dureeContract;
+            $indemniteFinContract = $totalRemuneration * 3 / 100;
+            /** Obtenir les mois précédent le jour du départ dépuis le premier mois de l'année */
+            $interval = new \DateInterval('P1M');
+            $periode = new \DatePeriod($embauche, $interval, $finEmbauche);
+            $mois = [];
+            foreach ($periode as $date) {
+                $mois[] = $date->format('F');
+            }
+            /** Obtenir le nombre de mois de presence que fait la période et la gratification */
+            $monthPresence = count($mois);
+            $tauxGratif = (int)$this->primesRepository->findOneBy(['code' => Status::GRATIFICATION])->getTaux() / 100;
+            $basePeriode = round($this->utimePaiementService->getAmountSalaireBrutAndImposable($personal)['salaire_categoriel'], 2);
+            $gratification = round(($basePeriode * $tauxGratif * ($monthPresence * 30) / 360), 2);
+
+            /** Obtenir l'allocation conges */
+            $jourConge = ceil($monthPresence * 2.2 * 1.25);
+            $cumulPeriode = $this->payrollRepository->getCumulSalaries($personal, $embauche, $finEmbauche);
+            $salaireMoyen = ($cumulPeriode + $gratification) / $jourConge;
+            $conge = round(($salaireMoyen / 30) * $jourConge, 2);
+
+        }
+        return round($indemniteFinContract + $gratification + $conge, 2);
+    }
 }

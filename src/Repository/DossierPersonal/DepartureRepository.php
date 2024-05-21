@@ -26,9 +26,9 @@ class DepartureRepository extends ServiceEntityRepository
      * @param $typeDepart
      * @return Departure[]
      */
-    public function getDepartureByDate($typeDepart): array
+    public function getDepartureByDate($typeDepart): ?array
     {
-        return $this->createQueryBuilder('departure')
+        $result = $this->createQueryBuilder('departure')
             ->select([
                 'departure.id',
                 'p.matricule',
@@ -60,7 +60,7 @@ class DepartureRepository extends ServiceEntityRepository
                 'departure.totalIndemniteImposable as total_indemnite_imposable',
                 'departure.totatChargePersonal as total_charge_personal',
                 'departure.netPayer as net_payer_indemnite',
-                'departure.uuid',
+                'departure.uuid as uuid',
                 'departure.reason',
                 'departure.reasonCode as type_depart',
                 'departure.fraisFuneraire as frais_funeraire',
@@ -78,8 +78,7 @@ class DepartureRepository extends ServiceEntityRepository
                 'departure.amountCr',
                 'departure.amountCnps',
                 'departure.impotNet',
-                'SUM(departure.salaryDue + departure.gratification + departure.congeAmount + departure.noticeAmount + departure.dissmissalAmount) as indemnite_brut'
-
+                //'SUM(departure.salaryDue + departure.gratification + departure.congeAmount + departure.noticeAmount + departure.dissmissalAmount) as indemnite_brut'
             ])
             ->join('departure.personal', 'p')
             ->join('p.categorie', 'categorie')
@@ -92,6 +91,7 @@ class DepartureRepository extends ServiceEntityRepository
             ->orderBy('departure.date', 'ASC')
             ->getQuery()
             ->getResult();
+        return !empty($result) ? $result : null;
     }
 
     /** Obtenir le depart qui est entre les 15 jours qui suivent la date de retour en congé */

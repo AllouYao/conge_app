@@ -10,19 +10,16 @@ use App\Entity\User;
 use App\Form\DossierPersonal\DepartureType;
 use App\Repository\DossierPersonal\DepartureRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
-use App\Service\DepartServices;
+use App\Repository\Impots\CategoryChargeRepository;
 use App\Service\UtimeDepartServ;
 use App\Utils\Status;
-use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use IntlDateFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use App\Repository\Impots\CategoryChargeRepository;
 
 #[Route('/dossier/personal/departure', name: 'departure_')]
 class DepartureController extends AbstractController
@@ -32,11 +29,11 @@ class DepartureController extends AbstractController
 
 
     public function __construct(
-        DepartureRepository                 $departureRepository,
-        PersonalRepository                  $personalRepository,
-        private readonly DepartureInterface $departureInterface,
-        private readonly SalaryInterface    $salaryInterface,
-        private readonly UtimeDepartServ    $utimeDepartServ,
+        DepartureRepository                       $departureRepository,
+        PersonalRepository                        $personalRepository,
+        private readonly DepartureInterface       $departureInterface,
+        private readonly SalaryInterface          $salaryInterface,
+        private readonly UtimeDepartServ          $utimeDepartServ,
         private readonly CategoryChargeRepository $categoryChargeRepository
     )
     {
@@ -54,7 +51,9 @@ class DepartureController extends AbstractController
         $apiDeparture = [];
 
         $personals = $this->personalRepository->findDisablePersonal();
-
+        if (!$personals) {
+            return $this->json(['data' => []]);
+        }
         foreach ($personals as $personal) {
             $apiDeparture[] = [
                 'index' => ++$index,
@@ -78,6 +77,9 @@ class DepartureController extends AbstractController
 
         $apiDeparture = [];
         $departures = $this->departureRepository->getDepartureByDate($codeDepart);
+        if (empty($departures)) {
+            return $this->json([]);
+        }
         foreach ($departures as $count => $departure) {
             $time_preavis = $this->utimeDepartServ->getTimePreavis((int)$departure['older'], $departure['intitule']);
             $url_solde = $this->generateUrl('departure_sold_of_all_compte', ['uuid' => $departure['uuid']]);
@@ -230,7 +232,7 @@ class DepartureController extends AbstractController
         ]);
     }
 
-    #[Route('/show/{uuid}/', name: 'show', methods: ['GET', 'POST'])]
+    #[Route('/{uuid}/show', name: 'show', methods: ['GET', 'POST'])]
     public function show(Departure $departure): Response
     {
         $reason = $departure->getReason();
@@ -281,7 +283,7 @@ class DepartureController extends AbstractController
         ]);
     }
 
-    #[Route('/{uuid}/sold_of_all_compte', name: 'sold_of_all_compte', methods: ['GET'])]
+    #[Route('/{uuid}/sold_of_all_compte', name: 'sold_of_all_compte', methods: ['GET', 'POST'])]
     public function soldOfAllCompte(Departure $departure): Response
     {
         $departures = $this->departureRepository->getDepartureByDate($departure->getReason());
@@ -315,14 +317,14 @@ class DepartureController extends AbstractController
         ]);
     }
 
-    #[Route('/uuid/certificat_travail', name: 'certificat_travail', methods: ['GET'])]
+    #[Route('/{uuid}/certificat_travail', name: 'certificat_travail', methods: ['GET'])]
     public function certificateTravail(): Response
     {
         return $this->render('dossier_personal/departure/certificate.html.twig');
     }
 
     #[Route('/{uuid}/bulletin', name: 'bulletin', methods: ['GET'])]
-    public function makeBulletin(Departure $departure) 
+    public function makeBulletin(Departure $departure)
     {
         $departures = $this->departureRepository->getDepartureByDate($departure->getReason());
         $time_preavis = null;
@@ -335,10 +337,10 @@ class DepartureController extends AbstractController
         $tauxFPCEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC'])->getValue();
         $tauxFPCAnnuelEmployeur = $this->categoryChargeRepository->findOneBy(['codification' => 'FDFP_FPC_VER'])->getValue();
         $accountBanque = $departure->getPersonal()->getAccountBanks();
-            foreach ($accountBanque as $value) {
-                $accountNumber = $value->getCode() . ' ' . $value->getCodeAgence() . ' ' . $value->getNumCompte() . ' ' . $value->getRib();
-                $nameBanque = $value->getName();
-            }
+        foreach ($accountBanque as $value) {
+            $accountNumber = $value->getCode() . ' ' . $value->getCodeAgence() . ' ' . $value->getNumCompte() . ' ' . $value->getRib();
+            $nameBanque = $value->getName();
+        }
         $api_bulletin = [];
         foreach ($departures as $key => $value) {
             $time_preavis = $this->utimeDepartServ->getTimePreavis((int)$value['older'], $value['intitule']);
@@ -366,7 +368,7 @@ class DepartureController extends AbstractController
                 'amount_ta_employeur' => $value['amountTa'],
                 'amount_is_employeur' => $value['amountIs'],
                 'amount_at_employeur' => $value['amountAt'],
-                'smig' => $value['smig'], 
+                'smig' => $value['smig'],
                 'amount_pf_employeur' => $value['amountPf'],
                 'amount_cr_employeur' => $value['amountCr'],
                 'amount_cnps_salarial' => $value['amountCnps'],
@@ -389,7 +391,7 @@ class DepartureController extends AbstractController
                 'taux_fpc_employeur' => (float)$tauxFPCEmployeur,
                 'taux_fpc_annuel_employeur' => (float)$tauxFPCAnnuelEmployeur,
                 'taux_its' => '0 à 32 %',
-                'indemnite_brut' => $value['indemnite_brut'],
+                'indemnite_brut' => $value['salaire_presence'] + $value['gratification_prorata'] + $value['conges_amount'] + $value['indemnite_preavis'] + $value['dissmissalAmount'],
                 'net_payes' => $value['net_payer_indemnite'],
                 'account_number' => $accountNumber,
                 'banque_name' => $nameBanque,
@@ -398,7 +400,7 @@ class DepartureController extends AbstractController
         }
         //dd($departures, $api_bulletin);
         return $this->render('dossier_personal/departure/bulletin.html.twig', [
-            'payrolls' =>  $api_bulletin,
+            'payrolls' => $api_bulletin,
             'caisse' => Status::CAISSE,
             'virement' => Status::VIREMENT
         ]);
