@@ -78,6 +78,7 @@ class DepartureRepository extends ServiceEntityRepository
                 'departure.amountCr',
                 'departure.amountCnps',
                 'departure.impotNet',
+                'departure.dissmissalAmount'
                 //'SUM(departure.salaryDue + departure.gratification + departure.congeAmount + departure.noticeAmount + departure.dissmissalAmount) as indemnite_brut'
             ])
             ->join('departure.personal', 'p')
