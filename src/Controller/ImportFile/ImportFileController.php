@@ -3,11 +3,13 @@
 namespace App\Controller\ImportFile;
 
 use App\Form\ImportFile\ImportFileType;
-use App\Service\ImportFileService\ImportFileService;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Service\ImportFileService\ImportFileService;
+use App\Repository\DossierPersonal\PersonalRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/file/import', name: 'import_file_')]
 class ImportFileController extends AbstractController
@@ -41,7 +43,7 @@ class ImportFileController extends AbstractController
         ]);
 
     }
-    #[Route('/new/conge', name: 'new_conge', methods: ['GET', 'POST'])]
+    #[Route('/historic/conge', name: 'historic_conge', methods: ['GET', 'POST'])]
     public function importConge(Request $request, ImportFileService $importFileService): Response
     {
         $form = $this->createForm(ImportFileType::class);
@@ -69,6 +71,30 @@ class ImportFileController extends AbstractController
             'form' => $form->createView(),
         ]);
 
+    }
+    #[Route('/historic/conge/model/download', name: 'historic_conge_download', methods: ['GET', 'POST'])]
+    public function dowloadModel(): Response
+    {
+        return $this->render('import_file/model_historic_conge.html.twig', [
+        ]);
+    }
+    #[Route('/api/historic/conge', name: 'api_historic_conge')]
+    public function apiDataModel(PersonalRepository $personalRepository): JsonResponse
+    {
+        $personals = $personalRepository->findBy(["active"=>true]);
+        $dataPersonals = [];
+
+        foreach ($personals as $personal) {
+            $dataPersonals[] = [
+                'matricule' => $personal->getMatricule(),
+                'nom' => $personal->getFirstName(),
+                'prenom' =>$personal->getLastName(),
+                'salaire_moyen',
+                'stock',
+                'date_retour',
+            ];
+        }
+        return new JsonResponse($dataPersonals);
     }
 
 

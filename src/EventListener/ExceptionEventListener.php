@@ -20,16 +20,17 @@ class ExceptionEventListener
     public function onKernelException(ExceptionEvent $event)
     {
         // Check any Exeption on the program
+        
+        /*
         if($event->getThrowable()){
 
-            /*
             $url = $this->router->generate('app_exception');
 
             $response = new RedirectResponse($url);
 
             $event->setResponse($response);
-            */
         }
+        */
 
     }
 

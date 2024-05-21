@@ -44,11 +44,13 @@ class OldCongeController extends AbstractController
                 'nom_prenom' => $old_conge->getPersonal()->getFirstName() . ' ' . $old_conge->getPersonal()->getLastName(),
                 'genre' => $old_conge->getPersonal()->getGenre(),
                 'salaryAverage' => $old_conge->getSalaryAverage(),
+                'stock' => $old_conge->getStock(),
                 'modifier' => $this->generateUrl('old_conge_edit', ['uuid' => $old_conge->getUuid()])
             ];
         }
         return new JsonResponse($data_old_conges);
     }
+    
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function news(Request $request): Response
