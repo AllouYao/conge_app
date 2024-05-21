@@ -11,6 +11,7 @@ use App\Repository\DossierPersonal\DetailSalaryRepository;
 use App\Repository\DossierPersonal\PersonalRepository;
 use App\Repository\Settings\PrimesRepository;
 use App\Service\MatriculeGenerator;
+use App\Service\Personal\ChargesServices;
 use App\Utils\Status;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,7 +27,10 @@ class PersonalController extends AbstractController
 {
     private PersonalRepository $personalRepository;
 
-    public function __construct(PersonalRepository $personalRepository)
+    public function __construct(
+        PersonalRepository               $personalRepository,
+        private readonly ChargesServices $chargesServices
+    )
     {
         $this->personalRepository = $personalRepository;
     }
@@ -39,7 +43,7 @@ class PersonalController extends AbstractController
         Personal                    $personal,
         DetailSalaryRepository      $detailSalaryRepository,
         PrimesRepository            $primesRepository,
-        DetailPrimeSalaryRepository $detailPrimeSalaryRepository
+        DetailPrimeSalaryRepository $detailPrimeSalaryRepository,
     ): Response
     {
         $accountNumber = $nameBanque = null;
@@ -53,7 +57,8 @@ class PersonalController extends AbstractController
 
         $dateEmbauche = $personal->getContract()->getDateEmbauche();
         $today = new DateTime();
-        $anciennete = (int)$personal->getOlder();
+        $older = $personal->getOlder();
+        $anciennete = $this->chargesServices->convertirAnciennete($older);
         $age = $personal->getBirthday() ? $personal->getBirthday()->diff($today)->y : '';
         $dureeContrat = round(($today->diff($dateEmbauche)->days) / 30);
 
@@ -112,16 +117,11 @@ class PersonalController extends AbstractController
     #[Route('/api/salaried_book/', name: 'salaried_book', methods: ['GET'])]
     public function getPersonalSalaried(): JsonResponse
     {
-        if ($this->isGranted('ROLE_RH')) {
-            $personal = $this->personalRepository->findPersonalSalaried();
-        } else {
-            $personal = $this->personalRepository->findPersonalSalaried();
-        }
-
+        $personal = $this->personalRepository->findPersonalSalaried();
         $personalSalaried = [];
         foreach ($personal as $value => $item) {
-            $anciennete = $item['older'];
-            $ancienneteEnMois = $anciennete * 12;
+            $older = $item['older'];
+            $anciennete = $this->chargesServices->convertirAnciennete($older);
             $personalSalaried[] = [
                 /**
                  * Information du salarié
@@ -139,7 +139,7 @@ class PersonalController extends AbstractController
                 'compte_banque' => $item['code_banque'] . ' ' . $item['numero_compte'] . ' ' . $item['rib'],
                 'salaire_base' => $item['personal_salaire_base'],
                 'type_contract' => $item['type_contrat'],
-                'anciennete_mois' => number_format($ancienneteEnMois, 2, ',', ' '),
+                'anciennete' => $anciennete,
                 'nom_banque' => $item ['name_banque'],
                 'category_grade' => $item['categorie_intitule'],
                 'nature_piece' => $item['personal_piece'] . '° ' . $item['personal_numero_piece'],
@@ -155,6 +155,7 @@ class PersonalController extends AbstractController
         }
         return new JsonResponse($personalSalaried);
     }
+
 
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(): Response

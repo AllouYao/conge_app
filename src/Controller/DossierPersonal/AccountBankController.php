@@ -11,7 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/dossier/personal/account_bank', name: 'personal_account_bank_')]
 class AccountBankController extends AbstractController
@@ -20,11 +20,7 @@ class AccountBankController extends AbstractController
     #[Route('/api_account_bank', name: 'api_account_bank', methods: ['GET'])]
     public function apiAccountBank(AccountBankRepository $accountBankRepository): JsonResponse
     {
-        if ($this->isGranted('ROLE_RH')) {
-            $accountBanks = $accountBankRepository->findAccountBank();
-        } else {
-            $accountBanks = $accountBankRepository->findByEmployeRole();
-        }
+        $accountBanks = $accountBankRepository->findAccountBank();
         $apiAccountBank = [];
 
         foreach ($accountBanks as $accountBank) {

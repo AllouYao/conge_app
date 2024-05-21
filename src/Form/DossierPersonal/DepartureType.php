@@ -5,7 +5,9 @@ namespace App\Form\DossierPersonal;
 use App\Entity\DossierPersonal\Departure;
 use App\Entity\DossierPersonal\Personal;
 use App\Form\CustomType\DateCustomType;
-use App\Utils\Status;
+use App\Repository\DossierPersonal\CongeRepository;
+use App\Repository\DossierPersonal\OldCongeRepository;
+use App\Repository\DossierPersonal\PersonalRepository;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -18,44 +20,40 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class DepartureType extends AbstractType
 {
+    public function __construct(private readonly CongeRepository $congeRepository, private readonly OldCongeRepository $oldCongeRepository)
+    {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('date', DateCustomType::class)
-            ->add('isPaied', ChoiceType::class, [
-                'multiple' => false,
-                'expanded' => false,
-                'attr' => [
-                    'data-plugin' => 'customselect',
-                ],
-                'choices' => [
-                    'Avec effet financier' => true,
-                    'Sans effet financier' => false
-                ],
-                'placeholder' => ""
-            ])
             ->add('reason', TextType::class, [
-                'disabled'=>true,
+                'disabled' => true,
             ])
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
-                'choice_label' => 'matricule',
-                'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('p')
-                        ->join('p.contract', 'ct')
-                        ->leftJoin('p.departures', 'departure')
-                        ->where('departure.id IS NULL ')
-                        ->orderBy('p.matricule', 'ASC');
+                'query_builder' => function (PersonalRepository $er) {
+                    return $er->findPersoBuilderForDepart();
                 },
                 'placeholder' => 'Sélectionner un matricule',
                 'attr' => [
                     'data-plugin' => 'customselect',
                 ],
                 'choice_attr' => function (Personal $personal) {
+                    $historique_retour = null;
+                    $last_conges = $this->congeRepository->findCongesBuilder($personal->getId(), false);
+                    $historique_conge = $this->oldCongeRepository->findOneByPersoBuilder($personal->getId());
+                    if ($historique_conge) {
+                        $historique_retour = $historique_conge['older_retour']->format('Y-m-d');
+                    }
+                    $hist_date_retour = $last_conges ? $last_conges['dernier_retour']->format('Y-m-d') : $historique_retour;
+
                     return [
                         'data-name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
                         'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y'),
-                        'data-category' => '( ' . $personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' . $personal->getCategorie()->getIntitule()
+                        'data-category' => '( ' . $personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' . $personal->getCategorie()->getIntitule(),
+                        'data-dernier-retour' => $hist_date_retour === "" ? null : $hist_date_retour
                     ];
                 }
             ])
@@ -77,6 +75,12 @@ class DepartureType extends AbstractType
                     'readonly' => 'readonly'
 
                 ]
+            ])
+            ->add('dateRetourConge', DateCustomType::class, [
+                'required' => false,
+                'attr' => [
+                    'readonly' => true
+                ]
             ]);
         $builder
             ->addEventListener(
@@ -89,24 +93,26 @@ class DepartureType extends AbstractType
                     if ($data instanceof Departure && $data->getId()) {
                         $form->add('personal', EntityType::class, [
                             'class' => Personal::class,
-                            'choice_label' => 'matricule',
-                            'query_builder' => function (EntityRepository $er) use ($personal) {
-                                return $er->createQueryBuilder('p')
-                                    ->join('p.contract', 'ct')
-                                    ->leftJoin('p.departures', 'departure')
-                                    ->andWhere('departure.id IS NOT NULL')
-                                    ->andWhere('p.id = :personal')
-                                    ->setParameter('personal', $personal->getId());
+                            'query_builder' => function (PersonalRepository $er) use ($personal) {
+                                return $er->findPersoBuilderEditDepart($personal);
                             },
                             'placeholder' => 'Sélectionner un matricule',
                             'attr' => [
                                 'data-plugin' => 'customselect',
                             ],
                             'choice_attr' => function (Personal $personal) {
+                                $historique_retour = null;
+                                $last_conges = $this->congeRepository->findCongesBuilder($personal->getId(), false);
+                                $historique_conge = $this->oldCongeRepository->findOneByPersoBuilder($personal->getId());
+                                if ($historique_conge) {
+                                    $historique_retour = $historique_conge['older_retour']->format('Y-m-d');
+                                }
+                                $hist_date_retour = $last_conges ? $last_conges['dernier_retour']->format('Y-m-d') : $historique_retour;
                                 return [
                                     'data-name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
                                     'data-hireDate' => $personal->getContract()?->getDateEmbauche()->format('d/m/Y'),
                                     'data-category' => '( ' . $personal->getCategorie()->getCategorySalarie()->getName() . ' ) - ' . $personal->getCategorie()->getIntitule(),
+                                    'data-dernier-retour' => $hist_date_retour === "" ? null : $hist_date_retour
                                 ];
                             }
                         ]);

@@ -23,52 +23,75 @@ class DepartureRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param int $month
-     * @param int $year
+     * @param $typeDepart
      * @return Departure[]
      */
-    public function getDepartureByDate(int $month, int $year, $typeDepart): array
+    public function getDepartureByDate($typeDepart): array
     {
         return $this->createQueryBuilder('departure')
-            ->join('departure.personal', 'personal')
-            ->andWhere('YEAR(departure.date) = :year')
-            ->andWhere('MONTH(departure.date) = :month')
+            ->select([
+                'departure.id',
+                'p.matricule',
+                'p.firstName',
+                'p.lastName',
+                'p.older',
+                'p.refCNPS',
+                'p.modePaiement',
+                'categorie.intitule',
+                'contract.dateEmbauche as date_embauche',
+                'contract.typeContrat as type_contrat',
+                'job.name as job_name',
+                'workplace.name as workplace_name',
+                'salary.smig',
+                'departure.date as departure_date',
+                'departure.dayOfPresence as day_of_presence',
+                'departure.salaryDue as salaire_presence',
+                'departure.gratification as gratification_prorata',
+                'departure.dateRetourConge as date_retour_conge',
+                'departure.periodeReferences as periode_references',
+                'departure.congesOuvrable as conges_ouvrable',
+                'departure.cumulSalaire as salaire_moyen_conges',
+                'departure.congeAmount as conges_amount',
+                'departure.noticeAmount as indemnite_preavis',
+                'departure.globalMoyen as salaire_global_moyen',
+                'departure.dissmissalAmount as indemnite_licenciement',
+                'departure.amountLcmtImposable as quotite_imposable',
+                'departure.amountLcmtNoImposable as quotite_non_imposable',
+                'departure.totalIndemniteImposable as total_indemnite_imposable',
+                'departure.totatChargePersonal as total_charge_personal',
+                'departure.netPayer as net_payer_indemnite',
+                'departure.uuid',
+                'departure.reason',
+                'departure.reasonCode as type_depart',
+                'departure.fraisFuneraire as frais_funeraire',
+                'departure.nbPart as nombre_part',
+                'departure.createdAt',
+                'departure.totalChargeEmployer as total_charge_employer',
+                'departure.amountCmuE',
+                'departure.amountCmu',
+                'departure.amountfpc',
+                'departure.amountFpcYear',
+                'departure.amountTa',
+                'departure.amountIs',
+                'departure.amountAt',
+                'departure.amountPf',
+                'departure.amountCr',
+                'departure.amountCnps',
+                'departure.impotNet',
+                'SUM(departure.salaryDue + departure.gratification + departure.congeAmount + departure.noticeAmount + departure.dissmissalAmount) as indemnite_brut'
+
+            ])
+            ->join('departure.personal', 'p')
+            ->join('p.categorie', 'categorie')
+            ->join('p.contract', 'contract')
+            ->join('p.job', 'job')
+            ->join('p.workplace', 'workplace')
+            ->join('p.salary', 'salary')
             ->andWhere('departure.reason = :typeDepart')
-            ->setParameter('year', $year)
-            ->setParameter('month', $month)
             ->setParameter('typeDepart', $typeDepart)
             ->orderBy('departure.date', 'ASC')
             ->getQuery()
             ->getResult();
-    }
-
-    public function getDepartureByDateByEmployeRole(int $month, int $year, $typeDepart): array
-    {
-        return $this->createQueryBuilder('departure')
-            ->join('departure.personal', 'personal')
-            ->join('personal.categorie', 'category') 
-            ->join('category.categorySalarie', 'categorySalarie') 
-            ->Where('categorySalarie.code = :code_employe OR   categorySalarie.code = :code_chauffeur')  
-            ->andWhere('YEAR(departure.date) = :year')
-            ->andWhere('MONTH(departure.date) = :month')
-            ->andWhere('departure.reason = :typeDepart')
-            ->setParameter('year', $year)
-            ->setParameter('month', $month)
-            ->setParameter('code_employe', 'OE') 
-            ->setParameter('code_chauffeur', 'CH')
-            ->setParameter('typeDepart', $typeDepart)
-            ->orderBy('departure.date', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findDeparturesByPersonal($personal): ?Departure
-    {
-        return $this->createQueryBuilder('d')
-            ->where('d.personal = :personal')
-            ->setParameter('personal', $personal)
-            ->getQuery()
-            ->getOneOrNullResult();
     }
 
     /** Obtenir le depart qui est entre les 15 jours qui suivent la date de retour en congé */
@@ -109,12 +132,6 @@ class DepartureRepository extends ServiceEntityRepository
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
-    }
-
-    public function findDeparture(): ?Departure
-    {
-        return $this->createQueryBuilder('departure')
-            ->getQuery()->getOneOrNullResult();
     }
 
 }

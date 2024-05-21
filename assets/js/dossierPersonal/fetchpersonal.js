@@ -52,10 +52,12 @@ let depart = () => {
     const name = selectedOption.attr('data-name');
     const hireDate = selectedOption.attr('data-hireDate');
     const category = selectedOption.attr('data-category');
+    const date_retour = selectedOption.attr('data-dernier-retour');
 
     $('#departure_name').val(name);
     $('#departure_hireDate').val(hireDate);
     $('#departure_category').val(category);
+    $('#departure_dateRetourConge').val(date_retour);
 }
 let absence = () => {
     const selectedOption = $("#personal_absence_personal :selected");

@@ -610,43 +610,5 @@ class PayrollService
 
         /** net à payer, total retenue, indemnité de transport et assurance santé du personnel */
         $netPayer = round($totalBrutImposable - $chargeSalarie, 2);
-
-        /** Enregistrement du livre de paie */
-        $payroll = (new Payroll())
-            ->setPersonal($personal)
-            ->setCampagne($campagne)
-            ->setDateCreated($campagne->getStartedAt())
-            ->setMatricule($matricule)
-            ->setService($service)
-            ->setCategories($categorie)
-            ->setNumberPart($nombrePart)
-            ->setDateEmbauche($dateEmbauche)
-            ->setNumCnps($numeroCnps)
-            ->setDepartement($departement)
-            ->setSalaryIts($salaryIts)
-            ->setSalaryCnps($salaryCnps)
-            ->setSalaryCmu($salaryCmu)
-            ->setEmployeurPf($employeurPF)
-            ->setEmployeurAt($employeurAT)
-            ->setEmployeurIs($employeurIS)
-            ->setEmployeurCmu($employeurCMU)
-            ->setEmployeurCnps($employeurCNPS)
-            ->setEmployeurCr($employeurCR)
-            ->setAmountTA($employeurTA)
-            ->setAmountFPC($employeurFPC)
-            ->setAmountAnnuelFPC($employeurFPCAnnuel)
-            ->setFixcalAmount($chargeSalarie)
-            ->setFixcalAmountEmployeur($chargePatronal)
-            ->setGratificationD($gratificationProrata)
-            ->setAllocationCongeD($indemniteConges)
-            ->setPreavisAmount($indemnitePreavis)
-            ->setLicemciementImposable($amountLicenciementImposable)
-            ->setLicenciementNoImpo($amountLicenciementNoImposable)
-            ->setTotalIndemniteBrut($totalBrut)
-            ->setTotalIndemniteImposable($totalBrutImposable)
-            ->setNetPayer($netPayer);
-
-        $this->manager->persist($payroll);
-
     }
 }

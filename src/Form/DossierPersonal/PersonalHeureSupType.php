@@ -4,6 +4,7 @@
 namespace App\Form\DossierPersonal;
 
 use App\Entity\DossierPersonal\Personal;
+use App\Repository\DossierPersonal\PersonalRepository;
 use App\Utils\Status;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -22,20 +23,10 @@ class PersonalHeureSupType extends AbstractType
         $builder
             ->add('personal', EntityType::class, [
                 'class' => Personal::class,
-                'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('p')
-                        ->join('p.contract', 'ct')
-                        ->join('p.categorie', 'category')
-                        ->join('category.categorySalarie', 'category_salarie')
-                        ->leftJoin('p.departures', 'departures')
-                        ->where('departures.id IS NULL')
-                        ->andWhere('category_salarie.name IN (:name)')
-                        ->andWhere('ct.typeContrat IN (:type)')
-                        ->andWhere('p.active = true')
-                        ->setParameter('type', [Status::CDI, Status::CDDI, Status::CDD])
-                        ->setParameter('name', [Status::CHAUFFEUR, Status::OUVRIER_EMPLOYE]);
+                'query_builder' => function (PersonalRepository $er) {
+                    return $er->findPersoBuilder();
                 },
-                'placeholder' => 'Sélectionner un salarié',
+                'placeholder' => '--- Sélectionner un salarié ---',
                 'attr' => [
                     'data-plugin' => 'customselect',
                 ],

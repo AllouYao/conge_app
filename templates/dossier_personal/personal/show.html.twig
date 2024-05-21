@@ -9,12 +9,12 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        SALARIE {{ personal.matricule|upper }}
+                        Détail du salarié {{ personal.matricule|upper }}
                     </h5>
                 </div>
                 <div class="card-body">
                     <fieldset>
-                        <legend>INFORMATION DU SALARIE</legend>
+                        <legend>Information du salarié</legend>
                         <table class="table table-bordered table-sm">
                             <thead class="table-light">
                             <tr style="font-size: 11px">
@@ -37,11 +37,11 @@
                                 <td class="text-start">{{ personal.firstName }}</td>
                                 <td class="text-start">{{ personal.lastName }}</td>
                                 <td class="text-start">{{ personal.genre|capitalize }}</td>
-                                <td class="text-center">{{ personal.birthday|date('d-m-Y') }}</td>
+                                <td class="text-center">{{ personal.birthday|date('d/m/Y') }}</td>
                                 <td class="text-start">{{ personal.lieuNaissance|capitalize }}</td>
-                                <td class="text-center">{{ personal.refCNPS }}</td>
-                                <td class="text-start">{{ personal.piece|capitalize }}</td>
-                                <td class="text-center">{{ personal.refPiece }}</td>
+                                <td class="text-center">{{ personal.refCNPS|upper }}</td>
+                                <td class="text-start">{{ personal.piece|upper }}</td>
+                                <td class="text-center">{{ personal.refPiece|upper }}</td>
                                 <td class="text-start">{{ personal.etatCivil|capitalize }}</td>
                                 <td class="text-start">{{ personal.modePaiement|capitalize }}</td>
                             </tr>
@@ -50,7 +50,7 @@
                     </fieldset>
                     <br>
                     <fieldset>
-                        <legend>COORDONNEE DU SALARIE</legend>
+                        <legend>Coordonnée du salarié</legend>
                         <table class="table table-bordered table-sm">
                             <thead class="table-light">
                             <tr style="font-size: 11px">
@@ -71,7 +71,7 @@
                     <br>
                     {% if personal.etatCivil == 'MARIEE' %}
                         <fieldset>
-                            <legend>SITUATION FAMILIALE</legend>
+                            <legend>Situation familiale du salarié</legend>
                             <table class="table table-bordered table-sm">
                                 <thead class="table-light">
                                 <tr style="font-size: 11px">
@@ -93,13 +93,13 @@
                     {% endif %}
 
                     <fieldset>
-                        <legend>CATEGORIE SOCIO PROFESSIONNELLE</legend>
+                        <legend>Catégorie socio professionnelle du salarié</legend>
                         <table class="table table-bordered table-sm">
                             <thead class="table-light">
                             <tr style="font-size: 11px">
                                 <th class="text-center">Catégorie</th>
                                 <th class="text-center">Niveau de formation</th>
-                                <th class="text-center">Fonction</th>
+                                <th class="text-center">Poste</th>
                                 <th class="text-center">Département ou Service</th>
                             </tr>
                             </thead>
@@ -116,7 +116,7 @@
                     </fieldset>
                     <br>
                     <fieldset>
-                        <legend>CONTRAT</legend>
+                        <legend>Contrat du salarié</legend>
                         <table class="table table-bordered table-sm">
                             <thead class="table-light">
                             <tr style="font-size: 11px">
@@ -124,14 +124,16 @@
                                 <th class="text-center">Date d’embauche</th>
                                 <th class="text-center">Date d’effet</th>
                                 <th class="text-center">Type de temps contractuel</th>
+                                <th class="text-center">Référence contrat</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr style="font-size: 10px">
-                                <td class="text-start">{{ personal.contract.typeContrat }}</td>
-                                <td class="text-center">{{ personal.contract.dateEmbauche|date('d-m-Y') }}</td>
-                                <td class="text-center">{{ personal.contract.dateEffet|date('d-m-Y') }}</td>
+                                <td class="text-start">{{ personal.contract.typeContrat|upper }}</td>
+                                <td class="text-center">{{ personal.contract.dateEmbauche|date('d/m/Y') }}</td>
+                                <td class="text-center">{{ personal.contract.dateEffet|date('d/m/Y') }}</td>
                                 <td class="text-start">{{ personal.contract.tempsContractuel|capitalize }}</td>
+                                <td class="text-start">{{ personal.contract.refContract|upper }}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -139,11 +141,11 @@
                     <br>
                     {% if personal.salary.detailSalaries %}
                         <fieldset>
-                            <legend>PRIME</legend>
+                            <legend>Primes du salarié</legend>
                             <table class="table table-bordered table-sm">
                                 <thead class="table-light">
                                 <tr style="font-size: 11px">
-                                    <th class="text-center">Intitule</th>
+                                    <th class="text-center">Intitulé</th>
                                     <th class="text-center">Montant</th>
                                 </tr>
                                 </thead>
@@ -168,7 +170,7 @@
 
                     {% if personal.salary.detailSalaries %}
                         <fieldset>
-                            <legend>AUTRES PRIMES</legend>
+                            <legend>Autres prime du salarié</legend>
                             <table class="table table-bordered table-sm">
                                 <thead class="table-light">
                                 <tr style="font-size: 11px">
@@ -196,11 +198,11 @@
                     {% endif %}
                     {% if personal.salary.detailRetenueForfetaires %}
                         <fieldset>
-                            <legend>RETENUE ASSURANCE</legend>
+                            <legend>Assurance salarié</legend>
                             <table class="table table-bordered table-sm">
                                 <thead class="table-light">
                                 <tr style="font-size: 11px">
-                                    <th class="text-center">Intitule</th>
+                                    <th class="text-center">Intitulé</th>
                                     <th class="text-center">Montant</th>
                                 </tr>
                                 </thead>
@@ -218,7 +220,7 @@
                     {% endif %}
 
                     <fieldset>
-                        <legend>SALAIRE</legend>
+                        <legend>Détail élement de salaire</legend>
                         <table class="table table-bordered table-sm">
                             <thead class="table-light">
                             <tr style="font-size: 11px">

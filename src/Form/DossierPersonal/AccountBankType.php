@@ -12,7 +12,6 @@ class AccountBankType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            //->add('bankId')
             ->add('name')
             ->add('code')
             ->add('codeAgence')

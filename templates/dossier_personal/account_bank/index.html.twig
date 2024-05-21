@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        LISTE COMPTE EN BANQUE PAR SALARIES
+                        Liste salariés & comptes bancaires
                     </h5>
                 </div>
                 <div class="card-body">
@@ -54,10 +54,15 @@
                 showColumnLines: true,
                 showRowLines: true,
                 rowAlternationEnabled: true,
-                height: 355,
+                height: 400,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual"
+                },
+                selection: {
+                    mode: "multiple",
+                    allowSelectAll: true,
+                    showCheckBoxesMode: "always"
                 },
                 groupPanel: {
                     visible: true,
@@ -140,7 +145,7 @@
                         dataField: 'date_embauche',
                     },
                     {
-                        caption: 'Banque',
+                        caption: 'Intitulé  Banque',
                         alignment: 'left',
                         dataType: 'string',
                         dataField: 'nom_banque',
@@ -158,7 +163,7 @@
                         dataField: 'code_agence',
                     },
                     {
-                        caption: 'N° Compte Bancaire',
+                        caption: 'N° Compte',
                         alignment: 'center',
                         dataType: 'string',
                         dataField: 'number_compte',
@@ -192,7 +197,8 @@
                     totalItems: [
                         {
                             column: 'matricule',
-                            summaryType: 'count'
+                            summaryType: 'count',
+                            displayFormat: 'Salariés : {0}'
                         }
                     ]
                 }

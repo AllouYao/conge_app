@@ -46,4 +46,19 @@ class OldCongeRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    public function findOneByPersoBuilder($value): array
+    {
+        return $this->createQueryBuilder('o')
+            ->select([
+                'o.id',
+                'o.dateRetour as older_retour'
+            ])
+            ->join('o.personal', 'personal')
+            ->where('personal.id = :value')
+            ->setParameter('value', $value)
+            ->orderBy('o.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

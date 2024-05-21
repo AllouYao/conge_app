@@ -1,3 +1,22 @@
+{# <!-- Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Message</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Le message que vous souhaitez afficher -->
+                Entrez votre montant.
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal --> #}
+
 <fieldset>
     <legend>Information du salarié</legend>
     <div class="mb-2 row">
@@ -21,17 +40,16 @@
         </div>
     </div>
 </fieldset>
-
 <fieldset>
-    <legend>Detail départ</legend>
+    <legend>Information concernant le départ</legend>
     <div class="mb-2 row">
+        <label class="col-md-1 col-form-label">Dernier congé</label>
+        <div class="col-md-3">
+            {{ form_widget(form.dateRetourConge) }}
+        </div>
         <label class="col-md-1 col-form-label">Type départ <span class="text-danger">*</span></label>
         <div class="col-md-3">
             {{ form_widget(form.reason) }}
-        </div>
-        <label class="col-md-1 col-form-label">Bilan financier <span class="text-danger">*</span></label>
-        <div class="col-md-3">
-            {{ form_widget(form.isPaied) }}
         </div>
         <label class="col-md-1 col-form-label">Date d'éffet <span class="text-danger">*</span></label>
         <div class="col-md-3">

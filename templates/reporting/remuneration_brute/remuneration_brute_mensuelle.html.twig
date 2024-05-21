@@ -18,7 +18,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        ETAT DES REMUNERATIONS BRUTES MENSUELLES
+                        EDI ANNEXE ITS
                     </h5>
                 </div>
                 <div class="card-body">
@@ -115,7 +115,7 @@
                         dataField: 'emp_q',
                         dataType: 'string',
                         caption: 'Emploi ou Qualité',
-                        alignment: 'center',
+                        alignment: 'left',
                     },
                     {
                         dataField: 'code_emp',
@@ -144,7 +144,7 @@
                     {
                         dataField: 'local',
                         dataType: 'string',
-                        caption: 'Local \ Expatrié',
+                        caption: 'Local / Expatrié',
                         alignment: 'center',
                     },
                     {
@@ -170,12 +170,18 @@
                         dataType: 'string',
                         caption: 'Nombre de parts',
                         alignment: 'center',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
                     },
                     {
                         dataField: 'day_work',
                         dataType: 'string',
                         caption: 'Nombre de jours d\'application de paiements',
                         alignment: 'center',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
                     },
                     {
                         dataField: 'salary_brut',
@@ -291,6 +297,36 @@
                 summary: {
                     totalItems: [
                         {
+                            column: 'its_salarie_brut', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'credit_impot', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'revenu_non_imposable', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'amount_avantage_bareme', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
+                            column: 'amount_avantage_reelle', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+                        {
                             column: 'index',
                             summaryType: 'count',
                         },
@@ -318,6 +354,13 @@
                                 return new Intl.NumberFormat('fr-FR').format(data.value)
                             },
                         },
+                        {
+                            column: 'exonere_amount', summaryType: 'sum',
+                            customizeText: (data) => {
+                                return new Intl.NumberFormat('fr-FR').format(data.value)
+                            },
+                        },
+
                     ],
                 }
             });

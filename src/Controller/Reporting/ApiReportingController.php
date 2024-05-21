@@ -20,20 +20,16 @@ use DateTime;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use IntlDateFormatter;
-use JetBrains\PhpStorm\NoReturn;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api_reporting', name: 'api_reporting_')]
 class ApiReportingController extends AbstractController
 {
     private PayrollRepository $payrollRepository;
     private EtatService $etatService;
-    private HeureSupService $heureSupService;
-    private CongeRepository $congeRepository;
-    private CategoryChargeRepository $categoryChargeRepository;
     private PrimesRepository $primesRepository;
     private DetailSalaryRepository $detailSalaryRepository;
     private PersonalRepository $personalRepository;
@@ -45,23 +41,17 @@ class ApiReportingController extends AbstractController
     public function __construct(
         PayrollRepository           $payrollRepository,
         EtatService                 $etatService,
-        HeureSupService             $heureSupService,
-        CongeRepository             $congeRepository,
-        CategoryChargeRepository    $categoryChargeRepository,
         PrimesRepository            $primesRepository,
         DetailSalaryRepository      $detailSalaryRepository,
         PersonalRepository          $personalRepository,
         DetailPrimeSalaryRepository $detailPrimeSalaryRepository,
         CampagneRepository          $campagneRepository,
         ChargePeopleRepository      $chargePeopleRepository,
-        PaieServices $paieServices
+        PaieServices                $paieServices
     )
     {
         $this->payrollRepository = $payrollRepository;
         $this->etatService = $etatService;
-        $this->heureSupService = $heureSupService;
-        $this->congeRepository = $congeRepository;
-        $this->categoryChargeRepository = $categoryChargeRepository;
         $this->primesRepository = $primesRepository;
         $this->detailSalaryRepository = $detailSalaryRepository;
         $this->personalRepository = $personalRepository;
@@ -152,6 +142,7 @@ class ApiReportingController extends AbstractController
             $nb_jr_travailler = $salary['dayOfPresence'];
             $data_payroll[] = [
                 'index' => ++$index,
+                'payroll_id' => $salary['payroll_id'],
                 'dateCreation' => date_format($salary['startedAt'], 'd/m/Y'),
                 'day_of_presence' => $nb_jr_travailler,
                 'nb_part' => $salary['numberPart'],
@@ -378,11 +369,8 @@ class ApiReportingController extends AbstractController
     #[Route('/declaration_dgi/current/month', name: 'declaration_dgi_current_month', methods: ['GET'])]
     public function declarationMonthDgi(): JsonResponse
     {
-        $today = Carbon::today();
-        $month = $today->month;
-        $year = $today->year;
         $data = [];
-        $declarationDgi = $this->payrollRepository->findSalarialeCampagne(true, $year, $month);
+        $declarationDgi = $this->payrollRepository->findSalarialeCampagne(true);
         if (!$declarationDgi) {
             return $this->json(['data' => []]);
         }
@@ -414,9 +402,7 @@ class ApiReportingController extends AbstractController
         return new JsonResponse($data);
     }
 
-    /**
-     * @throws NonUniqueResultException
-     */
+
     #[Route('/declaration_dgi', name: 'declaration_dgi', methods: ['GET'])]
     public function declarationDgi(Request $request): JsonResponse
     {
@@ -462,11 +448,8 @@ class ApiReportingController extends AbstractController
     #[Route('/declaration_cnps/current/month', name: 'declaration_cnps_current_month', methods: ['GET'])]
     public function declarationMonthCnps(): JsonResponse
     {
-        $today = Carbon::today();
-        $month = $today->month;
-        $year = $today->year;
         $data = [];
-        $declarationCnps = $this->payrollRepository->findSalarialeCampagne(true, $year, $month);
+        $declarationCnps = $this->payrollRepository->findSalarialeCampagne(true);
         if (!$declarationCnps) {
             return $this->json(['data' => []]);
         }
@@ -488,9 +471,6 @@ class ApiReportingController extends AbstractController
         return new JsonResponse($data);
     }
 
-    /**
-     * @throws NonUniqueResultException
-     */
     #[Route('/declaration_cnps', name: 'declaration_cnps', methods: ['GET'])]
     public function declarationCnps(Request $request): JsonResponse
     {
@@ -528,11 +508,8 @@ class ApiReportingController extends AbstractController
     #[Route('/declaration_fdfp/current/month', name: 'declaration_fdfp_current_month', methods: ['GET'])]
     public function declarationMonthFdfp(): JsonResponse
     {
-        $today = Carbon::today();
-        $month = $today->month;
-        $year = $today->year;
         $data = [];
-        $declarationFdfp = $this->payrollRepository->findSalarialeCampagne(true, $year, $month);
+        $declarationFdfp = $this->payrollRepository->findSalarialeCampagne(true);
         if (!$declarationFdfp) {
             return $this->json(['data' => []]);
         }
@@ -550,9 +527,6 @@ class ApiReportingController extends AbstractController
         return new JsonResponse($data);
     }
 
-    /**
-     * @throws NonUniqueResultException
-     */
     #[Route('/declaration_fdfp', name: 'declaration_fdfp', methods: ['GET'])]
     public function declarationFdfp(Request $request): JsonResponse
     {
@@ -583,11 +557,8 @@ class ApiReportingController extends AbstractController
     #[Route('/etat_salariale_mensuel', name: 'salariale_etat', methods: ['GET'])]
     public function etatSalarialeMensuel(): JsonResponse
     {
-        $today = Carbon::today();
-        $month = $today->month;
-        $year = $today->year;
         $data = [];
-        $requestEtatSalary = $this->payrollRepository->findSalarialeCampagne(true, $year, $month);
+        $requestEtatSalary = $this->payrollRepository->findSalarialeCampagne(true);
         foreach ($requestEtatSalary as $index => $salaryEtat) {
             $data[] = [
                 'index' => ++$index,
@@ -623,53 +594,14 @@ class ApiReportingController extends AbstractController
     #[Route('/declaration_cmu/current/month', name: 'declaration_cmu_current_month', methods: ['GET'])]
     public function declarationMonthCmu(): JsonResponse
     {
-        $today = Carbon::today();
-        $month = $today->month;
-        $year = $today->year;
         $data = [];
-        $declarationCmu = $this->payrollRepository->findCmuCampagne(true, $year, $month);
+        $declarationCmu = $this->payrollRepository->findCampagneCmuNew(true);
         if (!$declarationCmu) {
             return $this->json(['data' => []]);
         }
         foreach ($declarationCmu as $index => $declaration) {
-            $data[] = [
-                'index' => ++$index,
-                'matricule' => $declaration['matricule'],
-                'num_cnps_assure' => $declaration['refCNPS'],
-                'num_sec_assure' => $declaration['num_ss'],
-                'nom_assure' => $declaration['nom'],
-                'pnom_assure' => $declaration['prenoms'],
-                'birthday' => $declaration['personal_birthday'],
-                'num_cnps_benef' => $declaration['refCNPS'],
-                'num_sec_benef' => $declaration['num_ss'],
-                'type_benef' => 'T',
-                'nom_benef' => $declaration['nom'],
-                'pnom_benef' => $declaration['prenoms'],
-                'birthday_benef' => $declaration['personal_birthday'],
-                'genre_benef' => $declaration['genre']
-            ];
-            if ($declaration['cp_numCmu']) {
-                $chargePeoples = $this->chargePeopleRepository->findPeopleAssureByPersonalId($declaration['personal_id']);
-                foreach ($chargePeoples->getQuery()->getResult() as $chargePerson) {
-                    $data[] = [
-                        'index' => ++$index,
-                        'matricule' => $declaration['matricule'],
-                        'num_cnps_assure' => $declaration['refCNPS'],
-                        'num_sec_assure' => $declaration['num_ss'],
-                        'nom_assure' => $declaration['nom'],
-                        'pnom_assure' => $declaration['prenoms'],
-                        'birthday' => $declaration['personal_birthday'],
-                        'num_cnps_benef' => $declaration['refCNPS'],
-                        'num_sec_benef' => $chargePerson->getNumss(),
-                        'type_benef' => 'E',
-                        'nom_benef' => $chargePerson->getFirstName(),
-                        'pnom_benef' => $chargePerson->getLastName(),
-                        'birthday_benef' => date_format($chargePerson->getBirthday(), 'd/m/y'),
-                        'genre_benef' => $chargePerson->getGender(),
-                    ];
-                }
-            }
-            if ($declaration['is_cmu']) {
+            $chargePeoples = $this->chargePeopleRepository->findBy(['personal' => $declaration['personal_id'], 'isCmu' => true]);
+            if ($declaration['is_cmu'] == 1) {
                 $data[] = [
                     'index' => ++$index,
                     'matricule' => $declaration['matricule'],
@@ -681,12 +613,46 @@ class ApiReportingController extends AbstractController
                     'num_cnps_benef' => $declaration['refCNPS'],
                     'num_sec_benef' => $declaration['conjoint_num_ss'],
                     'type_benef' => 'C',
-                    'nom_benef' => $declaration['conjoint_name'],
-                    'pnom_benef' => $declaration['conjoint_name'],
+                    'full_name' => $declaration['conjoint_name'],
                     'birthday_benef' => '',
                     'genre_benef' => 'M',
                 ];
             }
+            if (count($chargePeoples) > 0) {
+                foreach ($chargePeoples as $item) {
+                    $data[] = [
+                        'index' => ++$index,
+                        'matricule' => $declaration['matricule'],
+                        'num_cnps_assure' => $declaration['refCNPS'],
+                        'num_sec_assure' => $declaration['num_ss'],
+                        'nom_assure' => $declaration['nom'],
+                        'pnom_assure' => $declaration['prenoms'],
+                        'birthday' => $declaration['personal_birthday'],
+                        'num_cnps_benef' => $declaration['refCNPS'],
+                        'num_sec_benef' => $declaration['num_ss'],
+                        'type_benef' => 'E',
+                        'full_name' => $item->getFirstName() . ' ' . $item->getLastName(),
+                        'birthday_benef' => $declaration['personal_birthday'],
+                        'genre_benef' => $declaration['genre']
+                    ];
+                }
+            }
+            $data[] = [
+                'index' => ++$index,
+                'matricule' => $declaration['matricule'],
+                'num_cnps_assure' => $declaration['refCNPS'],
+                'num_sec_assure' => $declaration['num_ss'],
+                'nom_assure' => $declaration['nom'],
+                'pnom_assure' => $declaration['prenoms'],
+                'birthday' => $declaration['personal_birthday'],
+                'num_cnps_benef' => $declaration['refCNPS'],
+                'num_sec_benef' => $declaration['num_ss'],
+                'type_benef' => 'T',
+                'full_name' => $declaration['nom'] . ' ' . $declaration['prenoms'],
+                'birthday_benef' => $declaration['personal_birthday'],
+                'genre_benef' => $declaration['genre']
+            ];
+
         }
         return new JsonResponse($data);
     }
@@ -720,27 +686,27 @@ class ApiReportingController extends AbstractController
                 'genre_benef' => $declaration['genre']
             ];
 
-                $chargePeoples = $this->chargePeopleRepository->findPeopleAssureByPersonalId($declaration['personal_id']);
-                if (!empty($chargePeoples->getQuery()->getResult())) {
-                    foreach ($chargePeoples->getQuery()->getResult() as $chargePerson) {
-                        $data[] = [
-                            'index' => ++$index,
-                            'matricule' => $declaration['matricule'],
-                            'num_cnps_assure' => $declaration['refCNPS'],
-                            'num_sec_assure' => $declaration['num_ss'],
-                            'nom_assure' => $declaration['nom'],
-                            'pnom_assure' => $declaration['prenoms'],
-                            'birthday' => $declaration['personal_birthday'],
-                            'num_cnps_benef' => $declaration['refCNPS'],
-                            'num_sec_benef' => $chargePerson->getNumss(),
-                            'type_benef' => 'E',
-                            'nom_benef' => $chargePerson->getFirstName(),
-                            'pnom_benef' => $chargePerson->getLastName(),
-                            'birthday_benef' => date_format($chargePerson->getBirthday(), 'd/m/y'),
-                            'genre_benef' => $chargePerson->getGender(),
-                        ];
-                    }
+            $chargePeoples = $this->chargePeopleRepository->findPeopleAssureByPersonalId($declaration['personal_id']);
+            if (!empty($chargePeoples->getQuery()->getResult())) {
+                foreach ($chargePeoples->getQuery()->getResult() as $chargePerson) {
+                    $data[] = [
+                        'index' => ++$index,
+                        'matricule' => $declaration['matricule'],
+                        'num_cnps_assure' => $declaration['refCNPS'],
+                        'num_sec_assure' => $declaration['num_ss'],
+                        'nom_assure' => $declaration['nom'],
+                        'pnom_assure' => $declaration['prenoms'],
+                        'birthday' => $declaration['personal_birthday'],
+                        'num_cnps_benef' => $declaration['refCNPS'],
+                        'num_sec_benef' => $chargePerson->getNumss(),
+                        'type_benef' => 'E',
+                        'nom_benef' => $chargePerson->getFirstName(),
+                        'pnom_benef' => $chargePerson->getLastName(),
+                        'birthday_benef' => date_format($chargePerson->getBirthday(), 'd/m/y'),
+                        'genre_benef' => $chargePerson->getGender(),
+                    ];
                 }
+            }
             if ($declaration['is_cmu'] !== null) {
                 $data[] = [
                     'index' => ++$index,
@@ -756,7 +722,7 @@ class ApiReportingController extends AbstractController
                     'nom_benef' => $declaration['conjoint_name'],
                     'pnom_benef' => $declaration['conjoint_name'],
                     'birthday_benef' => '',
-                    'genre_benef' => 'M',
+                    'genre_benef' => $declaration['genre'] = 'M' ? 'FEMME' : 'HOMME',
                 ];
             }
         }
@@ -803,27 +769,34 @@ class ApiReportingController extends AbstractController
     #[Route('/remuneration_brute', name: 'remuneration_brute', methods: ['GET'])]
     public function etatRbm(): JsonResponse
     {
-        $today = Carbon::today();
-        $year = $today->year;
-        $month = $today->month;
         $data = [];
-        $remunerations = $this->payrollRepository->findSalarialeCampagne(true, $year,$month);
+        $remunerations = $this->payrollRepository->findSalarialeCampagne(true);
         foreach ($remunerations as $index => $remuneration) {
+            $etat_civil = null;
+            if($remuneration['etatCivil'] === Status::CELIBATAIRE) {
+                $etat_civil = 'C';
+            }elseif ($remuneration['etatCivil'] === Status::DIVORCE) {
+                $etat_civil = 'D';
+            }elseif ($remuneration['etatCivil'] === Status::MARIEE) {
+                $etat_civil = 'M';
+            }elseif ($remuneration['etatCivil'] === Status::VEUF) {
+                $etat_civil = 'V';
+            }
             $personal = $this->personalRepository->findOneBy(['id' => $remuneration['personal_id']]);
             $creditImpot = $this->paieServices->amountCreditImpotCampagne($personal);
-            $autrePrime = $remuneration['amountPrimePanier'] + $remuneration['amountPrimeSalissure'] + $remuneration['amountPrimeOutillage'] + $remuneration['amountPrimeRendement'];
+            $autrePrime = (int)$remuneration['amountPrimePanier'] + $remuneration['amountPrimeSalissure'] + $remuneration['amountPrimeOutillage'] + $remuneration['amountPrimeRendement'] +$remuneration['amountPrimeTenueTrav'];
             $data[] = [
                 'index' => ++$index,
                 'num_cnps' => $remuneration['refCNPS'],
-                'nom_prenoms' => $remuneration['nom'] . $remuneration['prenoms'],
+                'nom_prenoms' => $remuneration['nom'] .' '. $remuneration['prenoms'],
                 'type_work' => 'Salarié',
-                'emp_q' => '',
+                'emp_q' => $remuneration['emploie'],
                 'code_emp' => 'EQ',
                 'regime' => 'G',
-                'genre' => $remuneration['genre'],
+                'genre' => $remuneration['genre'] === Status::MASCULIN ? 'M':'F',
                 'nationalite' => 'I',
                 'local' => 'L',
-                'etat_civil' => $remuneration['etatCivil'],
+                'etat_civil' => $etat_civil,
                 'nb_enfant' => $remuneration['nb_enfant'],
                 'nbPart' => $remuneration['numberPart'],
                 'day_work' => $remuneration['day_work'],
@@ -840,18 +813,6 @@ class ApiReportingController extends AbstractController
                 'exonere_designation' => 'TRANSPORT',
             ];
         }
-        return new JsonResponse($data);
-    }
-
-    #[Route('/global_cotisation_month', name: 'global_cotisation_month', methods: ['GET'])]
-    public function CotisationMonth(): JsonResponse
-    {
-        $today = Carbon::today();
-        $year = $today->year;
-        $month = $today->month;
-        $data = [];
-        
-
         return new JsonResponse($data);
     }
 }

@@ -15,7 +15,7 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        CESSATION DE CONTRACT SUR LA PERIODE DE {{ date|upper }}
+                        Liste des {{ typeDepart|replace({'_': ' '}) }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -46,7 +46,7 @@
             $("#dataGridDeparture").dxDataGrid({
                 dataSource: `{{ url('departure_api', {'typeDepart':typeDepart}) }}`,
                 showBorders: true,
-                height: 300,
+                height: 400,
                 scrolling: {
                     columnRenderingMode: 'virtual',
                     mode: "virtual"
@@ -88,7 +88,6 @@
                 },
                 searchPanel: {
                     visible: true,
-                    // width: 240,
                     placeholder: 'Rechercher...',
                 },
                 showColumnLines: true,
@@ -108,159 +107,251 @@
                         fixed: true
                     },
                     {
-                        caption: 'Nom et prénoms',
+                        caption: 'Nom',
                         alignment: 'left',
                         dataType: 'string',
-                        dataField: 'full_name',
+                        dataField: 'nom_salarie',
                         fixed: true
                     },
                     {
-                        caption: 'Date cessation',
-                        dataType: 'date',
-                        dataField: 'dateCessation',
-                        alignment: 'center',
-                    },
-                    {
-                        caption: 'Motif de la cessation',
+                        caption: 'Prénoms',
                         alignment: 'left',
                         dataType: 'string',
-                        dataField: 'motifCessation',
+                        dataField: 'prenom_salarie',
+                        fixed: true
                     },
                     {
-                        caption: 'Salaire de presence',
-                        dataType: 'number',
-                        dataField: 'solde_presence',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                    },
-                    {
-                        caption: 'Salaire moyen mensuel',
-                        dataType: 'number',
-                        dataField: 'salaireMoyen',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                    },
-                    {
-                        caption: 'Date dernier retour congé',
+                        caption: 'Postes',
+                        alignment: 'left',
                         dataType: 'string',
-                        dataField: 'dateRetourDrnConges',
+                        dataField: 'job_salarie',
+                    },
+                    {
+                        caption: 'Site',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'workplace_salarie',
+                    },
+                    {
+                        caption: 'Date embauche',
                         alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'embauche_salarie',
                     },
                     {
-                        caption: 'Gratification cessation',
+                        caption: 'Date départ salarié',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_depart_salarie',
+                    },
+                    {
+                        caption: 'Durée de présence',
+                        alignment: 'center',
                         dataType: 'number',
-                        dataField: 'gratification',
+                        dataField: 'nbr_jour_presence',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value) + ' jours';
+                        },
+                    },
+                    {
+                        caption: 'Salaire de présence',
                         alignment: 'right',
+                        dataType: 'number',
+                        dataField: 'salaire_presence',
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
                     },
                     {
-                        caption: 'Indemnité de congé',
-                        dataType: 'number',
-                        dataField: 'indemniteConges',
+                        caption: 'Gratification',
                         alignment: 'right',
+                        dataType: 'number',
+                        dataField: 'gratification_prorata',
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
                     },
                     {
-                        caption: 'Préavis',
-                        dataType: 'number',
-                        dataField: 'preavis',
+                        caption: 'Date retour congés',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'date_retour_conges',
+                    },
+                    {
+                        caption: 'Période de référence congés',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'periode_reference',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value) + ' mois';
+                        },
+                    },
+                    {
+                        caption: 'Durée ouvrable congés',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'jour_ouvrable_conge',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value) + ' jrs cumulé';
+                        },
+                    },
+                    {
+                        caption: 'Salaire moyen congés',
                         alignment: 'right',
+                        dataType: 'string',
+                        dataField: 'salaire_moyen_conges',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Indemnité de congés',
+                        alignment: 'right',
+                        dataType: 'string',
+                        dataField: 'allocation_conge',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Durée préavis',
+                        alignment: 'center',
+                        dataType: 'string',
+                        dataField: 'duree_preavis',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value) + ' mois';
+                        },
                     },
                     {
                         caption: 'Indemnité de préavis',
-                        dataType: 'number',
-                        dataField: 'indemnitePreavis',
                         alignment: 'right',
+                        dataType: 'string',
+                        dataField: 'indemnite_preavis',
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
                     },
                     {
-                        caption: 'Ancienneté (en mois)',
-                        dataType: 'number',
-                        dataField: 'anciennete',
+                        caption: 'Salaire global moyen',
                         alignment: 'right',
+                        dataType: 'number',
+                        dataField: 'salaire_global_moyen',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
                     },
                     {
-                        caption: 'Indemnité de cessation',
+                        caption: 'Indemnité de licenciement',
+                        alignment: 'right',
                         dataType: 'number',
                         dataField: 'indemnite_licenciement',
-                        alignment: 'right',
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
                     },
                     {
-                        caption: 'Indemnité de retraite',
-                        dataType: 'number',
-                        dataField: 'indemnite_retraite',
+                        caption: 'Quotité imposable (indmt licenciement)',
                         alignment: 'right',
+                        dataType: 'number',
+                        dataField: 'quotite_imposable_licenciement',
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
                     },
                     {
-                        caption: 'Indemnité de décès',
-                        dataType: 'number',
-                        dataField: 'indemnite_deces',
+                        caption: 'Quotité non imposable (indmt licenciement)',
                         alignment: 'right',
+                        dataType: 'number',
+                        dataField: 'quotite_non_imposable_licenciement',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Total indemnité imposable',
+                        alignment: 'right',
+                        dataType: 'number',
+                        dataField: 'total_indemnite_imposable',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Impôts à prélever',
+                        alignment: 'right',
+                        dataType: 'number',
+                        dataField: 'charge_personal_indemnite',
+                        customizeText: function (data) {
+                            return new Intl.NumberFormat('fr-FR').format(data.value);
+                        },
+                    },
+                    {
+                        caption: 'Net à payer',
+                        alignment: 'right',
+                        dataType: 'number',
+                        dataField: 'net_payer_indemnite',
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
                     },
                     {
                         caption: 'Frais funéraire',
+                        alignment: 'right',
                         dataType: 'number',
                         dataField: 'frais_funeraire',
-                        alignment: 'right',
                         customizeText: function (data) {
                             return new Intl.NumberFormat('fr-FR').format(data.value);
                         },
                     },
+
                     {
                         caption: 'Actions',
                         alignment: 'center',
                         columns: [
                             {
                                 dataField: 'modifier',
-                                caption: 'Modifier',
+                                caption: 'Consulter',
                                 alignment: 'center',
                                 cellTemplate: function (container, options) {
                                     $("<a>")
-                                        .html('<i data-feather="edit" style="color: #C9971C"></i>')
+                                        .html('<i data-feather="eye" style="color: #C9971C"></i>')
                                         .attr("href", options.data.modifier)
                                         .appendTo(container);
                                     feather.replace();
                                 },
                             },
                             {
-                                dataField: 'sold_tout_compte',
+                                dataField: 'url_solde_all_compte',
                                 caption: 'Sold de tout compte',
                                 alignment: 'center',
                                 cellTemplate: function (container, options) {
                                     $("<a>")
                                         .html('<i data-feather="printer" style="color: black"></i>')
-                                        .attr("href", options.data.sold_tout_compte)
+                                        .attr("href", options.data.url_solde_all_compte)
                                         .appendTo(container);
                                     feather.replace();
                                 },
                             },
                             {
-                                dataField: 'certificat',
+                                dataField: 'url_certificat',
                                 caption: 'Certificat travail',
                                 alignment: 'center',
                                 cellTemplate: function (container, options) {
                                     $("<a>")
                                         .html('<i data-feather="printer" style="color: black"></i>')
-                                        .attr("href", options.data.certificat)
+                                        .attr("href", options.data.url_certificat)
+                                        .appendTo(container);
+                                    feather.replace();
+                                },
+                            },
+                             {
+                                dataField: 'bulletin',
+                                caption: 'Bulletin',
+                                alignment: 'center',
+                                cellTemplate: function (container, options) {
+                                    $("<a>")
+                                        .html('<i data-feather="printer" style="color: black"></i>')
+                                        .attr("href", options.data.bulletin)
                                         .appendTo(container);
                                     feather.replace();
                                 },

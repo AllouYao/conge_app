@@ -1,0 +1,168 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail du départ
+{% endblock %}
+
+{% block body %}
+	<div class="row">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h5 class="card-title-custom" style="color: white">
+						<i data-feather="list"></i>
+						Détail du
+						{{ departure.reason|upper }}
+					</h5>
+				</div>
+				<div class="card-body">
+					<fieldset>
+						<legend>Identification du salarié</legend>
+						<table class="table table-bordered table-sm">
+							<thead class="table-light">
+								<tr style="font-size: 11px">
+									<th class="text-center">Matricule</th>
+									<th class="text-center">Nom</th>
+									<th class="text-center">Prénom(s)</th>
+									<th class="text-center">
+										Poste
+									</th>
+									<th class="text-center">
+										Site
+									</th>
+									<th class="text-center">Date d'embauche</th>
+									<th class="text-center">Date départ</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr style="font-size: 10px">
+									<td class="text-center">{{ departure.matricule }}</td>
+									<td>{{ departure.firstName|upper}}</td>
+									<td>{{ departure.lastName|upper }}</td>
+									<td>{{ departure.job_name }}</td>
+									<td>{{ departure.workplace_name }}</td>
+									<td class="text-center">{{ departure.date_embauche|date('d/m/Y') }}</td>
+									<td class="text-center">
+										{{ departure.departure_date|date('d/m/Y') }}</td>
+								</tr>
+							</tbody>
+						</table>
+					</fieldset>
+					<fieldset>
+						<legend>Détail sur le salaire de présence</legend>
+						<table class="table table-bordered table-sm">
+							<thead class="table-light">
+								<tr style="font-size: 11px">
+									<th class="text-center">Nombre de jour de presence</th>
+									<th class="text-center">Salaire de présence</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr style="font-size: 10px">
+									<td class="text-center">{{ departure.day_of_presence|number_format(0, ',', ' ') }}
+										{{ ' jours' }}</td>
+									<td class="text-end">{{  departure.salaire_presence|number_format(0, ',', ' ') }}</td>
+								</tr>
+							</tbody>
+						</table>
+					</fieldset>
+					<fieldset>
+						<legend>Détail sur l'indemnité de congé</legend>
+						<table class="table table-bordered table-sm">
+							<thead class="table-light">
+								<tr style="font-size: 11px">
+									<th class="text-center">Date rétour de congé</th>
+									<th class="text-center">Période de référence</th>
+									<th class="text-center">Nombre de jour ouvrable</th>
+									<th class="text-center">Gratification au prorata
+									</th>
+									<th class="text-center">Salaire moyen mensuel</th>
+									<th class="text-center">Indemnité compensatrice de congé</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr style="font-size: 10px">
+									<td class="text-center">{{ departure.date_retour_conge|date('d/m/Y') }}</td>
+									<td class="text-center">{{  departure.periode_references|number_format(0, ',', ' ') }}
+										{{ ' mois' }}</td>
+									<td class="text-center">
+										{{ departure.conges_ouvrable|number_format(0, ',', ' ') }}
+										{{ ' jours' }}
+									</td>
+									<td class="text-end">
+										{{ departure.gratification_prorata|number_format(0, ',', ' ') }}</td>
+									<td class="text-end">
+										{{ departure.salaire_moyen_conges|number_format(0, ',', ' ') }}</td>
+									<td class="text-end">{{ departure.conges_amount|number_format(0, ',', ' ') }}</td>
+								</tr>
+							</tbody>
+						</table>
+					</fieldset>
+					<fieldset>
+						<legend>Détail sur l'indemnite de préavis</legend>
+						<table class="table table-bordered table-sm">
+							<thead class="table-light">
+								<tr style="font-size: 11px">
+									<th class="text-center">Durée de préavis</th>
+									<th class="text-center">Indemnité de préavis</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr style="font-size: 10px">
+									<td class="text-center">{{ duree_preavis|number_format(0, ',', ' ') }}
+										{{ ' mois' }}</td>
+									<td class="text-end">{{  departure.indemnite_preavis|number_format(0, ',', ' ') }}</td>
+								</tr>
+							</tbody>
+						</table>
+					</fieldset>
+					<fieldset>
+						<legend>Détail sur l'indemnité de licenciement</legend>
+						<table class="table table-bordered table-sm">
+							<thead class="table-light">
+								<tr style="font-size: 11px">
+									<th class="text-center">Salaire global moyen</th>
+									<th class="text-center">Imdemnité de lienciement</th>
+									<th class="text-center">Quotité imposable</th>
+									<th class="text-center">Quotité non imposable</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr style="font-size: 10px">
+									<td class="text-center">{{ departure.salaire_global_moyen|number_format(0, ',', ' ') }}</td>
+									<td class="text-end">{{  departure.indemnite_licenciement|number_format(0, ',', ' ') }}</td>
+									<td class="text-end">{{  departure.quotite_imposable|number_format(0, ',', ' ') }}</td>
+									<td class="text-end">{{  departure.quotite_non_imposable|number_format(0, ',', ' ') }}</td>
+								</tr>
+							</tbody>
+						</table>
+					</fieldset>
+					<fieldset>
+						<legend>Détail sur l'indemnité net à payer</legend>
+						<table class="table table-bordered table-sm">
+							<thead class="table-light">
+								<tr style="font-size: 11px">
+									<th class="text-center">Total imdemmnité imposable</th>
+									<th class="text-center">Total charge dû par le salarié</th>
+									<th class="text-center">Frais funéraire</th>
+									<th class="text-center">Net à payer</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr style="font-size: 10px">
+									<td class="text-center">{{  departure.total_indemnite_imposable|number_format(0, ',', ' ') }}</td>
+									<td class="text-center">{{ departure.total_charge_personal|number_format(0, ',', ' ') }}</td>
+									<td class="text-end">{{ departure.frais_funeraire|number_format(0, ',', ' ') }}</td>
+									<td class="text-end">{{ departure.net_payer_indemnite|number_format(0, ',', ' ') }}</td>
+								</tr>
+							</tbody>
+						</table>
+					</fieldset>
+				</div>
+				<div class="card-footer">
+                    <a href="{{ path('departure_edit', {'uuid': departure.uuid, 'typeDepart': departure.type_depart}) }}" class="btn btn-warning float-end " style="color: white">Modifier</a>
+                    <a href="{{ path('departure_index', {'typeDepart': departure.type_depart}) }}" class="btn btn-info float-end me-2" style="color: white">Retour</a>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

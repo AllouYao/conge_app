@@ -118,5 +118,13 @@ class ChargesServices
         return $nbrePart[$personal->getEtatCivil()];
     }
 
+    public function convertirAnciennete(float $anciennete): string
+    {
+        $annees = floor($anciennete);
+        $mois_decimal = ($anciennete - $annees) * 12;
+        $mois = floor($mois_decimal);
+        return "$annees ans $mois mois";
+    }
+
 
 }

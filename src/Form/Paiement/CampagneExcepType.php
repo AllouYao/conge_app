@@ -103,14 +103,14 @@ class CampagneExcepType extends AbstractType
                     $personal = $this->repositoryPer->findAllPersonalDepart();
                     foreach ($personal as $individual) {
                         $campagne->addPersonal($individual);
-                        $this->salaryInterface->chargePersonalByDeparture($individual, $campagne);
-                        $this->salaryInterface->chargeEmployeurByDeparture($individual, $campagne);
+                        $this->salaryInterface->chargPersonalOut($individual, $campagne);
+                        $this->salaryInterface->chargEmployerOut($individual, $campagne);
                     }
                 } else {
                     foreach ($personal as $individual) {
                         $campagne->addPersonal($individual);
-                        $this->salaryInterface->chargePersonalByDeparture($individual, $campagne);
-                        $this->salaryInterface->chargeEmployeurByDeparture($individual, $campagne);
+                        $this->salaryInterface->chargPersonalOut($individual, $campagne);
+                        $this->salaryInterface->chargEmployerOut($individual, $campagne);
                     }
                 }
             }

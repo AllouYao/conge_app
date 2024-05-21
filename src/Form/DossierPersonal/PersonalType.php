@@ -48,7 +48,7 @@ class PersonalType extends AbstractType
                     'Masculin' => Status::MASCULIN,
                     'Féminin' => Status::FEMININ
                 ],
-                'placeholder' => 'Sélectionner un genre',
+                'placeholder' => '--- Sélectionner un genre ---',
                 'required' => false,
                 'constraints' => [
                     new NotBlank()
@@ -73,7 +73,7 @@ class PersonalType extends AbstractType
                     'Carte consulaire' => Status::CARTE_CONSULAIRE,
                     'Attestation' => Status::ATTESTATION
                 ],
-                'placeholder' => 'Sélectionner la nature de votre pièce',
+                'placeholder' => '--- Sélectionner la nature de votre pièce ---',
                 'required' => false
             ])
             ->add('refPiece', TextType::class, [
@@ -90,7 +90,7 @@ class PersonalType extends AbstractType
             ])
             ->add('categorie', EntityType::class, [
                 'class' => Category::class,
-                'placeholder' => 'Sélectionner une catégorie salariale',
+                'placeholder' => '--- Sélectionner une catégorie salariale ---',
                 'attr' => [
                     'data-plugin' => 'customselect',
                 ],
@@ -151,7 +151,7 @@ class PersonalType extends AbstractType
                     'Maitrise (Bac + 4) ' => Status::MAITRISE,
                     'Master (Bac + 5)' => Status::Master
                 ],
-                'placeholder' => 'Sélectionner votre niveau de formation',
+                'placeholder' => '--- Sélectionner votre niveau de formation ---',
                 'required' => false,
             ])
             ->add('contract', ContractType::class, [
@@ -169,14 +169,14 @@ class PersonalType extends AbstractType
                     'Virement' => Status::VIREMENT,
                     'Caisse' => Status::CAISSE,
                 ],
-                'placeholder' => 'Sélectionner le mode de paiement',
+                'placeholder' => '--- Sélectionner le mode de paiement ---',
                 'constraints' => [
                     new NotBlank()
                 ]
             ])
             ->add('job', EntityType::class, [
                 'class' => Job::class,
-                'placeholder' => '---- Selectionner une fonction ----',
+                'placeholder' => '--- Selectionner une fonction ---',
                 'required' => false,
                 'attr' => [
                     'data-plugin' => 'customselect',
@@ -188,7 +188,7 @@ class PersonalType extends AbstractType
                 'attr' => [
                     'data-plugin' => 'customselect',
                 ],
-                'placeholder' => 'Sélectionner le site de travail',
+                'placeholder' => '--- Sélectionner le departement ou service ---',
                 'constraints' => [
                     new NotBlank()
                 ]

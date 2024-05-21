@@ -35,13 +35,9 @@ class Campagne
     #[ORM\Column]
     private ?bool $ordinary = null;
 
-    #[ORM\OneToOne(inversedBy: 'campagne', targetEntity: self::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: true)]
     private ?self $lastCampagne = null;
-
-    #[ORM\OneToOne(mappedBy: 'lastCampagne', targetEntity: self::class, cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?self $campagne = null;
 
     #[ORM\ManyToMany(targetEntity: Personal::class, inversedBy: 'campagnes')]
     private Collection $personal;
@@ -182,23 +178,6 @@ class Campagne
                 $payroll->setCampagne(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getCampagne(): ?self
-    {
-        return $this->campagne;
-    }
-
-    public function setCampagne(self $campagne): static
-    {
-        // set the owning side of the relation if necessary
-        if ($campagne->getLastCampagne() !== $this) {
-            $campagne->setLastCampagne($this);
-        }
-
-        $this->campagne = $campagne;
 
         return $this;
     }

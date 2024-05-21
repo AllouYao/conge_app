@@ -1,42 +1,109 @@
-{% extends 'imprimerLivrePaie.html.twig' %}
+{% extends 'imprimer.html.twig' %}
 
 {% block title 'Fiche solde de tout compte' %}
 
+{% block stylesheets %}
+
+    <style>
+
+        @media print {
+            @page  {
+                size: A4;
+            }
+
+            .page-break {
+                page-break-before: always; /* Ajoute un saut de page après chaque élément avec la classe .page-break */
+            }
+        }
+
+        .sans-bordure th, .sans-bordure td {
+            border-bottom: none;
+            padding: 2px; /* Ajoutez un espacement entre les cellules si nécessaire */
+        }
+
+        .small-text {
+            font-size: 10px;
+        }
+        .smaller-text {
+            font-size: 11px;
+        }
+
+        .no-border-button {
+            border-bottom: none;
+        }
+
+        .no-border-top {
+            border-top: none;
+        }
+
+    </style>
+
+{% endblock %}
 
 {% block content %}
     <div class="row">
-        <div class="col-md-12 col-lg-offset-2">
+        <div class="col-md-12">
             <div class="widget">
                 <div class="widget-content">
-                    <div class="row">
-                        <div class="col-md-12 mb-3 mt-5"
-                             style="border: 2px double silver; padding: 10px; border-radius: 5px"
+                    <div class="row mt-3">
+                        <div class="col-md-12 mb-3"
+                             style="border: 2px double silver; padding: 8px; border-radius: 5px"
                              id="header">
                             <h4 class="text-center"><strong>SOLDE DE TOUT COMPTE </strong></h4>
                         </div>
                         <br><br>
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <table class="table table-bordered table-responsive table-sm">
-                                    <tr>
-                                        <td>QUOTE PART DE LA PRIME DE FIN D'ANNEE</td>
-                                        <td class="text-end">{{ gratification|number_format(2, ',', ' ') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>INDEMNITE COMPENSATRICE DE CONGE</td>
-                                        <td class="text-end">{{ conge_amount|number_format(2, ',', ' ') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>INDEMNITE DE LICENCIEMENT</td>
-                                        <td class="text-end">{{ licenciement_amount|number_format(2, ',', ' ') }}</td>
-                                    </tr>
-                                    <tr>
-                                        {% set amountTT = gratification + conge_amount + licenciement_amount %}
-                                        <th style="font-size: larger;">SOLDE DE TOUT COMPTE</th>
-                                        <td class="text-end" style="font-size: larger;">{{ amountTT|number_format(2, ',', ' ') }}</td>
-                                    </tr>
-                                </table>
-                            </div>
+                        <div class="mb-2">
+                            <table class="table table-bordered table-responsive table-sm">
+                                <tr>
+                                    <th colspan="7" class="text-center">Information du salarié</th>
+                                </tr>
+                                <tr class="small-text text-center">
+                                    <th class="text-center">Matricule</th>
+                                    <th class="text-center">Nom et prénoms</th>
+                                    <th class="text-center">Fonction</th>
+                                    <th class="text-center">Site de travail</th>
+                                    <th class="text-center">Type Contrat</th>
+                                    <th class="text-center">Date d'embauche</th>
+                                    <th class="text-center">Date départ</th>
+                                </tr>
+                                <tr class="smaller-text">
+                                    <td>{{ matricule }}</td>
+                                    <td>{{ full_name }}</td>
+                                    <td>{{ fonction }}</td>
+                                    <td>{{ service }}</td>
+                                    <td class="text-center">{{ type_contrat }}</td>
+                                    <td class="text-center">{{ embauche }}</td>
+                                    <td class="text-center">{{ date_depart }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="mb-2">
+                            <table class="table table-bordered table-responsive table-sm">
+                                <tr>
+                                    <th colspan="2" class="text-center">Détail du solde de tout compte</th>
+                                </tr>
+                                <tr class="small-text text-center">
+                                    <th class="text-center">Rubrique</th>
+                                    <th class="text-center">Montant</th>
+                                </tr>
+                                <tr>
+                                    <td class="smaller-text">Quote part de la prime de fin d'année</td>
+                                    <td class="text-end smaller-text">{{ gratification|number_format(0, ',', ' ') }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="smaller-text">Indemnité compensatrice de congé</td>
+                                    <td class="text-end smaller-text">{{ conge_amount|number_format(0, ',', ' ') }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="smaller-text">Indemnité de licenciement</td>
+                                    <td class="text-end smaller-text">{{ licenciement_amount|number_format(0, ',', ' ') }}</td>
+                                </tr>
+                                <tr>
+                                    {% set amountTT = gratification + conge_amount + licenciement_amount %}
+                                    <th style="font-size: 14px;" >Solde de tout compte</th>
+                                    <td class="text-end" style="font-size: 14px;">{{ amountTT|number_format(0, ',', ' ') }}</td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </div>
