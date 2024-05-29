@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Controller\DossierPersonal;
+namespace App\Controller;
 
-use App\Entity\DossierPersonal\Personal;
+use App\Entity\Personal;
 use App\Entity\User;
-use App\Form\DossierPersonal\PersonalAbsenceType;
-use App\Repository\DossierPersonal\AbsenceRepository;
-use App\Service\AbsenceService;
+use App\Form\PersonalAbsenceType;
+use App\Repository\AbsenceRepository;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
 use IntlDateFormatter;
@@ -23,18 +22,15 @@ class AbsenceController extends AbstractController
     private EntityManagerInterface $entityManager;
     private AbsenceRepository $absenceRepository;
 
-    private AbsenceService $absenceService;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         AbsenceRepository      $absenceRepository,
-        AbsenceService         $absenceService,
 
     )
     {
         $this->entityManager = $entityManager;
         $this->absenceRepository = $absenceRepository;
-        $this->absenceService = $absenceService;
     }
 
     #[Route('/api_absence', name: 'api_absence', methods: ['GET'])]

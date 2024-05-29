@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Controller\Auth;
+namespace App\Controller;
 
 use App\Entity\User;
-use App\Form\Auth\AuthUserType;
-use App\Form\Auth\ProfileEditType;
-use App\Form\Auth\ProfileShowType;
+use App\Form\AuthUserType;
+use App\Form\ProfileEditType;
+use App\Form\ProfileShowType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;

@@ -1,15 +1,13 @@
 <?php
 
-namespace App\Controller\DossierPersonal;
+namespace App\Controller;
 
-use App\Entity\DevPaie\CongePartiel;
-use App\Entity\DossierPersonal\Conge;
-use App\Entity\DossierPersonal\Personal;
+use App\Entity\Conge;
+use App\Entity\Personal;
 use App\Entity\User;
-use App\Form\DossierPersonal\CongeType;
-use App\Repository\DossierPersonal\CongeRepository;
-use App\Repository\DossierPersonal\OldCongeRepository;
-use App\Service\CongeService;
+use App\Form\CongeType;
+use App\Repository\CongeRepository;
+use App\Repository\OldCongeRepository;
 use Carbon\Carbon;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,17 +24,12 @@ class CongeController extends AbstractController
 {
 
     private CongeRepository $congeRepository;
-    private OldCongeRepository $oldCongeRepository;
-    private CongeService $congeService;
 
     public function __construct(
-        CongeRepository $congeRepository, OldCongeRepository $oldCongeRepository,
-        CongeService $congeService
+        CongeRepository $congeRepository,
     )
     {
         $this->congeRepository = $congeRepository;
-        $this->oldCongeRepository = $oldCongeRepository;
-        $this->congeService = $congeService;
     }
 
 

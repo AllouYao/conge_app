@@ -2,27 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\Society;
+use App\Entity\Service;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Society>
- *
- * @method Society|null find($id, $lockMode = null, $lockVersion = null)
- * @method Society|null findOneBy(array $criteria, array $orderBy = null)
- * @method Society[]    findAll()
- * @method Society[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends ServiceEntityRepository<Service>
  */
-class SocietyRepository extends ServiceEntityRepository
+class ServiceRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Society::class);
+        parent::__construct($registry, Service::class);
     }
 
 //    /**
-//     * @return Society[] Returns an array of Society objects
+//     * @return Service[] Returns an array of Service objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -36,7 +31,7 @@ class SocietyRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Society
+//    public function findOneBySomeField($value): ?Service
 //    {
 //        return $this->createQueryBuilder('s')
 //            ->andWhere('s.exampleField = :val')
@@ -45,13 +40,4 @@ class SocietyRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
-
-    public function getFirstResult(): Society
-    {
-        return $this->createQueryBuilder('s')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
 }

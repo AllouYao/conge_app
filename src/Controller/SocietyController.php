@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Controller\Admin;
+namespace App\Controller;
 
-use App\Entity\Admin\Society;
-use App\Form\Admin\SocietyType;
-use App\Repository\Admin\SocietyRepository;
+use App\Entity\Society;
+use App\Form\SocietyType;
+use App\Repository\SocietyRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;

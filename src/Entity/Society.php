@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Entity\Admin;
+namespace App\Entity;
 
 use App\Utils\Horodatage;
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\Admin\SocietyRepository;
+use App\Repository\SocietyRepository;
 
 #[ORM\Entity(repositoryClass: SocietyRepository::class)]
 #[ORM\HasLifecycleCallbacks]

@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Form\Auth;
+namespace App\Form;
 
-use App\Entity\Settings\Category;
-use App\Entity\Settings\CategorySalarie;
+use App\Entity\Category;
 use App\Entity\User;
-use App\Entity\Auth\Role;
+use App\Entity\Role;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Repository\DossierPersonal;
+namespace App\Repository;
 
-use App\Entity\DossierPersonal\Conge;
-use App\Entity\DossierPersonal\Personal;
+use App\Entity\Conge;
+use App\Entity\Personal;
 use App\Utils\Status;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;

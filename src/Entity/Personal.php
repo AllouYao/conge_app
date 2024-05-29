@@ -3,7 +3,10 @@
 namespace App\Entity;
 
 use App\Repository\PersonalRepository;
+use App\Entity\Category;
 use App\Utils\Horodatage;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -46,11 +49,29 @@ class Personal
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $email = null;
+    #[ORM\ManyToOne(inversedBy: 'personals')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Category $categorie = null;
+    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Conge::class)]
+    private Collection $conges;
+    #[ORM\ManyToOne(inversedBy: 'personals')]
+    private ?Service $service = null;
 
-
+    /**
+     * @var Collection<int, Fonction>
+     */
+    #[ORM\ManyToMany(targetEntity: Fonction::class, inversedBy: 'personals')]
+    private Collection $fonctions;
     
     public function __construct()
     {
+        $this->conges = new ArrayCollection();
+        $this->fonctions = new ArrayCollection();
+    }
+
+    public function __toString(): string
+    {
+        return '( ' . $this->matricule . ' ) - ' . $this->firstName . ' ' . $this->lastName;
     }
 
     public function getId(): ?int
@@ -164,9 +185,84 @@ class Personal
 
         return $this;
     }
-    public function __toString(): string
+
+
+    public function getCategorie(): ?Category
     {
-        return '( ' . $this->matricule . ' ) - ' . $this->firstName . ' ' . $this->lastName;
+        return $this->categorie;
+    }
+
+    public function setCategorie(?Category $categorie): static
+    {
+        $this->categorie = $categorie;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Conge>
+     */
+    public function getConges(): Collection
+    {
+        return $this->conges;
+    }
+
+    public function addConge(Conge $conge): static
+    {
+        if (!$this->conges->contains($conge)) {
+            $this->conges->add($conge);
+            $conge->setPersonal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConge(Conge $conge): static
+    {
+        if ($this->conges->removeElement($conge)) {
+            // set the owning side to null (unless already changed)
+            if ($conge->getPersonal() === $this) {
+                $conge->setPersonal(null);
+            }
+        }
+
+        return $this;
+    }
+    public function getService(): ?Service
+    {
+        return $this->service;
+    }
+
+    public function setService(?Service $service): static
+    {
+        $this->service = $service;
+
+        return $this;
+    }
+
+
+    /**
+     * @return Collection<int, Fonction>
+     */
+    public function getFonctions(): Collection
+    {
+        return $this->fonctions;
+    }
+
+    public function addFonction(Fonction $fonction): static
+    {
+        if (!$this->fonctions->contains($fonction)) {
+            $this->fonctions->add($fonction);
+        }
+
+        return $this;
+    }
+
+    public function removeFonction(Fonction $fonction): static
+    {
+        $this->fonctions->removeElement($fonction);
+
+        return $this;
     }
 
 }

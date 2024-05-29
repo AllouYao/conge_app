@@ -1,17 +1,11 @@
 <?php
 
-namespace App\Controller\DossierPersonal;
+namespace App\Controller;
 
-use App\Entity\DossierPersonal\Contract;
-use App\Entity\DossierPersonal\Personal;
-use App\Entity\DossierPersonal\Salary;
-use App\Form\DossierPersonal\PersonalType;
-use App\Repository\DossierPersonal\DetailPrimeSalaryRepository;
-use App\Repository\DossierPersonal\DetailSalaryRepository;
-use App\Repository\DossierPersonal\PersonalRepository;
-use App\Repository\Settings\PrimesRepository;
+use App\Entity\Personal;
+use App\Form\PersonalType;
+use App\Repository\PersonalRepository;
 use App\Service\MatriculeGenerator;
-use App\Service\Personal\ChargesServices;
 use App\Utils\Status;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -29,7 +23,6 @@ class PersonalController extends AbstractController
 
     public function __construct(
         PersonalRepository               $personalRepository,
-        private readonly ChargesServices $chargesServices
     )
     {
         $this->personalRepository = $personalRepository;

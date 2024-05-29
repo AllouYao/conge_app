@@ -49,34 +49,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private ?bool $active = null;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Absence::class)]
-    private Collection $absences;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: AccountBank::class)]
-    private Collection $accountBanks;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Conge::class)]
-    private Collection $conges;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: HeureSup::class)]
-    private Collection $heureSups;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Departure::class)]
-    private Collection $user;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: ChargePeople::class)]
-    private Collection $chargepeople;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: DetailRetenueForfetaire::class)]
-    private Collection $detailRetenueForfetaires;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Operation::class)]
-    private Collection $operations;
-
-    #[ORM\ManyToMany(targetEntity: CategorySalarie::class)]
-    private Collection $categories;
-
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $lastName = null;
 
@@ -86,15 +58,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->customRoles = new ArrayCollection();
-        $this->absences = new ArrayCollection();
-        $this->accountBanks = new ArrayCollection();
-        $this->conges = new ArrayCollection();
-        $this->heureSups = new ArrayCollection();
-        $this->user = new ArrayCollection();
-        $this->chargepeople = new ArrayCollection();
-        $this->detailRetenueForfetaires = new ArrayCollection();
-        $this->operations = new ArrayCollection();
-        $this->categories = new ArrayCollection();
     }
 
     public function getId(): ?int

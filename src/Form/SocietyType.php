@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Entity\Admin\Society;
+use App\Entity\Society;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
