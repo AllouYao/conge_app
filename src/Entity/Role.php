@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity\Auth;
+namespace App\Entity;
 
 use App\Entity\User;
 use App\Repository\RoleRepository;

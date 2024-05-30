@@ -4,11 +4,6 @@
         <ul class="list-unstyled topnav-menu float-end mb-0">
             <li class="d-none d-lg-block pt-3">
                 <a href="javascript:void(0);" class="text-decoration-none text-white h6">
-                    {% if campagne_info.campagne %}
-                        Campagne ouverte
-                    {% else %}
-                        Campagne fermée
-                    {% endif %}
                 </a>
             </li>
 
@@ -82,7 +77,7 @@
                 </span>
                 <span class="logo-lg">
                     <img src="assets/images/logo-dark.png" alt="" height="24">
-                    <span class="logo-lg-text-light">ORBIS PAIE</span>
+                    <span class="logo-lg-text-light">TIC SA</span>
                 </span>
             </a>
 
@@ -116,7 +111,7 @@
             </li>
 
             <!--  -->
-            {% set societe = society_info.info %}
+           {# {% set societe = society_info.info %}
             {% set societe_edit = is_granted('ROLE_ADMIN') ? path('admin_society_edit', {'uuid': societe.uuid}): path('app_home') %}
             <li class="d-none d-xl-block pt-2">
                 <a href="{{ societe_edit }}" class="navbar-brand logo">
@@ -135,6 +130,7 @@
                     <strong>{{ societe.siege }}</strong>
                 </a>
             </li>
+            #}
         </ul>
         <div class="clearfix"></div>
     </div>
