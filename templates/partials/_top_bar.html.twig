@@ -32,7 +32,7 @@
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    UTILISATEURS
+                                    Utilisateur
                                     <div class="arrow-down"></div>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
@@ -71,63 +71,41 @@
                         <div class="dropdown-menu" aria-labelledby="topnav-components">
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Fiche d'identifcation salarié
+                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false">
+                                    Salarié
                                     <div class="arrow-down"></div>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                    <div class="dropdown">
-                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                           aria-expanded="false">
-                                            Salarié
-                                            <div class="arrow-down"></div>
-                                        </a>
-                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                            <a href="{{ path('personal_new') }}"
-                                               class="dropdown-item">Créer</a>
-                                            <a href="{{ path('personal_index') }}"
-                                               class="dropdown-item">Liste des salariés</a>
-                                        </div>
-                                    </div>
+                                    <a href="{{ path('personal_new') }}"
+                                        class="dropdown-item">Créer</a>
+                                    <a href="{{ path('personal_index') }}"
+                                        class="dropdown-item">Liste des salariés</a>
                                 </div>
                             </div>
-                            
+                        </div>
+                    </li>
+                    {# FIN GESTION DU PERSONNEL #}
+                    {# DEBUT GESTION DU PERSONNEL #}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i data-feather="users"></i>CONGE
+                            <div class="arrow-down"></div>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="topnav-components">
                             <div class="dropdown">
                                 <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                   role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Congés & Absences
+                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false">
+                                    Congés
                                     <div class="arrow-down"></div>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                    <div class="dropdown">
-                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                           aria-expanded="false">
-                                            Congés
-                                            <div class="arrow-down"></div>
-                                        </a>
-                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                            <a href="{{ path('conge_new') }}"
-                                               class="dropdown-item">Créer</a>
-                                            <a href="{{ path('conge_index') }}"
-                                               class="dropdown-item">Liste des congés</a>
-                                        </div>
-                                    </div>
-                                    <div class="dropdown">
-                                        <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
-                                           role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                           aria-expanded="false">
-                                            Absences
-                                            <div class="arrow-down"></div>
-                                        </a>
-                                        <div class="dropdown-menu" aria-labelledby="topnav-map">
-                                            <a href="{{ path('personal_absence_new') }}"
-                                               class="dropdown-item">Créer</a>
-                                            <a href="{{ path('personal_absence_index') }}"
-                                               class="dropdown-item">Liste des absences</a>
-                                        </div>
-                                    </div>
+                                    <a href="{{ path('conge_new') }}"
+                                        class="dropdown-item">Créer</a>
+                                    <a href="{{ path('conge_index') }}"
+                                        class="dropdown-item">Liste des congés</a>
                                 </div>
                             </div>
                         </div>
