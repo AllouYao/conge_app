@@ -24,11 +24,6 @@
                                 <th class="text-center">Genre</th>
                                 <th class="text-center">Date de Naissance</th>
                                 <th class="text-center">Lieu de Naissance</th>
-                                <th class="text-center">N° CNPS</th>
-                                <th class="text-center">Nature Pièce</th>
-                                <th class="text-center">N° Pièce</th>
-                                <th class="text-center">Etat civil</th>
-                                <th class="text-center">Mode paiement</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -39,11 +34,6 @@
                                 <td class="text-start">{{ personal.genre|capitalize }}</td>
                                 <td class="text-center">{{ personal.birthday|date('d/m/Y') }}</td>
                                 <td class="text-start">{{ personal.lieuNaissance|capitalize }}</td>
-                                <td class="text-center">{{ personal.refCNPS|upper }}</td>
-                                <td class="text-start">{{ personal.piece|upper }}</td>
-                                <td class="text-center">{{ personal.refPiece|upper }}</td>
-                                <td class="text-start">{{ personal.etatCivil|capitalize }}</td>
-                                <td class="text-start">{{ personal.modePaiement|capitalize }}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -69,181 +59,26 @@
                         </table>
                     </fieldset>
                     <br>
-                    {% if personal.etatCivil == 'MARIEE' %}
-                        <fieldset>
-                            <legend>Situation familiale du salarié</legend>
-                            <table class="table table-bordered table-sm">
-                                <thead class="table-light">
-                                <tr style="font-size: 11px">
-                                    <th class="text-center">Nom & prénoms du conjoint</th>
-                                    <th class="text-center">N° Certificat mariage</th>
-                                    <th class="text-center">Extrait d’acte mariage</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr style="font-size: 10px">
-                                    <td class="text-start">{{ personal.conjoint }}</td>
-                                    <td class="text-center">{{ personal.numCertificat }}</td>
-                                    <td class="text-start">{{ personal.numExtraitActe }}</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </fieldset>
-                        <br>
-                    {% endif %}
-
                     <fieldset>
-                        <legend>Catégorie socio professionnelle du salarié</legend>
+                        <legend>Information suplementaire du salarié</legend>
                         <table class="table table-bordered table-sm">
                             <thead class="table-light">
                             <tr style="font-size: 11px">
                                 <th class="text-center">Catégorie</th>
-                                <th class="text-center">Niveau de formation</th>
-                                <th class="text-center">Poste</th>
+                                {#<th class="text-center">Poste</th>#}
                                 <th class="text-center">Département ou Service</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr style="font-size: 10px">
-                                <td class="text-start"> ({{ personal.categorie.categorySalarie }})
-                                    - {{ personal.categorie.intitule }}</td>
-                                <td class="text-start">{{ personal.niveauFormation|capitalize }}</td>
-                                <td class="text-start">{{ personal.job|capitalize }}</td>
-                                <td class="text-start">{{ personal.workplace|capitalize }}</td>
+                                <td class="text-start"> ({{ personal.categorie.libelle|capitalize  }})</td>
+                                {#<td class="text-start">{{ personal.fonction.libelle|capitalize }}</td> #}
+                                <td class="text-start">{{ personal.service.libelle|capitalize }}</td>
                             </tr>
                             </tbody>
                         </table>
                     </fieldset>
                     <br>
-                    <fieldset>
-                        <legend>Contrat du salarié</legend>
-                        <table class="table table-bordered table-sm">
-                            <thead class="table-light">
-                            <tr style="font-size: 11px">
-                                <th class="text-center">Type de contrat</th>
-                                <th class="text-center">Date d’embauche</th>
-                                <th class="text-center">Date d’effet</th>
-                                <th class="text-center">Type de temps contractuel</th>
-                                <th class="text-center">Référence contrat</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr style="font-size: 10px">
-                                <td class="text-start">{{ personal.contract.typeContrat|upper }}</td>
-                                <td class="text-center">{{ personal.contract.dateEmbauche|date('d/m/Y') }}</td>
-                                <td class="text-center">{{ personal.contract.dateEffet|date('d/m/Y') }}</td>
-                                <td class="text-start">{{ personal.contract.tempsContractuel|capitalize }}</td>
-                                <td class="text-start">{{ personal.contract.refContract|upper }}</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </fieldset>
-                    <br>
-                    {% if personal.salary.detailSalaries %}
-                        <fieldset>
-                            <legend>Primes du salarié</legend>
-                            <table class="table table-bordered table-sm">
-                                <thead class="table-light">
-                                <tr style="font-size: 11px">
-                                    <th class="text-center">Intitulé</th>
-                                    <th class="text-center">Montant</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for detail in personal.salary.detailSalaries %}
-                                    <tr style="font-size: 10px">
-                                        <td class="text-start">{{ detail.prime.intitule }}</td>
-                                        <td class="text-end">{{ detail.amountPrime|number_format(0, ',', ' ') }}</td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                                <tfoot>
-                                <tr style="font-size: 11px">
-                                    <th colspan="1" class="text-center">TOTAL</th>
-                                    <th class="text-end">{{ personal.salary.totalPrimeJuridique|number_format(0, ',', ' ') }}</th>
-                                </tr>
-                                </tfoot>
-                            </table>
-                        </fieldset>
-                        <br>
-                    {% endif %}
-
-                    {% if personal.salary.detailSalaries %}
-                        <fieldset>
-                            <legend>Autres prime du salarié</legend>
-                            <table class="table table-bordered table-sm">
-                                <thead class="table-light">
-                                <tr style="font-size: 11px">
-                                    <th class="text-center">Intitule</th>
-                                    <th class="text-center">Montant</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for detail in personal.salary.detailPrimeSalaries %}
-                                    <tr style="font-size: 10px">
-                                        <td class="text-start">{{ detail.prime.intitule }}</td>
-                                        <td class="text-end">{{ detail.amount|number_format(0, ',', ' ') }}</td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                                <tfoot>
-                                <tr style="font-size: 11px">
-                                    <th colspan="1" class="text-center">TOTAL</th>
-                                    <th class="text-end">{{ personal.salary.totalAutrePrimes|number_format(0, ',', ' ') }}</th>
-                                </tr>
-                                </tfoot>
-                            </table>
-                        </fieldset>
-                        <br>
-                    {% endif %}
-                    {% if personal.salary.detailRetenueForfetaires %}
-                        <fieldset>
-                            <legend>Assurance salarié</legend>
-                            <table class="table table-bordered table-sm">
-                                <thead class="table-light">
-                                <tr style="font-size: 11px">
-                                    <th class="text-center">Intitulé</th>
-                                    <th class="text-center">Montant</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for retenue in personal.salary.detailRetenueForfetaires %}
-                                    <tr style="font-size: 10px">
-                                        <td class="text-start">{{ retenue.retenuForfetaire.name }}</td>
-                                        <td class="text-end" style="font-weight: bold">{{ retenue.amount|number_format(0, ',', ' ') }}</td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </fieldset>
-                        <br>
-                    {% endif %}
-
-                    <fieldset>
-                        <legend>Détail élement de salaire</legend>
-                        <table class="table table-bordered table-sm">
-                            <thead class="table-light">
-                            <tr style="font-size: 11px">
-                                <th class="text-center">Salaire catégoriel</th>
-                                <th class="text-center">Sursalaire</th>
-                                <th class="text-center">Prime de transport</th>
-                                <th class="text-center">Avantage en nature</th>
-                                <th class="text-center">Salaire brut</th>
-                                <th class="text-center">Salaire brut Imposable</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr style="font-size: 10px">
-                                <td class="text-end" style="font-weight: bold">{{ personal.categorie.amount|number_format(0, ',', ' ') }}</td>
-                                <td class="text-end" style="font-weight: bold">{{ personal.salary.sursalaire|number_format(0, ',', ' ') }}</td>
-                                <td class="text-end" style="font-weight: bold">{{ personal.salary.primeTransport|number_format(0, ',', ' ') }}</td>
-                                <td class="text-center" >{{ personal.salary.avantage }} </td>
-                                <td class="text-end" style="font-weight: bold">{{ personal.salary.brutAmount|number_format(0, ',', ' ') }}</td>
-                                <td class="text-end" style="font-weight: bold">{{ personal.salary.brutImposable|number_format(0, ',', ' ') }}</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </fieldset>
                 </div>
                 <div class="card-footer">
                     <a href="{{ path('personal_edit', {'uuid': personal.uuid}) }}"

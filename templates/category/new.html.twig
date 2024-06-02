@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Modifier un salarié{% endblock %}
+{% block title %}Créer catégorie professionnelle{% endblock %}
 
 {% block body %}
     <div class="row">
@@ -10,16 +10,16 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        Modifier salarié {{ personal.matricule|upper }}
+                        CREER UNE CATEGORIE PROFESSIONNELLE
                     </h5>
                 </div>
                 <div class="card-body">
-                    {{ include('personal/_form.html.twig') }}
+                    {{ include('category/_form.html.twig') }}
                 </div>
                 <div class="card-footer">
                     <button type="submit"
                             class="btn btn-primary float-end">{{ button_label|default('Enregistrer') }}</button>
-                    <a href="{{ path('personal_index') }}"
+                    <a href="{{ path('app_home') }}"
                        class="btn btn-info float-end me-2" style="color: white">Retour</a>
                 </div>
             </div>
@@ -27,3 +27,5 @@
         </div>
     </div>
 {% endblock %}
+
+

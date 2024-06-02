@@ -2,68 +2,51 @@
 
 namespace App\Form;
 
+use App\Entity\Category;
+use App\Entity\Fonction;
 use App\Entity\Personal;
-use App\Form\CustomType\DateCustomType;
-use App\Utils\Status;
+use App\Entity\Service;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 class PersonalType extends AbstractType
 {
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('matricule', TextType::class, [
-                'constraints' => [
-                    new NotBlank()
-                ]
+            ->add('matricule')
+            ->add('firstName')
+            ->add('lastName')
+            ->add('genre')
+            ->add('birthday', null, [
+                'widget' => 'single_text',
             ])
-            ->add('firstName', TextType::class, [
-                'constraints' => [
-                    new NotBlank()
-                ]
-            ])
-            ->add('lastName', TextType::class, [
-                'constraints' => [
-                    new NotBlank()
-                ]
-            ])
-            ->add('genre', ChoiceType::class, [
+            ->add('lieuNaissance')
+            ->add('address')
+            ->add('telephone')
+            ->add('email')
+            ->add('categorie', EntityType::class, [
+                'class' => Category::class,
                 'attr' => [
                     'data-plugin' => 'customselect',
                 ],
-                'choices' => [
-                    'Masculin' => Status::MASCULIN,
-                    'Féminin' => Status::FEMININ
+            ])
+            ->add('service', EntityType::class, [
+                'class' => Service::class,
+                'attr' => [
+                    'data-plugin' => 'customselect',
                 ],
-                'placeholder' => '--- Sélectionner un genre ---',
-                'required' => false,
-                'constraints' => [
-                    new NotBlank()
-                ]
             ])
-            ->add('birthday', DateCustomType::class, [
-                'required' => false
+            ->add('fonctions', EntityType::class, [
+                'class' => Fonction::class,
+                'attr' => [
+                    'data-plugin' => 'customselect',
+                ],
+                'multiple' => true,
             ])
-            ->add('lieuNaissance', TextType::class, [
-                'required' => false
-            ])
-          
-            ->add('address', TextType::class, [
-                'required' => false
-            ])
-            ->add('telephone', TextType::class, [
-                'required' => false
-            ])
-            ->add('email', TextType::class, [
-                'required' => false
-            ]);
-        
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

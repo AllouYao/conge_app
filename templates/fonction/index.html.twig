@@ -1,0 +1,138 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}LISTE DES CATEGORIES PROFESSIONNELLE{% endblock %}
+{% block stylesheets %}
+    <style>
+        #dataGridConge {
+            border-width: 50px;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title-custom" style="color: white">
+                        <i data-feather="list"></i>
+                        LISTE FONCTION
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="dataFonction"></div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('fonction_new') }}" class="btn btn-primary float-end"
+                       style="color: white">Nouveau</a>
+                    <a href="{{ path('app_home') }}"
+                       class="btn btn-info float-end me-2" style="color: white">Retour</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        $(document).ready(function () {
+            let debut;
+            let fin;
+            $("#dataFonction").dxDataGrid({
+                dataSource: `{{ url('fonction_index_api') }}`,
+                showBorders: true,
+                height: 300,
+                scrolling: {
+                    columnRenderingMode: 'virtual',
+                    mode: "virtual"
+                },
+                groupPanel: {
+                    visible: true
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true,
+                    formats: ['xlsx'],
+                },
+                onExporting(e) {
+                    if (e.format === 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('FONCTION');
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                            customizeCell: function (options) {
+                                const {gridCell, excelCell} = options;
+                                if (gridCell.rowType === 'data' && typeof gridCell.value === "number") {
+                                    excelCell.text = formatNumber(gridCell.value)
+                                    excelCell.font = {size: 9};
+                                    excelCell.alignment = {horizontal: 'left'};
+                                }
+                            }
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then(function (buffer) {
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `CONGES PLANIFIES ${debut ?? " "} - ${fin ?? " "}.xlsx`);
+                            });
+                        });
+                        e.cancel = true;
+                    }
+                },
+                grouping: {
+                    autoExpandAll: true,
+                },
+                searchPanel: {
+                    visible: true,
+                    placeholder: 'Rechercher...',
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                paging: {
+                    pageSize: 10,
+                },
+                allowColumnReordering: true,
+                allowColumnResizing: true,
+                columnAutoWidth: true,
+                columns: [
+                    {
+                        caption: 'N°Ordre',
+                        alignment: 'center',
+                        dataType: 'number',
+                        dataField: 'index',
+                        fixed: true
+                    },
+                    {
+                        caption: 'Code',
+                        alignment: 'left',
+                        dataType: 'string',
+                        dataField: 'code',
+                        fixed: true
+                    },
+                    {
+                        caption: 'Libellé',
+                        dataType: 'string',
+                        dataField: 'libelle',
+                        alignment: 'center',
+                    },
+                    {
+                        dataField: 'modifier',
+                        caption: 'Modifier',
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<a>")
+                                .html('<i data-feather="edit" style="color: #C9971C"></i>')
+                                .attr("href", options.data.modifier)
+                                .appendTo(container);
+                            feather.replace();
+                        },
+                    },
+                ],
+            })
+        })
+    </script>
+
+{% endblock %}

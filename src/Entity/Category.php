@@ -24,17 +24,18 @@ class Category
 
     #[ORM\Column(length: 255)]
     private ?string $libelle = null;
-
-
+    #[ORM\Column(length: 255,nullable:true)]
+    private ?string $code = null;
     #[ORM\OneToMany(mappedBy: 'categorie', targetEntity: Personal::class)]
     private Collection $personals;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 2)]
-    private ?string $amount = null;
 
     public function __construct()
     {
         $this->personals = new ArrayCollection();
+    }
+    public function __toString(): string
+    {
+        return $this->libelle;
     }
 
     public function getId(): ?int
@@ -44,12 +45,23 @@ class Category
 
     public function getLibelle(): ?string
     {
-        return $this->intitule;
+        return $this->libelle;
     }
 
-    public function setLibelle(string $intitule): static
+    public function setLibelle(string $libelle): static
     {
-        $this->intitule = $intitule;
+        $this->libelle = $libelle;
+
+        return $this;
+    }
+    public function getCode(): ?string
+    {
+        return $this->code;
+    }
+
+    public function setCode(string $code): static
+    {
+        $this->code = $code;
 
         return $this;
     }
@@ -84,22 +96,9 @@ class Category
         return $this;
     }
 
-    public function __toString(): string
-    {
-        return $this->intitule;
-    }
+  
 
-    public function getAmount(): ?string
-    {
-        return $this->amount;
-    }
-
-    public function setAmount(string $amount): static
-    {
-        $this->amount = $amount;
-
-        return $this;
-    }
+  
 
   
 }

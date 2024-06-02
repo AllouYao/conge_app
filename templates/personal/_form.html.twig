@@ -34,23 +34,47 @@
             {{ form_errors(form.lieuNaissance) }}
         </div>
     </div>
+</fieldset>
+<fieldset>
+    <legend>Coordonnée du salarié</legend>
     <div class="mb-2 row">
-        <label class="col-md-1 col-form-label">N° CNPS </label>
+        <label class="col-md-1 col-form-label">Adresse <span class="text-danger">*</span></label>
         <div class="col-md-3">
-            {{ form_widget(form.refCNPS) }}
-            {{ form_errors(form.refCNPS) }}
+            {{ form_widget(form.address) }}
+            {{ form_errors(form.address) }}
         </div>
-        <label class="col-md-1 col-form-label">Nature pièce </label>
+        <label class="col-md-1 col-form-label">Email <span class="text-danger">*</span></label>
         <div class="col-md-3">
-            {{ form_widget(form.piece) }}
-            {{ form_errors(form.piece) }}
+            {{ form_widget(form.email) }}
+            {{ form_errors(form.email) }}
         </div>
-        <label class="col-md-1 col-form-label">N° pièce </label>
+        <label class="col-md-1 col-form-label">Téléphone <span class="text-danger">*</span></label>
         <div class="col-md-3">
-            {{ form_widget(form.refPiece) }}
-            {{ form_errors(form.refPiece) }}
+            {{ form_widget(form.telephone) }}
+            {{ form_errors(form.telephone) }}
         </div>
     </div>
 </fieldset>
+<fieldset>
+    <legend>Information supplementaire</legend>
+    <div class="mb-2 row">
+        <label class="col-md-1 col-form-label">Catégorie professionelle <span class="text-danger">*</span></label>
+        <div class="col-md-3">
+            {{ form_widget(form.categorie) }}
+            {{ form_errors(form.categorie) }}
+        </div>
+        <label class="col-md-1 col-form-label">Service <span class="text-danger">*</span></label>
+        <div class="col-md-3">
+            {{ form_widget(form.service) }}
+            {{ form_errors(form.service) }}
+        </div>
+        <label class="col-md-1 col-form-label">Fonction <span class="text-danger">*</span></label>
+        <div class="col-md-3">
+            {{ form_widget(form.fonctions) }}
+            {{ form_errors(form.fonctions) }}
+        </div>
+    </div>
+</fieldset>
+
 
 

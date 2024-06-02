@@ -6,7 +6,6 @@ use App\Entity\Personal;
 use App\Form\PersonalType;
 use App\Repository\PersonalRepository;
 use App\Service\MatriculeGenerator;
-use App\Utils\Status;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -16,13 +15,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/dossier/personal', name: 'personal_')]
+#[Route('personal', name: 'personal_')]
 class PersonalController extends AbstractController
 {
     private PersonalRepository $personalRepository;
 
     public function __construct(
-        PersonalRepository               $personalRepository,
+        PersonalRepository $personalRepository,
+        private EntityManagerInterface $entityManager,
+
     )
     {
         $this->personalRepository = $personalRepository;
@@ -31,9 +32,9 @@ class PersonalController extends AbstractController
     /**
      * @throws NonUniqueResultException
      */
-    #[Route('/{uuid}/print', name: 'print_salary_info', methods: ['GET'])]
+    #[Route('/{uuid}/print', name: 'print', methods: ['GET'])]
     public function print(
-        Personal                    $personal,
+        Personal $personal,
     ): Response
     {
        
@@ -44,66 +45,58 @@ class PersonalController extends AbstractController
         $age = $personal->getBirthday() ? $personal->getBirthday()->diff($today)->y : '';
 
 
-        return $this->render('dossier_personal/personal/print.html.twig', [
+        return $this->render('personal/print.html.twig', [
             'personals' => $personal,
             'index' => $index,
             'age' => $age,
         ]);
     }
 
-    #[Route('/api/salaried_book/', name: 'salaried_book', methods: ['GET'])]
+    #[Route('/index/api', name: 'index_api', methods: ['GET'])]
     public function getPersonalSalaried(): JsonResponse
     {
-        $personal = $this->personalRepository->findPersonalSalaried();
-        $personalSalaried = [];
-        foreach ($personal as $value => $item) {
-            $personalSalaried[] = [
+        $personals = $this->personalRepository->findAll();
+        $personalData = [];
+        $index=0;
+        foreach ($personals as $personal) {
+
+            $fonctions = "";
+
+            foreach($personal->getFonctions() as $fonction){
+                $fonctions =  $fonction->getLibelle();
+            }
+
+            $personalData[] = [
                 /**
                  * Information du salarié
                  */
-                "index" => ++$value,
-                'full_name' => $item['personal_name'] . ' ' . $item['personal_prenoms'],
-                'matricule' => $item['matricule'],
-                'date_embauche' => date_format($item['contrat_date_embauche'], 'd/m/Y'),
-                'fonction' => $item['personal_fonction'],
-                'departement' => $item['personal_service'],
-                'category' => $item['categorie_name'],
-                'date_naissance' => $item['personal_birthday'] ? date_format($item['personal_birthday'], 'd/m/Y') : '',
-                'adresse' => $item['personal_adresse'],
-                'niveau_etude' => $item['personal_niveau_formation'],
-                'compte_banque' => $item['code_banque'] . ' ' . $item['numero_compte'] . ' ' . $item['rib'],
-                'salaire_base' => $item['personal_salaire_base'],
-                'type_contract' => $item['type_contrat'],
-                'category_grade' => $item['categorie_intitule'],
-                'nature_piece' => $item['personal_piece'] . '° ' . $item['personal_numero_piece'],
-                'numero_cnps' => $item['personal_numero_cnps'],
-                'action' => $this->generateUrl('personal_print_salary_info', ['uuid' => $item['uuid']]),
-                'modifier' => $this->generateUrl('personal_edit', ['uuid' => $item['uuid']]),
-                'active' => $item['active'],
-                'personal_id' => $item['personal_id'],
-                'all_enable' => $this->personalRepository->areAllUsersActivated(),
-                'mode_paiement' => $item['mode_paiement'],
-                'sursalaire' => $item['personal_sursalaire']
+                "index" => ++$index,
+                'full_name' => $personal->getLastName() . ' ' . $personal->getFirstName() ,
+                'matricule' => $personal->getMatricule() ,
+                'fonction' => $fonctions,
+                'departement' => $personal->getService()->getLibelle(),
+                'category' => $personal->getCategorie()->getLibelle(),
+                'date_naissance' => $personal->getBirthday() ? date_format($personal->getBirthday(), 'd/m/Y') : 'N\A',
+                'adresse' => $personal->getAddress(),
+                'action' => $this->generateUrl('personal_print', ['uuid' => $personal->getUuid()]),
+                'modifier' => $this->generateUrl('personal_edit', ['uuid' => $personal->getUuid()]),
+                'personal_id' => $personal->getId(),
             ];
         }
-        return new JsonResponse($personalSalaried);
+        return new JsonResponse($personalData);
     }
 
 
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(): Response
     {
-        $status = $this->personalRepository->areAllUsersActivated();
 
-        return $this->render('dossier_personal/personal/index.html.twig', [
-            'status' => $status
-        ]);
+        return $this->render('personal/index.html.twig');
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(
         Request                $request,
-        EntityManagerInterface $entityManager,
         MatriculeGenerator     $matriculeGenerator
     ): Response
     {
@@ -115,13 +108,13 @@ class PersonalController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $entityManager->persist($personal);
-            $entityManager->flush();
+            $this->entityManager->persist($personal);
+            $this->entityManager->flush();
             flash()->addSuccess('Salarié enregistré avec succès.');
             return $this->redirectToRoute('personal_show', ['uuid' => $personal->getUuid()]);
         }
 
-        return $this->render('dossier_personal/personal/new.html.twig', [
+        return $this->render('personal/new.html.twig', [
             'personal' => $personal,
             'form' => $form->createView(),
         ]);
@@ -132,7 +125,7 @@ class PersonalController extends AbstractController
         Personal $personal,
     ): Response
     {
-        return $this->render('dossier_personal/personal/show.html.twig', [
+        return $this->render('personal/show.html.twig', [
             'personal' => $personal,
         ]);
     }
@@ -150,7 +143,7 @@ class PersonalController extends AbstractController
             return $this->redirectToRoute('personal_show', ['uuid' => $personal->getUuid()]);
         }
 
-        return $this->render('dossier_personal/personal/edit.html.twig', [
+        return $this->render('personal/edit.html.twig', [
             'personal' => $personal,
             'form' => $form->createView(),
             'editing' => true

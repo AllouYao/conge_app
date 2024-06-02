@@ -1,0 +1,22 @@
+<fieldset>
+    <div class="row">
+        <div class="col-10">
+            <div class="mb-3 row">
+                <label class="col-md-2 col-form-label" for="example-placeholder">Code<span
+                            class="text-danger">*</span></label>
+                <div class="col-md-4">
+                    {{ form_widget(form.code) }}
+                    {{ form_errors(form.code) }}
+                </div>
+                <label class="col-md-2 col-form-label" for="example-placeholder">Libellé<span
+                            class="text-danger">*</span></label>
+                <div class="col-md-4">
+                    {{ form_widget(form.libelle) }}
+                    {{ form_errors(form.libelle) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+

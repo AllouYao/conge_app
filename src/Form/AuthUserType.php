@@ -34,13 +34,6 @@ class AuthUserType extends AbstractType
                 ],
                 'multiple'=>true,
             ])
-            ->add('categories', EntityType::class, [
-                'class' => CategorySalarie::class,
-                'attr' => [
-                    'data-plugin' => 'customselect',
-                ],
-                'multiple' => true
-            ])
             ->add('active', ChoiceType::class, [
                 'choices' => [
                     'Oui' => true,

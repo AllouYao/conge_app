@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ServiceRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Service
 {
     use Horodatage;
@@ -20,7 +21,10 @@ class Service
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $name = null;
+    private ?string $libelle = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $code = null;
 
     #[ORM\OneToMany(mappedBy: 'service', targetEntity: Personal::class)]
     private Collection $personals;
@@ -29,20 +33,35 @@ class Service
     {
         $this->personals = new ArrayCollection();
     }
+    public function __toString(): string
+    {
+        return $this->libelle;
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getLibelle(): ?string
     {
-        return $this->name;
+        return $this->libelle;
     }
 
-    public function setName(string $name): static
+    public function setLibelle(string $libelle): static
     {
-        $this->name = $name;
+        $this->libelle = $libelle;
+
+        return $this;
+    }
+    public function getCode(): ?string
+    {
+        return $this->code;
+    }
+
+    public function setCode(string $code): static
+    {
+        $this->code = $code;
 
         return $this;
     }
@@ -59,7 +78,7 @@ class Service
     {
         if (!$this->personals->contains($personal)) {
             $this->personals->add($personal);
-            $personal->setWorkplace($this);
+            $personal->setService($this);
         }
 
         return $this;
@@ -69,16 +88,11 @@ class Service
     {
         if ($this->personals->removeElement($personal)) {
             // set the owning side to null (unless already changed)
-            if ($personal->getWorkplace() === $this) {
-                $personal->setWorkplace(null);
+            if ($personal->getService() === $this) {
+                $personal->setService(null);
             }
         }
 
         return $this;
-    }
-
-    public function __toString(): string
-    {
-        return $this->name;
     }
 }

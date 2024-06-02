@@ -40,8 +40,6 @@
         <input id="toggleAllInput" type="hidden" name="toggleAllInput">
     </form>
 
-    <input id="statusPersonnal" type="hidden" name="statusPersonnal" value="{{ status }}">
-
 
 
 
@@ -61,7 +59,7 @@
             const day = date.getDate();
 
             $("#dataGridPersonal").dxDataGrid({
-                dataSource: `{{ url('personal_salaried_book') }}`,
+                dataSource: `{{ url('personal_index_api') }}`,
                 showBorders: true,
                 showColumnLines: true,
                 showRowLines: true,
@@ -152,9 +150,9 @@
                         alignment: 'center',
                     },
                     {
-                        caption: 'Site',
+                        caption: 'Service | departement',
                         dataType: 'string',
-                        dataField: 'departement',
+                        dataField: 'service',
                         alignment: 'left',
                     },
                     {
@@ -164,95 +162,16 @@
                         alignment: 'left',
                     },
                     {
-                        caption: 'Type contrat',
-                        dataType: 'string',
-                        dataField: 'type_contract',
-                        alignment: 'center',
-                    },
-                    {
-                        caption: 'Date embauche',
-                        dataType: 'string',
-                        dataField: 'date_embauche',
-                        alignment: 'center',
-                        width: 120
-                    },
-                    {
-                        caption: 'Ancienneté (en année)',
-                        dataType: 'string',
-                        dataField: 'anciennete',
-                        alignment: 'center',
-                    },
-                    {
-                        caption: 'Numéro CNPS',
-                        dataType: 'string',
-                        dataField: 'numero_cnps',
-                        alignment: 'left',
-                    },
-                    {
                         caption: 'Catégorie',
                         dataType: 'string',
                         dataField: 'category',
                         alignment: 'left',
                     },
-                    {
-                        caption: 'Grade catégoriel',
-                        dataType: 'string',
-                        dataField: 'category_grade',
-                        alignment: 'center',
-                    },
-                    {
-                        caption: 'Salaire catégoriel (Fcfa)',
-                        dataType: 'number',
-                        dataField: 'salaire_base',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                    },
-                    {
-                        caption: 'Sursalaire (Fcfa)',
-                        dataType: 'number',
-                        dataField: 'sursalaire',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                    },
-                    {
-                        caption: 'Mode paiement',
-                        dataType: 'string',
-                        dataField: 'mode_paiement',
-                        alignment: 'left',
-                    },
+                   
                     {
                         caption: 'Actions',
                         alignment: 'center',
                         columns: [
-                            {
-                                headerCellTemplate: $('#statusPersonnal').val() ? $('<div class="form-check form-switch mx-5"><input class="form-check-input toggle-personal-all" type="checkbox" id="toggleAllPersonals" checked value="off"> <label class="form-check-label" for="toggleAllPersonal"></label> </div>') : $('<div class="form-check form-switch mx-5"><input class="form-check-input toggle-personal-all" type="checkbox" id="toggleAllPersonals" value="on"> <label class="form-check-label" for="toggleAllPersonal"></label> </div>'),
-
-                                columns: [
-                                    {
-                                        dataField: 'active',
-                                        caption: 'Activer/Desactiver',
-                                        alignment: 'center',
-                                        cellTemplate: function (container, options) {
-                                            if (options.data.active === true) {
-                                                $(`<div class="form-check form-switch mx-5">`)
-                                                    .html(`<input class="form-check-input toggle-disable " type="checkbox" id="disablePersonal${options.data.personal_id}" checked="checked" value="${options.data.personal_id}"> <label class="form-check-label" for="disablePersonal${options.data.personal_id}"></label> </div>`)
-                                                    .appendTo(container);
-                                                feather.replace();
-                                            } else {
-                                                $(`<div class="form-check form-switch mx-5">`)
-                                                    .html(`<input class="form-check-input toggle-enable" type="checkbox" id="enablePersonal${options.data.personal_id}" value="${options.data.personal_id}"> <label class="form-check-label" for="enablePersonal${options.data.personal_id}"></label> </div>`)
-                                                    .appendTo(container);
-                                                feather.replace();
-                                            }
-
-                                        }
-                                    }
-                                ]
-                            },
                             {
                                 dataField: 'modifier',
                                 caption: 'Modifier',

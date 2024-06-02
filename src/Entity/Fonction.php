@@ -24,7 +24,7 @@ class Fonction
     private ?string $libelle = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Code = null;
+    private ?string $code = null;
 
     /**
      * @var Collection<int, Personal>
@@ -35,6 +35,10 @@ class Fonction
     public function __construct()
     {
         $this->personals = new ArrayCollection();
+    }
+    public function __toString(): string
+    {
+        return $this->libelle;
     }
 
     public function getId(): ?int
@@ -56,12 +60,12 @@ class Fonction
 
     public function getCode(): ?string
     {
-        return $this->Code;
+        return $this->code;
     }
 
-    public function setCode(string $Code): static
+    public function setCode(string $code): static
     {
-        $this->Code = $Code;
+        $this->code = $code;
 
         return $this;
     }

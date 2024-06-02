@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Repository\DossierPersonal\PersonalRepository;
+use App\Repository\PersonalRepository;
 
 class MatriculeGenerator
 {

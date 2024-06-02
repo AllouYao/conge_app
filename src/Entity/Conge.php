@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use App\Entity\User;
-use App\Repository\DossierPersonal\CongeRepository;
+use App\Repository\CongeRepository;
 use App\Utils\Horodatage;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
