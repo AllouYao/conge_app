@@ -46,7 +46,7 @@ class SocietyRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-    public function getFirstResult(): Society
+    public function getFirstResult(): Society | NULL
     {
         return $this->createQueryBuilder('s')
             ->setMaxResults(1)

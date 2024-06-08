@@ -43,7 +43,7 @@
             let debut;
             let fin;
             $("#dataGridConge").dxDataGrid({
-                dataSource: `{{ url('conge_api_book') }}`,
+                dataSource: `{{ url('conge_index_api') }}`,
                 showBorders: true,
                 height: 300,
                 scrolling: {
@@ -125,15 +125,6 @@
                         alignment: 'center',
                     },
                     {
-                        caption: 'Stock congé disponible (en jours)',
-                        dataType: 'number',
-                        dataField: 'conges_annuel_jour',
-                        alignment: 'center',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                    },
-                    {
                         caption: 'Nbre congé pris (en jours)',
                         dataType: 'number',
                         dataField: 'conges_jour_pris',
@@ -147,33 +138,6 @@
                         dataType: 'string',
                         dataField: 'date_retour',
                         alignment: 'center',
-                    },
-                    {
-                        caption: 'Salaire moyen mensuel',
-                        dataType: 'number',
-                        dataField: 'salaire_moyen',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                    },
-                    {
-                        caption: 'Allocation  congé',
-                        dataType: 'number',
-                        dataField: 'allocation_annuel',
-                        alignment: 'right',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                    },
-                    {
-                        caption: 'Stock de congé restant',
-                        dataType: 'number',
-                        dataField: 'jour_restant',
-                        alignment: 'center',
-                        customizeText: function (data) { 
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
                     },
                     {
                         caption: 'Date de reprise',

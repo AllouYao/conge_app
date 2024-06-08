@@ -3,11 +3,11 @@
 namespace App\Repository;
 
 use App\Entity\Conge;
-use App\Entity\Personal;
 use App\Utils\Status;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
+use App\Entity\Personal;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<Conge>
@@ -35,21 +35,13 @@ class CongeRepository extends ServiceEntityRepository
                 'p.lastName as prenoms',
                 'co.dateRetour as retour',
                 'co.dateDepart as depart',
-                'co.salaireMoyen as salaire_moyen',
-                'co.allocationConge as allocation_conge',
                 'co.isConge as en_conge',
                 'co.dateDernierRetour as dernier_retour',
                 'co.uuid',
                 'co.totalDays',
-                'co.days',
-                'co.remainingVacation',
-                'co.typeConge',
                 'co.dateReprise',
-
-
             ])
             ->join('co.personal', 'p')
-            ->orderBy('co.typeConge', 'ASC')
             ->getQuery()
             ->getResult();
 
@@ -64,14 +56,10 @@ class CongeRepository extends ServiceEntityRepository
                 'personal.lastName as prenoms',
                 'co.dateRetour as retour',
                 'co.dateDepart as depart',
-                'co.salaireMoyen as salaire_moyen',
-                'co.allocationConge as allocation_conge',
                 'co.isConge as en_conge',
                 'co.dateDernierRetour as dernier_retour',
                 'co.uuid',
                 'co.totalDays',
-                'co.days',
-                'co.remainingVacation',
             ])
             ->join('co.personal', 'personal')
             ->where('personal.id = :personal')

@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\PersonalRepository;
 use App\Entity\Category;
 use App\Utils\Horodatage;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\DBAL\Types\Types;
+use App\Repository\PersonalRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: PersonalRepository::class)]
@@ -56,17 +56,26 @@ class Personal
     private Collection $conges;
     #[ORM\ManyToOne(inversedBy: 'personals')]
     private ?Service $service = null;
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateEmbauche = null;
 
     /**
      * @var Collection<int, Fonction>
      */
     #[ORM\ManyToMany(targetEntity: Fonction::class, inversedBy: 'personals')]
     private Collection $fonctions;
+
+    /**
+     * @var Collection<int, Evalution>
+     */
+    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Evaluation::class)]
+    private Collection $evaluations;
     
     public function __construct()
     {
         $this->conges = new ArrayCollection();
         $this->fonctions = new ArrayCollection();
+        $this->evaluations = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -240,6 +249,18 @@ class Personal
         return $this;
     }
 
+    public function getDateEmbauche(): ?\DateTimeInterface
+    {
+        return $this->dateEmbauche;
+    }
+
+    public function setDateEmbauche(?\DateTimeInterface $dateEmbauche): static
+    {
+        $this->dateEmbauche = $dateEmbauche;
+
+        return $this;
+    }
+
 
     /**
      * @return Collection<int, Fonction>
@@ -261,6 +282,36 @@ class Personal
     public function removeFonction(Fonction $fonction): static
     {
         $this->fonctions->removeElement($fonction);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Evalution>
+     */
+    public function getEvaluations(): Collection
+    {
+        return $this->evaluations;
+    }
+
+    public function addEvaluation(Evaluation $evaluation): static
+    {
+        if (!$this->evaluations->contains($evaluation)) {
+            $this->evaluations->add($evaluation);
+            $evaluation->setPersonal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEvaluation(Evaluation $evaluation): static
+    {
+        if ($this->evaluations->removeElement($evaluation)) {
+            // set the owning side to null (unless already changed)
+            if ($evaluation->getPersonal() === $this) {
+                $evaluation->setPersonal(null);
+            }
+        }
 
         return $this;
     }

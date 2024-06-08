@@ -2,22 +2,22 @@
 
 namespace App\Controller;
 
-use App\Entity\Conge;
-use App\Entity\Personal;
+use DateTime;
+use Exception;
+use Carbon\Carbon;
 use App\Entity\User;
+use App\Entity\Conge;
+use IntlDateFormatter;
 use App\Form\CongeType;
+use App\Entity\Personal;
 use App\Repository\CongeRepository;
 use App\Repository\OldCongeRepository;
-use Carbon\Carbon;
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use IntlDateFormatter;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/dossier/personal/conge', name: 'conge_')]
 class CongeController extends AbstractController
@@ -33,7 +33,7 @@ class CongeController extends AbstractController
     }
 
 
-    #[Route('/api/conge_book/', name: 'api_book', methods: ['GET'])]
+    #[Route('/index/api', name: 'index_api', methods: ['GET'])]
     public function getCongesSalaried(): JsonResponse
     {
         $conges = $this->congeRepository->findConge();
@@ -48,13 +48,9 @@ class CongeController extends AbstractController
                 'full_name' => $item['nom'] . ' ' . $item['prenoms'],
                 'date_depart' => date_format($dateDebut, 'd/m/Y'),
                 'date_retour' => date_format($dateRetour, 'd/m/Y'),
-                'conges_annuel_jour' => $item['totalDays'],
-                'conges_jour_pris' => $item['days'],
+                'totalDays' => $item['totalDays'],
                 'dernier_conge' => $item['dernier_retour']? date_format($item['dernier_retour'], 'd/m/Y'):"N/A",
-                'salaire_moyen' => $item['salaire_moyen'],
-                'allocation_annuel' => $item['allocation_conge'],
                 'status' => $item['en_conge'] === true ? 'OUI' : 'NON',
-                'jour_restant' => $item['remainingVacation'],
                 'date_reprise' => $item['dateReprise'],
                 'modifier' => $modifier 
             ];
@@ -68,7 +64,7 @@ class CongeController extends AbstractController
         $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, "MMMM Y");
         $today = Carbon::now();
         $date = $formatter->format($today);
-        return $this->render('dossier_personal/conge/index.html.twig', [
+        return $this->render('/conge/index.html.twig', [
             'conges' => $congeRepository->findAll(),
             'date' => $date
         ]);
@@ -81,7 +77,6 @@ class CongeController extends AbstractController
     public function new(
         Request                $request,
         EntityManagerInterface $entityManager,
-        CongeService           $congeService,
         CongeRepository        $congeRepository
     ): Response
     {
@@ -90,67 +85,20 @@ class CongeController extends AbstractController
          */
 
         $current_user = $this->getUser();
-        $conge = new Conge();
-        $forms = $this->createForm(CongeType::class, $conge);
+        $newConge = new Conge();
+        $forms = $this->createForm(CongeType::class, $newConge);
         $forms->handleRequest($request);
         if ($forms->isSubmitted() && $forms->isValid()) {
-            $personal = $conge->getPersonal();
 
-            $last_conge = $congeRepository->getLastCongeByID($personal->getId(), false);
-            $historique_conge = $this->oldCongeRepository->findOneByPerso($personal->getId()); 
-
-            /** Verifier si le salarié sélectionner est déjà en congés */
-            $conge_active = $congeRepository->getLastCongeByID($personal->getId(), true);
-            if($conge_active) {
-                flash()->addInfo('Mr/Mdm' . $personal->getFirstName() . ' ' . $personal->getLastName() . " 
-                est actuellement en congés n'est donc pas éligible pour une acquisition de congés.");
-                return $this->redirectToRoute('conge_index');
-            }
-
-            $last_date_retour = null;
-
-           
-            /** Verifier si le salarié sélectionner a deja pris un congé pour la meme annnée */
-
-            $lasConge = $this->congeRepository->findOneBy([
-                "personal"=>$personal,
-                "complete"=>false
-            ]);
-
-
-            $lastCongeDate = $lasConge?->getDateDepart();
-            $currentCongeDate = $conge?->getDateDepart();
-
-            if( $lasConge && ($lastCongeDate->format("Y") == $currentCongeDate->format("Y"))){
-                $congeService->congesPayeInSameYear($conge, $lasConge);
-            }elseif ($last_conge or $historique_conge) {
-                $last_date_retour = $last_conge ? $last_conge->getDateRetour() or $historique_conge->getDateRetour() : null;
-                $congeService->congesPayeByLast($conge);
-
-            } else {
-                $congeService->congesPayeFirst($conge);
-            }
-            if (!$congeService->success) {
-
-                flash()->addInfo($congeService->messages);
-                return $this->redirectToRoute('conge_new');
- 
-            }
-
-            $conge
-                ->setDateDernierRetour($last_date_retour)
-                ->setIsConge(true)
-                ->setUser($current_user);
-  
-            $entityManager->persist($conge);
+            $newConge->setIsConge(true);
+            $entityManager->persist($newConge);
             $entityManager->flush();
 
             flash()->addSuccess('Congé ajouter avec succès.');
             return $this->redirectToRoute('conge_index');
         }
 
-        return $this->render('dossier_personal/conge/new.html.twig', [
-            'conge' => $conge,
+        return $this->render('/conge/new.html.twig', [
             'form' => $forms->createView(),
         ]);
     }
@@ -164,7 +112,6 @@ class CongeController extends AbstractController
         Request                $request,
         Conge                  $conge,
         EntityManagerInterface $entityManager,
-        CongeService           $congeService,
         CongeRepository        $congeRepository
     ): Response
     {
@@ -177,18 +124,6 @@ class CongeController extends AbstractController
         $forms->handleRequest($request);
 
         if ($forms->isSubmitted() && $forms->isValid()) {
-            $personal = $conge->getPersonal();
-            $last_conge = $congeRepository->getLastCongeByID($personal->getId(), false);
-            $historique_conge = $this->oldCongeRepository->findOneByPerso($personal->getId());
-            if ($last_conge or $historique_conge) {
-                $congeService->congesPayeByLast($conge); 
-            } else { 
-                $congeService->congesPayeFirst($conge);
-            }
-            if (!$congeService->success) {
-                flash()->addInfo($congeService->messages);
-                return $this->redirectToRoute('conge_edit', ['uuid' => $conge->getUuid()]);
-            }
             $conge->setUser($current_user);
             $entityManager->persist($conge);
             $entityManager->flush();
