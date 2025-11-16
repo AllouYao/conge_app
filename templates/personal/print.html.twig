@@ -22,20 +22,14 @@
                                     <tr style="font-size: x-small; line-height: normal">
                                         <th class="text-center">N° Ordre</th>
                                         <th class="text-center">Nom et prénoms</th>
-                                        <th class="text-center">Date de naissance</th>
-                                        <th class="text-center">Age (en année)</th>
-                                        <th class="text-center">Site</th>
-                                        <th class="text-center">Fonction</th>
-                                        <th class="text-center">Nom banque</th>
-                                        <th class="text-center">Compte banque</th>
+                                        <th class="text-center">Département</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     <tr style="font-size: xx-small; line-height: normal">
                                         <td class="text-center">{{ index }}</td>
                                         <td>{{ personals.firstName|upper }} {{ personals.lastName|upper }}</td>
-                                        <td class="text-center">{{ personals.birthday|date('d/m/Y') }}</td>
-                                        <td class="text-center">{{ age }}</td>
+                                        <td class="text-center">{{ personals.service.libelle }}</td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -50,7 +44,6 @@
                                     <tr style="font-size: xx-small; line-height: normal">
                                         <td class="text-center">{{ personals.matricule }}</td>
                                         <td class="text-center">{{ personals.categorie.libelle }}</td>
-                                        <td>{{ personals.categorie.libelle|upper }}</td>
                                     </tr>
                                     </tbody>
                                 </table>

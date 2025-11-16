@@ -2,14 +2,15 @@
 
 namespace App\Form;
 
+use App\Entity\Service;
 use App\Entity\Category;
 use App\Entity\Fonction;
 use App\Entity\Personal;
-use App\Entity\Service;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class PersonalType extends AbstractType
 {
@@ -19,11 +20,16 @@ class PersonalType extends AbstractType
             ->add('matricule')
             ->add('firstName')
             ->add('lastName')
-            ->add('genre')
-            ->add('birthday', null, [
-                'widget' => 'single_text',
+            ->add('genre',ChoiceType::class, [
+                'attr' => [
+                    'data-plugin' => 'customselect',
+                ],
+                'choices' => [
+                    'Masculin' => 'M',
+                    'Féminin' => 'F',
+                ],
+                'placeholder' => 'Choisir le genre',
             ])
-            ->add('lieuNaissance')
             ->add('address')
             ->add('telephone')
             ->add('email')

@@ -1,66 +1,47 @@
-$(document).on('change', '#conge_dateDepart', function() {
-    var dateDepart = new Date($(this).val()); 
-    var totalDays = $('#conge_days').val() ?  $('#conge_days').val(): 0;
-    dateDepart.setDate(dateDepart.getDate() + totalDays); 
-    var dateRetour = formatDate(dateDepart); 
-    $('#conge_dateRetour').val(dateRetour); 
-    $('#conge_dateReprise').val(dateRetour); 
-
-
-    var dateDepart = new Date($('#conge_dateDepart').val()); 
-    var dateRetour = new Date($('#conge_dateRetour').val()); 
-    var totalDay = getFormatDays(dateRetour,dateDepart); 
-    $('#conge_days').val(0); 
-    $('#conge_days').val(totalDay); 
-    setDayReste()
-
-});
-
-
-
-$(document).on('change', '#conge_dateRetour', function() {
-    var dateDepart = new Date($('#conge_dateDepart').val()); 
-    var dateRetour = new Date($('#conge_dateRetour').val()); 
-    var totalDay = getFormatDays(dateRetour,dateDepart); 
-    $('#conge_days').val(totalDay); 
-    $('#conge_dateReprise').val($(this).val()); 
-
-    setDayReste()
-
-    
- });
-$(document).on('change', '#conge_personal', function() {
-
-    setDayReste()
-
-});
-
-function setDayReste(){
-    var conge_remaining =  $('#conge_remaining').val()
-    var jourPris =  $('#conge_days').val()
-
-    var resteJour = conge_remaining - jourPris
-    $('#conge_congeReste').val(resteJour)
-}
-
 $(document).ready(function() {
-})
+    // Fonction pour remplir les informations du personal
+    function fillPersonalInfo(personalId) {
+        // Réinitialiser les champs si aucune sélection
+        if (!personalId || personalId === '') {
+            $('#conge_name').val('');
+            $('#conge_hireDate').val('');
+            $('#conge_category').val('');
+            return;
+        }
 
-function formatDate(date) {
-    var year = date.getFullYear();
-    var month = ('0' + (date.getMonth() + 1)).slice(-2);
-    var day = ('0' + date.getDate()).slice(-2);
-    return year + '-' + month + '-' + day;
-}
+        // Appeler l'API pour récupérer les informations du personal
+        $.ajax({
+            url: '/dossier/personal/conge/personal/' + personalId + '/info',
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                // Remplir les champs avec les données reçues
+                $('#conge_name').val(data.name || '');
+                $('#conge_hireDate').val(data.hireDate || '');
+                $('#conge_category').val(data.category || '');
+            },
+            error: function(xhr, status, error) {
+                console.error('Erreur lors de la récupération des informations du personal:', error);
+                // Réinitialiser les champs en cas d'erreur
+                $('#conge_name').val('');
+                $('#conge_hireDate').val('');
+                $('#conge_category').val('');
+            }
+        });
+    }
 
-function getFormatDays(date1,date2) {
-    var time1 = date1.getTime();
-    var time2 = date2.getTime();
-    var diffInMilliseconds = time1 - time2;
-    // Conversion de la différence en jours
-    var msInDay = 24 * 60 * 60 * 1000;
-    var diffInDays = diffInMilliseconds / msInDay;
-    // Arrondir la différence en jours
-    diffInDays = Math.floor(diffInDays);
-    return diffInDays;
-}
+    // Attendre que Select2 soit initialisé (si le plugin customselect est utilisé)
+    setTimeout(function() {
+        const $personalSelect = $('#conge_personal');
+        
+        // Écouter le changement de sélection (fonctionne avec Select2 et select standard)
+        $personalSelect.on('change', function() {
+            fillPersonalInfo($(this).val());
+        });
+        
+        // Écouter aussi l'événement Select2 spécifique (si Select2 est utilisé)
+        $personalSelect.on('select2:select', function(e) {
+            fillPersonalInfo(e.params.data.id);
+        });
+    }, 100);
+});

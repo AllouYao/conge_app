@@ -41,14 +41,9 @@ class PersonalController extends AbstractController
         $personalSalaried = $this->getPersonalSalaried()->getContent();
         $index = $personalSalaried[10];
 
-        $today = new DateTime();
-        $age = $personal->getBirthday() ? $personal->getBirthday()->diff($today)->y : '';
-
-
         return $this->render('personal/print.html.twig', [
             'personals' => $personal,
             'index' => $index,
-            'age' => $age,
         ]);
     }
 
@@ -76,7 +71,6 @@ class PersonalController extends AbstractController
                 'fonction' => $fonctions,
                 'departement' => $personal->getService()->getLibelle(),
                 'category' => $personal->getCategorie()->getLibelle(),
-                'date_naissance' => $personal->getBirthday() ? date_format($personal->getBirthday(), 'd/m/Y') : 'N\A',
                 'adresse' => $personal->getAddress(),
                 'action' => $this->generateUrl('personal_print', ['uuid' => $personal->getUuid()]),
                 'modifier' => $this->generateUrl('personal_edit', ['uuid' => $personal->getUuid()]),
@@ -148,98 +142,6 @@ class PersonalController extends AbstractController
             'form' => $form->createView(),
             'editing' => true
         ]);
-    }
-
-    #[Route('/enable', name: 'enable', methods: ['POST'])]
-    public function enablePersonal(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        if ($request->request->has('personalEnableInput') && $request->isMethod('POST')) {
-
-            $personalId = $request->request->get("personalEnableInput");
-            $personal = $this->personalRepository->findOneBy(['id' => $personalId]);
-
-            if ($personal) {
-                $personal->setActive(true);
-                $entityManager->persist($personal);
-                $entityManager->flush();
-                flash()->addSuccess('Salarié Activé avec succès.');
-                return $this->redirectToRoute('personal_index');
-            } else {
-                flash()->addWarning('Action impossible !');
-                return $this->redirectToRoute('personal_index');
-            }
-
-        }
-
-        return $this->redirectToRoute('personal_index');
-
-
-    }
-
-    #[Route('/disable', name: 'disable', methods: ['POST'])]
-    public function disablePersonal(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        if ($request->request->has('personalDisableInput') && $request->isMethod('POST')) {
-
-            $personalId = $request->request->get("personalDisableInput");
-            $personal = $this->personalRepository->findOneBy(['id' => $personalId]);
-
-            if ($personal) {
-
-                $personal->setActive(false);
-                $entityManager->persist($personal);
-                $entityManager->flush();
-                flash()->addSuccess('Salarié Désactivé avec succès.');
-                return $this->redirectToRoute('personal_index');
-
-            } else {
-
-                flash()->addWarning('Action impossible !');
-                return $this->redirectToRoute('personal_index');
-
-            }
-
-        }
-
-        return $this->redirectToRoute('personal_index');
-
-    }
-
-    #[Route('/toggle/all', name: 'toggle_all', methods: ['POST'])]
-    public function disableAll(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        if ($request->request->has('toggleAllInput') && $request->isMethod('POST')) {
-
-            $status = $request->request->get("toggleAllInput");
-
-            if ($status == "on") {
-
-                $personals = $this->personalRepository->findAll();
-                foreach ($personals as $personal) {
-                    $personal->setActive(true);
-                    $entityManager->persist($personal);
-                    $entityManager->flush();
-                }
-
-                flash()->addSuccess('Salariés Activés avec succès.');
-
-            } else {
-
-                $personals = $this->personalRepository->findAll();
-                foreach ($personals as $personal) {
-                    $personal->setActive(false);
-                    $entityManager->persist($personal);
-                    $entityManager->flush();
-                }
-
-                flash()->addSuccess('Salariés Désactivés avec succès.');
-            }
-
-            return $this->redirectToRoute('personal_index');
-        }
-
-        return $this->redirectToRoute('personal_index');
-
     }
 
 }

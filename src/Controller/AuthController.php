@@ -14,7 +14,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/auth/user', name: 'auth_user_')]
 class AuthController extends AbstractController

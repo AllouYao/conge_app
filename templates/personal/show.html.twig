@@ -22,8 +22,6 @@
                                 <th class="text-center">Nom</th>
                                 <th class="text-center">Prénom(s)</th>
                                 <th class="text-center">Genre</th>
-                                <th class="text-center">Date de Naissance</th>
-                                <th class="text-center">Lieu de Naissance</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -32,8 +30,6 @@
                                 <td class="text-start">{{ personal.firstName }}</td>
                                 <td class="text-start">{{ personal.lastName }}</td>
                                 <td class="text-start">{{ personal.genre|capitalize }}</td>
-                                <td class="text-center">{{ personal.birthday|date('d/m/Y') }}</td>
-                                <td class="text-start">{{ personal.lieuNaissance|capitalize }}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -65,14 +61,12 @@
                             <thead class="table-light">
                             <tr style="font-size: 11px">
                                 <th class="text-center">Catégorie</th>
-                                {#<th class="text-center">Poste</th>#}
-                                <th class="text-center">Département ou Service</th>
+                                <th class="text-center">Département</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr style="font-size: 10px">
                                 <td class="text-start"> ({{ personal.categorie.libelle|capitalize  }})</td>
-                                {#<td class="text-start">{{ personal.fonction.libelle|capitalize }}</td> #}
                                 <td class="text-start">{{ personal.service.libelle|capitalize }}</td>
                             </tr>
                             </tbody>

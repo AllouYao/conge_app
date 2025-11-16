@@ -2,7 +2,335 @@
 
 {% block title %}Dashboard{% endblock %}
 
-{% block body %}
-
+{% block stylesheets %}
+<style>
+    .apex-charts {
+        min-height: 45px;
+    }
+    .stat-card-mini {
+        position: relative;
+    }
+</style>
 {% endblock %}
 
+{% block body %}
+<div class="content">
+    <!-- Start Content-->
+    <div class="container-fluid">
+        <!-- start page title -->
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box">
+                    <h4 class="page-title">Dashboard</h4>
+                </div>
+            </div>
+        </div>
+        <!-- end page title -->
+
+        <!-- Statistiques principales avec mini-graphiques -->
+        <div class="row">
+            <div class="col-md-6 col-xl-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex">
+                            <div class="flex-grow-1">
+                                <span class="text-muted text-uppercase fs-12 fw-bold">Total Congés</span>
+                                <h3 class="mb-0">{{ totalConges }}</h3>
+                            </div>
+                            <div class="align-self-center flex-shrink-0">
+                                <div class="apex-charts" style="min-height: 45px;">
+                                    <canvas id="total-conges-chart" width="90" height="45"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex">
+                            <div class="flex-grow-1">
+                                <span class="text-muted text-uppercase fs-12 fw-bold">En Attente</span>
+                                <h3 class="mb-0">{{ congesEnAttente }}</h3>
+                            </div>
+                            <div class="align-self-center flex-shrink-0">
+                                <div class="apex-charts" style="min-height: 45px;">
+                                    <canvas id="en-attente-chart" width="90" height="45"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex">
+                            <div class="flex-grow-1">
+                                <span class="text-muted text-uppercase fs-12 fw-bold">Validés</span>
+                                <h3 class="mb-0">{{ congesValides }}</h3>
+                            </div>
+                            <div class="align-self-center flex-shrink-0">
+                                <div class="apex-charts" style="min-height: 45px;">
+                                    <canvas id="valides-chart" width="90" height="45"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex">
+                            <div class="flex-grow-1">
+                                <span class="text-muted text-uppercase fs-12 fw-bold">En Cours</span>
+                                <h3 class="mb-0">{{ congesEnCours }}</h3>
+                            </div>
+                            <div class="align-self-center flex-shrink-0">
+                                <div class="apex-charts" style="min-height: 45px;">
+                                    <canvas id="en-cours-chart" width="90" height="45"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+       
+
+        <!-- row -->
+        <!-- Congés récents et en cours -->
+        <div class="row">
+            <!-- Congés récents -->
+            <div class="col-xl-5">
+                <div class="card">
+                    <div class="card-body" style="position: relative;">
+                        <div class="dropdown float-end">
+                            
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <a href="{{ path('conge_index') }}" class="dropdown-item">
+                                    <i data-feather="list" class="me-2"></i>Voir tous
+                                </a>
+                            </div>
+                        </div>
+                        <h5 class="card-title mt-0 mb-0 header-title p-2">Congés récents</h5>
+                        <div class="table-responsive mt-4">
+                            <table class="table table-hover table-nowrap mb-0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Salarié</th>
+                                        <th scope="col">Date départ</th>
+                                        <th scope="col">Date retour</th>
+                                        <th scope="col">Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for conge in derniersConges %}
+                                    <tr>
+                                        <td>{{ conge.personal.firstName }} {{ conge.personal.lastName }}</td>
+                                        <td>{{ conge.dateDepart|date('d/m/Y') }}</td>
+                                        <td>{{ conge.dateRetour|date('d/m/Y') }}</td>
+                                        <td>
+                                            {% if conge.status == 'Validé' %}
+                                                <span class="badge bg-success py-1">Validé</span>
+                                            {% elseif conge.status == 'Refusé' %}
+                                                <span class="badge bg-danger py-1">Refusé</span>
+                                            {% else %}
+                                                <span class="badge bg-warning py-1">En attente</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center">Aucun congé enregistré</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Congés en cours -->
+            <div class="col-xl-7">
+                <div class="card">
+                    <div class="card-body">
+                      
+                        <h5 class="card-title mt-0 mb-0 header-title p-2">Congés en cours</h5>
+                        <div class="table-responsive mt-4">
+                            <table class="table table-hover table-nowrap mb-0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Salarié</th>
+                                        <th scope="col">Date départ</th>
+                                        <th scope="col">Date retour</th>
+                                        <th scope="col">Jours</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for conge in congesActifs %}
+                                    <tr>
+                                        <td>{{ conge.personal.firstName }} {{ conge.personal.lastName }}</td>
+                                        <td>{{ conge.dateDepart|date('d/m/Y') }}</td>
+                                        <td>{{ conge.dateRetour|date('d/m/Y') }}</td>
+                                        <td><strong>{{ conge.totalDays }} jours</strong></td>
+                                        <td>
+                                            <a href="{{ path('conge_edit', {'uuid': conge.uuid}) }}" class="btn btn-sm btn-light">
+                                                <i data-feather="edit"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">Aucun congé en cours</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- container -->
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+    $(document).ready(function() {
+        feather.replace();
+
+        // Fonction pour créer des mini-graphiques sparkline
+        function createSparklineChart(canvasId, data, color) {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: data.length}, (_, i) => ''),
+                    datasets: [{
+                        data: data,
+                        borderColor: color,
+                        backgroundColor: color + '20',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Générer des données aléatoires pour les mini-graphiques
+        function generateSparklineData(value, length = 12) {
+            const data = [];
+            const base = value / length;
+            for (let i = 0; i < length; i++) {
+                data.push(base + Math.random() * base * 0.5);
+            }
+            return data;
+        }
+
+        // Mini-graphiques pour les cartes de statistiques
+        createSparklineChart('total-conges-chart', generateSparklineData({{ totalConges }}), '#727cf5');
+        createSparklineChart('en-attente-chart', generateSparklineData({{ congesEnAttente }}), '#ffc107');
+        createSparklineChart('valides-chart', generateSparklineData({{ congesValides }}), '#43d39e');
+        createSparklineChart('en-cours-chart', generateSparklineData({{ congesEnCours }}), '#00d9ff');
+
+        // Graphique principal : Évolution des congés
+        const ctxEvolution = document.getElementById('evolutionChart');
+        if (ctxEvolution) {
+            new Chart(ctxEvolution, {
+                type: 'line',
+                data: {
+                    labels: {{ congesParMois|map(c => c.mois)|json_encode|raw }},
+                    datasets: [{
+                        label: 'Nombre de congés',
+                        data: {{ congesParMois|map(c => c.count)|json_encode|raw }},
+                        borderColor: '#43d39e',
+                        backgroundColor: 'rgba(67, 211, 158, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Graphique en camembert : Répartition par statut
+        const ctxStatut = document.getElementById('statutChart');
+        if (ctxStatut) {
+            new Chart(ctxStatut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['En attente', 'Validé', 'Refusé'],
+                    datasets: [{
+                        data: [
+                            {{ congesParStatut['En attente'] }},
+                            {{ congesParStatut['Validé'] }},
+                            {{ congesParStatut['Refusé'] }}
+                        ],
+                        backgroundColor: [
+                            '#ffc107',
+                            '#43d39e',
+                            '#f77e53'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

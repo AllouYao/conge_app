@@ -11,10 +11,6 @@
         </div>
     </div>
     <div class="mb-2 row">
-        <label class="col-md-2 col-form-label">Date d'embauche <span class="text-danger">*</span></label>
-        <div class="col-md-4">
-            {{ form_widget(form.hireDate) }}
-        </div>
         <label class="col-md-2 col-form-label">Catégorie salarié <span class="text-danger">*</span></label>
         <div class="col-md-4">
             {{ form_widget(form.category) }}
@@ -24,23 +20,14 @@
 <fieldset>
     <legend>Détail du congé</legend>
     <div class="mb-2 row">
-        <label class="col-md-2 col-form-label">Date dernier retour <span class="text-danger">*</span></label>
-        <div class="col-md-4">
-            {{ form_widget(form.dernierRetour) }}
-        </div>
         <label class="col-md-2 col-form-label">Date départ <span class="text-danger">*</span></label>
         <div class="col-md-4">
             {{ form_widget(form.dateDepart) }}
         </div>
-    </div>
-    <div class="mb-2 row">
         <label class="col-md-2 col-form-label">Date retour <span class="text-danger">*</span></label>
         <div class="col-md-4">
             {{ form_widget(form.dateRetour) }}
         </div>
-        <label class="col-md-2 col-form-label">Date réprise <span class="text-danger">*</span></label>
-        <div class="col-md-4">
-            {{ form_widget(form.dateReprise) }}
-        </div>
     </div>
+    {{ form_widget(form.totalDays) }}
 </fieldset>

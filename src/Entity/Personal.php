@@ -35,12 +35,6 @@ class Personal
     #[ORM\Column(length: 255)]
     private ?string $genre = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $birthday = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $lieuNaissance = null;
-
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $address = null;
 
@@ -65,10 +59,7 @@ class Personal
     #[ORM\ManyToMany(targetEntity: Fonction::class, inversedBy: 'personals')]
     private Collection $fonctions;
 
-    /**
-     * @var Collection<int, Evalution>
-     */
-    #[ORM\OneToMany(mappedBy: 'personal', targetEntity: Evaluation::class)]
+   
     private Collection $evaluations;
     
     public function __construct()
@@ -136,29 +127,7 @@ class Personal
         return $this;
     }
 
-    public function getBirthday(): ?\DateTimeInterface
-    {
-        return $this->birthday;
-    }
-
-    public function setBirthday(?\DateTimeInterface $birthday): static
-    {
-        $this->birthday = $birthday;
-
-        return $this;
-    }
-
-    public function getLieuNaissance(): ?string
-    {
-        return $this->lieuNaissance;
-    }
-
-    public function setLieuNaissance(?string $lieuNaissance): static
-    {
-        $this->lieuNaissance = $lieuNaissance;
-
-        return $this;
-    }
+   
     public function getAddress(): ?string
     {
         return $this->address;
@@ -294,26 +263,8 @@ class Personal
         return $this->evaluations;
     }
 
-    public function addEvaluation(Evaluation $evaluation): static
-    {
-        if (!$this->evaluations->contains($evaluation)) {
-            $this->evaluations->add($evaluation);
-            $evaluation->setPersonal($this);
-        }
+   
 
-        return $this;
-    }
-
-    public function removeEvaluation(Evaluation $evaluation): static
-    {
-        if ($this->evaluations->removeElement($evaluation)) {
-            // set the owning side to null (unless already changed)
-            if ($evaluation->getPersonal() === $this) {
-                $evaluation->setPersonal(null);
-            }
-        }
-
-        return $this;
-    }
+   
 
 }

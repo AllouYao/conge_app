@@ -33,13 +33,12 @@ class CongeRepository extends ServiceEntityRepository
             ->select([
                 'p.firstName as nom',
                 'p.lastName as prenoms',
-                'co.dateRetour as retour',
                 'co.dateDepart as depart',
+                'co.dateRetour as retour',
                 'co.isConge as en_conge',
-                'co.dateDernierRetour as dernier_retour',
+                'co.status as status',
                 'co.uuid',
                 'co.totalDays',
-                'co.dateReprise',
             ])
             ->join('co.personal', 'p')
             ->getQuery()
@@ -57,7 +56,6 @@ class CongeRepository extends ServiceEntityRepository
                 'co.dateRetour as retour',
                 'co.dateDepart as depart',
                 'co.isConge as en_conge',
-                'co.dateDernierRetour as dernier_retour',
                 'co.uuid',
                 'co.totalDays',
             ])

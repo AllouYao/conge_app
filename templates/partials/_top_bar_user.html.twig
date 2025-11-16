@@ -1,0 +1,42 @@
+<div class="topnav">
+    <div class="container-fluid">
+        <nav class="navbar navbar-light navbar-expand-lg topnav-menu">
+            <div class="collapse navbar-collapse" id="topnav-menu-content">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a href="{{ path('app_home') }}" class="nav-link">
+                            <i data-feather="home"></i> ACCUEIL
+                        </a>
+                    </li>
+
+                    {# DEBUT GESTION DU PERSONNEL #}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle arrow-none" href="#" id="topnav-components" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i data-feather="users"></i>CONGE
+                            <div class="arrow-down"></div>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="topnav-components">
+                            <div class="dropdown">
+                                <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-map"
+                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false">
+                                    Congés
+                                    <div class="arrow-down"></div>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="topnav-map">
+                                    <a href="{{ path('conge_new') }}"
+                                        class="dropdown-item">Créer</a>
+                                    <a href="{{ path('conge_index') }}"
+                                        class="dropdown-item">Liste des congés</a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    {# FIN GESTION DU PERSONNEL #}
+                    
+                </ul>
+            </div>
+        </nav>
+    </div>
+</div>

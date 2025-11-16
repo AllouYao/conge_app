@@ -41,7 +41,7 @@ class FonctionController extends AbstractController
             $fonctionData[] = [
                 'index' => ++$index,
                 'code' => $fonction->getCode(),
-                'libelle' => $fonction->getCode(),
+                'libelle' => $fonction->getLibelle(),
                 'modifier' => $link 
             ];
         }

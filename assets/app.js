@@ -733,15 +733,7 @@ import './js/form.init'
  */
 import './js/add-form-collection';
 import './js/delete.form.collection';
-import './js/dossierPersonal/personnel';
-import './js/dossierPersonal/add_prime_juridique';
-import './js/dossierPersonal/fetchpersonal'
-import './js/dossierPersonal/personal1'
-import './js/dossierPersonal/salary'
-import './js/dossierPersonal/enableDisablePersonal'
-import './js/dossierPersonal/acompte'
 import './js/dossierPersonal/conge'
-import './js/dossierPersonal/etat_salaire'
 
 
 

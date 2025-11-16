@@ -38,7 +38,7 @@ class ServiceController extends AbstractController
             $serviceData[] = [
                 'index' => ++$index,
                 'code' => $service->getCode(),
-                'libelle' => $service->getCode(),
+                'libelle' => $service->getLibelle(),
                 'modifier' => $link 
             ];
         }

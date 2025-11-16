@@ -12,6 +12,7 @@ use App\Form\CongeType;
 use App\Entity\Personal;
 use App\Repository\CongeRepository;
 use App\Repository\OldCongeRepository;
+use App\Repository\PersonalRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -33,6 +34,24 @@ class CongeController extends AbstractController
     }
 
 
+    #[Route('/personal/{id}/info', name: 'personal_info', methods: ['GET'])]
+    public function getPersonalInfo(int $id, PersonalRepository $personalRepository): JsonResponse
+    {
+        $personal = $personalRepository->find($id);
+        
+        if (!$personal) {
+            return new JsonResponse(['error' => 'Personal not found'], 404);
+        }
+
+        $data = [
+            'name' => $personal->getFirstName() . ' ' . $personal->getLastName(),
+            'hireDate' => $personal->getDateEmbauche() ? $personal->getDateEmbauche()->format('d/m/Y') : null,
+            'category' => $personal->getCategorie() ? $personal->getCategorie()->getLibelle() : null,
+        ];
+
+        return new JsonResponse($data);
+    }
+
     #[Route('/index/api', name: 'index_api', methods: ['GET'])]
     public function getCongesSalaried(): JsonResponse
     {
@@ -49,9 +68,7 @@ class CongeController extends AbstractController
                 'date_depart' => date_format($dateDebut, 'd/m/Y'),
                 'date_retour' => date_format($dateRetour, 'd/m/Y'),
                 'totalDays' => $item['totalDays'],
-                'dernier_conge' => $item['dernier_retour']? date_format($item['dernier_retour'], 'd/m/Y'):"N/A",
-                'status' => $item['en_conge'] === true ? 'OUI' : 'NON',
-                'date_reprise' => $item['dateReprise'],
+                'status' => $item['status'],
                 'modifier' => $modifier 
             ];
         }
@@ -90,7 +107,8 @@ class CongeController extends AbstractController
         $forms->handleRequest($request);
         if ($forms->isSubmitted() && $forms->isValid()) {
 
-            $newConge->setIsConge(true);
+            $newConge->setIsConge(false);
+            $newConge->setStatus('En attente');
             $entityManager->persist($newConge);
             $entityManager->flush();
 
@@ -131,12 +149,31 @@ class CongeController extends AbstractController
             return $this->redirectToRoute('conge_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('dossier_personal/conge/edit.html.twig', [
+        return $this->render('/conge/edit.html.twig', [
             'conge' => $conge,
             'form' => $forms->createView(),
         ]);
     }
-   
+    #[Route('/{uuid}/validate', name: 'validate', methods: ['GET'])]
+    public function validate(Conge $conge, EntityManagerInterface $entityManager): Response
+    {
+        $conge->setIsConge(true);
+        $conge->setStatus('Validé');
+        $entityManager->persist($conge);
+        $entityManager->flush();
+        flash()->addSuccess('Congé validé avec succès.');
+        return $this->redirectToRoute('conge_index');
+    }
+    #[Route('/{uuid}/refuse', name: 'refuse', methods: ['GET'])]
+    public function refuse(Conge $conge, EntityManagerInterface $entityManager): Response
+    {
+        $conge->setIsConge(false);
+        $conge->setStatus('Refusé');
+        $entityManager->persist($conge);
+        $entityManager->flush();
+        flash()->addSuccess('Congé refusé avec succès.');
+        return $this->redirectToRoute('conge_index');
+    }
  
 
 }

@@ -18,8 +18,12 @@
 <!-- Begin page -->
 <div id="wrapper">
     {% include 'partials/_header.html.twig' %}
-    {% include 'partials/_top_bar.html.twig' %}
-
+    {% if is_granted('ROLE_ADMIN') %}
+        {% include 'partials/_top_bar_admin.html.twig' %}
+    {% endif %}
+    {% if is_granted('ROLE_USER') %}
+        {% include 'partials/_top_bar_user.html.twig' %}
+    {% endif %}
 
     <!-- ============================================================== -->
     <!-- Start Page Content here -->

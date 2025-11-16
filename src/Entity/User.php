@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Entity\Role;
-use App\Entity\Absence;
-use App\Entity\Conge;
 use App\Utils\Horodatage;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;

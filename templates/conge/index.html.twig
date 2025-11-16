@@ -112,41 +112,19 @@
                         dataField: 'full_name',
                         fixed: true
                     },
-                    {
-                        caption: 'Dernier retour congé',
-                        dataType: 'string',
-                        dataField: 'dernier_conge',
-                        alignment: 'center',
-                    },
+                    
                     {
                         caption: 'Date de départ',
                         dataType: 'string',
                         dataField: 'date_depart',
                         alignment: 'center',
                     },
-                    {
-                        caption: 'Nbre congé pris (en jours)',
-                        dataType: 'number',
-                        dataField: 'conges_jour_pris',
-                        alignment: 'center',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
-                    },
+                  
                     {
                         caption: 'Date de retour',
                         dataType: 'string',
                         dataField: 'date_retour',
                         alignment: 'center',
-                    },
-                    {
-                        caption: 'Date de reprise',
-                        dataType: 'string',
-                        dataField: 'date_reprise',
-                        alignment: 'center',
-                        customizeText: function (data) {
-                            return new Intl.NumberFormat('fr-FR').format(data.value);
-                        },
                     },
                     {
                         caption: 'Statut',
