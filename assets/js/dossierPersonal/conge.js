@@ -34,6 +34,13 @@ $(document).ready(function() {
     setTimeout(function() {
         const $personalSelect = $('#conge_personal');
         
+        // Vérifier si on est sur la page de modification (si le select a déjà une valeur)
+        const selectedPersonalId = $personalSelect.val();
+        if (selectedPersonalId && selectedPersonalId !== '') {
+            // Remplir automatiquement les informations au chargement de la page
+            fillPersonalInfo(selectedPersonalId);
+        }
+        
         // Écouter le changement de sélection (fonctionne avec Select2 et select standard)
         $personalSelect.on('change', function() {
             fillPersonalInfo($(this).val());
@@ -43,5 +50,24 @@ $(document).ready(function() {
         $personalSelect.on('select2:select', function(e) {
             fillPersonalInfo(e.params.data.id);
         });
+        
+        // Écouter l'événement Select2 ready (quand Select2 est complètement initialisé)
+        $personalSelect.on('select2:ready', function() {
+            const selectedId = $personalSelect.val();
+            if (selectedId && selectedId !== '') {
+                fillPersonalInfo(selectedId);
+            }
+        });
     }, 100);
+    
+    // Attendre un peu plus longtemps pour s'assurer que tous les plugins sont chargés
+    setTimeout(function() {
+        const $personalSelect = $('#conge_personal');
+        const selectedPersonalId = $personalSelect.val();
+        if (selectedPersonalId && selectedPersonalId !== '' && 
+            ($('#conge_name').val() === '' || $('#conge_category').val() === '')) {
+            // Si les champs ne sont pas remplis mais qu'un personal est sélectionné, remplir les infos
+            fillPersonalInfo(selectedPersonalId);
+        }
+    }, 500);
 });

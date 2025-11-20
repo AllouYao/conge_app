@@ -133,8 +133,8 @@
                         alignment: 'center',
                         cellTemplate: function(container, options) {
                             var status = options.data.status;
-                            var statusText = status === 'OUI' ? 'En cour' : 'Terminer';
-                            var labelClass = status === 'OUI' ? 'bg-primary' : 'bg-success';
+                            var statusText = status === 'Refusé' ? 'Refusé' : (status === 'En attente' ? 'En attente' : 'Accepté');
+                            var labelClass = status === 'Refusé' ? 'bg-danger' : (status === 'En attente' ? 'bg-warning' : 'bg-success');
 
                             // Créer une structure HTML personnalisée pour la cellule
                             var htmlContent = '<span class="badge ' + labelClass + '">' + statusText + '</span>';

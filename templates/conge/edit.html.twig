@@ -20,16 +20,26 @@
                    
                     <button type="submit"
                             class="btn btn-primary float-end">{{ button_label|default('Enregistrer') }}</button>
-                    <a href="{{ path('conge_index') }}"
-                       class="btn btn-info float-end me-2" style="color: white">Retour</a>
+                    
                     <a href="{{ path('conge_validate', {'uuid': conge.uuid}) }}"
                        class="btn btn-success float-end me-2" style="color: white">
                         Valider
                     </a>
-                    <a href="{{ path('conge_refuse', {'uuid': conge.uuid}) }}"
-                       class="btn btn-success float-end me-2" style="color: white">
-                        Refuser
+                    {%if(conge.status != 'Accepté')%}
+                        <a href="{{ path('conge_refuse', {'uuid': conge.uuid}) }}"
+                        class="btn btn-danger float-end me-2" style="color: white">
+                            Refuser
+                        </a>
+                    {%endif%}
+                    {%if(conge.status == 'Accepté')%}
+                    <a href="{{ path('conge_print', {'uuid': conge.uuid}) }}"
+                       target="_blank"
+                       class="btn btn-secondary float-end me-2" style="color: white">
+                        <i data-feather="printer"></i> Imprimer
                     </a>
+                    {%endif%}
+                    <a href="{{ path('conge_index') }}"
+                       class="btn btn-info float-end me-2" style="color: white">Retour</a>
                 </div>
             </div>
             {{ form_end(form) }}

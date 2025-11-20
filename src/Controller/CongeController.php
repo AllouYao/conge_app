@@ -13,6 +13,7 @@ use App\Entity\Personal;
 use App\Repository\CongeRepository;
 use App\Repository\OldCongeRepository;
 use App\Repository\PersonalRepository;
+use App\Repository\SocietyRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -59,7 +60,7 @@ class CongeController extends AbstractController
         $congeSalaried = [];
         foreach ($conges as $conge => $item) {
             $link = $this->generateUrl('conge_edit', ['uuid' => $item['uuid']]);
-            $modifier = $item['en_conge'] === true ? $link : null;
+            $modifier = $link;
             $dateDebut = $item['depart']; 
             $dateRetour = $item['retour'];
             $congeSalaried[] = [
@@ -94,7 +95,6 @@ class CongeController extends AbstractController
     public function new(
         Request                $request,
         EntityManagerInterface $entityManager,
-        CongeRepository        $congeRepository
     ): Response
     {
         /**
@@ -104,6 +104,7 @@ class CongeController extends AbstractController
         $current_user = $this->getUser();
         $newConge = new Conge();
         $forms = $this->createForm(CongeType::class, $newConge);
+        // get last conge
         $forms->handleRequest($request);
         if ($forms->isSubmitted() && $forms->isValid()) {
 
@@ -158,7 +159,7 @@ class CongeController extends AbstractController
     public function validate(Conge $conge, EntityManagerInterface $entityManager): Response
     {
         $conge->setIsConge(true);
-        $conge->setStatus('Validé');
+        $conge->setStatus('Accepté');
         $entityManager->persist($conge);
         $entityManager->flush();
         flash()->addSuccess('Congé validé avec succès.');
@@ -174,6 +175,24 @@ class CongeController extends AbstractController
         flash()->addSuccess('Congé refusé avec succès.');
         return $this->redirectToRoute('conge_index');
     }
- 
+
+    #[Route('/{uuid}/print', name: 'print', methods: ['GET'])]
+    public function print(Conge $conge, SocietyRepository $societyRepository): Response
+    {
+        $society = $societyRepository->getFirstResult();
+        
+        // Calculer la date de reprise (date de retour + 1 jour)
+        $dateReprise = null;
+        if ($conge->getDateRetour()) {
+            $dateReprise = \DateTime::createFromInterface($conge->getDateRetour());
+            $dateReprise->modify('+1 day');
+        }
+        
+        return $this->render('conge/print.html.twig', [
+            'conge' => $conge,
+            'society' => $society,
+            'dateReprise' => $dateReprise,
+        ]);
+    }
 
 }
