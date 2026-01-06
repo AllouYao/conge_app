@@ -13,7 +13,6 @@ use App\Entity\Personal;
 use App\Repository\CongeRepository;
 use App\Repository\OldCongeRepository;
 use App\Repository\PersonalRepository;
-use App\Repository\SocietyRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -177,10 +176,8 @@ class CongeController extends AbstractController
     }
 
     #[Route('/{uuid}/print', name: 'print', methods: ['GET'])]
-    public function print(Conge $conge, SocietyRepository $societyRepository): Response
+    public function print(Conge $conge): Response
     {
-        $society = $societyRepository->getFirstResult();
-        
         // Calculer la date de reprise (date de retour + 1 jour)
         $dateReprise = null;
         if ($conge->getDateRetour()) {
@@ -190,7 +187,6 @@ class CongeController extends AbstractController
         
         return $this->render('conge/print.html.twig', [
             'conge' => $conge,
-            'society' => $society,
             'dateReprise' => $dateReprise,
         ]);
     }

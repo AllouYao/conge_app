@@ -33,14 +33,14 @@ class SocietyController extends AbstractController
     public function apiSociete(): JsonResponse
     {
         $society = $this->societyRepository->getFirstResult();
-        $url = $this->generateUrl('admin_society_edit', ['uuid' => $society->getUuid()], UrlGeneratorInterface::ABSOLUTE_URL);
+        $url = $this->generateUrl('admin_society_edit', ['uuid' => $society?->getUuid()], UrlGeneratorInterface::ABSOLUTE_URL);
         $apiSociety = [
-            'raison_social' => $society->getRaisonSocial(),
-            'forme' => $society->getForme(),
-            'activity' => $society->getActivity(),
-            'numero_cc' => $society->getNumeroCc(),
-            'telephone' => $society->getTelephone(),
-            'siege' => $society->getSiege(),
+            'raison_social' => $society?->getRaisonSocial(),
+            'forme' => $society?->getForme(),
+            'activity' => $society?->getActivity(),
+            'numero_cc' => $society?->getNumeroCc(),
+            'telephone' => $society?->getTelephone(),
+            'siege' => $society?->getSiege(),
             'modifier' => $url
         ];
 

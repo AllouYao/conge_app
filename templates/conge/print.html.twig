@@ -92,14 +92,15 @@
             <div class="widget">
                 <div class="widget-content">
                     <!-- En-tête avec logo et informations de l'entreprise -->
+                    {% set society = get_society() %}
                     <div class="header-section">
                         <div class="logo-section">
-                            <div class="logo-box">G</div>
+                            <div class="logo-box">{{ society and society.raisonSocial ? society.raisonSocial|first|upper : 'G' }}</div>
                             <div class="company-info">
-                                <h4>{{ society.raisonSocial ?? 'Gremica CI SARL' }}</h4>
-                                <p>Capital social : {{ society.numeroCC ?? '1.000.000 F CFA' }}</p>
-                                <p>{{ society.siege ?? 'Abidjan, Cocody Attoban Zinsou' }}</p>
-                                <p>N°RCCM {{ society.numeroCC | default('1747895632') }}</p>
+                                <h4>{{ society ? society.raisonSocial : 'Gremica CI SARL' }}</h4>
+                                <p>Capital social : {{ society and society.numeroCC ? society.numeroCC : '1.000.000 F CFA' }}</p>
+                                <p>{{ society and society.siege ? society.siege : 'Abidjan, Cocody Attoban Zinsou' }}</p>
+                                <p>N°RCCM {{ society and society.numeroCC ? society.numeroCC : '1747895632' }}</p>
                             </div>
                         </div>
                     </div>

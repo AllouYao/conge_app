@@ -75,7 +75,7 @@
                     <span class="logo-lg-text-light"></span>
                 </span>
                 <span class="logo-lg">
-                    <span class="logo-lg-text-light">SDCI</span>
+                    <span class="logo-lg-text-light">{% set society = get_society() %}{{ society ? society.raisonSocial : 'SDCI' }}</span>
                 </span>
             </a>
 

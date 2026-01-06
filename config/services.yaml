@@ -24,6 +24,12 @@ services:
     App\EventListener\ExceptionEventListener:
         tags:
             - {name: kernel.event_listener, event: kernel.exception }
+    
+    # Twig Extensions
+    App\Twig\SocietyExtension:
+        tags:
+            - { name: twig.extension }
+    
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
