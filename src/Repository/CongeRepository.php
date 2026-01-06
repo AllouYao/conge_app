@@ -39,8 +39,10 @@ class CongeRepository extends ServiceEntityRepository
                 'co.status as status',
                 'co.uuid',
                 'co.totalDays',
+                'tc.libelle as type_conge_libelle',
             ])
             ->join('co.personal', 'p')
+            ->leftJoin('co.typeConge', 'tc')
             ->getQuery()
             ->getResult();
 

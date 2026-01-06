@@ -17,7 +17,6 @@ class HomeController extends AbstractController
 {
 
     public function __construct(
-        private EntityManagerInterface $entityManager,
         private CongeRepository $congeRepository,
         private PersonalRepository $personalRepository,
         private UserRepository $userRepository,

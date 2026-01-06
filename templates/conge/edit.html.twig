@@ -32,10 +32,15 @@
                         </a>
                     {%endif%}
                     {%if(conge.status == 'Accepté')%}
+                    <a href="{{ path('conge_attestation', {'uuid': conge.uuid}) }}"
+                       target="_blank"
+                       class="btn btn-warning float-end me-2" style="color: white">
+                        <i data-feather="file-text"></i> Attestation
+                    </a>
                     <a href="{{ path('conge_print', {'uuid': conge.uuid}) }}"
                        target="_blank"
                        class="btn btn-secondary float-end me-2" style="color: white">
-                        <i data-feather="printer"></i> Imprimer
+                        <i data-feather="printer"></i> Demande
                     </a>
                     {%endif%}
                     <a href="{{ path('conge_index') }}"

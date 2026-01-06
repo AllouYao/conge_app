@@ -53,6 +53,9 @@
         .request-content p {
             margin: 10px 0;
         }
+        .request-content-item {
+            margin: 10px 0;
+        }
         .signature-table {
             width: 100%;
             margin-top: 50px;
@@ -81,6 +84,47 @@
         @media print {
             .btn-print, .btn-back {
                 display: none;
+            }
+            /* Surcharger les styles du template parent */
+            body {
+                color: #000 !important;
+                background: #fff !important;
+            }
+            .request-content {
+                color: #000 !important;
+                background: transparent !important;
+            }
+            .request-content-item {
+                color: #000 !important;
+                font-size: 14px !important;
+            }
+            .request-content p {
+                color: #000 !important;
+                font-size: 14px !important;
+            }
+            .company-info h4,
+            .company-info p {
+                color: #000 !important;
+            }
+            .document-title {
+                color: #000 !important;
+            }
+            .signature-table th,
+            .signature-table td {
+                color: #000 !important;
+                font-size: 12px !important;
+            }
+            p {
+                font-size: 14px !important;
+                color: #000 !important;
+            }
+            strong {
+                color: #000 !important;
+            }
+            /* S'assurer que le widget-content est visible */
+            .widget-content {
+                color: #000 !important;
+                background: transparent !important;
             }
         }
     </style>
@@ -119,8 +163,13 @@
                             {% set fonctions = conge.personal.fonctions|first %}
                             <strong>Fonction :</strong> {{ fonctions ? fonctions.libelle : 'N/A' }}
                         </div>
+                        {% if conge.typeConge %}
                         <div class="request-content-item">
-                            <strong>Sollicite un congé annuel de {{ conge.totalDays }} jour(s) au titre de l'année {{ conge.dateDepart|date('Y') }}.</strong>
+                            <strong>Type de congé :</strong> {{ conge.typeConge.libelle }}
+                        </div>
+                        {% endif %}
+                        <div class="request-content-item">
+                            <strong>Sollicite {% if conge.typeConge %}un congé de type "{{ conge.typeConge.libelle }}"{% else %}un congé annuel{% endif %} de {{ conge.totalDays }} jour(s) au titre de l'année {{ conge.dateDepart|date('Y') }}.</strong>
                         </div>
                             <div class="request-content-item">
                             <strong>Période allant du {{ conge.dateDepart|date('d-m-Y') }} au {{ conge.dateRetour|date('d-m-Y') }}.</strong>

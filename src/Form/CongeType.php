@@ -5,6 +5,7 @@ namespace App\Form;
 use DateTime;
 use App\Entity\Conge;
 use App\Entity\Personal;
+use App\Entity\TypeConge;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Form\FormEvent;
@@ -24,6 +25,14 @@ class CongeType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('typeConge', EntityType::class, [
+                'class' => TypeConge::class,
+                'placeholder' => 'Sélectionner un type de congé',
+                'required' => false,
+                'attr' => [
+                    'data-plugin' => 'customselect',
+                ],
+            ])
             ->add('dateDepart', DateCustomType::class,)
             ->add('dateRetour', DateCustomType::class)
             ->add('personal', EntityType::class, [

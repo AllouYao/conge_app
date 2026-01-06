@@ -1,9 +1,9 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}LISTE DES CONGES PLANIFIES{% endblock %}
+{% block title %}LISTE DES TYPES DE CONGE{% endblock %}
 {% block stylesheets %}
     <style>
-        #dataGridConge {
+        #dataGridTypeConge {
             border-width: 50px;
         }
     </style>
@@ -15,14 +15,14 @@
                 <div class="card-header">
                     <h5 class="card-title-custom" style="color: white">
                         <i data-feather="list"></i>
-                        CONGES PLANIFIES SUR LA PERIODE DE {{ date|upper }}
+                        LISTE DES TYPES DE CONGE
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div id="dataGridConge"></div>
+                    <div id="dataGridTypeConge"></div>
                 </div>
                 <div class="card-footer">
-                    <a href="{{ path('conge_new') }}" class="btn btn-primary float-end"
+                    <a href="{{ path('type_conge_new') }}" class="btn btn-primary float-end"
                        style="color: white">Nouveau</a>
                     <a href="{{ path('app_home') }}"
                        class="btn btn-info float-end me-2" style="color: white">Retour</a>
@@ -33,7 +33,6 @@
 {% endblock %}
 
 {% block javascripts %}
-
     <script>
         function formatNumber(num) {
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
@@ -42,8 +41,8 @@
         $(document).ready(function () {
             let debut;
             let fin;
-            $("#dataGridConge").dxDataGrid({
-                dataSource: `{{ url('conge_index_api') }}`,
+            $("#dataGridTypeConge").dxDataGrid({
+                dataSource: `{{ url('type_conge_index_api') }}`,
                 showBorders: true,
                 height: 300,
                 scrolling: {
@@ -61,7 +60,7 @@
                 onExporting(e) {
                     if (e.format === 'xlsx') {
                         const workbook = new ExcelJS.Workbook();
-                        const worksheet = workbook.addWorksheet('CONGES PLANIFIES');
+                        const worksheet = workbook.addWorksheet('TYPES DE CONGE');
                         DevExpress.excelExporter.exportDataGrid({
                             component: e.component,
                             worksheet,
@@ -76,7 +75,7 @@
                             }
                         }).then(() => {
                             workbook.xlsx.writeBuffer().then(function (buffer) {
-                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `CONGES PLANIFIES ${debut ?? " "} - ${fin ?? " "}.xlsx`);
+                                saveAs(new Blob([buffer], {type: 'application/octet-stream'}), `TYPES DE CONGE ${debut ?? " "} - ${fin ?? " "}.xlsx`);
                             });
                         });
                         e.cancel = true;
@@ -106,47 +105,17 @@
                         fixed: true
                     },
                     {
-                        caption: 'Nom et prénoms',
+                        caption: 'Code',
                         alignment: 'left',
                         dataType: 'string',
-                        dataField: 'full_name',
+                        dataField: 'code',
                         fixed: true
                     },
                     {
-                        caption: 'Type de congé',
-                        alignment: 'left',
+                        caption: 'Libellé',
                         dataType: 'string',
-                        dataField: 'type_conge',
-                    },
-                    {
-                        caption: 'Date de départ',
-                        dataType: 'string',
-                        dataField: 'date_depart',
+                        dataField: 'libelle',
                         alignment: 'center',
-                    },
-                  
-                    {
-                        caption: 'Date de retour',
-                        dataType: 'string',
-                        dataField: 'date_retour',
-                        alignment: 'center',
-                    },
-                    {
-                        caption: 'Statut',
-                        dataType: 'string',
-                        dataField: 'status',
-                        alignment: 'center',
-                        cellTemplate: function(container, options) {
-                            var status = options.data.status;
-                            var statusText = status === 'Refusé' ? 'Refusé' : (status === 'En attente' ? 'En attente' : 'Accepté');
-                            var labelClass = status === 'Refusé' ? 'bg-danger' : (status === 'En attente' ? 'bg-warning' : 'bg-success');
-
-                            // Créer une structure HTML personnalisée pour la cellule
-                            var htmlContent = '<span class="badge ' + labelClass + '">' + statusText + '</span>';
-
-                            // Ajouter la structure HTML à la cellule
-                            container.append(htmlContent);
-                        },
                     },
                     {
                         dataField: 'modifier',
@@ -164,5 +133,5 @@
             })
         })
     </script>
-
 {% endblock %}
+

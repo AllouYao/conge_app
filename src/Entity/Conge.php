@@ -39,7 +39,9 @@ class Conge
 
     #[ORM\ManyToOne(inversedBy: 'conges')]
     private ?User $user = null;
-    
+
+    #[ORM\ManyToOne(inversedBy: 'conges')]
+    private ?TypeConge $typeConge = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $status = null;
@@ -130,6 +132,18 @@ class Conge
     public function setStatus(?string $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getTypeConge(): ?TypeConge
+    {
+        return $this->typeConge;
+    }
+
+    public function setTypeConge(?TypeConge $typeConge): static
+    {
+        $this->typeConge = $typeConge;
 
         return $this;
     }

@@ -125,6 +125,7 @@
                                 <thead>
                                     <tr>
                                         <th scope="col">Salarié</th>
+                                        <th scope="col">Type de congé</th>
                                         <th scope="col">Date départ</th>
                                         <th scope="col">Date retour</th>
                                         <th scope="col">Statut</th>
@@ -134,6 +135,7 @@
                                     {% for conge in derniersConges %}
                                     <tr>
                                         <td>{{ conge.personal.firstName }} {{ conge.personal.lastName }}</td>
+                                        <td>{{ conge.typeConge ? conge.typeConge.libelle : '-' }}</td>
                                         <td>{{ conge.dateDepart|date('d/m/Y') }}</td>
                                         <td>{{ conge.dateRetour|date('d/m/Y') }}</td>
                                         <td>
@@ -148,7 +150,7 @@
                                     </tr>
                                     {% else %}
                                     <tr>
-                                        <td colspan="4" class="text-center">Aucun congé enregistré</td>
+                                        <td colspan="5" class="text-center">Aucun congé enregistré</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -169,6 +171,7 @@
                                 <thead>
                                     <tr>
                                         <th scope="col">Salarié</th>
+                                        <th scope="col">Type de congé</th>
                                         <th scope="col">Date départ</th>
                                         <th scope="col">Date retour</th>
                                         <th scope="col">Jours</th>
@@ -177,11 +180,13 @@
                                 </thead>
                                 <tbody>
                                     {% for conge in congesActifs %}
+                                    {% set jours = conge.totalDays|number_format(0, ',', ' ') %}
                                     <tr>
                                         <td>{{ conge.personal.firstName }} {{ conge.personal.lastName }}</td>
+                                        <td>{{ conge.typeConge ? conge.typeConge.libelle : '-' }}</td>
                                         <td>{{ conge.dateDepart|date('d/m/Y') }}</td>
                                         <td>{{ conge.dateRetour|date('d/m/Y') }}</td>
-                                        <td><strong>{{ conge.totalDays }} jours</strong></td>
+                                        <td><strong>{{ jours }} jour{{ conge.totalDays > 1 ? 's' : '' }}</strong></td>
                                         <td>
                                             <a href="{{ path('conge_edit', {'uuid': conge.uuid}) }}" class="btn btn-sm btn-light">
                                                 <i data-feather="edit"></i>

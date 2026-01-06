@@ -65,6 +65,7 @@ class CongeController extends AbstractController
             $congeSalaried[] = [
                 'index' => ++$conge,
                 'full_name' => $item['nom'] . ' ' . $item['prenoms'],
+                'type_conge' => $item['type_conge_libelle'] ?? '',
                 'date_depart' => date_format($dateDebut, 'd/m/Y'),
                 'date_retour' => date_format($dateRetour, 'd/m/Y'),
                 'totalDays' => $item['totalDays'],
@@ -188,6 +189,14 @@ class CongeController extends AbstractController
         return $this->render('conge/print.html.twig', [
             'conge' => $conge,
             'dateReprise' => $dateReprise,
+        ]);
+    }
+
+    #[Route('/{uuid}/attestation', name: 'attestation', methods: ['GET'])]
+    public function attestation(Conge $conge): Response
+    {
+        return $this->render('conge/attestation.html.twig', [
+            'conge' => $conge,
         ]);
     }
 

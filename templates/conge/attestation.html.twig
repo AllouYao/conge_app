@@ -1,0 +1,219 @@
+{% extends 'imprimerLivrePaie.html.twig' %}
+
+{% block title 'Attestation de congé' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .header-section {
+            margin-bottom: 30px;
+        }
+        .logo-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .logo-box {
+            width: 60px;
+            height: 60px;
+            background-color: #28a745;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            margin-right: 15px;
+            border-radius: 4px;
+        }
+        .company-info {
+            flex: 1;
+        }
+        .company-info h4 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .company-info p {
+            margin: 2px 0;
+            font-size: 11px;
+        }
+        .document-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 40px 0;
+            text-transform: uppercase;
+            text-decoration: underline;
+        }
+        .attestation-content {
+            margin: 40px 0;
+            line-height: 2;
+            font-size: 14px;
+            text-align: justify;
+        }
+        .attestation-content p {
+            margin: 15px 0;
+        }
+        .employee-info {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #28a745;
+        }
+        .employee-info p {
+            margin: 5px 0;
+        }
+        .signature-section {
+            margin-top: 60px;
+            text-align: right;
+        }
+        .signature-box {
+            display: inline-block;
+            text-align: center;
+            margin-top: 40px;
+        }
+        .signature-line {
+            border-top: 2px solid #000;
+            width: 200px;
+            margin: 40px auto 10px;
+        }
+        @media print {
+            .btn-print, .btn-back {
+                display: none;
+            }
+            /* Surcharger les styles du template parent */
+            body {
+                color: #000 !important;
+                background: #fff !important;
+            }
+            .attestation-content {
+                color: #000 !important;
+                background: transparent !important;
+            }
+            .attestation-content p {
+                color: #000 !important;
+                font-size: 14px !important;
+                line-height: 2 !important;
+            }
+            .employee-info {
+                background-color: #f8f9fa !important;
+                color: #000 !important;
+                border-left: 4px solid #28a745 !important;
+            }
+            .employee-info p {
+                color: #000 !important;
+                font-size: 14px !important;
+            }
+            .company-info h4,
+            .company-info p {
+                color: #000 !important;
+            }
+            .document-title {
+                color: #000 !important;
+            }
+            .signature-section p {
+                color: #000 !important;
+                font-size: 14px !important;
+            }
+            p {
+                font-size: 14px !important;
+                color: #000 !important;
+            }
+            strong {
+                color: #000 !important;
+            }
+            /* S'assurer que le widget-content est visible */
+            .widget-content {
+                color: #000 !important;
+                background: transparent !important;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% set society = get_society() %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="widget">
+                <div class="widget-content">
+                    <!-- En-tête avec logo et informations de l'entreprise -->
+                    <div class="header-section">
+                        <div class="logo-section">
+                            <div class="logo-box">{{ society and society.raisonSocial ? society.raisonSocial|first|upper : 'G' }}</div>
+                            <div class="company-info">
+                                <h4>{{ society ? society.raisonSocial : 'Gremica CI SARL' }}</h4>
+                                <p>{{ society and society.siege ? society.siege : 'Abidjan, Cocody Attoban Zinsou' }}</p>
+                                {% if society and society.numeroCC %}
+                                    <p>N°RCCM {{ society.numeroCC }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Titre du document -->
+                    <div class="document-title">
+                        ATTESTATION DE CONGE
+                    </div>
+
+                    <!-- Contenu de l'attestation -->
+                    <div class="attestation-content">
+                        <p>
+                            Je soussigné(e), <strong>{{ society ? society.raisonSocial : 'Gremica CI SARL' }}</strong>, 
+                            certifie que :
+                        </p>
+
+                        <div class="employee-info">
+                            <p><strong>Nom et Prénoms :</strong> {{ conge.personal.firstName|upper }} {{ conge.personal.lastName|upper }}</p>
+                            {% set fonctions = conge.personal.fonctions|first %}
+                            {% if fonctions %}
+                                <p><strong>Fonction :</strong> {{ fonctions.libelle }}</p>
+                            {% endif %}
+                        {% if conge.personal.matricule %}
+                            <p><strong>Matricule :</strong> {{ conge.personal.matricule }}</p>
+                        {% endif %}
+                        {% if conge.typeConge %}
+                            <p><strong>Type de congé :</strong> {{ conge.typeConge.libelle }}</p>
+                        {% endif %}
+                    </div>
+
+                        {% set jours = conge.totalDays|number_format(0, ',', ' ') %}
+                        <p>
+                            a effectivement pris {% if conge.typeConge %}un congé de type "{{ conge.typeConge.libelle }}"{% else %}un congé annuel{% endif %} de <strong>{{ jours }} jour{{ conge.totalDays > 1 ? 's' : '' }}</strong> 
+                            du <strong>{{ conge.dateDepart|date('d/m/Y') }}</strong> au <strong>{{ conge.dateRetour|date('d/m/Y') }}</strong>.
+                        </p>
+
+                        <p>
+                            Le présent document est établi pour servir et valoir ce que de droit.
+                        </p>
+
+                        <p>
+                            Fait à {{ society and society.siege ? society.siege|split(',')|first : 'Abidjan' }}, 
+                            le {{ "now"|date('d/m/Y') }}
+                        </p>
+                    </div>
+
+                    <!-- Section signature -->
+                    <div class="signature-section">
+                        <div class="signature-box">
+                            <div class="signature-line"></div>
+                            <p><strong>La Direction</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3">
+            <a class="btn btn-dark btn-print pull-right" style="color: white" href="javascript:window.print()">
+                <i class="icon-print"></i>
+                Imprimer
+            </a>
+            <a class="btn btn-info btn-back pull-right" style="margin-right: 5px; color: white" onclick="window.close()"
+               href="{{ path('conge_index') }}">
+                Retour
+            </a>
+        </div>
+    </div>
+{% endblock %}
+
